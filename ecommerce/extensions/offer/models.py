@@ -590,8 +590,8 @@ class OfferAssignment(TimeStampedModel):
 
 class OfferAssignmentEmailAttempt(models.Model):
     """
-    This model is required to map the message identifier received from Sailthru to the OfferAssignment identifier.
-    The primary application of this model is in the asynchronous email status update from ecommerce-worker and Sailthru
+    This model maps the message identifier received from ecommerce-worker to the OfferAssignment identifier.
+    The primary application of this model is in the asynchronous email status update from ecommerce-worker.
     """
     offer_assignment = models.ForeignKey('offer.OfferAssignment', on_delete=models.CASCADE)
     send_id = models.CharField(max_length=255, unique=True)

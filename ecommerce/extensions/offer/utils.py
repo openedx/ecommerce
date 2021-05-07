@@ -11,7 +11,7 @@ import waffle
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
-from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
+from ecommerce_worker.email.v1.api import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import ENABLE_BRAZE
@@ -199,11 +199,11 @@ def send_assigned_offer_email(
 
     if settings.DEBUG:  # pragma: no cover
         # Avoid breaking devstack when no such service is available.
-        logger.warning("Skipping Sailthru task 'send_offer_assignment_email' because DEBUG=true.")  # pragma: no cover
+        logger.warning("Skipping email task 'send_assigned_offer_email' because DEBUG=true.")  # pragma: no cover
         return  # pragma: no cover
 
-    send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, sender_alias, None,
-                                      base_enterprise_url)
+    send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, sender_alias,
+                                      base_enterprise_url=base_enterprise_url)
 
 
 def send_revoked_offer_email(
@@ -236,7 +236,7 @@ def send_revoked_offer_email(
 
     if settings.DEBUG:  # pragma: no cover
         # Avoid breaking devstack when no such service is available.
-        logger.warning("Skipping Sailthru task 'send_revoked_offer_email' because DEBUG=true.")  # pragma: no cover
+        logger.warning("Skipping email task 'send_revoked_offer_email' because DEBUG=true.")  # pragma: no cover
         return  # pragma: no cover
 
     send_offer_update_email.delay(learner_email, subject, email_body, sender_alias)
@@ -293,9 +293,12 @@ def send_assigned_offer_reminder_email(
     )
     if settings.DEBUG:  # pragma: no cover
         # Avoid breaking devstack when no such service is available.
-        logger.warning("Skipping Sailthru task 'send_offer_assignment_email' because DEBUG=true.")  # pragma: no cover
+        logger.warning(
+            "Skipping email task 'send_assigned_offer_reminder_email' because DEBUG=true."
+        )  # pragma: no cover
         return  # pragma: no cover
-    send_offer_update_email.delay(learner_email, subject, email_body, sender_alias, base_enterprise_url)
+    send_offer_update_email.delay(learner_email, subject, email_body, sender_alias,
+                                  base_enterprise_url=base_enterprise_url)
 
 
 def format_email(template, placeholder_dict, greeting, closing, base_enterprise_url=''):

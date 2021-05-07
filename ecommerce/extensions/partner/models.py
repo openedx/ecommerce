@@ -13,8 +13,6 @@ class StockRecord(AbstractStockRecord):
 class Partner(AbstractPartner):
     # short_code is the unique identifier for the 'Partner'
     short_code = models.CharField(max_length=8, unique=True, null=False, blank=False)
-    enable_sailthru = models.BooleanField(default=True, verbose_name=_('Enable Sailthru Reporting'),
-                                          help_text='DEPRECATED: Use SiteConfiguration!')
     default_site = models.OneToOneField('sites.Site', null=True, blank=True, on_delete=models.PROTECT)
 
     history = HistoricalRecords(excluded_fields=['code'])

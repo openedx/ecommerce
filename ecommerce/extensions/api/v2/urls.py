@@ -98,7 +98,6 @@ ENTERPRISE_URLS = [
 
 ASSIGNMENT_EMAIL_URLS = [
     url(r'^status/$', assignment_email.AssignmentEmailStatus.as_view(), name='update_status'),
-    url(r'^bounce$', assignment_email.AssignmentEmailBounce.as_view(), name='receive_bounce')
 ]
 
 USER_MANAGEMENT_URLS = [

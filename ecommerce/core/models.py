@@ -160,11 +160,6 @@ class SiteConfiguration(models.Model):
         max_length=255,
         blank=True
     )
-    enable_sailthru = models.BooleanField(
-        verbose_name=_('Enable Sailthru Reporting'),
-        help_text=_('Determines if purchases should be reported to Sailthru.'),
-        default=False
-    )
     base_cookie_domain = models.CharField(
         verbose_name=_('Base Cookie Domain'),
         help_text=_('Base cookie domain used to share cookies across services.'),

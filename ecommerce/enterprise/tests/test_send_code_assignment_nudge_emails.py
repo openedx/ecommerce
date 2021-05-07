@@ -64,7 +64,8 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
     def _assert_sent_count(self):
         nudge_email = CodeAssignmentNudgeEmails.objects.all()
         assert nudge_email.filter(already_sent=True).count() == 0
-        with mock.patch('ecommerce_worker.sailthru.v1.tasks.send_code_assignment_nudge_email.delay') as mock_send_email:
+        cmd_path = 'ecommerce.enterprise.management.commands.send_code_assignment_nudge_emails'
+        with mock.patch(cmd_path + '.send_code_assignment_nudge_email.delay') as mock_send_email:
             with LogCapture(level=logging.INFO) as log:
                 mock_send_email.return_value = mock.Mock()
                 call_command('send_code_assignment_nudge_emails')

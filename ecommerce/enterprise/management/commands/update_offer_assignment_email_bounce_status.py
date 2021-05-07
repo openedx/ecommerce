@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timedelta
 
 from django.core.management import BaseCommand
-from ecommerce_worker.braze.v1.client import get_braze_client
+from ecommerce_worker.email.v1.api import did_email_bounce
 
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_BOUNCED
 from ecommerce.programs.custom import get_model
@@ -75,9 +75,8 @@ class Command(BaseCommand):
         """
         time_period = options['time_period']
         site_code = options['site_code']
-        client = get_braze_client(site_code=site_code)
 
         offer_assignments = self._get_offer_assignments_in_period(time_period)
         for assignment in offer_assignments:
-            if client.did_email_bounce(assignment.user_email):
+            if did_email_bounce(assignment.user_email, site_code=site_code):
                 self._update_email_bounce_status(assignment)
