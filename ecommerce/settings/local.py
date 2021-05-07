@@ -153,10 +153,6 @@ BROKER_URL = 'redis://'
 
 ENABLE_AUTO_AUTH = True
 
-#SAILTHRU settings
-SAILTHRU_KEY = 'abc123'
-SAILTHRU_SECRET = 'top_secret'
-
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] + ('rest_framework.renderers.BrowsableAPIRenderer',)
 
 #####################################################################

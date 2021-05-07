@@ -32,11 +32,11 @@ class UpdateOfferAssignmentEmailBounceStatusTests(TestCase):
     def test_bounce_status_update(self):
         with mock.patch(
                 'ecommerce.enterprise.management.commands.update_offer_assignment_email_bounce_status.'
-                'get_braze_client'
-        ) as mock_get_braze_client:
-            mock_get_braze_client.return_value = mock.Mock()
+                'did_email_bounce'
+        ) as mock_did_email_bounce:
+            mock_did_email_bounce.return_value = True
             call_command('update_offer_assignment_email_bounce_status')
-            assert mock_get_braze_client.call_count == 1
+            assert mock_did_email_bounce.call_count == 3
             offer_assignments = OfferAssignment.objects.all()
             for assignment in offer_assignments:
                 self.assertEqual(assignment.status, OFFER_ASSIGNMENT_EMAIL_BOUNCED)

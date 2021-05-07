@@ -7,7 +7,7 @@ from datetime import datetime
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from django.utils import timezone
-from ecommerce_worker.sailthru.v1.tasks import send_code_assignment_nudge_email
+from ecommerce_worker.email.v1.api import send_code_assignment_nudge_email
 
 from ecommerce.core.models import User
 from ecommerce.enterprise.utils import get_enterprise_customer_sender_alias, get_enterprise_customer_uuid

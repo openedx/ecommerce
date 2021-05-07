@@ -6,7 +6,7 @@ from datetime import datetime
 
 from django.core.management import BaseCommand
 from django.db.models import Sum
-from ecommerce_worker.sailthru.v1.tasks import send_offer_usage_email
+from ecommerce_worker.email.v1.api import send_offer_usage_email
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.programs.custom import get_model

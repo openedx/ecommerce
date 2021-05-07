@@ -135,10 +135,10 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             side_effect,
             sender_alias,
             base_enterprise_url,
-            mock_sailthru_task,
+            mock_email_task,
     ):
         """ Test that the offer assignment email message is sent to async task. """
-        mock_sailthru_task.delay.side_effect = side_effect
+        mock_email_task.delay.side_effect = side_effect
         send_assigned_offer_email(
             subject,
             greeting,
@@ -151,14 +151,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             base_enterprise_url,
         )
-        mock_sailthru_task.delay.assert_called_once_with(
+        mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             tokens.get('offer_assignment_id'),
             subject,
             mock.ANY,
             sender_alias,
-            None,
-            base_enterprise_url,
+            base_enterprise_url=base_enterprise_url,
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
@@ -207,13 +206,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             base_enterprise_url,
             search_url,
-            mock_sailthru_task,
+            mock_email_task,
     ):
         """ Test that the offer assignment email message is sent to async task. """
         switch, __ = Switch.objects.get_or_create(name=ENABLE_BRAZE)
         switch.active = True
         switch.save()
-        mock_sailthru_task.delay.side_effect = side_effect
+        mock_email_task.delay.side_effect = side_effect
         send_assigned_offer_email(
             subject,
             greeting,
@@ -235,18 +234,17 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code_expiration_date'),
             search_url
         )
-        mock_sailthru_task.delay.assert_called_once_with(
+        mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             tokens.get('offer_assignment_id'),
             subject,
             email_body,
             sender_alias,
-            None,
-            base_enterprise_url,
+            base_enterprise_url=base_enterprise_url,
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
-    def test_send_assigned_offer_email_without_base_ent_url(self, mock_sailthru_task):
+    def test_send_assigned_offer_email_without_base_ent_url(self, mock_email_task):
         send_assigned_offer_email(
             "You have mail",
             "you",
@@ -259,14 +257,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'sender alias'
         )
 
-        mock_sailthru_task.delay.assert_called_once_with(
+        mock_email_task.delay.assert_called_once_with(
             "bears@bearparty.com",
             42,
             "You have mail",
             mock.ANY,
             'sender alias',
-            None,
-            '',
+            base_enterprise_url='',
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
@@ -295,12 +292,12 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             tokens,
             side_effect,
-            mock_sailthru_task,
+            mock_email_task,
     ):
         """
         Test that the offer assignment reminder email message is sent to the async task in ecommerce-worker.
         """
-        mock_sailthru_task.delay.side_effect = side_effect
+        mock_email_task.delay.side_effect = side_effect
         send_assigned_offer_reminder_email(
             subject,
             greeting,
@@ -312,13 +309,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code_expiration_date'),
             sender_alias,
         )
-        mock_sailthru_task.delay.assert_called_once_with(
+        mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
             mock.ANY,
             sender_alias,
             # base_enterprise_url should be blank as it was not passed in
-            ''
+            base_enterprise_url=''
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
@@ -348,12 +345,12 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             tokens,
             side_effect,
-            mock_sailthru_task,
+            mock_email_task,
     ):
         """
         Test that the offer assignment reminder email message is sent to the async task in ecommerce-worker.
         """
-        mock_sailthru_task.delay.side_effect = side_effect
+        mock_email_task.delay.side_effect = side_effect
         send_assigned_offer_reminder_email(
             subject,
             greeting,
@@ -366,12 +363,12 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             tokens.get('base_enterprise_url'),
         )
-        mock_sailthru_task.delay.assert_called_once_with(
+        mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
             mock.ANY,
             sender_alias,
-            tokens.get('base_enterprise_url'),
+            base_enterprise_url=tokens.get('base_enterprise_url'),
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
@@ -397,12 +394,12 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             tokens,
             side_effect,
-            mock_sailthru_task,
+            mock_email_task,
     ):
         """
         Test that the offer revocation email message is sent to the async task in ecommerce-worker.
         """
-        mock_sailthru_task.delay.side_effect = side_effect
+        mock_email_task.delay.side_effect = side_effect
         send_revoked_offer_email(
             subject,
             greeting,
@@ -411,7 +408,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code'),
             sender_alias,
         )
-        mock_sailthru_task.delay.assert_called_once_with(
+        mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
             mock.ANY,

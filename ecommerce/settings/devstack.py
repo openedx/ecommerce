@@ -100,10 +100,6 @@ LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-#SAILTHRU settings
-SAILTHRU_KEY = 'abc123'
-SAILTHRU_SECRET = 'top_secret'
-
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] + ('rest_framework.renderers.BrowsableAPIRenderer',)
 
 #####################################################################

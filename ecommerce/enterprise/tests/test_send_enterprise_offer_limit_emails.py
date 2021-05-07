@@ -64,7 +64,8 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
         Test the send_enterprise_offer_limit_emails command
         """
         offer_usage_count = OfferUsageEmail.objects.all().count()
-        with mock.patch('ecommerce_worker.sailthru.v1.tasks.send_offer_usage_email.delay') as mock_send_email:
+        cmd_path = 'ecommerce.enterprise.management.commands.send_enterprise_offer_limit_emails'
+        with mock.patch(cmd_path + '.send_offer_usage_email.delay') as mock_send_email:
             with LogCapture(level=logging.INFO) as log:
                 mock_send_email.return_value = mock.Mock()
                 call_command('send_enterprise_offer_limit_emails')

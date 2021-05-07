@@ -47,7 +47,6 @@ python3-openid>=3
 pytz
 requests
 rules
-sailthru-client==2.2.3
 social-auth-app-django
 sorl-thumbnail
 stripe==1.70.0

@@ -569,11 +569,11 @@ CELERY_DEFAULT_EXCHANGE = 'ecommerce'
 CELERY_DEFAULT_ROUTING_KEY = 'ecommerce'
 CELERY_DEFAULT_QUEUE = DEFAULT_PRIORITY_QUEUE
 CELERY_ROUTES = {
+    'ecommerce_worker.email.v1.api.send_offer_assignment_email': {'queue': 'ecommerce.email_marketing'},
+    'ecommerce_worker.email.v1.api.send_offer_update_email': {'queue': 'ecommerce.email_marketing'},
+    'ecommerce_worker.email.v1.api.send_offer_usage_email': {'queue': 'ecommerce.email_marketing'},
+    'ecommerce_worker.email.v1.api.send_code_assignment_nudge_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'ecommerce.fulfillment'},
-    'ecommerce_worker.sailthru.v1.tasks.send_offer_assignment_email': {'queue': 'ecommerce.email_marketing'},
-    'ecommerce_worker.sailthru.v1.tasks.send_offer_update_email': {'queue': 'ecommerce.email_marketing'},
-    'ecommerce_worker.sailthru.v1.tasks.send_offer_usage_email': {'queue': 'ecommerce.email_marketing'},
-    'ecommerce_worker.sailthru.v1.tasks.send_code_assignment_nudge_email': {'queue': 'ecommerce.email_marketing'},
 }
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
@@ -732,10 +732,6 @@ OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP = {
     'revoke': OFFER_REVOKE_EMAIL_TEMPLATE,
     'remind': OFFER_REMINDER_EMAIL_TEMPLATE,
 }
-
-# SAILTHRU settings
-SAILTHRU_KEY = 'sailthru key here'
-SAILTHRU_SECRET = 'sailthru secret here'
 
 USERNAME_REPLACEMENT_WORKER = "replace with valid username"
 
