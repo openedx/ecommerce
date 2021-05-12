@@ -101,7 +101,7 @@ path.py==7.2              # via -r requirements/base.in
 paypalrestsdk==1.13.1     # via -r requirements/base.in
 pbr==5.5.1                # via cybersource-rest-client-python, fixtures, stevedore, testtools
 phonenumbers==8.12.16     # via django-oscar, django-phonenumber-field
-pillow==8.1.2             # via django-oscar
+pillow==8.1.0             # via django-oscar
 premailer==2.9.2          # via -r requirements/base.in
 psutil==5.8.0             # via edx-django-utils
 purl==1.5                 # via django-oscar

@@ -496,7 +496,7 @@ phonenumbers==8.12.16
     #   -r test.txt
     #   django-oscar
     #   django-phonenumber-field
-pillow==8.1.2
+pillow==8.1.0
     # via
     #   -r test.txt
     #   django-oscar
