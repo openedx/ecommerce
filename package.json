@@ -6,7 +6,7 @@
     "url": "git://github.com/edx/ecommerce"
   },
   "dependencies": {
-    "bower": "1.8.4",
+    "bower": "1.8.8",
     "requirejs": "2.3.3"
   },
   "devDependencies": {
