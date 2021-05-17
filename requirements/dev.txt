@@ -284,7 +284,7 @@ edx-drf-extensions==6.4.0
     # via
     #   -r test.txt
     #   edx-rbac
-edx-ecommerce-worker==2.0.0
+edx-ecommerce-worker==2.0.1
     # via -r test.txt
 edx-i18n-tools==0.5.3
     # via -r test.txt
