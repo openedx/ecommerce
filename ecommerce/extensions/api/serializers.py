@@ -1433,6 +1433,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
     )
     base_enterprise_url = serializers.URLField(required=False, write_only=True)
     enable_nudge_emails = serializers.BooleanField(default=False)
+    notify_learners = serializers.BooleanField(default=True)
 
     def create(self, validated_data):
         """
@@ -1454,6 +1455,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         current_date_time = timezone.now()
         base_enterprise_url = validated_data.pop('base_enterprise_url', '')
         site = self.context.get('site')
+        notify_learners = validated_data.pop('notify_learners', True)
 
         for code in available_assignments:
             offer = available_assignments[code]['offer']
@@ -1469,6 +1471,8 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 offer_assignments.append(new_offer_assignment)
                 # Start async email task. For MULTI_USE_PER_CUSTOMER, a single email is sent
                 email_code_pair = frozenset((new_offer_assignment.user_email, new_offer_assignment.code))
+                if not notify_learners:
+                    continue
                 if email_code_pair not in emails_already_sent:
                     # subscribe the user for nudge email if enable_nudge_emails flag is on.
                     if enable_nudge_emails:
