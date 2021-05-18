@@ -88,6 +88,7 @@ def get_enterprise_customer(site, uuid):
         'contact_email': response.get('contact_email', ''),
         'slug': response.get('slug'),
         'sender_alias': response.get('sender_alias', ''),
+        'reply_to': response.get('reply_to', ''),
     }
 
     TieredCache.set_all_tiers(
