@@ -323,6 +323,7 @@ class EnterpriseCouponViewSetRbacTests(
             'notify_email': 'batman@gotham.comics',
             'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
             'contract_discount_value': '12.35',
+            'notify_learners': True,
         }
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
@@ -2646,6 +2647,71 @@ class EnterpriseCouponViewSetRbacTests(
         for offer_assignment in OfferAssignment.objects.filter(user_email=offer_assignment.user_email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
             self.assertIsNotNone(offer_assignment.revocation_date)
+
+    def test_email_record_not_created_when_notify_learners_disabled(self):
+        """
+        Test that the code assignment serializer won't notify learners nor create email sent records if the
+        `notify_learner` param is set to false.
+        """
+        user = {'email': 'test1@example.com'}
+        coupon_post_data = dict(self.data)
+
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        # make sure that there is no assignment object before hitting the endpoint
+        self.assertIsNone(OfferAssignment.objects.first())
+        self.get_response(
+            'POST',
+            reverse('api:v2:enterprise-coupons-assign', args=[coupon_id]),
+            {
+                'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+                'users': [user],
+                'notify_learners': False,
+            }
+        )
+        # assert there has been no email sent record created
+        self.assertIsNone(OfferAssignmentEmailSentRecord.objects.first())
+        offer_assignment = OfferAssignment.objects.filter(user_email=user['email']).first()
+        self.assertEqual(offer_assignment.user_email, user['email'])
+
+    def test_emails_sent_defaults_to_true_for_code_assignment(self):
+        """
+        Test that the code assignment endpoint will default send emails to assigned learners if the notify-learners
+        param isn't provided
+        """
+        user = {'email': 'test1@example.com'}
+        coupon_post_data = dict(self.data)
+
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        # make sure that there is no assignment object before hitting the endpoint
+        self.assertIsNone(OfferAssignment.objects.first())
+
+        # construct options without the notify_learners param
+        options = {
+            'template': 'Test template',
+            'template_subject': TEMPLATE_SUBJECT,
+            'template_greeting': TEMPLATE_GREETING,
+            'template_closing': TEMPLATE_CLOSING,
+            'users': [user],
+        }
+
+        self.get_response(
+            'POST',
+            reverse('api:v2:enterprise-coupons-assign', args=[coupon_id]),
+            options
+        )
+        # assert there has been an email sent record created
+        self.assertIsNotNone(OfferAssignmentEmailSentRecord.objects.first())
+        offer_assignment = OfferAssignment.objects.filter(user_email=user['email']).first()
+        self.assertEqual(offer_assignment.user_email, user['email'])
 
     @ddt.data(
         (Voucher.SINGLE_USE, 2, None),
