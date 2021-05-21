@@ -24,7 +24,7 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
-from ecommerce.enterprise.constants import SENDER_ALIAS
+from ecommerce.enterprise.constants import DEFAULT_REPLY_TO, SENDER_ALIAS
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
@@ -675,3 +675,31 @@ def get_enterprise_customer_sender_alias(site, enterprise_customer_uuid):
     if not sender_alias:
         sender_alias = SENDER_ALIAS
     return sender_alias
+
+
+def get_enterprise_customer_replyto_address(site, enterprise_customer_uuid):
+    """
+    Return enterprise customer replyto address if available otherwise send a default address.
+
+    Arguments:
+        site (Site): The site object.
+        enterprise_customer_uuid (Enterprise_customer): The enterprise_customer uuid.
+
+    Returns:
+        reply_to: email address if present with the enterprise_customer, default otherwise.
+    """
+    reply_to_address = ''
+    try:
+        enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
+        reply_to_address = enterprise_customer['reply_to']
+    except Exception as exc:  # pylint: disable=broad-except
+        logging.exception(
+            '[Enterprise Sender Alias Fetch Failure]. Customer: %s, Site: %s, Exception: %s',
+            enterprise_customer_uuid,
+            site,
+            exc
+        )
+
+    if not reply_to_address:
+        reply_to_address = DEFAULT_REPLY_TO
+    return reply_to_address

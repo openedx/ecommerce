@@ -11,5 +11,7 @@ USE_ROLE_BASED_ACCESS_CONTROL = 'use_role_based_access_control'
 USE_ENTERPRISE_CATALOG = 'use_enterprise_catalog'
 
 # Default Sender Alias used in Enterprise Customer Code Assign,Remind and Revoke Emails.
-
 SENDER_ALIAS = 'edX Support Team'
+
+# Default Reply To used in Enterprise Customer Code Assign,Remind and Revoke Emails.
+DEFAULT_REPLY_TO = 'no-reply@edx.org'

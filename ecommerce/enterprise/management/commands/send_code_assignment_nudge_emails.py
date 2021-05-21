@@ -10,7 +10,11 @@ from django.utils import timezone
 from ecommerce_worker.email.v1.api import send_code_assignment_nudge_email
 
 from ecommerce.core.models import User
-from ecommerce.enterprise.utils import get_enterprise_customer_sender_alias, get_enterprise_customer_uuid
+from ecommerce.enterprise.utils import (
+    get_enterprise_customer_replyto_address,
+    get_enterprise_customer_sender_alias,
+    get_enterprise_customer_uuid
+)
 from ecommerce.extensions.offer.constants import AUTOMATIC_EMAIL
 from ecommerce.programs.custom import get_model
 
@@ -68,6 +72,17 @@ class Command(BaseCommand):
         enterprise_customer_uuid = get_enterprise_customer_uuid(nudge_email.code)
         return get_enterprise_customer_sender_alias(site, enterprise_customer_uuid)
 
+    @staticmethod
+    def _get_replyto_address(site, nudge_email):
+        """
+        Returns the replyto email address of an Enterprise Customer.
+
+        Arguments:
+            nudge_email (CodeAssignmentNudgeEmails): A nudge email for the learner.
+        """
+        enterprise_customer_uuid = get_enterprise_customer_uuid(nudge_email.code)
+        return get_enterprise_customer_replyto_address(site, enterprise_customer_uuid)
+
     def handle(self, *args, **options):
         send_nudge_email_count = 0
         site = Site.objects.get_current()
@@ -88,11 +103,13 @@ class Command(BaseCommand):
                 nudge_email.save()
                 send_nudge_email_count += 1
                 sender_alias = self._get_sender_alias(site, nudge_email)
+                reply_to = self._get_replyto_address(site, nudge_email)
                 send_code_assignment_nudge_email.delay(
                     nudge_email.user_email,
                     email_subject,
                     email_body,
                     sender_alias,
+                    reply_to,
                     base_enterprise_url=nudge_email.options.get('base_enterprise_url', '')
                 )
                 self.set_last_reminder_date(nudge_email.user_email, nudge_email.code)
