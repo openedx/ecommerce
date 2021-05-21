@@ -107,6 +107,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             },
             None,
             'sender alias',
+            'edx@example.com',
             ''
         ),
         (
@@ -122,6 +123,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             },
             None,
             'sender alias',
+            'edx@example.com',
             'https://bears.party'
         ),
     )
@@ -134,6 +136,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens,
             side_effect,
             sender_alias,
+            reply_to,
             base_enterprise_url,
             mock_email_task,
     ):
@@ -149,6 +152,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('redemptions_remaining'),
             tokens.get('code_expiration_date'),
             sender_alias,
+            reply_to,
             base_enterprise_url,
         )
         mock_email_task.delay.assert_called_once_with(
@@ -157,6 +161,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             mock.ANY,
             sender_alias,
+            reply_to,
             base_enterprise_url=base_enterprise_url,
         )
 
@@ -175,6 +180,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             },
             None,
             'sender alias',
+            'edx@example.com',
             '',
             'https://www.edx.org'
         ),
@@ -191,6 +197,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             },
             None,
             'sender alias',
+            'edx@example.com',
             'https://bears.party',
             'https://bears.party'
         ),
@@ -204,6 +211,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens,
             side_effect,
             sender_alias,
+            reply_to,
             base_enterprise_url,
             search_url,
             mock_email_task,
@@ -223,6 +231,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('redemptions_remaining'),
             tokens.get('code_expiration_date'),
             sender_alias,
+            reply_to,
             base_enterprise_url,
         )
         email_body = format_assigned_offer_email(
@@ -240,6 +249,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             email_body,
             sender_alias,
+            reply_to,
             base_enterprise_url=base_enterprise_url,
         )
 
@@ -254,7 +264,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'BearsOnly',
             1,
             '2020-12-19',
-            'sender alias'
+            'sender alias',
+            'edx@example.com',
         )
 
         mock_email_task.delay.assert_called_once_with(
@@ -263,6 +274,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             "You have mail",
             mock.ANY,
             'sender alias',
+            'edx@example.com',
             base_enterprise_url='',
         )
 
@@ -273,6 +285,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'hi',
             'bye',
             'sender_alias',
+            'edx@example.com',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -290,6 +303,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             greeting,
             closing,
             sender_alias,
+            reply_to,
             tokens,
             side_effect,
             mock_email_task,
@@ -308,12 +322,14 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('total_offer_count'),
             tokens.get('code_expiration_date'),
             sender_alias,
+            reply_to,
         )
         mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
             mock.ANY,
             sender_alias,
+            reply_to,
             # base_enterprise_url should be blank as it was not passed in
             base_enterprise_url=''
         )
@@ -325,6 +341,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'hi',
             'bye',
             'sender_alias',
+            'edx@example.com',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -343,6 +360,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             greeting,
             closing,
             sender_alias,
+            reply_to,
             tokens,
             side_effect,
             mock_email_task,
@@ -361,6 +379,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('total_offer_count'),
             tokens.get('code_expiration_date'),
             sender_alias,
+            reply_to,
             tokens.get('base_enterprise_url'),
         )
         mock_email_task.delay.assert_called_once_with(
@@ -368,6 +387,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             mock.ANY,
             sender_alias,
+            reply_to,
             base_enterprise_url=tokens.get('base_enterprise_url'),
         )
 
@@ -378,6 +398,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'hi',
             'bye',
             'sender_alias',
+            'edx@example.com',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -392,6 +413,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             greeting,
             closing,
             sender_alias,
+            reply_to,
             tokens,
             side_effect,
             mock_email_task,
@@ -407,12 +429,14 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('learner_email'),
             tokens.get('code'),
             sender_alias,
+            reply_to,
         )
         mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
             mock.ANY,
-            sender_alias
+            sender_alias,
+            reply_to,
         )
 
     @ddt.data(

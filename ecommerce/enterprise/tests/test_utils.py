@@ -23,6 +23,7 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer,
     get_enterprise_customer_catalogs,
     get_enterprise_customer_from_enterprise_offer,
+    get_enterprise_customer_reply_to_email,
     get_enterprise_customer_sender_alias,
     get_enterprise_customer_uuid,
     get_enterprise_customers,
@@ -387,6 +388,20 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         enterprise_customer.return_value = {'sender_alias': sender_alias}
         sender_alias = get_enterprise_customer_sender_alias('some-site', 'uuid')
         assert sender_alias == expected_sender_alias
+
+    @patch('ecommerce.enterprise.utils.get_enterprise_customer')
+    @ddt.data(
+        ('edx@example.com', 'edx@example.com'),
+        ('', ''),
+    )
+    @ddt.unpack
+    def test_get_enterprise_customer_reply_to_email(self, reply_to, expected_reply_to, enterprise_customer):
+        """
+        Verify get_enterprise_customer_reply_to_email returns enterprise reply_to email/
+        """
+        enterprise_customer.return_value = {'reply_to': reply_to}
+        reply_to = get_enterprise_customer_reply_to_email('some-site', 'uuid')
+        self.assertEqual(reply_to, expected_reply_to)
 
     def test_parse_consent_params(self):
         """
