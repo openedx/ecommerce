@@ -27,20 +27,22 @@ checks. You can run the full unit test, or save time for a local test by
 disabling the migrations. (You can also run the quality checks independent of
 the unit test suite.)
 
+  .. note::
+    The first time you run tests, and any time numerous unit tests fail with an
+    ``OfflineGenerationError`` message, run the following command to update the
+    static assets:
+
+    .. code-block:: bash
+
+       $ DJANGO_SETTINGS_MODULE=ecommerce.settings.test make static
+
+
 * To run the full unit test, including migrations and quality checks, use the
   following command.
 
   .. code-block:: bash
 
      $ make validate
-
-  .. note::
-    If numerous unit tests fail with an ``OfflineGenerationError`` message, run
-    the following command, then try to run unit tests again.
-
-    .. code-block:: bash
-
-       $ DJANGO_SETTINGS_MODULE=ecommerce.settings.test make static
 
 * To run unit tests with quality checks but without migrations, run the
   following command.
