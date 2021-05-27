@@ -216,6 +216,7 @@ django-widget-tweaks==1.4.8
     #   django-oscar
 django==2.2.17
     # via
+    #   -r test.txt
     #   django-appconf
     #   django-config-models
     #   django-cors-headers
@@ -416,7 +417,7 @@ logger==1.4
     # via
     #   -r test.txt
     #   cybersource-rest-client-python
-lxml==4.6.2
+lxml==4.6.3
     # via
     #   -r test.txt
     #   premailer
