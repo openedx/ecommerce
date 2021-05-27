@@ -4,43 +4,153 @@
 #
 #    make upgrade
 #
-attrs==20.3.0             # via -c requirements/base.txt, pytest
-certifi==2020.12.5        # via -c requirements/base.txt, requests
-cffi==1.14.4              # via -c requirements/base.txt, cryptography
-chardet==4.0.0            # via -c requirements/base.txt, requests
-cryptography==3.3.1       # via -c requirements/base.txt, pyjwt
-django-crum==0.7.9        # via -c requirements/base.txt, edx-django-utils
-django-waffle==2.0.0      # via -c requirements/base.txt, edx-django-utils
-django==2.2.17            # via -c requirements/base.txt, django-crum, edx-django-utils
-edx-django-utils==3.13.0  # via -c requirements/base.txt, edx-rest-api-client
-edx-rest-api-client==5.2.1  # via -c requirements/base.txt, -r requirements/e2e.in
-idna==2.7                 # via -c requirements/base.txt, -c requirements/pins.txt, requests
-more-itertools==8.6.0     # via pytest
-newrelic==6.0.0.154       # via -c requirements/base.txt, edx-django-utils
-packaging==20.8           # via -c requirements/base.txt, pytest
-pbr==5.5.1                # via -c requirements/base.txt, stevedore
-pluggy==0.13.1            # via pytest
-psutil==5.8.0             # via -c requirements/base.txt, edx-django-utils
-py==1.10.0                # via pytest
-pycparser==2.20           # via -c requirements/base.txt, cffi
-pyjwt[crypto]==1.7.1      # via -c requirements/base.txt, edx-rest-api-client
-pyparsing==2.4.7          # via -c requirements/base.txt, packaging
-pytest-base-url==1.4.2    # via pytest-selenium
-pytest-html==3.1.1        # via pytest-selenium
-pytest-metadata==1.11.0   # via pytest-html
-pytest-randomly==3.5.0    # via -r requirements/e2e.in
-pytest-selenium==2.0.1    # via -r requirements/e2e.in
-pytest-timeout==1.4.2     # via -r requirements/e2e.in
-pytest-variables==1.9.0   # via pytest-selenium
-pytest==5.3.5             # via -c requirements/pins.txt, -r requirements/e2e.in, pytest-base-url, pytest-html, pytest-metadata, pytest-randomly, pytest-selenium, pytest-timeout, pytest-variables
-python-dotenv==0.15.0     # via -r requirements/e2e.in
-pytz==2016.10             # via -c requirements/base.txt, -c requirements/pins.txt, django
-requests==2.25.1          # via -c requirements/base.txt, edx-rest-api-client, pytest-base-url, pytest-selenium, slumber
-selenium==3.141.0         # via -r requirements/e2e.in, pytest-selenium
-six==1.15.0               # via -c requirements/base.txt, cryptography, tenacity
-slumber==0.7.1            # via -c requirements/base.txt, edx-rest-api-client
-sqlparse==0.4.1           # via -c requirements/base.txt, django
-stevedore==3.3.0          # via -c requirements/base.txt, edx-django-utils
-tenacity==6.3.1           # via pytest-selenium
-urllib3==1.26.2           # via -c requirements/base.txt, -c requirements/pins.txt, requests, selenium
-wcwidth==0.2.5            # via pytest
+attrs==20.3.0
+    # via
+    #   -c base.txt
+    #   pytest
+certifi==2020.12.5
+    # via
+    #   -c base.txt
+    #   requests
+cffi==1.14.4
+    # via
+    #   -c base.txt
+    #   cryptography
+chardet==4.0.0
+    # via
+    #   -c base.txt
+    #   requests
+cryptography==3.3.2
+    # via
+    #   -c base.txt
+    #   pyjwt
+django-crum==0.7.9
+    # via
+    #   -c base.txt
+    #   edx-django-utils
+django-waffle==2.0.0
+    # via
+    #   -c base.txt
+    #   edx-django-utils
+django==2.2.17
+    # via
+    #   -c base.txt
+    #   django-crum
+    #   edx-django-utils
+edx-django-utils==3.13.0
+    # via
+    #   -c base.txt
+    #   edx-rest-api-client
+edx-rest-api-client==5.2.1
+    # via
+    #   -c base.txt
+    #   -r e2e.in
+idna==2.7
+    # via
+    #   -c base.txt
+    #   -c pins.txt
+    #   requests
+more-itertools==8.6.0
+    # via pytest
+newrelic==6.0.0.154
+    # via
+    #   -c base.txt
+    #   edx-django-utils
+packaging==20.8
+    # via
+    #   -c base.txt
+    #   pytest
+pbr==5.5.1
+    # via
+    #   -c base.txt
+    #   stevedore
+pluggy==0.13.1
+    # via pytest
+psutil==5.8.0
+    # via
+    #   -c base.txt
+    #   edx-django-utils
+py==1.10.0
+    # via pytest
+pycparser==2.20
+    # via
+    #   -c base.txt
+    #   cffi
+pyjwt[crypto]==1.7.1
+    # via
+    #   -c base.txt
+    #   edx-rest-api-client
+pyparsing==2.4.7
+    # via
+    #   -c base.txt
+    #   packaging
+pytest-base-url==1.4.2
+    # via pytest-selenium
+pytest-html==3.1.1
+    # via pytest-selenium
+pytest-metadata==1.11.0
+    # via pytest-html
+pytest-randomly==3.5.0
+    # via -r e2e.in
+pytest-selenium==2.0.1
+    # via -r e2e.in
+pytest-timeout==1.4.2
+    # via -r e2e.in
+pytest-variables==1.9.0
+    # via pytest-selenium
+pytest==5.3.5
+    # via
+    #   -c pins.txt
+    #   -r e2e.in
+    #   pytest-base-url
+    #   pytest-html
+    #   pytest-metadata
+    #   pytest-randomly
+    #   pytest-selenium
+    #   pytest-timeout
+    #   pytest-variables
+python-dotenv==0.15.0
+    # via -r e2e.in
+pytz==2016.10
+    # via
+    #   -c base.txt
+    #   -c pins.txt
+    #   django
+requests==2.25.1
+    # via
+    #   -c base.txt
+    #   edx-rest-api-client
+    #   pytest-base-url
+    #   pytest-selenium
+    #   slumber
+selenium==3.141.0
+    # via
+    #   -r e2e.in
+    #   pytest-selenium
+six==1.15.0
+    # via
+    #   -c base.txt
+    #   cryptography
+    #   tenacity
+slumber==0.7.1
+    # via
+    #   -c base.txt
+    #   edx-rest-api-client
+sqlparse==0.4.1
+    # via
+    #   -c base.txt
+    #   django
+stevedore==3.3.0
+    # via
+    #   -c base.txt
+    #   edx-django-utils
+tenacity==6.3.1
+    # via pytest-selenium
+urllib3==1.26.2
+    # via
+    #   -c base.txt
+    #   -c pins.txt
+    #   requests
+    #   selenium
+wcwidth==0.2.5
+    # via pytest
