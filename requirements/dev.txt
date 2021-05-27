@@ -216,6 +216,7 @@ django-widget-tweaks==1.4.8
     #   django-oscar
 django==2.2.17
     # via
+    #   -r test.txt
     #   django-appconf
     #   django-config-models
     #   django-cors-headers
@@ -907,7 +908,7 @@ uritemplate==3.0.1
     # via
     #   -r test.txt
     #   coreapi
-urllib3==1.26.2
+urllib3==1.26.4
     # via
     #   -r docs.txt
     #   -r test.txt
