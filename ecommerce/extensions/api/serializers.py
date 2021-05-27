@@ -32,7 +32,11 @@ from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
-from ecommerce.enterprise.utils import get_enterprise_customer_sender_alias, get_enterprise_customer_uuid_from_voucher
+from ecommerce.enterprise.utils import (
+    get_enterprise_customer_reply_to_email,
+    get_enterprise_customer_sender_alias,
+    get_enterprise_customer_uuid_from_voucher
+)
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.v2.constants import (
     REFUND_ORDER_EMAIL_CLOSING,
@@ -1482,9 +1486,10 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                             base_enterprise_url=base_enterprise_url,
                         )
                     sender_alias = get_enterprise_customer_sender_alias(site, enterprise_customer_uuid)
+                    reply_to = get_enterprise_customer_reply_to_email(site, enterprise_customer_uuid)
                     self._trigger_email_sending_task(
                         subject, greeting, closing, new_offer_assignment, voucher_usage_type, sender_alias,
-                        base_enterprise_url,
+                        reply_to, base_enterprise_url,
                     )
                     # Create a record of the email sent
                     create_offer_assignment_email_sent_record(
@@ -1595,7 +1600,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         return attrs
 
     def _trigger_email_sending_task(self, subject, greeting, closing, assigned_offer, voucher_usage_type, sender_alias,
-                                    base_enterprise_url=''):
+                                    reply_to, base_enterprise_url=''):
         """
         Schedule async task to send email to the learner who has been assigned the code.
         """
@@ -1615,6 +1620,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 redemptions_remaining=redemptions_remaining,
                 code_expiration_date=code_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
                 sender_alias=sender_alias,
+                reply_to=reply_to,
                 base_enterprise_url=base_enterprise_url,
             )
         except Exception as exc:  # pylint: disable=broad-except
@@ -1883,13 +1889,15 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
 
             if should_send_revoke_email:
                 sender_alias = get_enterprise_customer_sender_alias(site, enterprise_customer_uuid)
+                reply_to = get_enterprise_customer_reply_to_email(site, enterprise_customer_uuid)
                 send_revoked_offer_email(
                     subject=subject,
                     greeting=greeting,
                     closing=closing,
                     learner_email=user['email'],
                     code=code,
-                    sender_alias=sender_alias
+                    sender_alias=sender_alias,
+                    reply_to=reply_to,
                 )
                 # Create a record of the email sent
                 create_offer_assignment_email_sent_record(
@@ -1962,6 +1970,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         site = self.context.get('site')
 
         sender_alias = get_enterprise_customer_sender_alias(site, enterprise_customer_uuid)
+        reply_to = get_enterprise_customer_reply_to_email(site, enterprise_customer_uuid)
         try:
             self._trigger_email_sending_task(
                 subject,
@@ -1971,6 +1980,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 redeemed_offer_count,
                 total_offer_count,
                 sender_alias,
+                reply_to,
                 base_enterprise_url,
             )
             # Create a record of the email sent
@@ -2023,7 +2033,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
 
     def _trigger_email_sending_task(
             self, subject, greeting, closing, assigned_offer, redeemed_offer_count, total_offer_count, sender_alias,
-            base_enterprise_url='',
+            reply_to, base_enterprise_url='',
     ):
         """
         Schedule async task to send email to the learner who has been assigned the code.
@@ -2041,6 +2051,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 total_offer_count=total_offer_count,
                 code_expiration_date=code_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
                 sender_alias=sender_alias,
+                reply_to=reply_to,
                 base_enterprise_url=base_enterprise_url,
             )
         except Exception as exc:  # pylint: disable=broad-except

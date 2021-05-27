@@ -27,6 +27,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     CLOSING = ' Bye'
     BASE_ENTERPRISE_URL = 'https://bears.party'
     SENDER_ALIAS = 'edx Support Team'
+    REPLY_TO = 'edx@example.com'
 
     def setUp(self):
         super(CouponCodeSerializerTests, self).setUp()
@@ -76,6 +77,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             assigned_offer=self.offer_assignment,
             voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER,
             sender_alias=self.SENDER_ALIAS,
+            reply_to=self.REPLY_TO,
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
 
@@ -90,6 +92,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         assert assign_email_args['code_expiration_date'] == expected_expiration_date.strftime('%d %B, %Y %H:%M %Z')
         assert assign_email_args['base_enterprise_url'] == ''
         assert assign_email_args['sender_alias'] == self.SENDER_ALIAS
+        assert assign_email_args['reply_to'] == self.REPLY_TO
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
     def test_send_assigned_offer_email_args_with_enterprise_url(self, mock_assign_email):
@@ -103,6 +106,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             assigned_offer=self.offer_assignment,
             voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER,
             sender_alias=self.SENDER_ALIAS,
+            reply_to=self.REPLY_TO,
             base_enterprise_url=self.BASE_ENTERPRISE_URL,
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
@@ -118,6 +122,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         assert assign_email_args['code_expiration_date'] == expected_expiration_date.strftime('%d %B, %Y %H:%M %Z')
         assert assign_email_args['base_enterprise_url'] == self.BASE_ENTERPRISE_URL
         assert assign_email_args['sender_alias'] == self.SENDER_ALIAS
+        assert assign_email_args['reply_to'] == self.REPLY_TO
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_reminder_email')
     def test_send_assigned_offer_reminder_email_args(self, mock_remind_email):
@@ -131,6 +136,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             redeemed_offer_count=3,
             total_offer_count=5,
             sender_alias=self.SENDER_ALIAS,
+            reply_to=self.REPLY_TO,
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
         mock_remind_email.assert_called_with(
@@ -143,6 +149,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             total_offer_count=mock.ANY,
             code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
             sender_alias=self.SENDER_ALIAS,
+            reply_to=self.REPLY_TO,
             base_enterprise_url=''
         )
 
@@ -158,6 +165,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             redeemed_offer_count=3,
             total_offer_count=5,
             sender_alias=self.SENDER_ALIAS,
+            reply_to=self.REPLY_TO,
             base_enterprise_url=self.BASE_ENTERPRISE_URL
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
@@ -171,6 +179,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             total_offer_count=mock.ANY,
             code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
             sender_alias=self.SENDER_ALIAS,
+            reply_to=self.REPLY_TO,
             base_enterprise_url=self.BASE_ENTERPRISE_URL,
         )
 
@@ -202,7 +211,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 closing=self.CLOSING,
                 assigned_offer=self.offer_assignment,
                 voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER,
-                sender_alias=self.SENDER_ALIAS
+                sender_alias=self.SENDER_ALIAS,
+                reply_to=self.REPLY_TO,
             )
             log.check_present(*expected)
 
@@ -237,6 +247,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                     redeemed_offer_count=3,
                     total_offer_count=5,
                     sender_alias=self.SENDER_ALIAS,
+                    reply_to=self.REPLY_TO,
                     base_enterprise_url=self.BASE_ENTERPRISE_URL,
                 )
         log.check_present(*expected)
