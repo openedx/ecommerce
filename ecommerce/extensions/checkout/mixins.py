@@ -52,7 +52,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
 
     def create_order(self, request, basket, billing_address=None):
         # Emma: this is moved from an old OrderCreationMixin class which was only in use by
-        # CybersourceApplePayAuthorizationView. Not for Paypal.
+        # CybersourceInterstitialView and CybersourceApplePayAuthorizationView. Not for Paypal.
         # Paypal has a different codepath for creating orders.
 
         try:

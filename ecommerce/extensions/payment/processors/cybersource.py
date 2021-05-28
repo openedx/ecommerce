@@ -5,6 +5,7 @@ import base64
 import datetime
 import json
 import logging
+import uuid
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
@@ -35,6 +36,7 @@ from CyberSource import (
 )
 from CyberSource.rest import ApiException
 from django.conf import settings
+from django.urls import reverse
 from jwt.algorithms import RSAAlgorithm
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
@@ -43,7 +45,9 @@ from zeep import Client
 from zeep.helpers import serialize_object
 from zeep.wsse import UsernameToken
 
+from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP, CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
@@ -52,6 +56,7 @@ from ecommerce.extensions.payment.exceptions import (
     InvalidCybersourceDecision,
     InvalidSignatureError,
     PartialAuthorizationError,
+    PCIViolation,
     ProcessorMisconfiguredError,
     RedundantPaymentNotificationError
 )
@@ -265,7 +270,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 'secret key, and payment page URL are ALL configured in settings.'
             )
 
-        parameters = {}
+        parameters = self._generate_parameters(basket, use_client_side_checkout, **kwargs)
 
         # Sign all fields
         parameters['signed_field_names'] = ','.join(sorted(parameters.keys()))
@@ -273,6 +278,115 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         payment_page_url = self.sop_payment_page_url if use_client_side_checkout else self.payment_page_url
         parameters['payment_page_url'] = payment_page_url
+
+        return parameters
+
+    def _generate_parameters(self, basket, use_sop_profile, **kwargs):
+        """ Generates the parameters dict.
+
+        A signature is NOT included in the parameters.
+
+         Arguments:
+            basket (Basket): Basket from which the pricing and item details are pulled.
+            use_sop_profile (bool, optional): Indicates if the Silent Order POST profile should be used.
+            **kwargs: Additional parameters to add to the generated dict.
+
+         Returns:
+             dict: Dictionary containing the payment parameters that should be sent to CyberSource.
+        """
+        site = basket.site
+
+        access_key = self.access_key
+        profile_id = self.profile_id
+
+        if use_sop_profile:
+            access_key = self.sop_access_key
+            profile_id = self.sop_profile_id
+
+        parameters = {
+            'access_key': access_key,
+            'profile_id': profile_id,
+            'transaction_uuid': uuid.uuid4().hex,
+            'signed_field_names': '',
+            'unsigned_field_names': '',
+            'signed_date_time': datetime.datetime.utcnow().strftime(ISO_8601_FORMAT),
+            'locale': self.language_code,
+            'transaction_type': 'sale',
+            'reference_number': basket.order_number,
+            'amount': str(basket.total_incl_tax),
+            'currency': basket.currency,
+            'override_custom_receipt_page': get_receipt_page_url(
+                site_configuration=site.siteconfiguration,
+                order_number=basket.order_number,
+                override_url=site.siteconfiguration.build_ecommerce_url(
+                    reverse('cybersource:redirect')
+                ),
+                disable_back_button=True,
+            ),
+            'override_custom_cancel_page': self.cancel_page_url,
+        }
+        extra_data = []
+        # Level 2/3 details
+        if self.send_level_2_3_details:
+            parameters['amex_data_taa1'] = site.name
+            parameters['purchasing_level'] = '3'
+            parameters['line_item_count'] = basket.all_lines().count()
+            # Note (CCB): This field (purchase order) is required for Visa;
+            # but, is not actually used by us/exposed on the order form.
+            parameters['user_po'] = 'BLANK'
+
+            # Add a parameter specifying the basket's program, None if not present.
+            # This program UUID will *always* be in the merchant_defined_data1, if exists.
+            program_uuid = get_basket_program_uuid(basket)
+            if program_uuid:
+                extra_data.append("program,{program_uuid}".format(program_uuid=program_uuid))
+            else:
+                extra_data.append(None)
+
+            for index, line in enumerate(basket.all_lines()):
+                parameters['item_{}_code'.format(index)] = line.product.get_product_class().slug
+                parameters['item_{}_discount_amount '.format(index)] = str(line.discount_value)
+                # Note (CCB): This indicates that the total_amount field below includes tax.
+                parameters['item_{}_gross_net_indicator'.format(index)] = 'Y'
+                parameters['item_{}_name'.format(index)] = clean_field_value(line.product.title)
+                parameters['item_{}_quantity'.format(index)] = line.quantity
+                parameters['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
+                parameters['item_{}_tax_amount'.format(index)] = str(line.line_tax)
+                parameters['item_{}_tax_rate'.format(index)] = '0'
+                parameters['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
+                # Note (CCB): Course seat is not a unit of measure. Use item (ITM).
+                parameters['item_{}_unit_of_measure'.format(index)] = 'ITM'
+                parameters['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
+
+                # For each basket line having a course product, add course_id and course type
+                # as an extra CSV-formatted parameter sent to Cybersource.
+                # These extra course parameters will be in parameters merchant_defined_data2+.
+                line_course = line.product.course
+                if line_course:
+                    extra_data.append("course,{course_id},{course_type}".format(
+                        course_id=line_course.id if line_course else None,
+                        course_type=line_course.type if line_course else None
+                    ))
+
+        # Only send consumer_id for hosted payment page
+        if not use_sop_profile:
+            parameters['consumer_id'] = basket.owner.username
+
+        # Add the extra parameters
+        parameters.update(kwargs.get('extra_parameters', {}))
+
+        # Mitigate PCI compliance issues
+        signed_field_names = list(parameters.keys())
+        if any(pci_field in signed_field_names for pci_field in self.PCI_FIELDS):
+            raise PCIViolation('One or more PCI-related fields is contained in the payment parameters. '
+                               'This service is NOT PCI-compliant! Deactivate this service immediately!')
+
+        if extra_data:
+            # CyberSource allows us to send additional data in merchant_defined_data# fields.
+            for num, item in enumerate(extra_data, start=1):
+                if item:
+                    key = u"merchant_defined_data{num}".format(num=num)
+                    parameters[key] = item
 
         return parameters
 

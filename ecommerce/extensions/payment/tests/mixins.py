@@ -1,5 +1,6 @@
 
 
+import datetime
 import os
 import re
 from decimal import Decimal
@@ -18,6 +19,7 @@ from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
 from testfixtures import LogCapture
 
+from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.constants import CARD_TYPES
@@ -254,6 +256,71 @@ class CybersourceMixin(PaymentEventsMixin):
         responses.add(responses.POST, url, body=body, content_type='text/xml')
 
         return body
+
+    def get_expected_transaction_parameters(self, basket, transaction_uuid, include_level_2_3_details=True,
+                                            processor=None, use_sop_profile=False, **kwargs):
+        """
+        Builds expected transaction parameters dictionary.
+
+        Note:
+            Callers should separately validate the transaction_uuid parameter to ensure it is a valid UUID.
+        """
+        processor = processor or Cybersource(self.site)
+        configuration = settings.PAYMENT_PROCESSOR_CONFIG['edx'][processor.NAME]
+        access_key = configuration['sop_access_key'] if use_sop_profile else configuration['access_key']
+        profile_id = configuration['sop_profile_id'] if use_sop_profile else configuration['profile_id']
+        secret_key = configuration['sop_secret_key'] if use_sop_profile else configuration['secret_key']
+
+        expected = {
+            'access_key': access_key,
+            'profile_id': profile_id,
+            'transaction_uuid': transaction_uuid,
+            'signed_field_names': '',
+            'unsigned_field_names': '',
+            'signed_date_time': datetime.datetime.utcnow().strftime(ISO_8601_FORMAT),
+            'locale': settings.LANGUAGE_CODE,
+            'transaction_type': 'sale',
+            'reference_number': basket.order_number,
+            'amount': str(basket.total_incl_tax),
+            'currency': basket.currency,
+            'override_custom_receipt_page': basket.site.siteconfiguration.build_ecommerce_url(
+                reverse('cybersource:redirect')
+            ),
+            'override_custom_cancel_page': processor.cancel_page_url,
+        }
+
+        if include_level_2_3_details:
+            expected.update({
+                'line_item_count': basket.lines.count(),
+                'amex_data_taa1': basket.site.name,
+                'purchasing_level': '3',
+                'user_po': 'BLANK',
+            })
+
+            for index, line in enumerate(basket.lines.all()):
+                expected['item_{}_code'.format(index)] = line.product.get_product_class().slug
+                expected['item_{}_discount_amount '.format(index)] = str(line.discount_value)
+                expected['item_{}_gross_net_indicator'.format(index)] = 'Y'
+                expected['item_{}_name'.format(index)] = line.product.title
+                expected['item_{}_quantity'.format(index)] = line.quantity
+                expected['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
+                expected['item_{}_tax_amount'.format(index)] = str(line.line_tax)
+                expected['item_{}_tax_rate'.format(index)] = '0'
+                expected['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
+                expected['item_{}_unit_of_measure'.format(index)] = 'ITM'
+                expected['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
+
+        if not use_sop_profile:
+            expected['consumer_id'] = basket.owner.username
+
+        # Add the extra parameters
+        expected.update(kwargs.get('extra_parameters', {}))
+
+        # Generate a signature
+        expected['signed_field_names'] = ','.join(sorted(expected.keys()))
+        expected['signature'] = self.generate_signature(secret_key, expected)
+
+        return expected
 
     def mock_authorization_response(self, accepted=True):
         decision = 'ACCEPT' if accepted else 'REJECTED'

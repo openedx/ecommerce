@@ -6,6 +6,7 @@ import copy
 import json
 from decimal import Decimal
 from unittest import SkipTest
+from uuid import UUID
 
 import ddt
 import mock
@@ -14,14 +15,23 @@ import responses
 from CyberSource.api_client import ApiClient
 from django.conf import settings
 from django.test import override_settings
+from django.urls import reverse
+from freezegun import freeze_time
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
+from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.payment.exceptions import (
+    ExcessivePaymentForOrderError,
     InvalidCybersourceDecision,
     InvalidSignatureError,
-    PartialAuthorizationError
+    PartialAuthorizationError,
+    PCIViolation,
+    ProcessorMisconfiguredError,
+    RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import (
@@ -33,6 +43,7 @@ from ecommerce.extensions.payment.processors.cybersource import (
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CyberSourceRESTAPIMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -62,9 +73,31 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         return ppr.id
 
-    def test_get_transaction_parameters(self):
-        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
-        raise SkipTest("No longer used")
+    @freeze_time('2016-01-01')
+    def assert_correct_transaction_parameters(self, include_level_2_3_details=True, **kwargs):
+        """ Verifies the processor returns the correct parameters required to complete a transaction.
+
+         Arguments
+            include_level_23_details (bool): Determines if Level 2/3 details should be included in the parameters.
+        """
+        # NOTE (CCB): Instantiate a new processor object to ensure we reload any overridden settings.
+        actual = self.processor_class(self.site).get_transaction_parameters(self.basket, **kwargs)
+
+        expected = self.get_expected_transaction_parameters(
+            self.basket,
+            actual['transaction_uuid'],
+            include_level_2_3_details,
+            processor=self.processor,
+            **kwargs
+        )
+        self.assertDictContainsSubset(expected, actual)
+
+        # Verify the extra data is included
+        extra_parameters = kwargs.get('extra_parameters', {})
+        self.assertDictContainsSubset(extra_parameters, actual)
+
+        # If this raises an exception, the value is not a valid UUID4.
+        UUID(actual['transaction_uuid'], version=4)
 
     def test_init_without_config(self):
         partner_short_code = self.partner.short_code
@@ -79,6 +112,82 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
                     AssertionError,
                     'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'):
                 self.processor_class(self.site)
+
+    def test_get_transaction_parameters(self):
+        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
+        # NOTE (CCB): Make a deepcopy of the settings so that we can modify them without affecting the real settings.
+        # This is a bit simpler than using modify_copy(), which would does not support nested dictionaries.
+        payment_processor_config = copy.deepcopy(settings.PAYMENT_PROCESSOR_CONFIG)
+        payment_processor_config['edx'][self.processor_name]['send_level_2_3_details'] = False
+
+        with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
+            self.assert_correct_transaction_parameters(include_level_2_3_details=False)
+
+    def test_get_transaction_parameters_with_program(self):
+        """ Verify the processor returns parameters including Level 2/3 details. """
+        bundle_id = TEST_BUNDLE_ID
+        BasketAttribute.objects.update_or_create(
+            basket=self.basket,
+            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+            value_text=bundle_id
+        )
+        self.assert_correct_transaction_parameters(
+            extra_parameters={
+                'merchant_defined_data1': 'program,{}'.format(bundle_id),
+                'merchant_defined_data2': 'course,a/b/c,audit'
+            }
+        )
+
+    def test_get_transaction_parameters_with_level2_3_details(self):
+        """ Verify the processor returns parameters including Level 2/3 details. """
+        self.assert_correct_transaction_parameters(
+            extra_parameters={
+                'merchant_defined_data2': 'course,a/b/c,audit'
+            }
+        )
+
+    def test_get_transaction_parameters_with_extra_parameters(self):
+        """ Verify the method supports adding additional unsigned parameters. """
+        extra_parameters = {
+            'payment_method': 'card',
+            'merchant_defined_data2': 'course,a/b/c,audit'
+        }
+        self.assert_correct_transaction_parameters(extra_parameters=extra_parameters)
+
+    def test_get_transaction_parameters_with_quoted_product_title(self):
+        """ Verify quotes are removed from item name """
+        course = CourseFactory(id='a/b/c/d', name='Course with "quotes"')
+        product = course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20)
+
+        basket = create_basket(owner=UserFactory(), site=self.site, empty=True)
+        basket.add_product(product)
+
+        response = self.processor.get_transaction_parameters(basket)
+        self.assertEqual(response['item_0_name'], 'Seat in Course with quotes with test-certificate-type certificate')
+
+    @ddt.data('card_type', 'card_number', 'card_expiry_date', 'card_cvn')
+    def test_get_transaction_parameters_with_unpermitted_parameters(self, field):
+        """ Verify the method raises an error if un-permitted parameters are passed to the method. """
+        with self.assertRaises(PCIViolation):
+            extra_parameters = {field: 'This value is irrelevant.'}
+            self.processor.get_transaction_parameters(self.basket, extra_parameters=extra_parameters)
+
+    @ddt.data('sop_access_key', 'sop_payment_page_url', 'sop_profile_id', 'sop_secret_key')
+    def test_get_transaction_parameters_with_missing_sop_configuration(self, key):
+        """ Verify attempts to get transaction parameters for Silent Order POST fail if the appropriate settings
+        are not configured.
+        """
+        # NOTE (CCB): Make a deepcopy of the settings so that we can modify them without affecting the real settings.
+        # This is a bit simpler than using modify_copy(), which would does not support nested dictionaries.
+        payment_processor_config = copy.deepcopy(settings.PAYMENT_PROCESSOR_CONFIG)
+
+        # Remove the key/field from settings
+        del payment_processor_config['edx'][self.processor_name][key]
+
+        with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
+            with self.assertRaises(ProcessorMisconfiguredError):
+                # NOTE (CCB): Instantiate a new processor object to ensure we reload any overridden settings.
+                self.processor_class(self.site).get_transaction_parameters(self.basket, use_client_side_checkout=True)
 
     def test_is_signature_valid(self):
         """ Verify that the is_signature_valid method properly validates the response's signature. """
@@ -165,6 +274,35 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             PartialAuthorizationError,
             self.processor.handle_processor_response,
             self.processor.normalize_processor_response(response),
+            basket=self.basket
+        )
+
+    def test_handle_processor_response_duplicate_notification(self):
+        """
+        The handle_processor_response method should raise respective exception if there is already a
+        payment notification and order existed with same or different transaction IDs.
+        """
+        notification = self.generate_notification(self.basket, billing_address=self.make_billing_address())
+        self.client.post(reverse('cybersource:redirect'), notification)
+
+        self.assertTrue(PaymentProcessorResponse.objects.filter(basket=self.basket).exists())
+        self.assertTrue(Order.objects.filter(basket=self.basket).exists())
+
+        # handle_processor_response should raise RedundantPaymentNotificationError for same transaction ID
+        self.assertRaises(
+            RedundantPaymentNotificationError,
+            self.processor.handle_processor_response,
+            self.processor.normalize_processor_response(notification),
+            basket=self.basket
+        )
+
+        notification['transaction_id'] = '394934470384'
+        notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
+        # handle_processor_response should raise ExcessivePaymentForOrderError for different transaction ID
+        self.assertRaises(
+            ExcessivePaymentForOrderError,
+            self.processor.handle_processor_response,
+            self.processor.normalize_processor_response(notification),
             basket=self.basket
         )
 
