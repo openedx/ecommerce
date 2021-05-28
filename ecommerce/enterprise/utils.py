@@ -675,28 +675,3 @@ def get_enterprise_customer_sender_alias(site, enterprise_customer_uuid):
     if not sender_alias:
         sender_alias = SENDER_ALIAS
     return sender_alias
-
-
-def get_enterprise_customer_reply_to_email(site, enterprise_customer_uuid):
-    """
-    Return enterprise customer reply to email address.
-
-    Arguments:
-        site (Site): The site object.
-        enterprise_customer_uuid (Enterprise_customer): The enterprise_customer uuid.
-
-    Returns:
-        reply_to: email if the enterprise_customer has a reply to email address, empty string otherwise.
-    """
-    reply_to = ''
-    try:
-        enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
-        reply_to = enterprise_customer['reply_to']
-    except Exception as exc:  # pylint: disable=broad-except
-        logging.exception(
-            '[Enterprise - failure in fetching reply_to property]. Customer: %s, Site: %s, Exception: %s',
-            enterprise_customer_uuid,
-            site,
-            exc
-        )
-    return reply_to

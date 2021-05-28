@@ -167,7 +167,6 @@ def send_assigned_offer_email(
         redemptions_remaining,
         code_expiration_date,
         sender_alias,
-        reply_to,
         base_enterprise_url=''):
     """
     Arguments:
@@ -204,7 +203,7 @@ def send_assigned_offer_email(
         return  # pragma: no cover
 
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, sender_alias,
-                                      reply_to, base_enterprise_url=base_enterprise_url)
+                                      base_enterprise_url=base_enterprise_url)
 
 
 def send_revoked_offer_email(
@@ -214,7 +213,6 @@ def send_revoked_offer_email(
         learner_email,
         code,
         sender_alias,
-        reply_to,
 ):
     """
     Arguments:
@@ -228,10 +226,6 @@ def send_revoked_offer_email(
             Email of the customer who will receive the code.
         *code*
             Code for the user.
-        *sender_alias*
-           Enterprise customer sender alias.
-        *reply_to*
-           Enterprise customer reply to email address.
     """
     email_template = settings.OFFER_REVOKE_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
@@ -245,7 +239,7 @@ def send_revoked_offer_email(
         logger.warning("Skipping email task 'send_revoked_offer_email' because DEBUG=true.")  # pragma: no cover
         return  # pragma: no cover
 
-    send_offer_update_email.delay(learner_email, subject, email_body, sender_alias, reply_to)
+    send_offer_update_email.delay(learner_email, subject, email_body, sender_alias)
 
 
 def send_assigned_offer_reminder_email(
@@ -258,7 +252,6 @@ def send_assigned_offer_reminder_email(
         total_offer_count,
         code_expiration_date,
         sender_alias,
-        reply_to,
         base_enterprise_url=''):
     """
     Arguments:
@@ -280,8 +273,6 @@ def send_assigned_offer_reminder_email(
            Date till code is valid.
        *sender_alias*
            Enterprise customer sender alias.
-       *reply_to*
-           Enterprise customer reply to email address.
        *base_enterprise_url*
            Url for the enterprise's learner portal
     """
@@ -307,7 +298,7 @@ def send_assigned_offer_reminder_email(
         )  # pragma: no cover
         return  # pragma: no cover
     send_offer_update_email.delay(learner_email, subject, email_body, sender_alias,
-                                  reply_to, base_enterprise_url=base_enterprise_url)
+                                  base_enterprise_url=base_enterprise_url)
 
 
 def format_email(template, placeholder_dict, greeting, closing, base_enterprise_url=''):
