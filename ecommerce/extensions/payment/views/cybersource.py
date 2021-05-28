@@ -382,7 +382,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             order = self.create_order(
                 self.request,
                 basket,
-                order_completion_message.billing_address
+                self.payment_processor.get_billing_address(order_completion_message)
             )
             self.handle_post_order(order)
             return self.redirect_to_receipt_page()

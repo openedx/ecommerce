@@ -134,14 +134,18 @@ testing with CyberSource, you will need to validate your ngrok domain at Apple.
 
 CyberSource
 ***********
-Our CyberSource integration supports using the `Flex Microform API`_ for accepting payments.
+Our CyberSource integration supports accepting payments via both `Silent Order POST and Secure Acceptance Web/Mobile`_.
+(Note that both fall under the product name of "Secure Acceptance".) We highly recommend using the Silent Order POST
+integration as it allows for greater control over the checkout experience via the use of the custom checkout page in
+this codebase. Web/Mobile, on the other hand, redirects learners to a checkout page hosted by CyberSource.
 
 In addition to Secure Acceptance, this processor plugin also makes use of the `Simple Order API`_ to facilitate payments
 made via Apple Pay and refunds (for all payment methods).
 
 When testing payments with your test profiles, use test card numbers from https://www.cybersource.com/developers/other_resources/quick_references/test_cc_numbers/.
 
-.. _Flex Microform API: https://developer.cybersource.com/api/developer-guides/dita-flex/SAFlexibleToken/FlexMicroform.html
+.. _Silent Order POST and Secure Acceptance Web/Mobile: https://www.cybersource.com/products/payment_security/secure_acceptance_web_mobile/
+.. _Simple Order API: https://www.cybersource.com/developers/integration_methods/simple_order_and_soap_toolkit_api/
 
 
 Settings
@@ -174,6 +178,15 @@ environment in which you are operating.
 
                 # This instructs the plugin to send Level II/III details. Consider disabling if you run into issues.
                 'send_level_2_3_details': True,
+
+                # Generate this at EBC: Tools & Settings > Profiles.
+                # Remember to select "Silent Order Post" as your integration method!
+                'sop_profile_id': '',
+                'sop_access_key': '',
+                'sop_secret_key': '',
+
+                # Production: https://secureacceptance.cybersource.com/silent/pay
+                'sop_payment_page_url': 'https://testsecureacceptance.cybersource.com/silent/pay',
 
                 # These come from the Apple Developer portal
                 # https://developer.apple.com/account/ios/identifier/merchant

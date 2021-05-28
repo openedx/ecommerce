@@ -2,6 +2,7 @@
 """Unit tests of Cybersource payment processor implementation."""
 
 
+import copy
 import json
 from decimal import Decimal
 from unittest import SkipTest
@@ -11,10 +12,17 @@ import mock
 import requests
 import responses
 from CyberSource.api_client import ApiClient
-from oscar.apps.payment.exceptions import GatewayError
+from django.conf import settings
+from django.test import override_settings
+from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.extensions.payment.exceptions import (
+    InvalidCybersourceDecision,
+    InvalidSignatureError,
+    PartialAuthorizationError
+)
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import (
     Cybersource,
@@ -54,17 +62,111 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         return ppr.id
 
-    def test_handle_processor_response(self):
-        """ Verify that the processor creates the appropriate PaymentEvent and Source objects. """
-        raise SkipTest("No longer used")
-
-    def test_client_side_payment_url(self):
-        """ Verify that the processor creates the appropriate PaymentEvent and Source objects. """
-        raise SkipTest("No longer used")
-
     def test_get_transaction_parameters(self):
-        """ Verify that the processor creates the appropriate PaymentEvent and Source objects. """
+        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
         raise SkipTest("No longer used")
+
+    def test_init_without_config(self):
+        partner_short_code = self.partner.short_code
+
+        payment_processor_config = copy.deepcopy(settings.PAYMENT_PROCESSOR_CONFIG)
+        for key in ('sop_access_key', 'sop_payment_page_url', 'sop_profile_id', 'sop_secret_key', 'access_key',
+                    'payment_page_url', 'profile_id', 'secret_key'):
+            del payment_processor_config[partner_short_code][self.processor_name][key]
+
+        with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
+            with self.assertRaisesMessage(
+                    AssertionError,
+                    'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'):
+                self.processor_class(self.site)
+
+    def test_is_signature_valid(self):
+        """ Verify that the is_signature_valid method properly validates the response's signature. """
+
+        # Empty data should never be valid
+        self.assertFalse(self.processor.is_signature_valid({}))
+
+        # The method should return False for responses with invalid signatures.
+        response = {
+            'req_profile_id': self.processor.profile_id,
+            'signed_field_names': 'field_1,field_2,signed_field_names',
+            'field_2': 'abc',
+            'field_1': '123',
+            'signature': 'abc123=='
+        }
+        self.assertFalse(self.processor.is_signature_valid(response))
+
+        # The method should return True if the signature is valid.
+        response['signature'] = self.generate_signature(self.processor.secret_key, response)
+        self.assertTrue(self.processor.is_signature_valid(response))
+
+        # The method should return True if the signature is valid for a Silent Order POST response.
+        response['req_profile_id'] = self.processor.sop_profile_id
+        response['signature'] = self.generate_signature(self.processor.sop_secret_key, response)
+        self.assertTrue(self.processor.is_signature_valid(response))
+
+        # The method should return False if the response has no req_profile_id field.
+        del response['req_profile_id']
+        self.assertFalse(self.processor.is_signature_valid(response))
+
+    def test_handle_processor_response(self):
+        """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
+
+        response = self.generate_notification(self.basket)
+        handled_response = self.processor.handle_processor_response(
+            self.processor.normalize_processor_response(response),
+            basket=self.basket
+        )
+        self.assertEqual(handled_response.currency, self.basket.currency)
+        self.assertEqual(handled_response.total, self.basket.total_incl_tax)
+        self.assertEqual(handled_response.transaction_id, response['transaction_id'])
+        self.assertEqual(handled_response.card_number, response['req_card_number'])
+        self.assertEqual(handled_response.card_type, self.DEFAULT_CARD_TYPE)
+
+    def test_handle_processor_response_invalid_signature(self):
+        """
+        The handle_processor_response method should raise an InvalidSignatureError if the response's
+        signature is not valid.
+        """
+        response = self.generate_notification(self.basket)
+        response['signature'] = 'Tampered.'
+        self.assertRaises(
+            InvalidSignatureError,
+            self.processor.handle_processor_response,
+            self.processor.normalize_processor_response(response),
+            basket=self.basket
+        )
+
+    @ddt.data(
+        ('CANCEL', UserCancelled),
+        ('DECLINE', TransactionDeclined),
+        ('ERROR', GatewayError),
+        ('huh?', InvalidCybersourceDecision))
+    @ddt.unpack
+    def test_handle_processor_response_not_accepted(self, decision, exception):
+        """ The handle_processor_response method should raise an exception if payment was not accepted. """
+
+        response = self.generate_notification(self.basket, decision=decision)
+
+        self.assertRaises(
+            exception,
+            self.processor.handle_processor_response,
+            self.processor.normalize_processor_response(response),
+            basket=self.basket
+        )
+
+    def test_handle_processor_response_invalid_auth_amount(self):
+        """
+        The handle_processor_response method should raise PartialAuthorizationError if the authorized amount
+        differs from the requested amount.
+        """
+        response = self.generate_notification(self.basket, auth_amount='0.00')
+        self.assertRaises(
+            PartialAuthorizationError,
+            self.processor.handle_processor_response,
+            self.processor.normalize_processor_response(response),
+            basket=self.basket
+        )
 
     @responses.activate
     def test_issue_credit(self):
@@ -120,6 +222,16 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
                           amount, currency)
         self.assert_processor_response_recorded(self.processor.NAME, transaction_id, response, basket)
         self.assertEqual(source.amount_refunded, 0)
+
+    def test_client_side_payment_url(self):
+        """ Verify the property returns the Silent Order POST URL. """
+        processor_config = settings.PAYMENT_PROCESSOR_CONFIG[self.partner.name.lower()][self.processor.NAME.lower()]
+        expected = processor_config['sop_payment_page_url']
+        self.assertEqual(self.processor.client_side_payment_url, expected)
+
+    def test_get_template_name(self):
+        """ Verify the method returns the path to the client-side template. """
+        self.assertEqual(self.processor.get_template_name(), 'payment/cybersource.html')
 
     @responses.activate
     def test_request_apple_pay_authorization(self):

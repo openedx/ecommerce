@@ -139,6 +139,10 @@ PAYMENT_PROCESSOR_ERROR_PATH = '/checkout/error/'
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
         'cybersource': {
+            'profile_id': None,
+            'access_key': None,
+            'secret_key': None,
+            'payment_page_url': None,
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'send_level_2_3_details': True,
             'apple_pay_merchant_identifier': '',
@@ -147,6 +151,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'apple_pay_country_code': '',
         },
         'cybersource-rest': {
+            'profile_id': None,
+            'access_key': None,
+            'secret_key': None,
+            'payment_page_url': None,
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'send_level_2_3_details': True,
             'apple_pay_merchant_identifier': '',
