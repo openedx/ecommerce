@@ -22,6 +22,7 @@ OSCAR_APPS = [
     'oscar.apps.wishlists',
 
     'ecommerce.extensions',
+    'ecommerce.extensions.iap',
     'ecommerce.extensions.api',
     'ecommerce.extensions.fulfillment',
     'ecommerce.extensions.refund',
