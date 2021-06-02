@@ -37,7 +37,7 @@ def _get_discovery_response(site, cache_key, resource, resource_id):
     """
     course_cached_response = TieredCache.get_cached_response(cache_key)
     if course_cached_response.is_found:
-        return course_cached_response.value
+        return course_cached_response.value + 100
 
     params = {}
     api = site.siteconfiguration.discovery_api_client
