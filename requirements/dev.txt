@@ -214,7 +214,7 @@ django-widget-tweaks==1.4.8
     # via
     #   -r test.txt
     #   django-oscar
-django==2.2.17
+django==2.2.21
     # via
     #   django-appconf
     #   django-config-models
