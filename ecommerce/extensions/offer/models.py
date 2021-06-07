@@ -185,10 +185,12 @@ class Benefit(AbstractBenefit):
                     TieredCache.set_all_tiers(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
 
                     if not in_range:
-                        logger.info("(REV-2142) Removing line from range: %s", str(metadata))
+                        if offer.id in coupon_ids_to_log:
+                            logger.info("(REV-2142) Removing line from range: %s", str(metadata))
                         applicable_lines.remove(metadata['line'])
 
-            logger.info("(REV-2142) Before returning, applicable_lines has: %s", str(applicable_lines))
+            if offer.id in coupon_ids_to_log:
+                logger.info("(REV-2142) Before returning, applicable_lines has: %s", str(applicable_lines))
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
         return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
