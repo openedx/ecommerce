@@ -36,24 +36,32 @@ class BaseApi:
 class DiscoveryApi(BaseApi):
     api_url_root = DISCOVERY_API_URL_ROOT
 
-    def get_course_run(self, seat_type):
-        """ Returns a dict containing data for a current course run with the given seat type.
+    def get_course_runs(self, seat_type):
+        """ Returns a list of dicts containing data for current course runs with the given seat type.
 
-        The search endpoint is used to find an available course run. Ultimately, the data returned comes from the
-        course run detail endpoint.
+        The search endpoint is used to find available course runs. Ultimately, the data returned comes from the
+        course run detail endpoint called from get_course_run.
 
         Args:
             seat_type (str)
 
         Returns:
-            dict
+            list(dict)
         """
         results = self._client.search.course_runs.facets.get(
             selected_query_facets='availability_current', selected_facets='seat_types_exact:{}'.format(seat_type))
-        results = results['objects']['results']
-        # TODO Verify the course run exists on LMS and Otto. Some course runs are only present on Drupal.
-        # TODO Cache the result so we don't waste resources doing this work again. The search endpoint order is stable.
-        return self._client.course_runs(results[0]['key']).get()
+        return results['objects']['results']
+
+    def get_course_run(self, course_run):
+        """ Returns the details for a given course run.
+
+        Args:
+            course_run (str)
+
+        Returns:
+            dict
+        """
+        return self._client.course_runs(course_run).get()
 
 
 class EcommerceApi(BaseApi):

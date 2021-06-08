@@ -18,10 +18,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSeatPayment:
-    def get_verified_course_run(self):
-        """ Returns a course run data dict. """
-        return DiscoveryApi().get_course_run('verified')
-
     def checkout_with_credit_card(self, selenium, address):
         """
         Submits the credit card form hosted by the E-Commerce Service.
@@ -165,19 +161,49 @@ class TestSeatPayment:
 
         """
         LmsHelpers.login(selenium)
+        discovery_client = DiscoveryApi()
 
-        # Get the course run we want to purchase
-        course_run = self.get_verified_course_run()
-        verified_seat = self.get_verified_seat(course_run)
+        # REV-2189: The course runs we get back may not exist in ecommerce, or may not be able to be added to the
+        # basket (ex: upgrade time expired). We can't easily make that determination here, so we try this in a loop
+        # until we find one that works. This quick fix is made in the hope that this whole system is deprecated in the
+        # near future.
+        course_runs = discovery_client.get_course_runs('verified')
 
-        for address in addresses:
-            self.add_item_to_basket(selenium, verified_seat['sku'])
-            self.checkout_with_credit_card(selenium, address)
-            self.assert_browser_on_receipt_page(selenium)
+        assert len(course_runs) > 0
 
-            course_run_key = course_run['key']
-            self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
-            assert self.refund_orders_for_course_run(course_run_key)
+        # Use this to make sure that the tests actually ran and that we didn't accidentally skip it due to
+        # not finding a valid seat.
+        test_run_successfully = False
+
+        # Check up to 10 course runs to find a good one
+        for potential_course_run in course_runs[:10]:
+            course_run = discovery_client.get_course_run(potential_course_run['key']).get()
+            verified_seat = self.get_verified_seat(course_run)
+            try:
+                for address in addresses:
+                    # This is the line that will throw the TimeoutException if the sku isn't valid
+                    # for this test.
+                    self.add_item_to_basket(selenium, verified_seat['sku'])
+                    log.warning("%s, was added to the basket.", verified_seat['sku'])
+                    self.checkout_with_credit_card(selenium, address)
+                    self.assert_browser_on_receipt_page(selenium)
+
+                    course_run_key = course_run['key']
+                    self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
+                    assert self.refund_orders_for_course_run(course_run_key)
+
+                test_run_successfully = True
+
+                # We finished a test, stop trying course runs
+                break
+            except selenium.common.exceptions.TimeoutException as exc:
+                # We only want to continue on this particular error from add_item_to_basket.
+                if "No product is available" in exc.msg:
+                    log.warning("Failed to get a valid course run for SKU %s, continuing", verified_seat['sku'])
+                    continue
+                raise
+
+        assert test_run_successfully, "Unable to find a valid course run to test!"
 
     def test_verified_seat_payment_with_credit_card_payment_page(self, selenium):
         """
