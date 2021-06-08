@@ -130,7 +130,7 @@ class Benefit(AbstractBenefit):
             query = applicable_range.catalog_query
             applicable_lines = self._filter_for_paid_course_products(basket.all_lines(), applicable_range)
 
-            coupon_ids_to_log = [66492]  # REV-2142 Stage coupon id to test with
+            coupon_ids_to_log = [66492, 66502]  # REV-2142 Stage coupon ids to test with
             if offer.id in coupon_ids_to_log:
                 logger.info("(REV-2142) initial applicable_lines: %s", str(applicable_lines))
 
@@ -142,16 +142,16 @@ class Benefit(AbstractBenefit):
 
             if offer.id in coupon_ids_to_log:
                 logger.info('(REV-2142) checked _identify_uncached_product_identifiers for '
-                                'Basket: [%s], Offer: [%s], User: [%s], course_run_ids: [%s], course_uuids: [%s],'
-                                'query: [%s]'
-                                'applicable_lines: [%s]',
-                                basket.id,
-                                offer.id,
-                                basket.owner.id,
-                                str(course_run_ids),
-                                str(course_uuids),
-                                str(query),
-                                str(applicable_lines))
+                    'Basket: [%s], Offer: [%s], User: [%s], course_run_ids: [%s], course_uuids: [%s],'
+                    'query: [%s]'
+                    'applicable_lines: [%s]',
+                    basket.id,
+                    offer.id,
+                    basket.owner.id,
+                    str(course_run_ids),
+                    str(course_uuids),
+                    str(query),
+                    str(applicable_lines))
 
             if course_run_ids or course_uuids:
                 # Hit Discovery Service to determine if remaining courses and runs are in the range.
