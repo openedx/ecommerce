@@ -141,7 +141,8 @@ class Benefit(AbstractBenefit):
             )
 
             if offer.id in coupon_ids_to_log:
-                logger.info('(REV-2142) checked _identify_uncached_product_identifiers for '
+                logger.info(
+                    '(REV-2142) checked _identify_uncached_product_identifiers for '
                     'Basket: [%s], Offer: [%s], User: [%s], course_run_ids: [%s], course_uuids: [%s],'
                     'query: [%s]'
                     'applicable_lines: [%s]',
@@ -151,7 +152,8 @@ class Benefit(AbstractBenefit):
                     str(course_run_ids),
                     str(course_uuids),
                     str(query),
-                    str(applicable_lines))
+                    str(applicable_lines)
+                )
 
             if course_run_ids or course_uuids:
                 # Hit Discovery Service to determine if remaining courses and runs are in the range.
