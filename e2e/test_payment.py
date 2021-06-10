@@ -4,6 +4,7 @@ import datetime
 import logging
 import time
 
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
@@ -196,7 +197,7 @@ class TestSeatPayment:
 
                 # We finished a test, stop trying course runs
                 break
-            except selenium.common.exceptions.TimeoutException as exc:
+            except TimeoutException as exc:
                 # We only want to continue on this particular error from add_item_to_basket.
                 if "No product is available" in exc.msg:
                     log.warning("Failed to get a valid course run for SKU %s, continuing", verified_seat['sku'])
