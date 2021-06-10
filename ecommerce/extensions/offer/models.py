@@ -130,8 +130,17 @@ class Benefit(AbstractBenefit):
             query = applicable_range.catalog_query
             applicable_lines = self._filter_for_paid_course_products(basket.all_lines(), applicable_range)
 
-            coupon_ids_to_log = [66492, 66502]  # REV-2142 Stage coupon ids to test with
-            if offer.id in coupon_ids_to_log:
+            logger.info("(REV-2142) get_applicable_lines Basket: [%s], Offer: [%s]", basket.id, offer.id)
+            rev_2142_coupon_ids_to_log = [66492, 66502]  # REV-2142 Stage coupon ids to test with
+            rev_2142_basket_owners_to_log = [
+                'bjhstage', 'bjhstage2', 'bjhstage3', 'bjhstage4', 
+                'bjh-prod', 'bjh-prod2', 'bjh-prod3', 'bjh-prod4',
+            ]
+            rev_2142_logging_enabled = (
+                offer.id in rev_2142_coupon_ids_to_log or
+                basket.owner.username in rev_2142_basket_owners_to_log
+            )
+            if rev_2142_logging_enabled:
                 logger.info("(REV-2142) initial applicable_lines: %s", str(applicable_lines))
 
             site = basket.site
@@ -140,14 +149,15 @@ class Benefit(AbstractBenefit):
                 applicable_lines, site.domain, partner_code, query
             )
 
-            if offer.id in coupon_ids_to_log:
+            if rev_2142_logging_enabled:
                 logger.info(
                     '(REV-2142) checked _identify_uncached_product_identifiers for '
-                    'Basket: [%s], Offer: [%s], User: [%s], course_run_ids: [%s], course_uuids: [%s],'
+                    'Basket: [%s], Offer: [%s], User: [%s (%s)], course_run_ids: [%s], course_uuids: [%s],'
                     'query: [%s]'
                     'applicable_lines: [%s]',
                     basket.id,
                     offer.id,
+                    basket.owner.username,
                     basket.owner.id,
                     str(course_run_ids),
                     str(course_uuids),
@@ -177,7 +187,7 @@ class Benefit(AbstractBenefit):
                 for metadata in course_run_ids + course_uuids:
                     in_range = response[str(metadata['id'])]
 
-                    if offer.id in coupon_ids_to_log:
+                    if rev_2142_logging_enabled:
                         logger.info("(REV-2142) discovery response for id %s: %s", str(metadata['id']), str(in_range))
 
                     # Convert to int, because this is what memcached will return, and the request cache should return
@@ -187,11 +197,11 @@ class Benefit(AbstractBenefit):
                     TieredCache.set_all_tiers(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
 
                     if not in_range:
-                        if offer.id in coupon_ids_to_log:
+                        if rev_2142_logging_enabled:
                             logger.info("(REV-2142) Removing line from range: %s", str(metadata))
                         applicable_lines.remove(metadata['line'])
 
-            if offer.id in coupon_ids_to_log:
+            if rev_2142_logging_enabled:
                 logger.info("(REV-2142) Before returning, applicable_lines has: %s", str(applicable_lines))
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
         return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
