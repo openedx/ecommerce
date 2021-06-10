@@ -177,7 +177,7 @@ class TestSeatPayment:
 
         # Check up to 10 course runs to find a good one
         for potential_course_run in course_runs[:10]:
-            course_run = discovery_client.get_course_run(potential_course_run['key']).get()
+            course_run = discovery_client.get_course_run(potential_course_run['key'])
             verified_seat = self.get_verified_seat(course_run)
             try:
                 for address in addresses:
