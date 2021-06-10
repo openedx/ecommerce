@@ -47,7 +47,7 @@
                         <div class="depth depth-2 message-error-content">
                             <h3>{% trans "Your basket is empty" as tmsg %}{{ tmsg | force_escape }}</h3>
                             {% blocktrans asvar tmsg %}
-                                If you attempted to make a purchase, you have not been charged. Return to your {link_start}{link_middle}{homepage_url}dashboard{link_end} to try
+                                If you attempted to make a purchase, you have not been charged. Return to your {link_start}{homepage_url}{link_middle}dashboard{link_end} to try
                                 again, or {link_start}{homepage_url}{link_middle}contact {platform_name} Support{link_end}.
                             {% endblocktrans %}
                             {% interpolate_html tmsg link_start='<a href="'|safe support_url=support_url|safe platform_name=platform_name|safe link_end='</a>'|safe homepage_url=homepage_url|safe link_middle='">'|safe %}
