@@ -133,7 +133,7 @@ class Benefit(AbstractBenefit):
             logger.info("(REV-2142) get_applicable_lines Basket: [%s], Offer: [%s]", basket.id, offer.id)
             rev_2142_coupon_ids_to_log = [66492, 66502]  # REV-2142 Stage coupon ids to test with
             rev_2142_basket_owners_to_log = [
-                'bjhstage', 'bjhstage2', 'bjhstage3', 'bjhstage4', 
+                'bjhstage', 'bjhstage2', 'bjhstage3', 'bjhstage4',
                 'bjh-prod', 'bjh-prod2', 'bjh-prod3', 'bjh-prod4',
             ]
             rev_2142_logging_enabled = (
