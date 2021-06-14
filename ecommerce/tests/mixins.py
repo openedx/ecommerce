@@ -441,24 +441,6 @@ class LmsApiMockMixin:
         body = json.dumps(data)
         httpretty.register_uri(httpretty.GET, url, body=body, content_type=CONTENT_TYPE)
 
-    def mock_accounts_api_using_email(self, request, user):
-        """ Mock the account LMS API endpoint for a user.
-
-        Args:
-            request (WSGIRequest): The request from which the host URL is constructed.
-            user(User): User to mock.
-        """
-        url = '{host}/accounts?email={email}'.format(
-            host=request.site.siteconfiguration.build_lms_url('/api/user/v1'),
-            email=user.email,
-        )
-        data = [{
-            'id': user.id,
-            'username': user.username,
-        }]
-        body = json.dumps(data)
-        httpretty.register_uri(httpretty.GET, url, body=body, content_type=CONTENT_TYPE)
-
     def mock_bulk_lms_users_using_emails(self, request, users):
         """ Mock the account Bulk LMS API endpoint for users.
 
