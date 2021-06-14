@@ -713,6 +713,35 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if errors:
             raise DRFValidationError({'error': errors})
 
+    def add_extra_user_info(self, lms_users, user):
+        """
+        Update user dict to add lms_user_id and username from lms_users.
+        """
+        email = user['email']
+        lms_user = next((lms_user for lms_user in lms_users if lms_user['email'] == email), None)
+        if lms_user:
+            user['lms_user_id'] = lms_user['id']
+            user['username'] = lms_user['username']
+
+    def add_extra_user_info_in_assignments(self, assignments):
+        """
+        Update assignments to add lms_user_id and username using email.
+        """
+        emails = [assignment['user'] for assignment in assignments]
+        lms_users = User.get_bulk_lms_users_using_emails(self.request.site, emails)
+        for assignment in assignments:
+            user = assignment['user']
+            self.add_extra_user_info(lms_users, user)
+
+    def add_extra_user_info_in_users(self, users):
+        """
+        Update users to add lms_user_id and username using email.
+        """
+        emails = [user['email'] for user in users]
+        lms_users = User.get_bulk_lms_users_using_emails(self.request.site, emails)
+        for user in users:
+            self.add_extra_user_info(lms_users, user)
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def assign(self, request, pk):  # pylint: disable=unused-argument
@@ -729,21 +758,23 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         self._validate_email_fields(subject, greeting, closing)
 
-        serializer = CouponCodeAssignmentSerializer(
-            data=request.data,
-            context={
-                'coupon': coupon,
-                'subject': subject,
-                'greeting': greeting,
-                'closing': closing,
-                'template_id': template_id,
-                'sender_id': sender_id,
-                'site': request.site
-            }
-        )
+        assignments = request.data
+        context = {
+            'coupon': coupon,
+            'subject': subject,
+            'greeting': greeting,
+            'closing': closing,
+            'template_id': template_id,
+            'sender_id': sender_id,
+            'site': request.site
+        }
+        serializer = CouponCodeAssignmentSerializer(data=request.data, context=context)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            self.add_extra_user_info_in_users(assignments['users'])
+            serializer = CouponCodeAssignmentSerializer(data=assignments, context=context)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
@@ -821,29 +852,30 @@ class EnterpriseCouponViewSet(CouponViewSet):
         assignments = [
             dict(**assignment, do_not_email=do_not_email) for assignment in request.data.get('assignments')
         ]
+        context = {
+            'coupon': coupon,
+            'subject': subject,
+            'greeting': greeting,
+            'closing': closing,
+            'template_id': template_id,
+            'sender_id': sender_id,
+            'site': request.site
+        }
+        self.add_extra_user_info_in_assignments(assignments)
 
-        serializer = CouponCodeRevokeSerializer(
-            data=assignments,
-            many=True,
-            context={
-                'coupon': coupon,
-                'subject': subject,
-                'greeting': greeting,
-                'closing': closing,
-                'template_id': template_id,
-                'sender_id': sender_id,
-                'site': request.site
-            }
-        )
+        serializer = CouponCodeRevokeSerializer(data=assignments, many=True, context=context)
         if serializer.is_valid():
-            serializer.save()
+            self.add_extra_user_info_in_assignments(assignments)
+            serializer = CouponCodeRevokeSerializer(data=assignments, many=True, context=context)
+            if serializer.is_valid():
+                serializer.save()
 
-            # unsubscribe user from receiving nudge emails
-            CodeAssignmentNudgeEmails.unsubscribe_from_nudging(
-                map(lambda assignment: assignment['code'], assignments),
-                map(lambda assignment: assignment['user']['email'], assignments)
-            )
-            return Response(serializer.data, status=status.HTTP_200_OK)
+                # unsubscribe user from receiving nudge emails
+                CodeAssignmentNudgeEmails.unsubscribe_from_nudging(
+                    map(lambda assignment: assignment['code'], assignments),
+                    map(lambda assignment: assignment['user']['email'], assignments)
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -881,17 +913,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
             else:
                 raise serializers.ValidationError('Invalid code_filter specified: {}'.format(code_filter))
 
-            emails = [assignment['user_email'] for assignment in assignment_usages]
-            emails = list(set(emails))
-            lms_users = User.get_bulk_lms_users_using_emails(request.site, emails)
             assignments = []
             for assignment_usage in assignment_usages:
-                email = assignment_usage['user_email']
-                user = {'email': email}
-                lms_user = next((user for user in lms_users if user['email'] == email), None)
-                if lms_user:
-                    user['lms_user_id'] = lms_user['id']
-                    user['username'] = lms_user['username']
+                user = {'email': assignment_usage['user_email']}
                 assignments.append(
                     {
                         'user': user,
@@ -899,23 +923,23 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     }
                 )
 
-        serializer = CouponCodeRemindSerializer(
-            data=assignments,
-            many=True,
-            context={
-                'coupon': coupon,
-                'subject': subject,
-                'greeting': greeting,
-                'closing': closing,
-                'template_id': template_id,
-                'sender_id': sender_id,
-                'site': request.site,
-                'base_enterprise_url': base_enterprise_url,
-            }
-        )
+        context = {
+            'coupon': coupon,
+            'subject': subject,
+            'greeting': greeting,
+            'closing': closing,
+            'template_id': template_id,
+            'sender_id': sender_id,
+            'site': request.site,
+            'base_enterprise_url': base_enterprise_url,
+        }
+        serializer = CouponCodeRemindSerializer(data=assignments, many=True, context=context)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            self.add_extra_user_info_in_assignments(assignments)
+            serializer = CouponCodeRemindSerializer(data=assignments, many=True, context=context)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
