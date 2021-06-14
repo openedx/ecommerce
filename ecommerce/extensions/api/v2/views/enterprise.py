@@ -727,7 +727,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         Update assignments to add lms_user_id and username using email.
         """
-        emails = [assignment['user'] for assignment in assignments]
+        emails = [assignment['user']['email'] for assignment in assignments]
         lms_users = User.get_bulk_lms_users_using_emails(self.request.site, emails)
         for assignment in assignments:
             user = assignment['user']
@@ -768,7 +768,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             'sender_id': sender_id,
             'site': request.site
         }
-        serializer = CouponCodeAssignmentSerializer(data=request.data, context=context)
+        serializer = CouponCodeAssignmentSerializer(data=assignments, context=context)
         if serializer.is_valid():
             self.add_extra_user_info_in_users(assignments['users'])
             serializer = CouponCodeAssignmentSerializer(data=assignments, context=context)
