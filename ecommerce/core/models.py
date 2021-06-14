@@ -548,8 +548,8 @@ class User(AbstractUser):
         except Exception:  # pylint: disable=broad-except
             return None
 
-    @staticmethod
-    def get_lms_user_attribute_using_email(site, user_email, attribute='id'):
+    @classmethod
+    def get_lms_user_attribute_using_email(cls, site, user_email, attribute='id'):
         """Returns a lms_user attribute by query LMS using email address.
 
         Args:
@@ -562,14 +562,9 @@ class User(AbstractUser):
         """
         if user_email:
             try:
-                api = EdxRestApiClient(
-                    site.siteconfiguration.build_lms_url('/api/user/v1'),
-                    append_slash=False,
-                    jwt=site.siteconfiguration.access_token
-                )
-                response = api.accounts.get(email=user_email)
+                response = cls.get_bulk_lms_users_using_emails(site, [user_email])
                 return response[0][attribute]
-            except Exception:  # pylint: disable=broad-except
+            except (IndexError, KeyError):
                 log.exception('Failed to get attribute [%s] for email: [%s]', attribute, user_email)
         return None
 
