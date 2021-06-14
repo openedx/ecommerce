@@ -1248,7 +1248,7 @@ class EnterpriseCouponViewSetRbacTests(
         # Redeem a voucher without using the assignment endpoint
         self.use_voucher(coupon3.coupon_vouchers.first().vouchers.first(), self.user)
         self.mock_bulk_lms_users_using_emails(self.request, [{
-            'id': self.user.lms_user_id,
+            'lms_user_id': self.user.lms_user_id,
             'username': self.user.username,
             'email': self.user.email}
         ])
