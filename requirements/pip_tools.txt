@@ -6,10 +6,12 @@
 #
 click==8.0.1
     # via pip-tools
-pip-tools==5.5.0
-    # via
-    #   -c requirements/pins.txt
-    #   -r requirements/pip_tools.in
+pep517==0.10.0
+    # via pip-tools
+pip-tools==6.1.0
+    # via -r requirements/pip_tools.in
+toml==0.10.2
+    # via pep517
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
