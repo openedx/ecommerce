@@ -38,7 +38,7 @@ celery==4.4.7
     # via
     #   -c requirements/pins.txt
     #   edx-ecommerce-worker
-certifi==2020.12.5
+certifi==2021.5.30
     # via
     #   cybersource-rest-client-python
     #   requests
@@ -140,7 +140,7 @@ django-waffle==2.2.0
     #   edx-drf-extensions
 django-widget-tweaks==1.4.8
     # via django-oscar
-django==2.2.23
+django==2.2.24
     # via
     #   -r requirements/base.in
     #   django-appconf
@@ -192,7 +192,7 @@ edx-django-release-util==1.0.0
     # via -r requirements/base.in
 edx-django-sites-extensions==3.0.0
     # via -r requirements/base.in
-edx-django-utils==4.0.0
+edx-django-utils==4.1.0
     # via
     #   -r requirements/base.in
     #   django-config-models
@@ -223,7 +223,7 @@ extras==1.0.0
     #   testtools
 factory-boy==2.12.0
     # via django-oscar
-faker==8.2.1
+faker==8.8.0
     # via factory-boy
 fixtures==3.0.0
     # via
@@ -282,13 +282,13 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.in
-newrelic==6.4.0.157
+newrelic==6.4.1.158
     # via
     #   -r requirements/base.in
     #   edx-django-utils
 nose==1.3.7
     # via cybersource-rest-client-python
-oauthlib==3.1.0
+oauthlib==3.1.1
     # via
     #   requests-oauthlib
     #   social-auth-core
@@ -308,7 +308,7 @@ pbr==5.6.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.23
+phonenumbers==8.12.24
     # via
     #   django-oscar
     #   django-phonenumber-field
