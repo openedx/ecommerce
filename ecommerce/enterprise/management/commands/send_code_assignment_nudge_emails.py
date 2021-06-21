@@ -16,12 +16,14 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_uuid
 )
 from ecommerce.extensions.offer.constants import AUTOMATIC_EMAIL
+from ecommerce.extensions.voucher.utils import get_cached_voucher
 from ecommerce.programs.custom import get_model
 
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 CodeAssignmentNudgeEmailTemplates = get_model('offer', 'CodeAssignmentNudgeEmailTemplates')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
+Voucher = get_model('voucher', 'Voucher')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -93,6 +95,18 @@ class Command(BaseCommand):
             total_nudge_emails_count
         )
         for nudge_email in nudge_emails:
+            try:
+                voucher = get_cached_voucher(nudge_email.code)
+            except Voucher.DoesNotExist:
+                continue
+            if voucher.is_expired():
+                # unsubscribe the user to avoid sending any nudge in future regarding this same code assignment
+                CodeAssignmentNudgeEmails.unsubscribe_from_nudging(
+                    codes=[nudge_email.code],
+                    user_emails=[nudge_email.user_email]
+                )
+                continue
+
             # Get the formatted email body and subject on the bases of given code.
             email_body, email_subject = nudge_email.email_template.get_email_content(
                 nudge_email.user_email,
