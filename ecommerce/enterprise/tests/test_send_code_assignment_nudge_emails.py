@@ -6,6 +6,7 @@ import datetime
 import logging
 
 import mock
+import pytz
 from dateutil.relativedelta import relativedelta
 from django.core.management import call_command
 from django.utils import timezone
@@ -39,12 +40,12 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
         """
         super(SendCodeAssignmentNudgeEmailsTests, self).setUp()
         # Create a voucher with valid offer so we can get
-        voucher = VoucherFactory()
-        voucher.offers.add(EnterpriseOfferFactory(max_global_applications=98))
+        self.voucher = VoucherFactory()
+        self.voucher.offers.add(EnterpriseOfferFactory(max_global_applications=98))
 
         self.total_nudge_emails_for_today = 5
         self.nudge_emails = CodeAssignmentNudgeEmailsFactory.create_batch(
-            self.total_nudge_emails_for_today, code=voucher.code
+            self.total_nudge_emails_for_today, code=self.voucher.code
         )
         CodeAssignmentNudgeEmailsFactory(
             email_date=datetime.datetime.now() + relativedelta(days=1)
@@ -104,7 +105,7 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
         Test the send_enterprise_offer_limit_emails command
         """
         code = "dummy-code"
-        nudge_email_without_voucher = CodeAssignmentNudgeEmailsFactory(code=code)
+        CodeAssignmentNudgeEmailsFactory(code=code)
         log = self._assert_sent_count()
         log.check_present(
             (
@@ -113,15 +114,6 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
                 '[Code Assignment Nudge Email] Total count of Enterprise Nudge Emails that are scheduled for '
                 'today is {send_nudge_email_count}.'.format(
                     send_nudge_email_count=self.total_nudge_emails_for_today + 1
-                )
-            ),
-            (
-                MODEL_LOGGER_NAME,
-                'WARNING',
-                '[Code Assignment Nudge Email] Unable to send the email for user_email: {user_email}, code: '
-                '{code} because code does not have associated voucher.'.format(
-                    user_email=nudge_email_without_voucher.user_email,
-                    code=code
                 )
             ),
             (
@@ -144,3 +136,20 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
         self._assert_sent_count()
         # Check that a new email record for every email has been created now that the nudge emails are sent
         assert OfferAssignmentEmailSentRecord.objects.count() == self.total_nudge_emails_for_today
+
+    def test_nudge_email_with_expired_voucher(self):
+        """
+        Test that no nudge email is sent when voucher is expired and user is unsubscribed from receiving email.
+        """
+        self.voucher.end_datetime = datetime.datetime.now(pytz.UTC) - datetime.timedelta(days=1)
+        self.voucher.save(update_fields=['end_datetime'])
+        nudge_email = CodeAssignmentNudgeEmails.objects.all()
+        cmd_path = 'ecommerce.enterprise.management.commands.send_code_assignment_nudge_emails'
+        with mock.patch(cmd_path + '.send_code_assignment_nudge_email.delay') as mock_send_email:
+            mock_send_email.return_value = mock.Mock()
+            call_command('send_code_assignment_nudge_emails')
+            # assert that no emails were sent
+            assert mock_send_email.call_count == 0
+            assert nudge_email.filter(already_sent=True).count() == 0
+            # assert that nudge emails are unsubscribed if voucher is expired
+            assert nudge_email.filter(is_subscribed=False).count() == self.total_nudge_emails_for_today
