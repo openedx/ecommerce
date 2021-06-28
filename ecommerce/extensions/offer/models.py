@@ -176,9 +176,9 @@ class Benefit(AbstractBenefit):
                         applicable_lines.remove(metadata['line'])
 
             logger.info(
-                "Basket [%s] with offer [%s] has applicable lines: %s", 
-                basket.id, 
-                offer.id, 
+                "Basket [%s] with offer [%s] has applicable lines: %s",
+                basket.id,
+                offer.id,
                 applicable_lines
             )
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
