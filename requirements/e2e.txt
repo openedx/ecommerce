@@ -8,7 +8,7 @@ attrs==21.2.0
     # via
     #   -c requirements/base.txt
     #   pytest
-certifi==2020.12.5
+certifi==2021.5.30
     # via
     #   -c requirements/base.txt
     #   requests
@@ -32,12 +32,12 @@ django-waffle==2.2.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-django==2.2.23
+django==2.2.24
     # via
     #   -c requirements/base.txt
     #   django-crum
     #   edx-django-utils
-edx-django-utils==4.0.0
+edx-django-utils==4.1.0
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
@@ -50,11 +50,11 @@ idna==2.7
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   requests
-importlib-metadata==4.2.0
+importlib-metadata==4.6.0
     # via pytest-randomly
 more-itertools==8.8.0
     # via pytest
-newrelic==6.4.0.157
+newrelic==6.4.3.160
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
@@ -111,7 +111,7 @@ pytest==5.3.5
     #   pytest-selenium
     #   pytest-timeout
     #   pytest-variables
-python-dotenv==0.17.1
+python-dotenv==0.18.0
     # via -r requirements/e2e.in
 pytz==2016.10
     # via
@@ -147,7 +147,7 @@ stevedore==3.3.0
     #   edx-django-utils
 tenacity==6.3.1
     # via pytest-selenium
-urllib3==1.26.5
+urllib3==1.26.6
     # via
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
