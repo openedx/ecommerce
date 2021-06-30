@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 
 from django import forms
 from django.forms.utils import ErrorList
@@ -82,10 +83,12 @@ class ProgramOfferForm(forms.ModelForm):
     def save(self, commit=True):
         program_uuid = self.cleaned_data['program_uuid']
         site = self.request.site
+        current_date = str(datetime.today().strftime('%Y-%m-%d'))
 
         client = ProgramsApiClient(site.siteconfiguration.discovery_api_client, site.domain)
         program = client.get_program(program_uuid)
-        offer_name = _(u'Discount for the {program_title} {program_type} Program'.format(
+        offer_name = _(u'{current_date} Discount for the {program_title} {program_type} Program'.format(
+            current_date=current_date,
             program_title=program['title'],
             program_type=program['type']
         ))
