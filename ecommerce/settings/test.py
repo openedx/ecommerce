@@ -101,6 +101,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
+        'android-iap': {
+            'google_bundle_id': '',
+            'google_service_account_key_file': ''
+        }
     },
     'other': {
         'cybersource': {
@@ -140,6 +144,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
+        'android-iap': {
+            'google_bundle_id': '',
+            'google_service_account_key_file': ''
+        }
     }
 }
 

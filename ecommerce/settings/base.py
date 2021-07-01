@@ -814,6 +814,10 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'mode': 'sandbox',
             'receipt_url': '/checkout/receipt/'
         },
+        'android-iap': {
+            'google_bundle_id': '',
+            'google_service_account_key_file': ''
+        },
         'stripe': {
             'api_version': '2022-08-01; server_side_confirmation_beta=v1',
             'enable_telemetry': None,
