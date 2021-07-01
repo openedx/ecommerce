@@ -2,6 +2,7 @@
 
 
 import uuid
+from datetime import datetime
 
 import httpretty
 from oscar.core.loading import get_model
@@ -23,6 +24,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
             'program_uuid': uuid.uuid4(),
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 22,
+            'current_date': str(datetime.today().strftime('%Y-%m-%d')),
         }
         data.update(**kwargs)
         return data
@@ -83,8 +85,9 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
+        expected_name = data['current_date'] + ' Discount for the Test Program MicroMockers Program'
         self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'],
-                                             'Discount for the Test Program MicroMockers Program')
+                                             expected_name)
 
     @httpretty.activate
     def test_save_create_special_char_title(self):
@@ -96,8 +99,9 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
+        expected_name = data['current_date'] + ' Discount for the Spánish Program MicroMockers Program'
         self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'],
-                                             'Discount for the Spánish Program MicroMockers Program')
+                                             expected_name)
 
     @httpretty.activate
     def test_save_edit(self):
@@ -110,8 +114,9 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         form.save()
 
         offer.refresh_from_db()
+        expected_name = data['current_date'] + ' Discount for the Test Program MicroMockers Program'
         self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'],
-                                             'Discount for the Test Program MicroMockers Program')
+                                             expected_name)
 
     @httpretty.activate
     def test_save_without_commit(self):
@@ -133,8 +138,9 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
+        expected_name = data['current_date'] + ' Discount for the Test Program MicroMockers Program'
         self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'],
-                                             'Discount for the Test Program MicroMockers Program')
+                                             expected_name)
 
     def test_create_when_conditional_offer_with_uuid_exists(self):
         """
