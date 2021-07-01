@@ -171,6 +171,8 @@ urllib3==1.26.12
     #   -c requirements/constraints.txt
     #   requests
     #   selenium
+wcwidth==0.2.5
+    # via pytest
 zipp==3.8.1
     # via
     #   -c requirements/base.txt

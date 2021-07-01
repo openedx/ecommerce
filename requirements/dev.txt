@@ -4,6 +4,10 @@
 #
 #    make upgrade
 #
+aiohttp==3.7.4.post0
+    # via
+    #   -r requirements/test.txt
+    #   inapppy
 alabaster==0.7.12
     # via
     #   -r requirements/docs.txt
@@ -33,6 +37,7 @@ async-timeout==4.0.2
 attrs==22.1.0
     # via
     #   -r requirements/test.txt
+    #   aiohttp
     #   jsonschema
     #   pytest
     #   zeep
@@ -74,6 +79,10 @@ cached-property==1.5.2
     # via
     #   -r requirements/test.txt
     #   zeep
+cachetools==4.2.2
+    # via
+    #   -r requirements/test.txt
+    #   google-auth
 celery==4.4.7
     # via
     #   -r requirements/test.txt
@@ -93,6 +102,7 @@ cffi==1.15.1
 chardet==5.0.0
     # via
     #   -r requirements/test.txt
+    #   aiohttp
     #   cybersource-rest-client-python
     #   diff-cover
 charset-normalizer==2.1.1
@@ -369,6 +379,36 @@ gitdb==4.0.9
     # via gitpython
 gitpython==3.1.27
     # via transifex-client
+google-api-core==1.30.0
+    # via
+    #   -r requirements/test.txt
+    #   google-api-python-client
+google-api-python-client==2.11.0
+    # via
+    #   -r requirements/test.txt
+    #   inapppy
+google-auth-httplib2==0.1.0
+    # via
+    #   -r requirements/test.txt
+    #   google-api-python-client
+google-auth==1.32.1
+    # via
+    #   -r requirements/test.txt
+    #   google-api-core
+    #   google-api-python-client
+    #   google-auth-httplib2
+googleapis-common-protos==1.53.0
+    # via
+    #   -r requirements/test.txt
+    #   google-api-core
+httplib2==0.19.1
+    # via
+    #   -r requirements/test.txt
+    #   google-api-python-client
+    #   google-auth-httplib2
+    #   oauth2client
+httpretty==0.9.7
+    # via -r requirements/test.txt
 idna==2.7
     # via
     #   -r requirements/docs.txt
@@ -389,6 +429,8 @@ importlib-resources==5.9.0
     # via
     #   -r requirements/test.txt
     #   jsonschema
+inapppy==2.5.2
+    # via -r requirements/test.txt
 inflection==0.5.1
     # via
     #   -r requirements/test.txt
@@ -478,6 +520,15 @@ monotonic==1.6
     # via
     #   -r requirements/test.txt
     #   analytics-python
+more-itertools==8.8.0
+    # via
+    #   -r requirements/test.txt
+    #   pytest
+multidict==5.1.0
+    # via
+    #   -r requirements/test.txt
+    #   aiohttp
+    #   yarl
 mysqlclient==1.4.6
     # via -r requirements/test.txt
 naked==0.1.31
@@ -495,12 +546,20 @@ nose==1.3.7
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
+oauth2client==4.1.3
+    # via
+    #   -r requirements/test.txt
+    #   inapppy
 oauthlib==3.2.1
     # via
     #   -r requirements/test.txt
     #   getsmarter-api-clients
     #   requests-oauthlib
     #   social-auth-core
+openapi-codec==1.3.2
+    # via
+    #   -r requirements/test.txt
+    #   django-rest-swagger
 packaging==21.3
     # via
     #   -r requirements/docs.txt
@@ -558,6 +617,11 @@ polib==1.1.1
     #   edx-i18n-tools
 premailer==2.9.2
     # via -r requirements/test.txt
+protobuf==3.17.3
+    # via
+    #   -r requirements/test.txt
+    #   google-api-core
+    #   googleapis-common-protos
 psutil==5.9.2
     # via
     #   -r requirements/test.txt
@@ -573,11 +637,18 @@ py==1.11.0
     #   -r requirements/test.txt
     #   pytest
     #   tox
+pyasn1-modules==0.2.8
+    # via
+    #   -r requirements/test.txt
+    #   google-auth
+    #   oauth2client
 pyasn1==0.4.8
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
     #   ndg-httpsclient
+    #   oauth2client
+    #   pyasn1-modules
     #   rsa
     #   x509
 pycodestyle==2.9.1
@@ -638,6 +709,7 @@ pyparsing==3.0.9
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
+    #   httplib2
     #   packaging
 pypi==2.1
     # via
@@ -754,6 +826,8 @@ requests==2.28.1
     #   cybersource-rest-client-python
     #   edx-drf-extensions
     #   edx-rest-api-client
+    #   google-api-core
+    #   inapppy
     #   naked
     #   paypalrestsdk
     #   pyjwkest
@@ -842,10 +916,18 @@ six==1.16.0
     #   edx-ecommerce-worker
     #   edx-rbac
     #   edx-sphinx-theme
+    #   fixtures
+    #   google-api-core
+    #   google-api-python-client
+    #   google-auth
+    #   google-auth-httplib2
+    #   httpretty
     #   isodate
     #   libsass
+    #   oauth2client
     #   paramiko
     #   paypalrestsdk
+    #   protobuf
     #   purl
     #   pyjwkest
     #   python-dateutil
@@ -956,6 +1038,10 @@ traceback2==1.4.0
     #   cybersource-rest-client-python
 transifex-client==0.14.4
     # via -r requirements/dev.in
+typing-extensions==3.10.0.0
+    # via
+    #   -r requirements/test.txt
+    #   aiohttp
 typing==3.7.4.3
     # via
     #   -r requirements/test.txt
@@ -1024,6 +1110,10 @@ x509==0.1
     #   cybersource-rest-client-python
 xss-utils==0.4.0
     # via -r requirements/test.txt
+yarl==1.6.3
+    # via
+    #   -r requirements/test.txt
+    #   aiohttp
 zeep==4.1.0
     # via -r requirements/test.txt
 zipp==3.8.1
