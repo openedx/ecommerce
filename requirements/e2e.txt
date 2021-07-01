@@ -171,5 +171,7 @@ urllib3==1.26.8
     #   -c requirements/pins.txt
     #   requests
     #   selenium
+wcwidth==0.2.5
+    # via pytest
 zipp==3.7.0
     # via importlib-metadata
