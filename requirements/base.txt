@@ -38,7 +38,7 @@ celery==4.4.7
     # via
     #   -c requirements/pins.txt
     #   edx-ecommerce-worker
-certifi==2020.12.5
+certifi==2021.5.30
     # via
     #   cybersource-rest-client-python
     #   requests
@@ -93,7 +93,7 @@ django-compressor==2.4.1
     # via
     #   -r requirements/base.in
     #   django-libsass
-django-config-models==2.1.1
+django-config-models==2.1.2
     # via -r requirements/base.in
 django-cors-headers==3.7.0
     # via -r requirements/base.in
@@ -140,7 +140,7 @@ django-waffle==2.2.0
     #   edx-drf-extensions
 django-widget-tweaks==1.4.8
     # via django-oscar
-django==2.2.23
+django==2.2.24
     # via
     #   -r requirements/base.in
     #   django-appconf
@@ -192,7 +192,7 @@ edx-django-release-util==1.0.0
     # via -r requirements/base.in
 edx-django-sites-extensions==3.0.0
     # via -r requirements/base.in
-edx-django-utils==4.0.0
+edx-django-utils==4.1.0
     # via
     #   -r requirements/base.in
     #   django-config-models
@@ -204,7 +204,7 @@ edx-drf-extensions==6.5.0
     #   edx-rbac
 edx-ecommerce-worker==2.2.0
     # via -r requirements/base.in
-edx-opaque-keys==2.2.1
+edx-opaque-keys==2.2.2
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -223,7 +223,7 @@ extras==1.0.0
     #   testtools
 factory-boy==2.12.0
     # via django-oscar
-faker==8.2.1
+faker==8.9.1
     # via factory-boy
 fixtures==3.0.0
     # via
@@ -282,19 +282,19 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.in
-newrelic==6.4.0.157
+newrelic==6.4.3.160
     # via
     #   -r requirements/base.in
     #   edx-django-utils
 nose==1.3.7
     # via cybersource-rest-client-python
-oauthlib==3.1.0
+oauthlib==3.1.1
     # via
     #   requests-oauthlib
     #   social-auth-core
 openapi-codec==1.3.2
     # via django-rest-swagger
-packaging==20.9
+packaging==21.0
     # via bleach
 paramiko==2.7.2
     # via cybersource-rest-client-python
@@ -308,11 +308,11 @@ pbr==5.6.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.23
+phonenumbers==8.12.26
     # via
     #   django-oscar
     #   django-phonenumber-field
-pillow==8.2.0
+pillow==8.3.0
     # via django-oscar
 premailer==2.9.2
     # via -r requirements/base.in
@@ -364,7 +364,7 @@ pyparsing==2.4.7
     # via packaging
 pypi==2.1
     # via cybersource-rest-client-python
-pyrsistent==0.17.3
+pyrsistent==0.18.0
     # via jsonschema
 python-dateutil==2.8.1
     # via
@@ -515,7 +515,7 @@ unittest2==1.1.0
     # via testtools
 uritemplate==3.0.1
     # via coreapi
-urllib3==1.26.5
+urllib3==1.26.6
     # via
     #   -c requirements/pins.txt
     #   cybersource-rest-client-python
