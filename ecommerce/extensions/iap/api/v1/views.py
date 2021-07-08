@@ -3,12 +3,12 @@
 
 import logging
 import time
-from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.apps.partner import strategy
 from oscar.core.loading import get_class, get_model
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -40,7 +40,7 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
     """
     View that adds multiple products to a mobile user's basket.
     """
-    permission_classes = (LoginRedirectIfUnauthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
@@ -111,7 +111,7 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
     """
     View that adds verifies an in-app purchase and completes an order.
     """
-    permission_classes = (LoginRedirectIfUnauthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     @property
     def payment_processor(self):
