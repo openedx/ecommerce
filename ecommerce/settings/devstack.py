@@ -106,6 +106,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
+        'android-iap': {
+            'google_bundle_id': '<put-value-here>',
+            'google_service_account_key_file': '<put-value-here>'
+        }
     },
 }
 # END PAYMENT PROCESSING
