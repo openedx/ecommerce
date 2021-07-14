@@ -132,6 +132,7 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
+    'ecommerce.extensions.iap.processors.android_iap.AndroidIAP',
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
     'ecommerce.extensions.payment.processors.cybersource.CybersourceREST',
     'ecommerce.extensions.payment.processors.paypal.Paypal',
