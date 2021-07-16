@@ -6,7 +6,7 @@
 #
 filelock==3.0.12
     # via tox
-packaging==20.9
+packaging==21.0
     # via tox
 pluggy==0.13.1
     # via tox
