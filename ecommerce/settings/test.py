@@ -104,6 +104,9 @@ PAYMENT_PROCESSOR_CONFIG = {
         'android-iap': {
             'google_bundle_id': '<put-value-here>',
             'google_service_account_key_file': '<put-value-here>'
+        },
+        'ios-iap': {
+            'ios_bundle_id': '<put-value-here>',
         }
     },
     'other': {
@@ -145,8 +148,11 @@ PAYMENT_PROCESSOR_CONFIG = {
             'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
         'android-iap': {
-            'google_bundle_id': '<put-value-here>',
+            'google_bundle_id': 'org.edx.mobile',
             'google_service_account_key_file': '<put-value-here>'
+        },
+        'ios-iap': {
+            'ios_bundle_id': 'org.edx.mobile',
         }
     }
 }

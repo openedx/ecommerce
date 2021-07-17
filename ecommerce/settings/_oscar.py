@@ -133,6 +133,7 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
     'ecommerce.extensions.iap.processors.android_iap.AndroidIAP',
+    'ecommerce.extensions.iap.processors.ios_iap.IOSIAP',
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
     'ecommerce.extensions.payment.processors.cybersource.CybersourceREST',
     'ecommerce.extensions.payment.processors.paypal.Paypal',
@@ -184,6 +185,9 @@ PAYMENT_PROCESSOR_CONFIG = {
         'android-iap': {
             'google_bundle_id': '<put-value-here>',
             'google_service_account_key_file': '<put-value-here>'
+        },
+        'ios-iap': {
+            'ios_bundle_id': '<put-value-here>',
         }
     },
 }
