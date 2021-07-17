@@ -24,6 +24,7 @@ from ecommerce.extensions.basket.utils import basket_add_organization_attribute,
 from ecommerce.extensions.basket.views import BasketLogicMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
+from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.iap.api.v1.serializers import OrderSerializer
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
@@ -115,7 +116,10 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
 
     @property
     def payment_processor(self):
-        return AndroidIAP(self.request.site)
+        if self.request.data['payment_processor'] == IOSIAP.NAME:
+            return IOSIAP(self.request.site)
+        else:
+            return AndroidIAP(self.request.site)
 
     def _get_basket(self, request, basket_id):
         """
