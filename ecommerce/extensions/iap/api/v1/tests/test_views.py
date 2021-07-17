@@ -213,6 +213,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             'transactionId': 'transactionId.android.test.purchased',
             'productId': 'android.test.purchased',
             'purchaseToken': 'inapp:org.edx.mobile:android.test.purchased',
+            'payment_processor': 'android-iap',
             'basket_id': self.basket.id
         }
         self.order_placement_error_message = \
