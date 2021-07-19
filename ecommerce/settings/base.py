@@ -785,6 +785,13 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'error_url': '/checkout/error/',
             'mode': 'sandbox',
             'receipt_url': '/checkout/receipt/'
+        },
+        'android-iap': {
+            'google_bundle_id': '<put-value-here>',
+            'google_service_account_key_file': '<put-value-here>'
+        },
+        'ios-iap': {
+            'ios_bundle_id': '<put-value-here>',
         }
     }
 }
