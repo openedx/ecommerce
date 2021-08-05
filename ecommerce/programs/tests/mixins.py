@@ -1,5 +1,3 @@
-
-
 import json
 from decimal import Decimal
 
@@ -94,7 +92,7 @@ class ProgramTestMixin(DiscoveryTestMixin):
             api_url = get_lms_entitlement_api_url() + 'entitlements/'
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}?user={}'.format(api_url, username),
+            uri=f'{api_url}?user={username}',
             body=json.dumps([] if owned_products is None else owned_products),
             status=response_code,
             content_type='application/json'

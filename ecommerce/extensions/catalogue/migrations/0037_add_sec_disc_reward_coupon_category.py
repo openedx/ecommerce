@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Adds a new couple category that will be used to track rewards given
 to members of the community who make security disclosures.

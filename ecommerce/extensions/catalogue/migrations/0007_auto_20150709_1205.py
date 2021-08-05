@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import django.core.validators
 import django.db.models.deletion
 import oscar.core.validators

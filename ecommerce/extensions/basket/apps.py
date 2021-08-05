@@ -1,5 +1,3 @@
-
-
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 from oscar.apps.basket import apps

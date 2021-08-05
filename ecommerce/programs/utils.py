@@ -1,5 +1,3 @@
-
-
 import logging
 
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -32,10 +30,10 @@ def get_program(program_uuid, siteconfiguration):
         client = ProgramsApiClient(siteconfiguration.discovery_api_client, siteconfiguration.site.domain)
         response = client.get_program(str(program_uuid))
     except HttpNotFoundError:
-        msg = 'No program data found for {}'.format(program_uuid)
+        msg = f'No program data found for {program_uuid}'
         log.debug(msg)
     except (ReqConnectionError, SlumberBaseException, Timeout):
-        msg = 'Failed to retrieve program details for {}'.format(program_uuid)
+        msg = f'Failed to retrieve program details for {program_uuid}'
         log.debug(msg)
 
     return response

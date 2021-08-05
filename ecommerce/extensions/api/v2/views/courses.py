@@ -49,7 +49,7 @@ class CourseViewSet(NonDestroyableModelViewSet):
               paramType: query
               multiple: false
         """
-        return super(CourseViewSet, self).list(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         site_configuration = request.site.siteconfiguration
@@ -73,10 +73,10 @@ class CourseViewSet(NonDestroyableModelViewSet):
               paramType: query
               multiple: false
         """
-        return super(CourseViewSet, self).retrieve(request, *args, **kwargs)
+        return super().retrieve(request, *args, **kwargs)
 
     def get_serializer_context(self):
-        context = super(CourseViewSet, self).get_serializer_context()
+        context = super().get_serializer_context()
         context['include_products'] = bool(self.request.GET.get('include_products', False)) if self.request else False
         return context
 

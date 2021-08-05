@@ -1,9 +1,8 @@
-# encoding: utf-8
 """Contains the tests for migrate enterprise conditional offers command."""
 import logging
 
 from django.core.management import call_command
-from mock import patch
+from unittest.mock import patch
 from oscar.test.factories import (
     BenefitFactory,
     ConditionalOfferFactory,
@@ -35,7 +34,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         """
         Create test data.
         """
-        super(MigrateEnterpriseConditionalOffersTests, self).setUp()
+        super().setUp()
 
         # Set up vouchers that relate to a range with a enterprise_customer
         uuid = '123e4567-e89b-12d3-a456-426655440000'
@@ -53,7 +52,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         )
 
         for i in range(2):
-            code = '{}EntUserPercentBenefit'.format(i)
+            code = f'{i}EntUserPercentBenefit'
             voucher = VoucherFactory(code=code)
             offer_name = "Coupon [{}]-{}-{}".format(
                 voucher.pk,
@@ -68,7 +67,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
             voucher.offers.add(conditional_offer)
 
         for i in range(2):
-            code = '{}EntUserAbsoluteBenefit'.format(i)
+            code = f'{i}EntUserAbsoluteBenefit'
             voucher = VoucherFactory(code=code)
             offer_name = "Coupon [{}]-{}-{}".format(
                 voucher.pk,
@@ -92,7 +91,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         )
 
         for i in range(3):
-            code = '{}NoEntUserPercentBenefit'.format(i)
+            code = f'{i}NoEntUserPercentBenefit'
             voucher = VoucherFactory(code=code)
             offer_name = "Coupon [{}]-{}-{}".format(
                 voucher.pk,

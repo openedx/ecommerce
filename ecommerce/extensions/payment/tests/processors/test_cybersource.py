@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Unit tests of Cybersource payment processor implementation."""
 
 
@@ -7,7 +6,7 @@ from decimal import Decimal
 from unittest import SkipTest
 
 import ddt
-import mock
+from unittest import mock
 import requests
 import responses
 from CyberSource.api_client import ApiClient

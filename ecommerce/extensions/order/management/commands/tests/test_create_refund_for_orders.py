@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import json
 
 import httpretty
@@ -26,7 +24,7 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
     Test the `create_refund_for_orders` command.
     """
     def setUp(self):
-        super(CreateRefundForOrdersTests, self).setUp()
+        super().setUp()
         self.url = reverse('api:v2:manual-course-enrollment-order-list')
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
@@ -86,9 +84,9 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
             "enrollments": [
                 {
                     "lms_user_id": 10 + count,
-                    "username": "ma{}".format(count),
+                    "username": f"ma{count}",
                     "mode": "verified",
-                    "email": "ma{}@example.com".format(count),
+                    "email": f"ma{count}@example.com",
                     "course_run_key": self.course.id,
                     "discount_percentage": discount_percentage
                 }
@@ -131,7 +129,7 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
 
         self.assertFalse(Refund.objects.exists())
         call_command(
-            'create_refund_for_orders', '--order-numbers-file={}'.format(filename)
+            'create_refund_for_orders', f'--order-numbers-file={filename}'
         )
         self.assertTrue(Refund.objects.exists())
 
@@ -165,7 +163,7 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
         Order.objects.all().delete()
         self.assertFalse(Refund.objects.exists())
         call_command(
-            'create_refund_for_orders', '--order-numbers-file={}'.format(filename)
+            'create_refund_for_orders', f'--order-numbers-file={filename}'
         )
         self.assertFalse(Refund.objects.exists())
 
@@ -179,6 +177,6 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
         OrderLine.objects.all().delete()
         self.assertFalse(Refund.objects.exists())
         call_command(
-            'create_refund_for_orders', '--order-numbers-file={}'.format(filename)
+            'create_refund_for_orders', f'--order-numbers-file={filename}'
         )
         self.assertFalse(Refund.objects.exists())

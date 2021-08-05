@@ -1,5 +1,3 @@
-
-
 import datetime
 
 import ddt
@@ -21,7 +19,7 @@ Voucher = get_model('voucher', 'Voucher')
 @ddt.ddt
 class VoucherTests(TestCase):
     def setUp(self):
-        super(VoucherTests, self).setUp()
+        super().setUp()
         self.data = {
             'code': 'TESTCODE',
             'end_datetime': now() + datetime.timedelta(days=1),

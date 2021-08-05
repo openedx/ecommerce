@@ -42,7 +42,7 @@ class Paypal(BasePaymentProcessor):
         Raises:
             KeyError: If a required setting is not configured for this payment processor
         """
-        super(Paypal, self).__init__(site)
+        super().__init__(site)
 
         # Number of times payment execution is retried after failure.
         self.retry_attempts = PaypalProcessorConfiguration.get_solo().retry_attempts
@@ -89,7 +89,7 @@ class Paypal(BasePaymentProcessor):
             }, api=self.paypal_api)
 
             if web_profile.create():
-                msg = "Web Profile[%s] for locale %s created successfully" % (
+                msg = "Web Profile[{}] for locale {} created successfully".format(
                     web_profile.id,
                     web_profile.presentation.locale_code
                 )
@@ -119,7 +119,7 @@ class Paypal(BasePaymentProcessor):
         courseid = ''
         line_course = line.product.course
         if line_course:
-            courseid = "{}|".format(line_course.id)
+            courseid = f"{line_course.id}|"
         return courseid + line.product.title
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
@@ -205,7 +205,7 @@ class Paypal(BasePaymentProcessor):
                     break
                 if i < available_attempts:
                     logger.warning(
-                        u"Creating PayPal payment for basket [%d] was unsuccessful. Will retry.",
+                        "Creating PayPal payment for basket [%d] was unsuccessful. Will retry.",
                         basket.id,
                         exc_info=True
                     )
@@ -218,7 +218,7 @@ class Paypal(BasePaymentProcessor):
                         basket=basket
                     )
                     logger.error(
-                        u"%s [%d], %s [%d].",
+                        "%s [%d], %s [%d].",
                         "Failed to create PayPal payment for basket",
                         basket.id,
                         "PayPal's response recorded in entry",
@@ -230,13 +230,13 @@ class Paypal(BasePaymentProcessor):
             except:  # pylint: disable=bare-except
                 if i < available_attempts:
                     logger.warning(
-                        u"Creating PayPal payment for basket [%d] resulted in an exception. Will retry.",
+                        "Creating PayPal payment for basket [%d] resulted in an exception. Will retry.",
                         basket.id,
                         exc_info=True
                     )
                 else:
                     logger.exception(
-                        u"After %d retries, creating PayPal payment for basket [%d] still experienced exception.",
+                        "After %d retries, creating PayPal payment for basket [%d] still experienced exception.",
                         i,
                         basket.id
                     )
@@ -256,7 +256,7 @@ class Paypal(BasePaymentProcessor):
                 entry.id
             )
             raise GatewayError(
-                'Approval URL missing from PayPal payment response. See entry [{}] for details.'.format(entry.id))
+                f'Approval URL missing from PayPal payment response. See entry [{entry.id}] for details.')
 
         parameters = {
             'payment_page_url': approval_url,
@@ -333,7 +333,7 @@ class Paypal(BasePaymentProcessor):
         # payer_info.email may be None, see:
         # http://stackoverflow.com/questions/24090460/paypal-rest-api-return-empty-payer-info-for-non-us-accounts
         email = payment.payer.payer_info.email
-        label = 'PayPal ({})'.format(email) if email else 'PayPal Account'
+        label = f'PayPal ({email})' if email else 'PayPal Account'
 
         return HandledProcessorResponse(
             transaction_id=transaction_id,

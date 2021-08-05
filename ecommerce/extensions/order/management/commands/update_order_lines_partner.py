@@ -1,5 +1,3 @@
-
-
 import logging
 from textwrap import dedent
 
@@ -22,7 +20,7 @@ class Command(BaseCommand):
         ./manage.py update_order_lines_partner <SKU 1> <SKU 2> ... --partner edX
     """
     help = dedent(__doc__)
-    CONFIRMATION_PROMPT = u"You're going to update {count} order lines. Do you want to continue?"
+    CONFIRMATION_PROMPT = "You're going to update {count} order lines. Do you want to continue?"
 
     def add_arguments(self, parser):
         parser.add_argument('skus',
@@ -49,7 +47,7 @@ class Command(BaseCommand):
         try:
             partner = Partner.objects.get(short_code__iexact=partner_code)
         except Partner.DoesNotExist:
-            msg = 'No Partner exists for code {}.'.format(partner_code)
+            msg = f'No Partner exists for code {partner_code}.'
             logger.exception(msg)
             raise CommandError(msg)
 

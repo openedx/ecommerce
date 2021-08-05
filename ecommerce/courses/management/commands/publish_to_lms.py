@@ -33,7 +33,7 @@ class Command(BaseCommand):
         if not course_ids_file or not os.path.exists(course_ids_file):
             raise CommandError("Pass the correct absolute path to course ids file as --course_ids_file argument.")
 
-        with open(course_ids_file, 'r') as file_handler:
+        with open(course_ids_file) as file_handler:
             course_ids = file_handler.readlines()
             total_courses = len(course_ids)
             logger.info("Publishing %d courses.", total_courses)
@@ -45,14 +45,14 @@ class Command(BaseCommand):
                     if publishing_error:
                         failed += 1
                         logger.error(
-                            u"(%d/%d) Failed to publish %s: %s", index, total_courses, course_id, publishing_error
+                            "(%d/%d) Failed to publish %s: %s", index, total_courses, course_id, publishing_error
                         )
                     else:
-                        logger.info(u"(%d/%d) Successfully published %s.", index, total_courses, course_id)
+                        logger.info("(%d/%d) Successfully published %s.", index, total_courses, course_id)
                 except Course.DoesNotExist:
                     failed += 1
                     logger.error(
-                        u"(%d/%d) Failed to publish %s: Course does not exist.", index, total_courses, course_id
+                        "(%d/%d) Failed to publish %s: Course does not exist.", index, total_courses, course_id
                     )
         if failed:
             logger.error("Completed publishing courses. %d of %d failed.", failed, total_courses)

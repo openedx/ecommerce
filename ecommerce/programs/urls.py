@@ -1,5 +1,3 @@
-
-
 from django.conf.urls import include, url
 
 from ecommerce.programs import views

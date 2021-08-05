@@ -1,5 +1,3 @@
-
-
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -25,7 +23,7 @@ def find_orders_associated_with_course(user, course_id):
     """
     # Validate the course_id
     if not course_id or not course_id.strip():
-        raise ValueError('"{}" is not a valid course ID.'.format(course_id))
+        raise ValueError(f'"{course_id}" is not a valid course ID.')
 
     # If the user has no orders, we cannot possibly return a list of orders eligible for refund.
     if not user.orders.exists():

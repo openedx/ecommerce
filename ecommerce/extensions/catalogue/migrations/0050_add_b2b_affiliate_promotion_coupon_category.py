@@ -16,7 +16,7 @@ def create_new_categories(apps, schema_editor):
     """ Create new coupon categories """
     Category.skip_history_when_saving = True
     for category in NEW_CATEGORIES:
-        create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, category))
+        create_from_breadcrumbs(f'{COUPON_CATEGORY_NAME} > {category}')
 
 
 def remove_new_categories(apps, schema_editor):

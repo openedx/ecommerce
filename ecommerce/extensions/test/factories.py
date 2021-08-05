@@ -1,5 +1,3 @@
-
-
 import logging
 import uuid
 from datetime import datetime, timedelta
@@ -197,11 +195,11 @@ def prepare_enterprise_voucher(code='COUPONTEST', start_datetime=None, end_datet
 
 class VoucherFactory(BaseVoucherFactory):  # pylint: disable=function-redefined
     name = factory.Faker('word')
-    code = factory.Sequence(lambda n: 'VOUCHERCODE{number}'.format(number=n))
+    code = factory.Sequence(lambda n: f'VOUCHERCODE{n}')
 
 
 class ConditionalOfferFactory(BaseConditionalOfferFactory):  # pylint: disable=function-redefined
-    name = factory.Sequence(lambda n: 'ConditionalOffer {number}'.format(number=n))
+    name = factory.Sequence(lambda n: f'ConditionalOffer {n}')
 
 
 class AbsoluteDiscountBenefitWithoutRangeFactory(BenefitFactory):
@@ -308,7 +306,7 @@ class EnterpriseOfferFactory(ConditionalOfferFactory):
 
 class OfferAssignmentFactory(factory.DjangoModelFactory):
     offer = factory.SubFactory(EnterpriseOfferFactory)
-    code = factory.Sequence(lambda n: 'VOUCHERCODE{number}'.format(number=n))
+    code = factory.Sequence(lambda n: f'VOUCHERCODE{n}')
     user_email = factory.Sequence(lambda n: 'example_%s@example.com' % n)
 
     class Meta:

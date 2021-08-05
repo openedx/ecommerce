@@ -1,5 +1,3 @@
-
-
 import json
 from urllib.parse import urlencode
 from uuid import uuid4
@@ -54,7 +52,7 @@ class EnterpriseServiceMockMixin:
     )
 
     def setUp(self):
-        super(EnterpriseServiceMockMixin, self).setUp()
+        super().setUp()
         self.course_run = CourseFactory()
 
     def mock_enterprise_customer_list_api_get(self):
@@ -87,7 +85,7 @@ class EnterpriseServiceMockMixin:
         """
         enterprise_catalog_api_response = {
             "count": 60,
-            "next": "{}{}/?page=2".format(self.LEGACY_ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            "next": f"{self.LEGACY_ENTERPRISE_CATALOG_URL}{enterprise_catalog_uuid}/?page=2",
             "previous": None,
             "results": [
                 {
@@ -151,7 +149,7 @@ class EnterpriseServiceMockMixin:
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}{}/'.format(self.LEGACY_ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            uri=f'{self.LEGACY_ENTERPRISE_CATALOG_URL}{enterprise_catalog_uuid}/',
             body=enterprise_catalog_api_body,
             content_type='application/json'
         )
@@ -182,7 +180,7 @@ class EnterpriseServiceMockMixin:
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
+            uri=f'{self.ENTERPRISE_CUSTOMER_URL}{uuid}/',
             body=enterprise_customer_api_response_json,
             content_type='application/json'
         )
@@ -199,7 +197,7 @@ class EnterpriseServiceMockMixin:
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
+            uri=f'{self.ENTERPRISE_CUSTOMER_URL}{uuid}/',
             body=enterprise_customer_api_response_json,
             content_type='application/json',
             status=404,
@@ -302,7 +300,7 @@ class EnterpriseServiceMockMixin:
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}{}/contains_content_items/'.format(self.ENTERPRISE_CATALOG_URL, uuid),
+            uri=f'{self.ENTERPRISE_CATALOG_URL}{uuid}/contains_content_items/',
             body=json.dumps(catalog_contains_content_response),
             content_type='application/json'
         )
@@ -586,8 +584,8 @@ class EnterpriseServiceMockMixin:
                     'title': 'new catalog'
                 }
             ],
-            'next': "{}?enterprise_customer={}&page=3".format(self.ENTERPRISE_CATALOG_URL, enterprise_customer_uuid),
-            'previous': "{}?enterprise_customer={}".format(self.ENTERPRISE_CATALOG_URL, enterprise_customer_uuid),
+            'next': f"{self.ENTERPRISE_CATALOG_URL}?enterprise_customer={enterprise_customer_uuid}&page=3",
+            'previous': f"{self.ENTERPRISE_CATALOG_URL}?enterprise_customer={enterprise_customer_uuid}",
             'start': 0,
         }
 
@@ -595,7 +593,7 @@ class EnterpriseServiceMockMixin:
         body = raise_timeout if raise_exception else json.dumps(enterprise_catalog_api_response)
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}'.format(self.LEGACY_ENTERPRISE_CATALOG_URL),
+            uri=f'{self.LEGACY_ENTERPRISE_CATALOG_URL}',
             body=body,
             content_type='application/json'
         )
@@ -607,7 +605,7 @@ class EnterpriseDiscountTestMixin:
     """
 
     def setUp(self):
-        super(EnterpriseDiscountTestMixin, self).setUp()
+        super().setUp()
         self.discount_offer = self._create_enterprise_offer()
 
     @staticmethod

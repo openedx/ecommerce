@@ -47,7 +47,7 @@ class MarkOrdersStatusCompleteTests(TestCase):
 
         with LogCapture(LOGGER_NAME) as log_capture:
             call_command(
-                'mark_orders_status_complete', '--order-numbers-file={}'.format(self.filename)
+                'mark_orders_status_complete', f'--order-numbers-file={self.filename}'
             )
 
             log_capture.check_present(
@@ -75,7 +75,7 @@ class MarkOrdersStatusCompleteTests(TestCase):
         user = self.create_user()
         for __ in range(3):
             order = create_order(site=self.site, user=user, status=ORDER.FULFILLMENT_ERROR)
-            lines += '{}\n'.format(order.number)
+            lines += f'{order.number}\n'
 
         txt_file = SimpleUploadedFile(
             name='failed_orders.txt', content=lines.encode('utf-8'), content_type='text/plain'
@@ -116,7 +116,7 @@ class MarkOrdersStatusCompleteTests(TestCase):
         with LogCapture(LOGGER_NAME) as log_capture:
             call_command(
                 'mark_orders_status_complete',
-                '--order-numbers-file={}'.format(self.filename),
+                f'--order-numbers-file={self.filename}',
                 '--sleep-time=1'
             )
 

@@ -317,5 +317,5 @@ def django_db_setup(django_db_setup, django_db_blocker, django_db_use_migrations
         EcommerceFeatureRole.objects.get_or_create(name=ENTERPRISE_COUPON_ADMIN_ROLE)
 
         for category in DEFAULT_CATEGORIES:
-            create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, category))
+            create_from_breadcrumbs(f'{COUPON_CATEGORY_NAME} > {category}')
 

@@ -1,12 +1,10 @@
-
-
 import json
 from datetime import datetime
 from decimal import Decimal
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import pytz
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -41,7 +39,7 @@ User = get_user_model()
 @ddt.ddt
 class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     def setUp(self):
-        super(OrderListViewTests, self).setUp()
+        super().setUp()
         self.path = reverse('api:v2:order-list')
         self.user = self.create_user()
         self.token = self.generate_jwt_token_header(self.user)
@@ -62,7 +60,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     @httpretty.activate
     def test_oauth2_authentication(self):
         """Verify clients can authenticate with OAuth 2.0."""
-        auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
+        auth_header = f'Bearer {self.DEFAULT_TOKEN}'
 
         self.mock_user_info_response(username=self.user.username)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=auth_header)
@@ -218,7 +216,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 @override_settings(ECOMMERCE_SERVICE_WORKER_USERNAME='test-service-user')
 class OrderFulfillViewTests(TestCase):
     def setUp(self):
-        super(OrderFulfillViewTests, self).setUp()
+        super().setUp()
         ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
 
         # Use the ecommerce worker service user in order to cover
@@ -340,7 +338,7 @@ class OrderFulfillViewTests(TestCase):
         Verify that email_opt_in is set to the query param if given.
         """
         # Add email_opt_in to url
-        self.url += '?email_opt_in={expected_opt_in}'.format(expected_opt_in=expected_opt_in)
+        self.url += f'?email_opt_in={expected_opt_in}'
         with mock.patch.object(post_checkout, 'send', side_effect=post_checkout.send):
             self._assert_fulfillment_success()
             send_arguments = {
@@ -365,7 +363,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
     Test the `ManualCourseEnrollmentOrderViewSet` functionality.
     """
     def setUp(self):
-        super(ManualCourseEnrollmentOrderViewSetTests, self).setUp()
+        super().setUp()
         self.url = reverse('api:v2:manual-course-enrollment-order-list')
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
@@ -896,8 +894,8 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
             "enrollments": [
                 {
                     "lms_user_id": 10 + count,
-                    "username": "ma{}".format(count),
-                    "email": "ma{}@example.com".format(count),
+                    "username": f"ma{count}",
+                    "email": f"ma{count}@example.com",
                     "course_run_key": self.course.id,
                     "mode": mode,
                     "discount_percentage": discount_percentage,

@@ -1,5 +1,3 @@
-
-
 from django.urls import reverse
 from oscar.test.factories import OrderFactory
 

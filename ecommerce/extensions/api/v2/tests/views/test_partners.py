@@ -1,5 +1,3 @@
-
-
 from django.urls import reverse
 from oscar.core.loading import get_model
 
@@ -11,7 +9,7 @@ Partner = get_model('partner', 'Partner')
 
 class PartnerViewTest(TestCase):
     def setUp(self):
-        super(PartnerViewTest, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.dummy_partner = PartnerFactory(name='dummy')

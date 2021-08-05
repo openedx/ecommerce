@@ -21,7 +21,7 @@ class TestComprehensiveTheme(TestCase):
         """
         Clear static file finders cache and register cleanup methods.
         """
-        super(TestComprehensiveTheme, self).setUp()
+        super().setUp()
 
         # Clear the internal staticfiles caches, to get test isolation.
         staticfiles.finders.get_finder.cache_clear()
@@ -41,7 +41,7 @@ class TestComprehensiveTheme(TestCase):
         # Compress test theme templates
         call_command("compress")
 
-        super(TestComprehensiveTheme, cls).setUpClass()
+        super().setUpClass()
 
     def test_templates(self):
         """

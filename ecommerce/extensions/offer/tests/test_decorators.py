@@ -1,6 +1,4 @@
-
-
-from mock import patch
+from unittest.mock import patch
 from oscar.test.factories import ConditionalOfferFactory, ConditionFactory
 from waffle.models import Switch
 
@@ -14,7 +12,7 @@ from ecommerce.tests.testcases import TestCase
 class OfferDecoratorTests(DiscoveryTestMixin, TestCase):
 
     def setUp(self):
-        super(OfferDecoratorTests, self).setUp()
+        super().setUp()
         self.condition = ConditionFactory()
         self.offer = ConditionalOfferFactory(condition=self.condition, partner=self.partner)
         self.user = UserFactory()

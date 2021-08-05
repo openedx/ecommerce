@@ -1,5 +1,3 @@
-
-
 import abc
 import logging
 
@@ -23,7 +21,7 @@ class PaymentFailedView(TemplateView):
     template_name = 'oscar/checkout/payment_error.html'
 
     def get_context_data(self, **kwargs):
-        context = super(PaymentFailedView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update({
             'dashboard_url': get_lms_url(),
             'payment_support_email': self.request.site.siteconfiguration.payment_support_email
@@ -36,7 +34,7 @@ class SDNFailure(TemplateView):
     template_name = 'oscar/checkout/sdn_failure.html'
 
     def get_context_data(self, **kwargs):
-        context = super(SDNFailure, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['logout_url'] = self.request.site.siteconfiguration.build_lms_url('/logout')
         return context
 
@@ -58,7 +56,7 @@ class BasePaymentSubmitView(View):
             request.basket.id,
             request.basket.status
         )
-        return super(BasePaymentSubmitView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request):  # pylint: disable=unused-argument
         # NOTE (CCB): Ideally, we'd inherit FormView; however, doing so causes issues for children

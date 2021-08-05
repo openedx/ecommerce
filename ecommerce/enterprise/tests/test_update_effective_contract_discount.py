@@ -1,4 +1,3 @@
-# encoding: utf-8
 """
 Contains the tests for updating effective_contract_discount_percentage and discounted_price for order lines created by
 Manual Order Offers via the Enrollment API
@@ -25,7 +24,7 @@ class UpdateEffectiveContractDiscountTests(TestCase):
         """
         Create test data.
         """
-        super(UpdateEffectiveContractDiscountTests, self).setUp()
+        super().setUp()
 
         # Set up orders with a enterprise_customer
         self.enterprise_customer_uuid = '123e4567-e89b-12d3-a456-426655440000'
@@ -47,7 +46,7 @@ class UpdateEffectiveContractDiscountTests(TestCase):
         discount_percentage = 20
         call_command(
             'update_effective_contract_discount',
-            '--enterprise-customer={}'.format(self.enterprise_customer_uuid),
-            '--discount-percentage={}'.format(discount_percentage)
+            f'--enterprise-customer={self.enterprise_customer_uuid}',
+            f'--discount-percentage={discount_percentage}'
         )
         assert self.line.order == self.order

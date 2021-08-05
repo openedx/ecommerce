@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from edx_rbac.admin.forms import UserRoleAssignmentAdminForm
 
 from ecommerce.core.models import EcommerceFeatureRoleAssignment

@@ -1,8 +1,6 @@
-
-
 import ddt
 from django.core.management import call_command
-from mock import patch
+from unittest.mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 from testfixtures import LogCapture
@@ -41,7 +39,7 @@ class ChangeOffersPriorityTests(TestCase):
         ent_offer_count = 2
         for idx in range(ent_offer_count):
             factories.ConditionalOfferFactory(
-                name='ENT Offer {}'.format(idx), offer_type=ConditionalOffer.VOUCHER, priority=5
+                name=f'ENT Offer {idx}', offer_type=ConditionalOffer.VOUCHER, priority=5
             )
 
         offer_names = '1. ENT Offer 0\n2. ENT Offer 1'
@@ -60,7 +58,7 @@ class ChangeOffersPriorityTests(TestCase):
             with LogCapture(LOGGER_NAME) as log:
                 call_command('change_priority_of_offers')
                 if yes_no_value:
-                    log_msg = 'Operation completed. {} conditional offers updated successfully.'.format(ent_offer_count)
+                    log_msg = f'Operation completed. {ent_offer_count} conditional offers updated successfully.'
                 else:
                     log_msg = 'Operation canceled.'
 
@@ -84,7 +82,7 @@ class ChangeOffersPriorityTests(TestCase):
         ent_offer_count = 30
         for idx in range(ent_offer_count):
             factories.ConditionalOfferFactory(
-                name='ENT Offer {}'.format(idx), offer_type=ConditionalOffer.VOUCHER, priority=priority
+                name=f'ENT Offer {idx}', offer_type=ConditionalOffer.VOUCHER, priority=priority
             )
 
         update_offer_cnt = limit if offset + limit <= ent_offer_count else ent_offer_count - offset
@@ -106,7 +104,7 @@ class ChangeOffersPriorityTests(TestCase):
             mocked_yes_no.return_value = True
             with LogCapture(LOGGER_NAME) as log:
                 call_command('change_priority_of_offers', offset=offset, limit=limit, priority=priority)
-                log_msg = 'Operation completed. {} conditional offers updated successfully.'.format(update_offer_cnt)
+                log_msg = f'Operation completed. {update_offer_cnt} conditional offers updated successfully.'
                 expected.append(
                     (
                         LOGGER_NAME,

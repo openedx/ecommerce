@@ -138,7 +138,7 @@ class Command(BaseCommand):
             flunk = error_rate > threshold
 
         if flunk:
-            raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
+            raise CommandError(f"Errors in transactions: {exit_errors}")
         if self.ERRORS_DICT:
             logger.warning("Errors in transactions within threshold (%r): %s", threshold, exit_errors)
 
@@ -171,7 +171,7 @@ class Command(BaseCommand):
 
         error_count, exit_errors, error_rate = self.process_errors(orders)
         if error_count and error_rate > 0:
-            raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
+            raise CommandError(f"Errors in transactions: {exit_errors}")
 
     def validate_order(self, order):
         all_payment_events = order.payment_events

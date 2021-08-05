@@ -424,7 +424,7 @@ class CybersourceAuthorizeAPIView(
             request.basket.id,
             request.basket.status
         )
-        return super(CybersourceAuthorizeAPIView, self).post(request)
+        return super().post(request)
 
     def form_valid(self, form):
         self.data = form.cleaned_data

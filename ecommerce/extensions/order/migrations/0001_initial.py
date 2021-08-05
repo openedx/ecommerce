@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import django.db.models.deletion
 import oscar.models.fields
 import oscar.models.fields.autoslugfield
@@ -304,7 +301,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='shippingeventquantity',
-            unique_together=set([('event', 'line')]),
+            unique_together={('event', 'line')},
         ),
         migrations.AddField(
             model_name='shippingevent',
@@ -326,7 +323,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='paymenteventquantity',
-            unique_together=set([('event', 'line')]),
+            unique_together={('event', 'line')},
         ),
         migrations.AddField(
             model_name='paymentevent',

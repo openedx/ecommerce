@@ -1,5 +1,3 @@
-
-
 import warnings
 
 from django.conf import settings
@@ -50,7 +48,7 @@ def get_lms_courseware_url(course_run_id):
     Returns:
         string: The courseware URL.
     """
-    return get_lms_url('courses/{}/info'.format(course_run_id))
+    return get_lms_url(f'courses/{course_run_id}/info')
 
 
 def get_lms_course_about_url(course_key):
@@ -60,7 +58,7 @@ def get_lms_course_about_url(course_key):
     Returns:
         string: The course about page URL.
     """
-    return get_lms_url('courses/{}/about'.format(course_key))
+    return get_lms_url(f'courses/{course_key}/about')
 
 
 def get_lms_explore_courses_url():

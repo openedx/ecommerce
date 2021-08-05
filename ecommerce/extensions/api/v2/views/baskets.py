@@ -61,7 +61,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
     # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, request, *args, **kwargs):
-        return super(BasketCreateView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         """Add products to the authenticated user's basket.
@@ -322,10 +322,10 @@ class OrderByBasketRetrieveView(generics.RetrieveAPIView):
         # Change the basket ID to an order number.
         partner = request.site.siteconfiguration.partner
         kwargs['number'] = OrderNumberGenerator().order_number_from_basket_id(partner, kwargs['basket_id'])
-        return super(OrderByBasketRetrieveView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def filter_queryset(self, queryset):
-        queryset = super(OrderByBasketRetrieveView, self).filter_queryset(queryset)
+        queryset = super().filter_queryset(queryset)
         user = self.request.user
 
         # Non-staff users should only see their own orders
@@ -499,7 +499,7 @@ class BasketCalculateView(generics.GenericAPIView):
         # If we have a basket owner, ensure they have an LMS user id
         try:
             if basket_owner:
-                called_from = u'calculation of basket total'
+                called_from = 'calculation of basket total'
                 basket_owner.add_lms_user_id('ecommerce_missing_lms_user_id_calculate_basket_total', called_from)
         except MissingLmsUserIdException:
             return self._report_bad_request(

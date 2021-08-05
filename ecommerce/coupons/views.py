@@ -1,5 +1,3 @@
-
-
 import logging
 
 import unicodecsv as csv
@@ -102,7 +100,7 @@ class CouponAppView(StaffOnlyMixin, TemplateView):
     template_name = 'coupons/coupon_app.html'
 
     def get_context_data(self, **kwargs):
-        context = super(CouponAppView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['admin'] = 'coupon'
         return context
 
@@ -125,7 +123,7 @@ class CouponOfferView(TemplateView):
         if not valid_voucher:
             return {'error': msg, 'hide_error_message': hide_error_message}
 
-        context_data = super(CouponOfferView, self).get_context_data(**kwargs)
+        context_data = super().get_context_data(**kwargs)
         context_data.update(get_enterprise_customer_consent_failed_context_data(self.request, voucher))
 
         if context_data and 'error' not in context_data:
@@ -141,7 +139,7 @@ class CouponOfferView(TemplateView):
     @method_decorator(login_required_for_credit)
     def get(self, request, *args, **kwargs):
         """Get method for coupon redemption page."""
-        return super(CouponOfferView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
 
 class CouponRedeemView(EdxOrderPlacementMixin, APIView):
@@ -168,7 +166,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         try:
             voucher = Voucher.objects.get(code=code)
         except Voucher.DoesNotExist:
-            msg = 'No voucher found with code {code}'.format(code=code)
+            msg = f'No voucher found with code {code}'
             return render(request, template_name, {'error': _(msg)})
 
         try:
@@ -306,7 +304,7 @@ class EnrollmentCodeCsvView(View):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
-        return super(EnrollmentCodeCsvView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, number):
         """
@@ -343,11 +341,11 @@ class EnrollmentCodeCsvView(View):
         if request.user != order.user and not request.user.is_staff:
             raise PermissionDenied
 
-        file_name = 'Enrollment code CSV order num {}'.format(order.number)
+        file_name = f'Enrollment code CSV order num {order.number}'
         file_name = '{filename}.csv'.format(filename=slugify(file_name))
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=file_name)
+        response['Content-Disposition'] = f'attachment; filename={file_name}'
 
         redeem_url = get_ecommerce_url(reverse('coupons:offer'))
         voucher_field_names = ('Code', 'Redemption URL', 'Name Of Employee', 'Date Of Distribution', 'Employee Email')
@@ -365,7 +363,7 @@ class EnrollmentCodeCsvView(View):
             for voucher in order_line_voucher.vouchers.all():
                 voucher_writer.writerow({
                     voucher_field_names[0]: voucher.code,
-                    voucher_field_names[1]: '{url}?code={code}'.format(url=redeem_url, code=voucher.code)
+                    voucher_field_names[1]: f'{redeem_url}?code={voucher.code}'
                 })
             writer.writerow([])
         return response

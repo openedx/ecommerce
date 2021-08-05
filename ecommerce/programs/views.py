@@ -1,5 +1,3 @@
-
-
 import logging
 
 from django.contrib import messages
@@ -21,12 +19,12 @@ class ProgramOfferViewMixin(StaffOnlyMixin):
     model = ConditionalOffer
 
     def get_context_data(self, **kwargs):
-        context = super(ProgramOfferViewMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['admin'] = 'program_offers'
         return context
 
     def get_queryset(self):
-        return super(ProgramOfferViewMixin, self).get_queryset().filter(
+        return super().get_queryset().filter(
             partner=self.request.site.siteconfiguration.partner,
             condition__program_uuid__isnull=False,
             offer_type=ConditionalOffer.SITE
@@ -38,12 +36,12 @@ class ProgramOfferProcessFormViewMixin(ProgramOfferViewMixin):
     success_message = _('Program offer updated!')
 
     def get_form_kwargs(self):
-        kwargs = super(ProgramOfferProcessFormViewMixin, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs.update({'request': self.request})
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(ProgramOfferProcessFormViewMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update({
             'editing': False,
         })
@@ -66,7 +64,7 @@ class ProgramOfferUpdateView(ProgramOfferProcessFormViewMixin, UpdateView):
     template_name = 'programs/programoffer_form.html'
 
     def get_context_data(self, **kwargs):
-        context = super(ProgramOfferUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update({
             'editing': True,
             'program': get_program(self.object.condition.program_uuid,
@@ -79,7 +77,7 @@ class ProgramOfferListView(ProgramOfferViewMixin, ListView):
     template_name = 'programs/programoffer_list.html'
 
     def get_context_data(self, **kwargs):
-        context = super(ProgramOfferListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         # TODO: In the future, we should optimize our API calls, pulling the program data in as few calls as possible.
         offers = []

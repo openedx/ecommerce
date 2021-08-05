@@ -92,7 +92,7 @@ class RefundCreateView(generics.CreateAPIView):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            raise BadRequestException('User "{}" does not exist.'.format(username))
+            raise BadRequestException(f'User "{username}" does not exist.')
 
         # Ensure the user has an LMS user id
         try:
@@ -100,12 +100,12 @@ class RefundCreateView(generics.CreateAPIView):
                 requested_by = request.user.id
             else:  # pragma: no cover
                 requested_by = None
-            called_from = u'refund processing for user {user_id} requested by {requested_by}'.format(
+            called_from = 'refund processing for user {user_id} requested by {requested_by}'.format(
                 user_id=user.id,
                 requested_by=requested_by)
             user.add_lms_user_id('ecommerce_missing_lms_user_id_refund', called_from)
         except MissingLmsUserIdException:
-            raise BadRequestException('User {} does not have an LMS user id.'.format(user.id))
+            raise BadRequestException(f'User {user.id} does not have an LMS user id.')
 
         # Try and create a refund for the passed in order
         if entitlement_uuid:
@@ -113,7 +113,7 @@ class RefundCreateView(generics.CreateAPIView):
                 order = user.orders.get(number=order_number)
                 refunds = create_refunds_for_entitlement(order, entitlement_uuid)
             except (Order.DoesNotExist, OrderLine.DoesNotExist):
-                raise BadRequestException('Order {} does not exist.'.format(order_number))
+                raise BadRequestException(f'Order {order_number} does not exist.')
         else:
             if not course_id:
                 raise BadRequestException('No course_id specified.')
@@ -154,7 +154,7 @@ class RefundProcessView(generics.UpdateAPIView):
         action = request.data.get('action', '').lower()
 
         if action not in (APPROVE, DENY, APPROVE_PAYMENT_ONLY):
-            raise ParseError('The action [{}] is not valid.'.format(action))
+            raise ParseError(f'The action [{action}] is not valid.')
 
         with transaction.atomic():
             refund = self.get_object()

@@ -241,7 +241,7 @@ class Theme:
         return hash((self.theme_dir_name, self.path))
 
     def __str__(self):
-        return u"<Theme: {name} at '{path}'>".format(name=self.name, path=self.path)
+        return f"<Theme: {self.name} at '{self.path}'>"
 
     def __repr__(self):
         return self.__str__()

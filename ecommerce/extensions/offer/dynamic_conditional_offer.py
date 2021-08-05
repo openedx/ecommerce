@@ -68,7 +68,7 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
             return ZERO_DISCOUNT
         percent = self.benefit_class_value
         if percent:
-            application_result = super(DynamicPercentageDiscountBenefit, self).apply(
+            application_result = super().apply(
                 basket,
                 condition,
                 offer,

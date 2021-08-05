@@ -1,9 +1,8 @@
-# encoding: utf-8
 """
 Contains the tests for updating offer assignment email bounce status command.
 """
 
-import mock
+from unittest import mock
 from django.core.management import call_command
 
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_BOUNCED
@@ -23,9 +22,9 @@ class UpdateOfferAssignmentEmailBounceStatusTests(TestCase):
         """
         Setup the test data
         """
-        super(UpdateOfferAssignmentEmailBounceStatusTests, self).setUp()
+        super().setUp()
         for x in range(3):
-            assignment = OfferAssignmentFactory(code='test-code{}'.format(x), user_email='test{}@example.com'.format(x))
+            assignment = OfferAssignmentFactory(code=f'test-code{x}', user_email=f'test{x}@example.com')
             assignment.status = OFFER_ASSIGNED
             assignment.save()
 

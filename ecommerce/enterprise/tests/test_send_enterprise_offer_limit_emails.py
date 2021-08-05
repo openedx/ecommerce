@@ -1,11 +1,10 @@
-# encoding: utf-8
 """
 Contains the tests for sending the enterprise offer limit emails command.
 """
 import datetime
 import logging
 
-import mock
+from unittest import mock
 from django.core.management import call_command
 from testfixtures import LogCapture
 
@@ -28,7 +27,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
         """
         Create test data.
         """
-        super(SendEnterpriseOfferLimitEmailsTests, self).setUp()
+        super().setUp()
 
         EnterpriseOfferFactory(max_global_applications=10)
         EnterpriseOfferFactory(max_discount=100)

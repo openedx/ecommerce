@@ -1,9 +1,7 @@
-
-
 import json
 
 import httpretty
-import mock
+from unittest import mock
 from django.contrib.messages import constants as MSG
 from django.urls import reverse
 from requests import Timeout
@@ -20,7 +18,7 @@ LOGGER_NAME = 'ecommerce.extensions.dashboard.users.views'
 
 class UserDetailViewTests(DashboardViewTestMixin, TestCase):
     def setUp(self):
-        super(UserDetailViewTests, self).setUp()
+        super().setUp()
         self.switch = toggle_switch('user_enrollments_on_dashboard', True)
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
@@ -90,5 +88,5 @@ class UserDetailViewTests(DashboardViewTestMixin, TestCase):
             logger.check((
                 LOGGER_NAME,
                 'ERROR',
-                'An unexpected error occurred while retrieving enrollments for [{}].'.format(self.user.username)
+                f'An unexpected error occurred while retrieving enrollments for [{self.user.username}].'
             ))

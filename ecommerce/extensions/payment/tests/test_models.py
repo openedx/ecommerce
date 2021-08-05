@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
@@ -18,7 +16,7 @@ from ecommerce.tests.testcases import TestCase
 
 class SDNCheckFailureTests(TestCase):
     def setUp(self):
-        super(SDNCheckFailureTests, self).setUp()
+        super().setUp()
         self.full_name = 'Keyser Söze'
         self.username = 'UnusualSuspect'
         self.country = 'US'
@@ -42,7 +40,7 @@ class SDNCheckFailureTests(TestCase):
 
 class EnterpriseContractMetadataTests(TestCase):
     def setUp(self):
-        super(EnterpriseContractMetadataTests, self).setUp()
+        super().setUp()
         self.ecm = EnterpriseContractMetadata()
 
     def test_validate_fixed_value_good(self):
@@ -242,7 +240,7 @@ class SDNFallbackMetadataTests(TestCase):
 class SDNFallbackDataTests(TestCase):
 
     def setUp(self):
-        super(SDNFallbackDataTests, self).setUp()
+        super().setUp()
         self.sdn_metadata = factories.SDNFallbackMetadataFactory.create(import_state="New")
 
     def test_fields(self):

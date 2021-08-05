@@ -1,5 +1,4 @@
-# coding=utf-8
-import mock
+from unittest import mock
 from django.conf import settings
 from django.test import override_settings
 from mock_django import mock_signal_receiver
@@ -24,9 +23,9 @@ SourceType = get_model('payment', 'SourceType')
 
 class RefundTestMixin(DiscoveryTestMixin):
     def setUp(self):
-        super(RefundTestMixin, self).setUp()
+        super().setUp()
         self.course = CourseFactory(
-            id=u'edX/DemoX/Demo_Course', name=u'edX Demó Course', partner=self.partner
+            id='edX/DemoX/Demo_Course', name='edX Demó Course', partner=self.partner
         )
         self.honor_product = self.course.create_or_update_seat('honor', False, 0)
         self.verified_product = self.course.create_or_update_seat('verified', True, 10)

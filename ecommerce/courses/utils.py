@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
@@ -68,7 +66,7 @@ def get_course_detail(site, course_resource_id):
     resource = "courses"
     cache_key = get_cache_key(
         site_domain=site.domain,
-        resource="{}-{}".format(resource, course_resource_id)
+        resource=f"{resource}-{course_resource_id}"
     )
     return _get_discovery_response(site, cache_key, resource, course_resource_id)
 
@@ -87,7 +85,7 @@ def get_course_run_detail(site, course_run_key):
     resource = "course_runs"
     cache_key = get_cache_key(
         site_domain=site.domain,
-        resource="{}-{}".format(resource, course_run_key)
+        resource=f"{resource}-{course_run_key}"
     )
     return _get_discovery_response(site, cache_key, resource, course_run_key)
 
@@ -121,7 +119,7 @@ def get_course_catalogs(site, resource_id=None):
     resource = "catalogs"
     cache_key = get_cache_key(
         site_domain=site.domain,
-        resource=resource if resource_id is None else "{}-{}".format(resource, resource_id)
+        resource=resource if resource_id is None else f"{resource}-{resource_id}"
     )
     return _get_discovery_response(site, cache_key, 'catalogs', resource_id)
 
@@ -137,6 +135,6 @@ def get_certificate_type_display_value(certificate_type):
     }
 
     if certificate_type not in display_values:
-        raise ValueError('Certificate Type [{}] not found.'.format(certificate_type))
+        raise ValueError(f'Certificate Type [{certificate_type}] not found.')
 
     return display_values[certificate_type]

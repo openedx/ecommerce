@@ -77,7 +77,7 @@ class Command(BaseCommand):
         if options['file_from_database']:
             order_numbers_file = self.get_file_from_database()
         else:
-            order_numbers_file = options[str('order_numbers_file')]
+            order_numbers_file = options['order_numbers_file']
             if not order_numbers_file or not os.path.exists(order_numbers_file):
                 raise CommandError(
                     'Pass the correct absolute path to order numbers file as --order-numbers-file argument.'
@@ -95,11 +95,11 @@ class Command(BaseCommand):
         order_numbers_file.close()
 
         logger.info(
-            u'[Mark Orders Status Complete] Execution of command mark orders status complete is successful.\n'
-            u'Total orders received: %d\n'
-            u'Orders marked as completed: %d\n'
-            u'Failed orders: %s\n'
-            u'Skipped orders: %s\n',
+            '[Mark Orders Status Complete] Execution of command mark orders status complete is successful.\n'
+            'Total orders received: %d\n'
+            'Orders marked as completed: %d\n'
+            'Failed orders: %s\n'
+            'Skipped orders: %s\n',
             total_orders,
             total_orders - (len(failed_orders) + len(skipped_orders)),
             ', '.join(failed_orders),
@@ -124,8 +124,8 @@ class Command(BaseCommand):
 
         total_orders = len(order_numbers)
         logger.info(
-            u'[Mark Orders Status Complete] '
-            u'Starting mark order status as complete process for %d orders.', total_orders
+            '[Mark Orders Status Complete] '
+            'Starting mark order status as complete process for %d orders.', total_orders
         )
         for index, order_number in enumerate(order_numbers, start=1):
             try:
@@ -142,14 +142,14 @@ class Command(BaseCommand):
             except Exception as e:  # pylint: disable=broad-except
                 failed_orders.append(order_number)
                 logger.exception(
-                    u'[Mark Orders Status Complete] %d/%d '
-                    u'Failed to change status for order %s. %s', index, total_orders, order_number, str(e)
+                    '[Mark Orders Status Complete] %d/%d '
+                    'Failed to change status for order %s. %s', index, total_orders, order_number, str(e)
                 )
 
             if sleep_time:
                 logger.info(
-                    u'[Mark Orders Status Complete] '
-                    u'Sleeping for %s seconds', sleep_time
+                    '[Mark Orders Status Complete] '
+                    'Sleeping for %s seconds', sleep_time
                 )
                 time.sleep(sleep_time)
 

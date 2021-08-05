@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Unit tests of Invoice payment processor implementation."""
 
 

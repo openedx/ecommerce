@@ -1,7 +1,7 @@
 """Tests of the service health endpoint."""
 
 
-import mock
+from unittest import mock
 from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
 from django.db import DatabaseError
@@ -131,7 +131,7 @@ class LogoutViewTests(TestCase):
         self.assert_authentication_status(True)
 
         qs = 'next=/test/'
-        response = self.client.get('{url}?{qs}'.format(url=self.get_logout_url(), qs=qs))
+        response = self.client.get(f'{self.get_logout_url()}?{qs}')
         self.assert_authentication_status(False)
 
         # NOTE: The querystring parameters SHOULD be ignored

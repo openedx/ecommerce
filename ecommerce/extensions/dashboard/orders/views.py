@@ -1,5 +1,3 @@
-
-
 from django.contrib import messages
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -42,7 +40,7 @@ class OrderListView(FilterFieldsMixin, CoreOrderListView):
         return super(CoreOrderListView, self).dispatch(request, *args, **kwargs)  # pylint: disable=bad-super-call
 
     def get_queryset(self):
-        queryset = super(OrderListView, self).get_queryset()
+        queryset = super().get_queryset()
 
         # Note (CCB): We set self.form here because the super method does not always pass request.GET
         # to the form constructor. This results in the form not being populated when re-rendered.

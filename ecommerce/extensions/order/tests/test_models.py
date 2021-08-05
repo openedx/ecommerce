@@ -1,5 +1,3 @@
-
-
 import ddt
 from oscar.test import factories
 
@@ -12,7 +10,7 @@ from ecommerce.tests.testcases import TestCase
 @ddt.ddt
 class OrderTests(TestCase):
     def setUp(self):
-        super(OrderTests, self).setUp()
+        super().setUp()
         self.order = create_order()
 
     @ddt.data(ORDER.OPEN, ORDER.FULFILLMENT_ERROR)

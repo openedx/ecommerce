@@ -1,5 +1,3 @@
-
-
 from django import template
 
 from ecommerce.enterprise import utils

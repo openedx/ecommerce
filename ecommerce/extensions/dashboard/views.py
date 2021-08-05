@@ -1,5 +1,3 @@
-
-
 from oscar.apps.dashboard.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 
 
@@ -65,7 +63,7 @@ class FilterFieldsMixin:
         return {field: details for (field, details) in self.get_filter_fields().items() if details['exposed']}
 
     def get_context_data(self, **kwargs):
-        context = super(FilterFieldsMixin, self).get_context_data(**kwargs)
-        context['exposed_field_ids'] = ['id_{}'.format(field) for field in self.exposed_fields().keys()]
+        context = super().get_context_data(**kwargs)
+        context['exposed_field_ids'] = [f'id_{field}' for field in self.exposed_fields().keys()]
 
         return context

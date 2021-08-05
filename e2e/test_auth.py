@@ -1,5 +1,3 @@
-
-
 from selenium.common.exceptions import NoSuchElementException
 
 from e2e.config import LMS_URL_ROOT, MARKETING_URL_ROOT

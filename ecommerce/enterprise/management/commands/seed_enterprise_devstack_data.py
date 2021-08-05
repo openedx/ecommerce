@@ -150,7 +150,7 @@ class Command(BaseCommand):
             "end_datetime": str(now() + datetime.timedelta(days=10)),
             "benefit_value": 100
         }
-        url = '{}/enterprise/coupons/'.format(ecommerce_api_url)
+        url = f'{ecommerce_api_url}/enterprise/coupons/'
         response = requests.post(url, json=request_obj, headers=self.headers)
         return response.json()
 
@@ -161,12 +161,12 @@ class Command(BaseCommand):
         enterprise_customer_uuid = options['enterprise_customer']
         self.site = SiteConfiguration.objects.first()
 
-        ecommerce_api_url = '{}/api/v2'.format(self.site.build_ecommerce_url())
+        ecommerce_api_url = f'{self.site.build_ecommerce_url()}/api/v2'
         enterprise_api_url = self.site.enterprise_api_url
         enterprise_catalog_api_url = self.site.enterprise_catalog_api_url + 'enterprise-catalogs'
 
-        enterprise_customer_request_url = '{}enterprise-customer/'.format(enterprise_api_url)
-        enterprise_catalog_request_url = '{}enterprise_catalogs/'.format(enterprise_api_url)
+        enterprise_customer_request_url = f'{enterprise_api_url}enterprise-customer/'
+        enterprise_catalog_request_url = f'{enterprise_api_url}enterprise_catalogs/'
 
         # Set up request headers with JWT access token
         self.headers = self.get_headers()

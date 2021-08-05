@@ -1,9 +1,7 @@
-
-
 import ddt
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from mock import patch
+from unittest.mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 from testfixtures import LogCapture
@@ -33,12 +31,12 @@ class RemovePartnerOffersTests(TestCase):
     def test_no_offer_found(self):
         """Test that command logs no offer found."""
         with LogCapture(LOGGER_NAME) as log:
-            call_command('remove_partner_offers', '--partner={}'.format(self.PARTNER_CODE))
+            call_command('remove_partner_offers', f'--partner={self.PARTNER_CODE}')
             log.check(
                 (
                     LOGGER_NAME,
                     'INFO',
-                    'No offer found for partner [{}].'.format(self.PARTNER_CODE)
+                    f'No offer found for partner [{self.PARTNER_CODE}].'
                 )
             )
 
@@ -55,7 +53,7 @@ class RemovePartnerOffersTests(TestCase):
         offer_range.save()
         second_offer_range.save()
 
-        offer_names = '1. {offer} \n 2. {second_offer} '.format(offer=offer.name, second_offer=second_offer.name)
+        offer_names = f'1. {offer.name} \n 2. {second_offer.name} '
         expected = [
             (
                 LOGGER_NAME,
@@ -70,7 +68,7 @@ class RemovePartnerOffersTests(TestCase):
         with patch(self.YES_NO_PATCH_LOCATION) as mocked_yes_no:
             mocked_yes_no.return_value = yes_no_value
             with LogCapture(LOGGER_NAME) as log:
-                call_command('remove_partner_offers', '--partner={}'.format(self.PARTNER_CODE))
+                call_command('remove_partner_offers', f'--partner={self.PARTNER_CODE}')
                 if yes_no_value:
                     log_msg = '2 conditional offers removed successfully.'
                 else:

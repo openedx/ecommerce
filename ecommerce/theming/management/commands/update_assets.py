@@ -244,7 +244,7 @@ def compile_sass(sass_source_dir, css_destination_dir, lookup_paths, **kwargs):
 
     if not sass_source_dir.isdir():
         logger.warning("Sass dir '%s' does not exist.", sass_source_dir)
-        raise ValueError("Sass dir '{dir}' must be a valid directory.".format(dir=sass_source_dir))
+        raise ValueError(f"Sass dir '{sass_source_dir}' must be a valid directory.")
     if not css_destination_dir.isdir():
         # If css destination directory does not exist, then create one
         css_destination_dir.mkdir_p()

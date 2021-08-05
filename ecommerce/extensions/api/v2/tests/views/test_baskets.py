@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import datetime
 import json
 import urllib
@@ -9,7 +6,7 @@ from decimal import Decimal
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
@@ -72,7 +69,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
     MOCK_ACCESS_TOKEN = False
 
     def setUp(self):
-        super(BasketCreateViewTests, self).setUp()
+        super().setUp()
 
         self.paid_product = factories.ProductFactory(
             structure='child',
@@ -85,7 +82,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         factories.ProductFactory(
             structure='child',
             parent=self.base_product,
-            title=u'Papier-mâché',
+            title='Papier-mâché',
             stockrecords__partner_sku=self.ALTERNATE_FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
             stockrecords__partner__short_code='otto',
@@ -289,7 +286,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
 class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
     def setUp(self):
-        super(BasketViewSetTests, self).setUp()
+        super().setUp()
         self.path = reverse('api:v2:basket-list')
         self.user = self.create_user(is_staff=True)
         self.token = self.generate_jwt_token_header(self.user)
@@ -302,7 +299,7 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     @httpretty.activate
     def test_oauth2_authentication(self):
         """Verify clients can authenticate with OAuth 2.0."""
-        auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
+        auth_header = f'Bearer {self.DEFAULT_TOKEN}'
 
         self.mock_user_info_response(username=self.user.username)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=auth_header)
@@ -375,7 +372,7 @@ class OrderByBasketRetrieveViewTests(OrderDetailViewTestMixin, TestCase):
 
 class BasketDestroyViewTests(TestCase):
     def setUp(self):
-        super(BasketDestroyViewTests, self).setUp()
+        super().setUp()
         self.basket = BasketFactory()
         self.url = reverse('api:v2:baskets:destroy', kwargs={'basket_id': self.basket.id})
 
@@ -399,7 +396,7 @@ class BasketDestroyViewTests(TestCase):
 
 class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
     def setUp(self):
-        super(BasketCalculateViewTests, self).setUp()
+        super().setUp()
         self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories=[])
         self.path = reverse('api:v2:baskets:calculate')
         self.range = factories.RangeFactory(includes_all_products=True)
@@ -443,7 +440,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         discount_value = 10.00
         benefit = factories.BenefitFactory(type=Benefit.PERCENTAGE, range=self.range, value=discount_value)
         condition = factories.ConditionFactory(value=3, range=self.range, type=Condition.COVERAGE)
-        factories.ConditionalOfferFactory(name=u'Test Offer', benefit=benefit, condition=condition,
+        factories.ConditionalOfferFactory(name='Test Offer', benefit=benefit, condition=condition,
                                           offer_type=ConditionalOffer.SITE,
                                           start_datetime=datetime.datetime.now() - datetime.timedelta(days=1),
                                           end_datetime=datetime.datetime.now() + datetime.timedelta(days=2))
@@ -473,7 +470,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
         self.mock_user_data(self.user.username)
 
-        response = self.client.get(self.url + '&bundle={}'.format(program_uuid))
+        response = self.client.get(self.url + f'&bundle={program_uuid}')
         expected = {
             'total_incl_tax_excl_discounts': self.product_total,
             'total_incl_tax': self.product_total,
@@ -491,7 +488,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         """
         products, program_uuid = self._create_program_with_courses_and_offer()
         url = self._generate_sku_url(products, self.user.username)
-        url += '&bundle={}'.format(program_uuid)
+        url += f'&bundle={program_uuid}'
 
         response = self.client.get(url)
         expected = {
@@ -536,7 +533,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
     def test_basket_calculate_percentage_coupon(self):
         """ Verify successful basket calculation when passing a voucher """
         voucher, _ = prepare_voucher(_range=self.range)
-        response = self.client.get(self.url + '&code={code}'.format(code=voucher.code))
+        response = self.client.get(self.url + f'&code={voucher.code}')
 
         expected = {
             'total_incl_tax_excl_discounts': self.product_total,
@@ -552,7 +549,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         discount = 5
         voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=discount)
 
-        response = self.client.get(self.url + '&code={code}'.format(code=voucher.code))
+        response = self.client.get(self.url + f'&code={voucher.code}')
 
         expected = {
             'total_incl_tax_excl_discounts': self.product_total,
@@ -572,14 +569,14 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
     @httpretty.activate
     def test_basket_calculate_by_staff_user_own_username(self):
         """Verify a staff user passing their own username gets a response about themself"""
-        response = self.client.get(self.url + '&username={username}'.format(username=self.user.username))
+        response = self.client.get(self.url + f'&username={self.user.username}')
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate
     def test_basket_calculate_missing_lms_user_id(self):
         """Verify a staff user passing a username for a user with a missing LMS user id fails"""
         user_without_id = self.create_user(lms_user_id=None)
-        response = self.client.get(self.url + '&username={username}'.format(username=user_without_id.username))
+        response = self.client.get(self.url + f'&username={user_without_id.username}')
         self.assertEqual(response.status_code, 400)
 
     @override_switch(ALLOW_MISSING_LMS_USER_ID, active=True)
@@ -587,7 +584,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
     def test_basket_calculate_missing_lms_user_id_allow_missing(self):
         """Verify a staff user passing a username for a user with a missing LMS user id succeeds if the switch is on"""
         user_without_id = self.create_user(lms_user_id=None)
-        response = self.client.get(self.url + '&username={username}'.format(username=user_without_id.username))
+        response = self.client.get(self.url + f'&username={user_without_id.username}')
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate
@@ -678,7 +675,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         different_user = self.create_user(username='different_user', is_staff=False)
 
         products = self._get_program_verified_seats(program)
-        url = self._generate_sku_url(products, username=different_user.username) + '&bundle={}'.format(program_uuid)
+        url = self._generate_sku_url(products, username=different_user.username) + f'&bundle={program_uuid}'
         enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
         self.mock_user_data(different_user.username, owned_products=enrollment)
 
@@ -890,7 +887,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         nonstaffuser = self.create_user(is_staff=False)
         self.request.user = nonstaffuser
         self.client.login(username=nonstaffuser.username, password=self.password)
-        response = self.client.get(self.url + '&username={username}'.format(username=nonstaffuser.username))
+        response = self.client.get(self.url + f'&username={nonstaffuser.username}')
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate
@@ -900,7 +897,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         differentuser = self.create_user(username='ImDifferentYeahImDifferent', is_staff=False)
         self.request.user = nonstaffuser
         self.client.login(username=nonstaffuser.username, password=self.password)
-        response = self.client.get(self.url + '&username={username}'.format(username=differentuser.username))
+        response = self.client.get(self.url + f'&username={differentuser.username}')
         self.assertEqual(response.status_code, 403)
 
     @mock.patch('ecommerce.extensions.basket.models.Basket.add_product', mock.Mock(side_effect=Exception))
@@ -910,7 +907,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=5)
 
         with self.assertRaises(Exception):
-            self.client.get(self.url + '&code={code}'.format(code=voucher.code))
+            self.client.get(self.url + f'&code={voucher.code}')
             self.assertTrue(mock_logger.called)
 
     def _create_program_with_courses_and_offer(self):
@@ -958,7 +955,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         )
         products = self._get_program_verified_seats(program)
         url = self._generate_sku_url(products, username=None)
-        url += '&bundle={}'.format(program_uuid)
+        url += f'&bundle={program_uuid}'
         return products, url
 
     def _generate_sku_url(self, products, username=None, add_query_params=True):
@@ -978,11 +975,11 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
             {'sku': sku_list},
             True
         )
-        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        url = f'{self.path}?{qs}'
 
         if add_query_params:
             if username:
-                url += '&username={username}'.format(username=username)
+                url += f'&username={username}'
             else:
                 url += '&is_anonymous=tRuE'
 

@@ -1,6 +1,4 @@
-
-
-from mock import patch
+from unittest.mock import patch
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.models import SegmentClient
@@ -16,7 +14,7 @@ class RefundTrackingTests(RefundTestMixin, TransactionTestCase):
     """Tests verifying the behavior of refund tracking."""
 
     def setUp(self):
-        super(RefundTrackingTests, self).setUp()
+        super().setUp()
         self.user = UserFactory(lms_user_id=6179)
         self.refund = create_refunds([self.create_order()], self.course.id)[0]
 

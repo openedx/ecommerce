@@ -1,5 +1,3 @@
-
-
 import json
 
 from django.contrib.auth.models import Permission
@@ -22,7 +20,7 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
     detail_path = 'api:v2:stockrecords-detail'
 
     def setUp(self):
-        super(StockRecordViewSetTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(id='edX/DemoX/Demo_Course', name='Demo Course', partner=self.partner)

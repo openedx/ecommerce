@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.conf.urls import include, url
 
@@ -36,5 +34,5 @@ urlpatterns = [
 ]
 
 for payment_processor_name, urls_module in settings.EXTRA_PAYMENT_PROCESSOR_URLS.items():
-    processor_url = url(r'^{}/'.format(payment_processor_name), include((urls_module, payment_processor_name)))
+    processor_url = url(fr'^{payment_processor_name}/', include((urls_module, payment_processor_name)))
     urlpatterns.append(processor_url)

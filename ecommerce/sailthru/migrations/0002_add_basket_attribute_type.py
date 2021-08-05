@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.db import migrations
 
 from ecommerce.sailthru.signals import SAILTHRU_CAMPAIGN

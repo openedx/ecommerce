@@ -1,5 +1,3 @@
-
-
 import waffle
 from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
@@ -17,7 +15,7 @@ class LineInlineExtended(LineInline):
     raw_id_fields = ['stockrecord', 'product', ]
 
     def get_queryset(self, request):
-        queryset = super(LineInlineExtended, self).get_queryset(request)
+        queryset = super().get_queryset(request)
         queryset = queryset.select_related('partner', 'stockrecord', 'product', )
         return queryset
 
@@ -39,7 +37,7 @@ class OrderAdminExtended(OrderAdmin):
             self.message_user(request, msg, level=messages.WARNING)
             return Order.objects.none()
 
-        queryset = super(OrderAdminExtended, self).get_queryset(request)
+        queryset = super().get_queryset(request)
         queryset = queryset.select_related('partner', 'site', 'user', 'basket', )
         return queryset
 

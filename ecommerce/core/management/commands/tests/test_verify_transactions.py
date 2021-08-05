@@ -56,7 +56,7 @@ class VerifyTransactionsTest(TestCase):
         try:
             call_command('verify_transactions')
         except CommandError as e:
-            self.fail("Failed to verify transactions when no errors were expected. {}".format(e))
+            self.fail(f"Failed to verify transactions when no errors were expected. {e}")
 
     def test_threshold(self):
         """ Test verify_transactions only fails if there are too many anomolies """
@@ -84,12 +84,12 @@ class VerifyTransactionsTest(TestCase):
         try:
             call_command('verify_transactions', '--threshold=1')  # allow 1 anomoly
         except CommandError as e:
-            self.fail("Failed to verify transactions when no failure was expected. {}".format(e))
+            self.fail(f"Failed to verify transactions when no failure was expected. {e}")
 
         try:
             call_command('verify_transactions', '--threshold=0.25')  # 1-in-4 should be just on the line
         except CommandError as e:
-            self.fail("Failed to verify transactions when no failure was expected. {}".format(e))
+            self.fail(f"Failed to verify transactions when no failure was expected. {e}")
 
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions', '--threshold=0.2')
@@ -112,7 +112,7 @@ class VerifyTransactionsTest(TestCase):
         try:
             call_command('verify_transactions')
         except CommandError as e:
-            self.fail("Failed to verify transactions when no errors were expected. {}".format(e))
+            self.fail(f"Failed to verify transactions when no errors were expected. {e}")
 
     def test_zero_dollar_order(self):
         """ Verify zero dollar orders are not flagged as errors """
@@ -122,7 +122,7 @@ class VerifyTransactionsTest(TestCase):
         try:
             call_command('verify_transactions')
         except CommandError as e:
-            self.fail("Failed to verify transactions when no errors were expected. {}".format(e))
+            self.fail(f"Failed to verify transactions when no errors were expected. {e}")
         finally:
             self.order.total_incl_tax = total_incl_tax_before
             self.order.save()
@@ -144,7 +144,7 @@ class VerifyTransactionsTest(TestCase):
         try:
             call_command('verify_transactions')
         except CommandError as e:
-            self.fail("Failed to verify transactions when no errors were expected. {}".format(e))
+            self.fail(f"Failed to verify transactions when no errors were expected. {e}")
         finally:
             self.product.product_class = self.seat_product_class
             self.product.save()
@@ -210,7 +210,7 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment.id), exception)
         self.assertIn('"amount": 90.0', exception)
-        self.assertIn('"amount": {}'.format(amount), exception)
+        self.assertIn(f'"amount": {amount}', exception)
 
     def test_totals_mismatch_support(self):
         """ Verify errors thrown when payment amount is greater

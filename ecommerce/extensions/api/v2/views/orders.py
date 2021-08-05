@@ -61,7 +61,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = OrderFilter
 
     def filter_queryset(self, queryset):
-        queryset = super(OrderViewSet, self).filter_queryset(queryset)
+        queryset = super().filter_queryset(queryset)
 
         username = self.request.query_params.get('username')
         user = self.request.user
@@ -423,7 +423,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             logger.error(
                 '[Manual Order Creation Failure] Missing required enrollment data. Message: %s', missing_params
             )
-            raise ValidationError('Missing required enrollment data: {}'.format(missing_params))
+            raise ValidationError(f'Missing required enrollment data: {missing_params}')
 
         if mode not in paid_modes:
             raise ValidationError('Course mode should be paid')
@@ -474,7 +474,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         }
 
         offer, __ = ConditionalOffer.objects.get_or_create(
-            name='Manual Course Enrollment Order Offer for enterprise {}'.format(enterprise_customer_uuid),
+            name=f'Manual Course Enrollment Order Offer for enterprise {enterprise_customer_uuid}',
             defaults=offer_kwargs
         )
         if sales_force_id and offer.sales_force_id != sales_force_id:

@@ -1,5 +1,3 @@
-
-
 import uuid
 
 import ddt
@@ -8,7 +6,7 @@ from django.conf import settings
 from django.http.response import HttpResponse
 from django.test import RequestFactory
 from edx_django_utils.cache import TieredCache
-from mock import patch
+from unittest.mock import patch
 from oscar.core.loading import get_class
 from oscar.test.factories import BasketFactory, VoucherFactory
 
@@ -51,7 +49,7 @@ TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 @httpretty.activate
 class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
     def setUp(self):
-        super(EnterpriseUtilsTests, self).setUp()
+        super().setUp()
         self.learner = self.create_user(is_staff=True)
         self.client.login(username=self.learner.username, password=self.password)
 
@@ -228,7 +226,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         for user if request has jwt and user has proper role
         """
         mock_decode_jwt.return_value = {
-            'roles': ['{}:some-uuid'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE)]
+            'roles': [f'{SYSTEM_ENTERPRISE_LEARNER_ROLE}:some-uuid']
         }
         assert get_enterprise_id_for_current_request_user_from_jwt() == 'some-uuid'
 
@@ -239,7 +237,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         context is missing
         """
         mock_decode_jwt.return_value = {
-            'roles': ['{}'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE)]
+            'roles': [f'{SYSTEM_ENTERPRISE_LEARNER_ROLE}']
         }
         assert get_enterprise_id_for_current_request_user_from_jwt() is None
 
@@ -251,7 +249,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         """
 
         mock_decode_jwt.return_value = {
-            'roles': ['{}:some-uuid'.format(SYSTEM_ENTERPRISE_ADMIN_ROLE)]
+            'roles': [f'{SYSTEM_ENTERPRISE_ADMIN_ROLE}:some-uuid']
         }
         assert get_enterprise_id_for_current_request_user_from_jwt() is None
 

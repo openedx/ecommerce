@@ -488,7 +488,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     has_active_bulk_enrollment_code = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
-        super(CourseSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # NOTE: All normal initializations of the serializer will include a context kwarg.
         # We use dict.get() here because Swagger does not include context when generating docs.
@@ -523,17 +523,17 @@ class EntitlementProductHelper:
         attrs = _flatten(product['attribute_values'])
 
         if 'certificate_type' not in attrs:
-            raise serializers.ValidationError(_(u"Products must have a certificate type."))
+            raise serializers.ValidationError(_("Products must have a certificate type."))
 
         if 'price' not in product:
-            raise serializers.ValidationError(_(u"Products must have a price."))
+            raise serializers.ValidationError(_("Products must have a price."))
 
     @staticmethod
     def save(partner, course, uuid, product):
         attrs = _flatten(product['attribute_values'])
 
         if not uuid:
-            raise Exception(_(u"You need to provide a course UUID to create Course Entitlements."))
+            raise Exception(_("You need to provide a course UUID to create Course Entitlements."))
 
         # Extract arguments required for Entitlement creation, deserializing as necessary.
         certificate_type = attrs.get('certificate_type')
@@ -562,11 +562,11 @@ class SeatProductHelper:
     def validate(product):
         attrs = _flatten(product['attribute_values'])
         if attrs.get('id_verification_required') is None:
-            raise serializers.ValidationError(_(u"Products must indicate whether ID verification is required."))
+            raise serializers.ValidationError(_("Products must indicate whether ID verification is required."))
 
         # Verify that a price is present.
         if product.get('price') is None:
-            raise serializers.ValidationError(_(u"Products must have a price."))
+            raise serializers.ValidationError(_("Products must have a price."))
 
     @staticmethod
     def save(course, product, create_enrollment_code):
@@ -619,7 +619,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     products = serializers.ListField()
 
     def __init__(self, *args, **kwargs):
-        super(AtomicPublicationSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.partner = kwargs['context'].pop('partner', None)
 
     def validate_products(self, products):
@@ -633,7 +633,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 SeatProductHelper.validate(product)
             else:
                 raise serializers.ValidationError(
-                    _(u"Invalid product class [{product_class}] requested.").format(product_class=product_class)
+                    _("Invalid product class [{product_class}] requested.").format(product_class=product_class)
                 )
 
         return products
@@ -665,9 +665,9 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         try:
             if not waffle.switch_is_active('publish_course_modes_to_lms'):
                 message = _(
-                    u'Course [{course_id}] was not published to LMS '
-                    u'because the switch [publish_course_modes_to_lms] is disabled. '
-                    u'To avoid ghost SKUs, data has not been saved.'
+                    'Course [{course_id}] was not published to LMS '
+                    'because the switch [publish_course_modes_to_lms] is disabled. '
+                    'To avoid ghost SKUs, data has not been saved.'
                 ).format(course_id=course_id)
 
                 raise Exception(message)
@@ -701,7 +701,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 raise Exception(resp_message)
 
         except Exception as e:  # pylint: disable=broad-except
-            logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, str(e))
+            logger.exception('Failed to save and publish [%s]: [%s]', course_id, str(e))
             return False, e, str(e)
 
 
@@ -772,7 +772,7 @@ class VoucherSerializer(serializers.ModelSerializer):
 
     def get_redeem_url(self, obj):
         url = get_ecommerce_url('/coupons/offer/')
-        return '{url}?code={code}'.format(url=url, code=obj.code)
+        return f'{url}?code={obj.code}'
 
     class Meta:
         model = Voucher
@@ -863,7 +863,7 @@ class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
         return ''
 
     def get_redemptions(self, obj):
-        redemptions = super(NotAssignedCodeUsageSerializer, self).get_redemptions(obj)
+        redemptions = super().get_redemptions(obj)
         return dict(redemptions, num_assignments=self.num_assignments(code=self.get_code(obj)))
 
 
@@ -872,7 +872,7 @@ class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
     def get_redemptions(self, obj):
         usage_type = self.context.get('usage_type')
         if usage_type in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
-            return super(NotRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+            return super().get_redemptions(obj)
 
         num_assignments = self.num_assignments(code=self.get_code(obj), user_email=self.get_assigned_to(obj))
         return {'used': 0, 'total': num_assignments}
@@ -886,7 +886,7 @@ class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disabl
             return {}
 
         if usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
-            return super(PartialRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+            return super().get_redemptions(obj)
 
         num_assignments = self.num_assignments(code=self.get_code(obj), user_email=self.get_assigned_to(obj))
         num_applications = VoucherApplication.objects.filter(
@@ -975,21 +975,21 @@ class OfferAssignmentEmailTemplatesSerializer(serializers.ModelSerializer):
     def validate_email_greeting(self, value):
         if len(value) > OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT:
             raise serializers.ValidationError(
-                'Email greeting must be {} characters or less'.format(OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT)
+                f'Email greeting must be {OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT} characters or less'
             )
         return value
 
     def validate_email_closing(self, value):
         if len(value) > OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT:
             raise serializers.ValidationError(
-                'Email closing must be {} characters or less'.format(OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT)
+                f'Email closing must be {OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT} characters or less'
             )
         return value
 
     def validate_email_subject(self, value):
         if len(value) > OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT:
             raise serializers.ValidationError(
-                'Email subject must be {} characters or less'.format(OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT)
+                f'Email subject must be {OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT} characters or less'
             )
         return value
 
@@ -1079,7 +1079,7 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         return max_uses_per_code * voucher_count
 
     def to_representation(self, coupon):  # pylint: disable=arguments-differ
-        representation = super(EnterpriseCouponOverviewListSerializer, self).to_representation(coupon)
+        representation = super().to_representation(coupon)
 
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         voucher = vouchers.first()
@@ -1355,7 +1355,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
         return retrieve_voucher_usage(obj)
 
     def validate(self, attrs):
-        validated_data = super(CouponSerializer, self).validate(attrs)
+        validated_data = super().validate(attrs)
 
         # Validate max_uses
         max_uses = self.initial_data.get('max_uses')
@@ -1833,7 +1833,7 @@ class CouponCodeMixin:
         :raises rest_framework.exceptions.ValidationError in case code is not associated with the coupon
         """
         if not coupon.attr.coupon_vouchers.vouchers.filter(code=code).exists():
-            raise serializers.ValidationError('Code {} is not associated with this Coupon'.format(code))
+            raise serializers.ValidationError(f'Code {code} is not associated with this Coupon')
 
     def get_unredeemed_offer_assignments(self, code, email):
         """

@@ -1,7 +1,5 @@
-
-
 import ddt
-import mock
+from unittest import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
 
@@ -18,7 +16,7 @@ ShippingEvent = get_model('order', 'ShippingEvent')
 @ddt.ddt
 class EventHandlerTests(TestCase):
     def setUp(self):
-        super(EventHandlerTests, self).setUp()
+        super().setUp()
         self.shipping_event_type, __ = ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
         self.order = create_order()
 

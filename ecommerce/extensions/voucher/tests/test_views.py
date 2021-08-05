@@ -1,5 +1,3 @@
-
-
 from uuid import uuid4
 
 import httpretty
@@ -23,7 +21,7 @@ class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, 
     """Unit tests for getting coupon report."""
 
     def setUp(self):
-        super(CouponReportCSVViewTest, self).setUp()
+        super().setUp()
 
         self.user = self.create_user(full_name="Test User", is_staff=True)
         self.client.login(username=self.user.username, password=self.password)

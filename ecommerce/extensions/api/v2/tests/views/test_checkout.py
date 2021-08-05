@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
@@ -29,7 +27,7 @@ class CheckoutViewTests(TestCase):
     path = reverse('api:v2:checkout:process')
 
     def setUp(self):
-        super(CheckoutViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.basket = Basket.objects.create(site=self.site, owner=self.user)
@@ -54,7 +52,7 @@ class CheckoutViewTests(TestCase):
 
     def test_invalid_payment_processor(self):
         """ Verify the endpoint returns HTTP 400 if payment processor not found. """
-        expected_content = 'Payment processor [{}] not found.'.format(DummyProcessorWithUrl.NAME)
+        expected_content = f'Payment processor [{DummyProcessorWithUrl.NAME}] not found.'
         response = self.client.post(self.path, data=self.data)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content.decode('utf-8'), expected_content)

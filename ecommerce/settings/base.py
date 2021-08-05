@@ -245,7 +245,7 @@ MIDDLEWARE = (
 
 # URL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
-ROOT_URLCONF = '{}.urls'.format(SITE_NAME)
+ROOT_URLCONF = f'{SITE_NAME}.urls'
 
 # Commerce API settings used for publishing information to LMS.
 COMMERCE_API_TIMEOUT = 7
@@ -601,7 +601,7 @@ RECEIPT_PAGE_PATH = '/checkout/receipt/'
 COURSE_CATALOG_API_URL = 'http://localhost:8008/api/v1/'
 
 # Black-listed course modes not allowed to create coupons with
-BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']
+BLACK_LIST_COUPON_COURSE_MODES = ['audit', 'honor']
 
 # Theme settings
 # enable or disable comprehensive theming

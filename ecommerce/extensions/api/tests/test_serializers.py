@@ -30,7 +30,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     REPLY_TO = 'edx@example.com'
 
     def setUp(self):
-        super(CouponCodeSerializerTests, self).setUp()
+        super().setUp()
 
         self.coupon = self.create_coupon(
             benefit_value=25,

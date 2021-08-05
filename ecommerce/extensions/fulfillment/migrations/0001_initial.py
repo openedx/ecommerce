@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.db import migrations
 
 from ecommerce.core.constants import HUBSPOT_FORMS_INTEGRATION_ENABLE

@@ -1,5 +1,3 @@
-
-
 import logging
 import time
 
@@ -81,10 +79,10 @@ class Command(BaseCommand):
             response_data = api_response.get('results', [])
 
             # Map course_id with enrollment end date.
-            courses_enrollment = dict(
-                (course_info['course_id'], course_info['enrollment_end'])
+            courses_enrollment = {
+                course_info['course_id']: course_info['enrollment_end']
                 for course_info in response_data
-            )
+            }
             return courses_enrollment, api_response['pagination'].get('next', None)
 
         querystring = {'page_size': 50}

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import oscar.core.utils
 from django.db import migrations, models
 

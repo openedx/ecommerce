@@ -344,9 +344,9 @@ def generate_coupon_report(coupon_vouchers):
 
 
 def generate_offer_name(coupon_id, benefit_type, benefit_value, offer_number=None, is_enterprise=False):
-    offer_name = "Coupon [{}]-{}-{}".format(coupon_id, benefit_type, benefit_value)
+    offer_name = f"Coupon [{coupon_id}]-{benefit_type}-{benefit_value}"
     if offer_number:
-        offer_name = "{} [{}]".format(offer_name, offer_number)
+        offer_name = f"{offer_name} [{offer_number}]"
     if is_enterprise:
         offer_name = offer_name + " ENT Offer"
     return offer_name
@@ -409,7 +409,7 @@ def _get_or_create_offer(
                 offer_benefit.value = benefit_value
                 offer_benefit.save()
 
-            offer_name = "{}-{}".format(offer_name, offer_benefit.name)
+            offer_name = f"{offer_name}-{offer_benefit.name}"
         else:
             offer_benefit, __ = Benefit.objects.get_or_create(
                 range=product_range,
@@ -638,7 +638,7 @@ def validate_voucher_fields(
             dateutil.parser.parse(end_datetime)
         except (AttributeError, ValueError, TypeError):
             log_message_and_raise_validation_error(
-                'Failed to create Voucher. Voucher end datetime value [{date}] is invalid.'.format(date=end_datetime)
+                f'Failed to create Voucher. Voucher end datetime value [{end_datetime}] is invalid.'
             )
 
     if not start_datetime:
@@ -648,7 +648,7 @@ def validate_voucher_fields(
             dateutil.parser.parse(start_datetime)
         except (AttributeError, ValueError, TypeError):
             log_message_and_raise_validation_error(
-                'Failed to create Voucher. Voucher start datetime [{date}] is invalid.'.format(date=start_datetime)
+                f'Failed to create Voucher. Voucher start datetime [{start_datetime}] is invalid.'
             )
 
 
@@ -971,7 +971,7 @@ def get_cached_voucher(code):
     Raises:
         Voucher.DoesNotExist: When no vouchers with provided code exist.
     """
-    voucher_code = 'voucher_{code}'.format(code=code)
+    voucher_code = f'voucher_{code}'
     cache_key = hashlib.md5(voucher_code.encode('utf-8')).hexdigest()
     voucher_cached_response = TieredCache.get_cached_response(cache_key)
     if voucher_cached_response.is_found:

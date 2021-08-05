@@ -1,5 +1,3 @@
-
-
 import csv
 import os
 import tempfile
@@ -22,7 +20,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
     Test the `backfill_opportunity_ids` command.
     """
     def setUp(self):
-        super(BackfillOpportunityIdsCommandTests, self).setUp()
+        super().setUp()
 
         # coupons and offers created for these enterprises are missing opportunity ids in database
         self.enterprise_without_opportunity_ids = {
@@ -232,7 +230,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
         csv_file_path = self.create_input_data_csv()
 
         call_command(
-            'backfill_opportunity_ids', '--data-csv={}'.format(csv_file_path)
+            'backfill_opportunity_ids', f'--data-csv={csv_file_path}'
         )
 
         data = dict(self.enterprise_without_opportunity_ids)
@@ -246,7 +244,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
         csv_file_path = self.create_multi_contracts_input_data_csv()
 
         call_command(
-            'backfill_opportunity_ids', '--data-csv={}'.format(csv_file_path), '--contract-type=multi'
+            'backfill_opportunity_ids', f'--data-csv={csv_file_path}', '--contract-type=multi'
         )
 
         # verify coupons

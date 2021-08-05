@@ -54,7 +54,7 @@ class ThemeFilesFinder(BaseFinder):
             if theme.theme_dir_name not in self.themes:
                 self.themes.append(theme.theme_dir_name)
 
-        super(ThemeFilesFinder, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def check(self, **kwargs):  # pylint: disable=unused-argument
         """

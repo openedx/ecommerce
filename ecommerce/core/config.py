@@ -1,5 +1,3 @@
-
-
 from django.apps import AppConfig
 
 
@@ -8,7 +6,7 @@ class CoreAppConfig(AppConfig):
     verbose_name = 'Core'
 
     def ready(self):
-        super(CoreAppConfig, self).ready()
+        super().ready()
 
         # Ensures that the initialized Celery app is loaded when Django starts.
         # Allows Celery tasks to bind themselves to an initialized instance of the Celery library.

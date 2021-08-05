@@ -22,12 +22,12 @@ class EnterpriseOfferViewMixin(StaffOnlyMixin):
     model = ConditionalOffer
 
     def get_context_data(self, **kwargs):
-        context = super(EnterpriseOfferViewMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['admin'] = 'enterprise_offers'
         return context
 
     def get_queryset(self):
-        return super(EnterpriseOfferViewMixin, self).get_queryset().filter(
+        return super().get_queryset().filter(
             partner=self.request.site.siteconfiguration.partner,
             condition__enterprise_customer_uuid__isnull=False,
             offer_type=ConditionalOffer.SITE
@@ -39,12 +39,12 @@ class EnterpriseOfferProcessFormViewMixin(EnterpriseOfferViewMixin):
     success_message = _('Enterprise offer updated!')
 
     def get_form_kwargs(self):
-        kwargs = super(EnterpriseOfferProcessFormViewMixin, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs.update({'request': self.request})
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(EnterpriseOfferProcessFormViewMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update({
             'editing': False,
         })
@@ -67,7 +67,7 @@ class EnterpriseOfferUpdateView(EnterpriseOfferProcessFormViewMixin, UpdateView)
     template_name = 'enterprise/enterpriseoffer_form.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EnterpriseOfferUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update({
             'editing': True,
             'enterprise_customer': get_enterprise_customer(
@@ -86,6 +86,6 @@ class EnterpriseCouponAppView(StaffOnlyMixin, TemplateView):
     template_name = 'enterprise/enterprise_coupon_app.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EnterpriseCouponAppView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['admin'] = 'enterprise_coupons'
         return context

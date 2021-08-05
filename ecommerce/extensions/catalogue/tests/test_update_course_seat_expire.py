@@ -1,13 +1,10 @@
-# encoding: utf-8
-
-
 import datetime
 import json
 import logging
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.core.management import CommandError, call_command
 from pytz import UTC
 from slumber.exceptions import HttpClientError
@@ -30,7 +27,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
 
     def setUp(self):
         """ Setup course and seats required to run tests """
-        super(UpdateSeatExpireDateTests, self).setUp()
+        super().setUp()
         now = datetime.datetime.now(tz=UTC)
         self.expire_date = now - datetime.timedelta(days=7)
         self.verified_expire_date = now - datetime.timedelta(days=8)
@@ -172,7 +169,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
             (
                 LOGGER_NAME,
                 'ERROR',
-                'Enrollment missing for course [{}]'.format(self.course.id)
+                f'Enrollment missing for course [{self.course.id}]'
             )
         ]
 

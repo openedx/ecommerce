@@ -1,11 +1,9 @@
-
-
 import json
 from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
 
-import mock
+from unittest import mock
 import pytz
 from django.urls import reverse
 from oscar.core.loading import get_model
@@ -34,7 +32,7 @@ EXPIRES_STRING = EXPIRES.strftime(ISO_8601_FORMAT)
 
 class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
     def setUp(self):
-        super(AtomicPublicationTests, self).setUp()
+        super().setUp()
 
         self.course_id = 'BadgerX/B101/2015'
         self.course_uuid = '394a5ce5-6ff4-4b2b-bea1-a273c6920ae1'
@@ -223,7 +221,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertIsNotNone(certificate_type)
 
         # If the seat does not exist, an error will be raised.
-        entitlement = Product.objects.get(title='Course {}'.format(course.name))
+        entitlement = Product.objects.get(title=f'Course {course.name}')
 
         self.assertEqual(entitlement.structure, Product.CHILD)
         self.assertEqual(entitlement.parent.product_class.name, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
@@ -242,10 +240,10 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             elif name == 'id_verification_required':
                 id_verification_required = attr['value']
 
-        seat_title = 'Seat in {course_name}'.format(course_name=course.name)
+        seat_title = f'Seat in {course.name}'
 
         if certificate_type:
-            seat_title += ' with {certificate_type} certificate'.format(certificate_type=certificate_type)
+            seat_title += f' with {certificate_type} certificate'
 
         if id_verification_required:
             seat_title += ' (and ID verification)'
@@ -298,8 +296,8 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(response.status_code, 500)
         self.assert_course_does_not_exist(self.course_id)
 
-        expected = u'Course [{}] was not published to LMS because the switch [publish_course_modes_to_lms] is ' \
-                   u'disabled. To avoid ghost SKUs, data has not been saved.'.format(self.course_id)
+        expected = 'Course [{}] was not published to LMS because the switch [publish_course_modes_to_lms] is ' \
+                   'disabled. To avoid ghost SKUs, data has not been saved.'.format(self.course_id)
         self.assertEqual(response.data.get('error'), expected)
 
     def test_create(self):
@@ -369,7 +367,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
             response.data.get('error'),
-            u'You need to provide a course UUID to create Course Entitlements.'
+            'You need to provide a course UUID to create Course Entitlements.'
         )
         self.assert_course_does_not_exist(self.course_id)
 
@@ -400,7 +398,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
 
         self.assertEqual(
             response.data.get('products')[0],
-            u'Invalid product class [{product_class}] requested.'.format(product_class=product_class)
+            f'Invalid product class [{product_class}] requested.'
         )
 
     def test_incomplete_seat_attributes(self):
@@ -415,7 +413,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data.get('products')[0],
-            u'Products must indicate whether ID verification is required.'
+            'Products must indicate whether ID verification is required.'
         )
         self.assert_course_does_not_exist(self.course_id)
 
@@ -431,7 +429,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data.get('products')[0],
-            u'Products must have a certificate type.'
+            'Products must have a certificate type.'
         )
         self.assert_course_does_not_exist(self.course_id)
 
@@ -447,7 +445,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
 
         self.assertEqual(
             response.data.get('products')[0],
-            u'Products must have a price.'
+            'Products must have a price.'
         )
         self.assert_course_does_not_exist(self.course_id)
 
@@ -463,7 +461,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
 
         self.assertEqual(
             response.data.get('products')[0],
-            u'Products must have a price.'
+            'Products must have a price.'
         )
         self.assert_course_does_not_exist(self.course_id)
 

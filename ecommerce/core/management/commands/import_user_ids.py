@@ -107,7 +107,7 @@ class Command(BaseCommand):
                     )
             self.stdout.write(
                 self.style.SUCCESS(
-                    'Updated {} rows, starting at {}'.format(update_count, starting_user_id)
+                    f'Updated {update_count} rows, starting at {starting_user_id}'
                 )
             )
             starting_user_id += increment

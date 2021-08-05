@@ -1,5 +1,3 @@
-
-
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from oscar.core.loading import get_model
@@ -34,12 +32,12 @@ class FakeOrdersTests(TestCase):
         stockrecord = create_stockrecord(product=product, partner_name=partner.name)
         with LogCapture(LOGGER_NAME) as log:
             with self.assertRaises(CommandError):
-                call_command('create_fake_orders', '--count=5', '--sku={}'.format(stockrecord.partner_sku))
+                call_command('create_fake_orders', '--count=5', f'--sku={stockrecord.partner_sku}')
                 log.check(
                     (
                         LOGGER_NAME,
                         'EXCEPTION',
-                        'No default site exists for partner {}!'.format(partner.id)
+                        f'No default site exists for partner {partner.id}!'
                     )
                 )
 
@@ -52,6 +50,6 @@ class FakeOrdersTests(TestCase):
         stockrecord = create_stockrecord(product=product, partner_name=partner.name)
         self.assertEqual(Order.objects.all().count(), 0)
         self.assertEqual(Basket.objects.all().count(), 0)
-        call_command('create_fake_orders', '--count=5', '--sku={}'.format(stockrecord.partner_sku))
+        call_command('create_fake_orders', '--count=5', f'--sku={stockrecord.partner_sku}')
         self.assertEqual(Order.objects.all().count(), 5)
         self.assertEqual(Basket.objects.all().count(), 5)

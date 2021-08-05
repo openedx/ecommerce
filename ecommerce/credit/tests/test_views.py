@@ -32,7 +32,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
     """Test for Checkout page"""
 
     def setUp(self):
-        super(CheckoutPageTest, self).setUp()
+        super().setUp()
 
         user = self.create_user(is_superuser=False)
         self.create_access_token(user)
@@ -105,7 +105,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         response = self.client.get(self.path)
         self.assertContains(
             response,
-            u"An error has occurred. We could not confirm that you are eligible for course credit."
+            "An error has occurred. We could not confirm that you are eligible for course credit."
         )
 
     def _assert_error_without_providers(self):
@@ -115,8 +115,8 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         response = self.client.get(self.path)
         self.assertContains(
             response,
-            u"An error has occurred. We could not confirm that the institution you selected offers "
-            u"this course credit."
+            "An error has occurred. We could not confirm that the institution you selected offers "
+            "this course credit."
         )
 
     def _assert_success_checkout_page(self, sku=None):
@@ -267,7 +267,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=self.provider_data)
 
-        response = self.client.get('{}?code={}'.format(self.path, code))
+        response = self.client.get(f'{self.path}?code={code}')
         self.assertEqual(response.status_code, 200)
         provider_info = response.context['providers'][0]
 

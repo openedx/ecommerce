@@ -46,7 +46,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, request, *args, **kwargs):
-        return super(PaypalPaymentExecutionView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def _get_basket(self, payment_id):
         """
@@ -72,17 +72,17 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             basket_add_organization_attribute(basket, self.request.GET)
             return basket
         except MultipleObjectsReturned:
-            logger.warning(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
+            logger.warning("Duplicate payment ID [%s] received from PayPal.", payment_id)
             return None
         except Exception:  # pylint: disable=broad-except
-            logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")
+            logger.exception("Unexpected error during basket retrieval while executing PayPal payment.")
             return None
 
     def get(self, request):
         """Handle an incoming user returned to us by PayPal after approving payment."""
         payment_id = request.GET.get('paymentId')
         payer_id = request.GET.get('PayerID')
-        logger.info(u"Payment [%s] approved by payer [%s]", payment_id, payer_id)
+        logger.info("Payment [%s] approved by payer [%s]", payment_id, payer_id)
 
         paypal_response = request.GET.dict()
         basket = self._get_basket(payment_id)
@@ -128,7 +128,7 @@ class PaypalProfileAdminView(View):
         if not request.user.is_superuser:
             raise Http404
 
-        return super(PaypalProfileAdminView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *_args, **_kwargs):
 
@@ -166,7 +166,7 @@ class PaypalProfileAdminView(View):
             pass
 
         # Format the output for display
-        output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
+        output = 'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
                                                                         log=log.getvalue())
 
         # Remove the log capture handler

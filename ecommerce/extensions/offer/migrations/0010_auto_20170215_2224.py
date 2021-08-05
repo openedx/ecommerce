@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import oscar.models.fields
 from django.db import migrations, models
 

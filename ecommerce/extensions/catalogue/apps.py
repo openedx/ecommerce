@@ -1,5 +1,3 @@
-
-
 from oscar.apps.catalogue import apps
 
 

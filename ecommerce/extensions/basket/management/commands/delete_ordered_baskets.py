@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
         if options['commit']:
             if count:
-                self.stderr.write('Deleting [{}] baskets.'.format(count))
+                self.stderr.write(f'Deleting [{count}] baskets.')
 
                 batch_size = options['batch_size']
                 sleep_seconds = options['sleep_seconds']
@@ -54,11 +54,11 @@ class Command(BaseCommand):
                 max_id = queryset.order_by('-id')[0].id
                 for start in range(0, max_id, batch_size):
                     end = min(start + batch_size, max_id)
-                    self.stderr.write('Deleting baskets [{start}] through [{end}].'.format(start=start, end=end))
+                    self.stderr.write(f'Deleting baskets [{start}] through [{end}].')
                     with transaction.atomic():
                         queryset.filter(pk__gte=start, pk__lte=end).delete()
 
-                    self.stderr.write('Complete. Sleeping.'.format(start=start, end=end))
+                    self.stderr.write(f'Complete. Sleeping.')
                     time.sleep(sleep_seconds)
 
                 self.stderr.write('All baskets deleted.')

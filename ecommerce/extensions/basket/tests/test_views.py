@@ -1,5 +1,3 @@
-
-
 import datetime
 import itertools
 import json
@@ -10,7 +8,7 @@ from decimal import Decimal
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import pytz
 from django.conf import settings
 from django.contrib.messages import get_messages
@@ -81,7 +79,7 @@ class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixi
     path = reverse('basket:basket-add')
 
     def setUp(self):
-        super(BasketAddItemsViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -93,9 +91,9 @@ class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixi
 
     def _get_response(self, product_skus, **url_params):
         qs = urllib.parse.urlencode({'sku': product_skus}, True)
-        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        url = f'{self.path}?{qs}'
         for name, value in url_params.items():
-            url += '&{}={}'.format(name, value)
+            url += f'&{name}={value}'
         return self.client.get(url)
 
     def test_add_multiple_products_to_basket(self):
@@ -370,7 +368,7 @@ class BasketLogicTestMixin:
 
                 logger.check((
                     logger_name, 'ERROR',
-                    u'Failed to fire Cart Viewed event for basket [{}]'.format(basket.id)
+                    f'Failed to fire Cart Viewed event for basket [{basket.id}]'
                 ))
 
 
@@ -402,11 +400,11 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             url=None,
             response=None,
             status_code=200,
-            product_type=u'Seat',
-            currency=u'USD',
+            product_type='Seat',
+            currency='USD',
             discount_value=0,
             discount_type=Benefit.FIXED,
-            certificate_type=u'verified',
+            certificate_type='verified',
             summary_price=100,
             voucher=None,
             offer_provider=None,
@@ -434,7 +432,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             coupons = [{
                 'benefit_type': discount_type,
                 'benefit_value': discount_value,
-                'code': u'COUPONTEST',
+                'code': 'COUPONTEST',
                 'id': voucher.id,
             }]
         else:
@@ -491,7 +489,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
     maxDiff = None
 
     def setUp(self):
-        super(PaymentApiViewTests, self).setUp()
+        super().setUp()
         self.clear_message_utils()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
@@ -516,8 +514,8 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
             self.assert_expected_response(
                 basket,
                 certificate_type=certificate_type,
-                image_url=u'/path/to/image.jpg',
-                title=u'PaymentApiViewTests',
+                image_url='/path/to/image.jpg',
+                title='PaymentApiViewTests',
             )
 
     @override_settings(
@@ -670,7 +668,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         }
         self.assert_expected_response(
             basket,
-            product_type=u'Enrollment Code',
+            product_type='Enrollment Code',
             show_coupon_form=False,
             messages=[expected_message],
             summary_quantity=1,
@@ -723,7 +721,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         )
         expected_message = {
             'message_type': 'error',
-            'user_message': u"Could not apply the code 'THISISACOUPONCODE'; it requires data sharing consent.",
+            'user_message': "Could not apply the code 'THISISACOUPONCODE'; it requires data sharing consent.",
         }
         self.assert_expected_response(
             basket,
@@ -789,7 +787,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
     path = reverse('basket:summary')
 
     def setUp(self):
-        super(BasketSummaryViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(name='BasketSummaryTest', partner=self.partner)
@@ -811,7 +809,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         logger_name = 'ecommerce.extensions.basket.views'
         self.mock_api_error(
             error=error,
-            url=get_lms_url('api/courses/v1/courses/{}/'.format(self.course.id))
+            url=get_lms_url(f'api/courses/v1/courses/{self.course.id}/')
         )
 
         with LogCapture(logger_name) as logger:
@@ -820,7 +818,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
             logger.check(
                 (
                     logger_name, 'ERROR',
-                    u'Failed to retrieve data from Discovery Service for course [{}].'.format(self.course.id)
+                    f'Failed to retrieve data from Discovery Service for course [{self.course.id}].'
                 )
             )
 
@@ -861,9 +859,9 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
         params = 'consent_failed=THISISACOUPONCODE'
-        url = '{}?{}'.format(self.path, params)
+        url = f'{self.path}?{params}'
         response = self.client.get(url)
-        expected_redirect_url = '{}?{}'.format(microfrontend_url, params)
+        expected_redirect_url = f'{microfrontend_url}?{params}'
         self.assertRedirects(response, expected_redirect_url, status_code=302, fetch_redirect_response=False)
 
     def test_microfrontend_for_enrollment_code_seat_type(self):
@@ -928,7 +926,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
                 logger.check((
                     logger_name, 'ERROR',
-                    u'Failed to fire Cart Viewed event for basket [{}]'.format(basket.id)
+                    f'Failed to fire Cart Viewed event for basket [{basket.id}]'
                 ))
 
     def assert_empty_basket(self):
@@ -1224,7 +1222,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 @httpretty.activate
 class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
     def setUp(self):
-        super(VoucherAddMixin, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.basket = factories.BasketFactory(owner=self.user, site=self.site)
@@ -1237,8 +1235,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         product = ProductFactory()
         self.basket.add_product(product)
         messages = [{
-            'message_type': u'error',
-            'user_message': u"Coupon code '{code}' does not exist.".format(code=COUPON_CODE),
+            'message_type': 'error',
+            'user_message': f"Coupon code '{COUPON_CODE}' does not exist.",
         }]
         self.assert_response(product=product, status_code=400, messages=messages)
 
@@ -1248,8 +1246,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         self.basket.add_product(product)
 
         messages = [{
-            'message_type': u'error',
-            'user_message': u"You have already added coupon code '{code}' to your basket.".format(code=COUPON_CODE),
+            'message_type': 'error',
+            'user_message': f"You have already added coupon code '{COUPON_CODE}' to your basket.",
         }]
         self.assert_response(
             product=product,
@@ -1268,8 +1266,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         self.basket.add_product(product)
 
         messages = [{
-            'message_type': u'error',
-            'user_message': u"Coupon code 'COUPONTEST' has expired.",
+            'message_type': 'error',
+            'user_message': "Coupon code 'COUPONTEST' has expired.",
         }]
         self.assert_response(product=product, status_code=400, messages=messages)
 
@@ -1281,7 +1279,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
 
         messages = [{
             'message_type': 'info',
-            'user_message': u"Coupon code 'COUPONTEST' added to basket.",
+            'user_message': "Coupon code 'COUPONTEST' added to basket.",
         }]
         self.assert_response(
             product=product,
@@ -1299,8 +1297,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         order = factories.OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
         messages = [{
-            'message_type': u'error',
-            'user_message': u"Coupon code '{code}' is not available. "
+            'message_type': 'error',
+            'user_message': "Coupon code '{code}' is not available. "
                             "This coupon has already been used".format(code=COUPON_CODE),
         }]
         self.assert_response(product=product, status_code=400, messages=messages)
@@ -1312,8 +1310,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         __, product = prepare_voucher(code=COUPON_CODE, benefit_value=0)
         self.basket.add_product(product)
         messages = [{
-            'message_type': u'warning',
-            'user_message': u'Basket does not qualify for coupon code {code}.'.format(code=COUPON_CODE),
+            'message_type': 'warning',
+            'user_message': f'Basket does not qualify for coupon code {COUPON_CODE}.',
         }]
         self.assert_response(product=product, status_code=200, messages=messages)
 
@@ -1332,9 +1330,9 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
             value_text=TEST_BUNDLE_ID
         )
         messages = [{
-            'message_type': u'error',
-            'user_message': u"Coupon code '{code}' is not valid for this "
-                            u"basket for a bundled purchase.".format(code=voucher.code),
+            'message_type': 'error',
+            'user_message': "Coupon code '{code}' is not valid for this "
+                            "basket for a bundled purchase.".format(code=voucher.code),
         }]
         self.assert_response(product=product, status_code=400, messages=messages, summary_price=19.98)
 
@@ -1348,8 +1346,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         self.basket.add_product(new_product)
         _set_basket_bundle_status(TEST_BUNDLE_ID, self.basket)
         messages = [{
-            'message_type': u'info',
-            'user_message': u"Coupon code '{code}' added to basket.".format(code=voucher.code),
+            'message_type': 'info',
+            'user_message': f"Coupon code '{voucher.code}' added to basket.",
         }]
         self.assert_response(
             product=product,
@@ -1370,8 +1368,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         voucher, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
         self.basket.add_product(product)
         messages = [{
-            'message_type': u'error',
-            'user_message': u"Coupon code '{code}' is not active.".format(code=voucher.code),
+            'message_type': 'error',
+            'user_message': f"Coupon code '{voucher.code}' is not active.",
         }]
         self.assert_response(
             product=product,
@@ -1393,8 +1391,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
 
         stock_record = Selector().strategy().fetch_for_product(product).stockrecord
         expected_redirect_url = (
-            u'{coupons_redeem_base_url}?code=COUPONTEST&sku={sku}&'
-            u'failure_url=http%3A%2F%2F{domain}%2Fbasket%2F%3Fconsent_failed%3D{code}'
+            '{coupons_redeem_base_url}?code=COUPONTEST&sku={sku}&'
+            'failure_url=http%3A%2F%2F{domain}%2Fbasket%2F%3Fconsent_failed%3D{code}'
         ).format(
             coupons_redeem_base_url=absolute_url(self.request, 'coupons:redeem'),
             sku=stock_record.partner_sku,
@@ -1433,7 +1431,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         self.basket.add_product(product)
         messages = [{
             'message_type': 'info',
-            'user_message': u"Coupon code '{code}' added to basket.".format(code=COUPON_CODE),
+            'user_message': f"Coupon code '{COUPON_CODE}' added to basket.",
         }]
         self.assert_response(
             product=product,
@@ -1456,9 +1454,9 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         """
         response = self._get_account_activation_view_response(keys, "edx/email_confirmation_required.html")
         expected_titles = expected_titles if isinstance(expected_titles, list) else [expected_titles]
-        self.assertIn(u'An email has been sent to {}'.format(self.user.email), response.content.decode('utf-8'))
+        self.assertIn(f'An email has been sent to {self.user.email}', response.content.decode('utf-8'))
         for expected_title in expected_titles:
-            self.assertIn(u'{}'.format(expected_title), response.content.decode('utf-8'))
+            self.assertIn(f'{expected_title}', response.content.decode('utf-8'))
 
     def test_account_activation_rendered(self):
         """
@@ -1496,7 +1494,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
             error=ReqConnectionError,
         )
         response = self._get_account_activation_view_response([course_key], "404.html")
-        self.assertIn(u'Not Found', response.content.decode('utf-8'))
+        self.assertIn('Not Found', response.content.decode('utf-8'))
 
 
 @httpretty.activate
@@ -1504,7 +1502,7 @@ class VoucherAddViewTests(VoucherAddMixin, TestCase):
     """ Tests for VoucherAddView. """
 
     def setUp(self):
-        super(VoucherAddViewTests, self).setUp()
+        super().setUp()
         self.view = VoucherAddView()
         self.view.request = self.request
 
@@ -1536,7 +1534,7 @@ class VoucherAddViewTests(VoucherAddMixin, TestCase):
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         __, product = prepare_voucher(code=COUPON_CODE, site=self.request.site)
         self.basket.add_product(product)
-        self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
+        self.assert_form_valid_message(f"Coupon code '{COUPON_CODE}' added to basket.")
 
     def test_voucher_not_valid_for_other_site(self):
         """ Verify correct error message is returned when coupon is applied against on the wrong site. """
@@ -1545,7 +1543,7 @@ class VoucherAddViewTests(VoucherAddMixin, TestCase):
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         voucher, product = prepare_voucher(code=COUPON_CODE, site=other_site)
         self.basket.add_product(product)
-        self.assert_form_valid_message("Coupon code '{code}' is not valid for this basket.".format(code=voucher.code))
+        self.assert_form_valid_message(f"Coupon code '{voucher.code}' is not valid for this basket.")
 
     def test_form_valid_without_basket_id(self):
         """ Verify the view redirects to the basket summary view if the basket has no ID.  """
@@ -1608,7 +1606,7 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
     maxDiff = None
 
     def setUp(self):
-        super(QuantityApiViewTests, self).setUp()
+        super().setUp()
         self.clear_message_utils()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
@@ -1630,7 +1628,7 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
         }
         self.assert_expected_response(
             basket,
-            product_type=u'Enrollment Code',
+            product_type='Enrollment Code',
             response=response,
             show_coupon_form=False,
             messages=[expected_message],
@@ -1676,7 +1674,7 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
         ]
         self.assert_expected_response(
             basket,
-            product_type=u'Enrollment Code',
+            product_type='Enrollment Code',
             response=response,
             show_coupon_form=False,
             status_code=400,
@@ -1693,7 +1691,7 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
 
         self.assert_expected_response(
             basket,
-            product_type=u'Seat',
+            product_type='Seat',
             response=response,
             show_coupon_form=True,
             status_code=400,
@@ -1707,7 +1705,7 @@ class VoucherAddApiViewTests(PaymentApiResponseTestMixin, VoucherAddMixin, TestC
     maxDiff = None
 
     def setUp(self):
-        super(VoucherAddApiViewTests, self).setUp()
+        super().setUp()
         self.clear_message_utils()
 
     def assert_response(self, product, summary_price=9.99, **kwargs):
@@ -1718,7 +1716,7 @@ class VoucherAddApiViewTests(PaymentApiResponseTestMixin, VoucherAddMixin, TestC
             title=product.title,
             certificate_type=None,
             product_type=product.get_product_class().name,
-            currency=u'GBP',
+            currency='GBP',
             summary_price=summary_price,
             discount_type=Benefit.PERCENTAGE,
             **kwargs
@@ -1748,7 +1746,7 @@ class VoucherRemoveApiViewTests(PaymentApiResponseTestMixin, TestCase):
     maxDiff = None
 
     def setUp(self):
-        super(VoucherRemoveApiViewTests, self).setUp()
+        super().setUp()
         self.clear_message_utils()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
@@ -1767,7 +1765,7 @@ class VoucherRemoveApiViewTests(PaymentApiResponseTestMixin, TestCase):
         self.assert_expected_response(
             basket,
             response=response,
-            currency=u'GBP',
+            currency='GBP',
             certificate_type=None,
             voucher=voucher,
             title=product.title,
@@ -1781,13 +1779,13 @@ class VoucherRemoveApiViewTests(PaymentApiResponseTestMixin, TestCase):
         response = self.client.delete(path)
 
         messages = [{
-            'message_type': u'info',
-            'user_message': u"Coupon code '{code}' was removed from your basket.".format(code=voucher.code),
+            'message_type': 'info',
+            'user_message': f"Coupon code '{voucher.code}' was removed from your basket.",
         }]
         self.assert_expected_response(
             basket,
             response=response,
-            currency=u'GBP',
+            currency='GBP',
             certificate_type=None,
             voucher=voucher,
             title=product.title,

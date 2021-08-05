@@ -1,5 +1,3 @@
-
-
 from edx_rest_api_client.client import EdxRestApiClient
 
 from e2e.config import (
@@ -49,7 +47,7 @@ class DiscoveryApi(BaseApi):
             list(dict)
         """
         results = self._client.search.course_runs.facets.get(
-            selected_query_facets='availability_current', selected_facets='seat_types_exact:{}'.format(seat_type))
+            selected_query_facets='availability_current', selected_facets=f'seat_types_exact:{seat_type}')
         return results['objects']['results']
 
     def get_course_run(self, course_run):
@@ -94,4 +92,4 @@ class EnrollmentApi(BaseApi):
             username (str)
             course_run_id (str)
         """
-        return self._client.enrollment('{},{}'.format(username, course_run_id)).get()
+        return self._client.enrollment(f'{username},{course_run_id}').get()

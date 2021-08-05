@@ -11,7 +11,7 @@ Condition = get_model('offer', 'Condition')
 
 
 def class_path(klass):
-    return '%s.%s' % (klass.__module__, klass.__name__)
+    return f'{klass.__module__}.{klass.__name__}'
 
 
 def create_condition(condition_class, **kwargs):

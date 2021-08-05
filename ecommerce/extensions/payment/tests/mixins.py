@@ -1,12 +1,10 @@
-
-
 import os
 import re
 from decimal import Decimal
 from urllib.parse import urljoin
 
 import ddt
-import mock
+from unittest import mock
 import responses
 from django.conf import settings
 from django.urls import reverse
@@ -201,7 +199,7 @@ class CybersourceMixin(PaymentEventsMixin):
 
         for filename in files:
             path = os.path.join(os.path.dirname(__file__), filename)
-            body = open(path, 'r').read()
+            body = open(path).read()
             url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource']['soap_api_url'], filename)
             responses.add(responses.GET, url, body=body)
 
@@ -318,7 +316,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
     CYBERSOURCE_VIEW_LOGGER_NAME = 'ecommerce.extensions.payment.views.cybersource'
 
     def setUp(self):
-        super(CybersourceNotificationTestsMixin, self).setUp()
+        super().setUp()
 
         self.user = UserFactory()
         self.billing_address = self.make_billing_address()
@@ -385,7 +383,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         # Ensure the response is stored in the database
         self.assert_processor_response_recorded(
             self.processor_name,
-            notification[u'transaction_id'],
+            notification['transaction_id'],
             notification,
             basket=self.basket
         )
@@ -577,7 +575,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         """ Ensure notifications are handled properly with or without keys/values present for optional fields. """
 
         with mock.patch(
-                'ecommerce.extensions.payment.views.cybersource.{}.handle_order_placement'.format(self.view.__name__)
+                f'ecommerce.extensions.payment.views.cybersource.{self.view.__name__}.handle_order_placement'
         ) as mock_placement_handler:
             def check_notification_address(notification, expected_address):
                 self.client.post(self.path, notification)
@@ -585,7 +583,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                 actual_address = mock_placement_handler.call_args[1]['billing_address']
                 self.assertEqual(actual_address.summary, expected_address.summary)
 
-            cybersource_key = 'req_bill_to_address_{}'.format(field_name)
+            cybersource_key = f'req_bill_to_address_{field_name}'
 
             # Generate a notification without the optional field set.
             # Ensure that the Cybersource key does not exist in the notification,
@@ -801,12 +799,12 @@ class PaypalMixin:
             'intent': 'sale',
             'links': [
                 {
-                    'href': 'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(self.PAYMENT_ID),
+                    'href': f'https://api.sandbox.paypal.com/v1/payments/payment/{self.PAYMENT_ID}',
                     'method': 'GET',
                     'rel': 'self'
                 },
                 {
-                    'href': 'https://api.sandbox.paypal.com/v1/payments/payment/{}/execute'.format(self.PAYMENT_ID),
+                    'href': f'https://api.sandbox.paypal.com/v1/payments/payment/{self.PAYMENT_ID}/execute',
                     'method': 'POST',
                     'rel': 'execute'
                 }
@@ -857,7 +855,7 @@ class PaypalMixin:
         payment_creation_response = self.get_payment_creation_response_mock(basket, state, approval_url)
 
         if find:
-            path = '/v1/payments/payment/{}'.format(self.PAYMENT_ID)
+            path = f'/v1/payments/payment/{self.PAYMENT_ID}'
             self.mock_api_response(path, payment_creation_response, method=responses.GET)
         else:
             self.mock_api_response('/v1/payments/payment', payment_creation_response)
@@ -866,21 +864,21 @@ class PaypalMixin:
 
     def get_payment_creation_error_response_mock(self):
         payment_creation_error_response = {
-            u'error': {
+            'error': {
                 'debug_id': '23432',
                 'message': '500 server error'
             },
-            u'intent': u'sale',
-            u'payer': {
-                u'payer_info': {u'shipping_address': {}},
-                u'payment_method': u'paypal'
+            'intent': 'sale',
+            'payer': {
+                'payer_info': {'shipping_address': {}},
+                'payment_method': 'paypal'
             },
-            u'redirect_urls': {
-                u'cancel_url': u'http://fake-cancel-page',
-                u'return_url': u'http://fake-return-url'
+            'redirect_urls': {
+                'cancel_url': 'http://fake-cancel-page',
+                'return_url': 'http://fake-return-url'
             },
-            u'state': 'failed',
-            u'transactions': []
+            'state': 'failed',
+            'transactions': []
         }
         return payment_creation_error_response
 
@@ -893,7 +891,7 @@ class PaypalMixin:
             'id': self.PAYMENT_ID,
             'intent': 'sale',
             'links': [{
-                'href': 'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(self.PAYMENT_ID),
+                'href': f'https://api.sandbox.paypal.com/v1/payments/payment/{self.PAYMENT_ID}',
                 'method': 'GET',
                 'rel': 'self'
             }],
@@ -934,7 +932,7 @@ class PaypalMixin:
                         'id': self.SALE_ID,
                         'links': [
                             {
-                                'href': 'https://api.sandbox.paypal.com/v1/payments/sale/{}'.format(self.SALE_ID),
+                                'href': f'https://api.sandbox.paypal.com/v1/payments/sale/{self.SALE_ID}',
                                 'method': 'GET',
                                 'rel': 'self'
                             },
@@ -970,7 +968,7 @@ class PaypalMixin:
         }
 
         self.mock_api_response(
-            '/v1/payments/payment/{}/execute'.format(self.PAYMENT_ID),
+            f'/v1/payments/payment/{self.PAYMENT_ID}/execute',
             payment_execution_response
         )
 

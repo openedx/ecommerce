@@ -1,9 +1,7 @@
-
-
 import json
 
 import jwt
-import mock
+from unittest import mock
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -28,7 +26,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
     list_path = reverse('api:v2:course-list')
 
     def setUp(self):
-        super(CourseViewSetTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.course = self.create_course()

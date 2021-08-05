@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.db import migrations
 
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE

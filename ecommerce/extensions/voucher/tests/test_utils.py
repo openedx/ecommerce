@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import uuid
 
 import ddt
@@ -66,7 +63,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
     provider = None
 
     def setUp(self):
-        super(UtilTests, self).setUp()
+        super().setUp()
 
         self.user = self.create_user(full_name="Tešt Ušer", is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
@@ -690,7 +687,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         voucher.record_usage(order, self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
 
-        expected_redemed_course_ids = '{}, {}'.format(course1.id, course2.id)
+        expected_redemed_course_ids = f'{course1.id}, {course2.id}'
         self.assertEqual(rows[-1]['Redeemed For Course IDs'], expected_redemed_course_ids)
         self.assertEqual(rows[-1].get('Redeemed For Course ID'), None)
         self.assertIn('Redeemed For Course ID', field_names)

@@ -1,10 +1,8 @@
-
-
 import json
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import requests
 from requests import ConnectionError as ReqConnectionError
 from requests import Timeout
@@ -16,7 +14,7 @@ from ecommerce.tests.testcases import TestCase
 @ddt.ddt
 class UtilTests(TestCase):
     def setUp(self):
-        super(UtilTests, self).setUp()
+        super().setUp()
         self.credit_provider_id = 'HGW'
         self.credit_provider_name = 'Hogwarts'
         self.body = {'display_name': self.credit_provider_name}
@@ -31,7 +29,7 @@ class UtilTests(TestCase):
         Returns:
             Relative URL to the LMS Credit Provider details API endpoint.
         """
-        return 'api/credit/v1/providers/{credit_provider_id}/'.format(credit_provider_id=credit_provider_id)
+        return f'api/credit/v1/providers/{credit_provider_id}/'
 
     @httpretty.activate
     def test_get_credit_provider_details(self):

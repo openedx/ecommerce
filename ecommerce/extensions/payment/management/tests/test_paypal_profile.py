@@ -1,10 +1,8 @@
-
-
 import json
 from io import StringIO
 
 import ddt
-import mock
+from unittest import mock
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
@@ -58,7 +56,7 @@ class TestPaypalProfileCommand(TestCase):
         mock_profile.all.return_value = [self.mock_profile_instance]
         self.call_command_action("list")
         self.assertTrue(mock_profile.all.called)
-        self.check_stdout('[{}]'.format(self.TEST_JSON))
+        self.check_stdout(f'[{self.TEST_JSON}]')
 
     def test_create(self, mock_profile):
         mock_profile.return_value = self.mock_profile_instance

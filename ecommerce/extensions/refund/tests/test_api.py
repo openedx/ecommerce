@@ -1,5 +1,3 @@
-
-
 import ddt
 from django.test import override_settings
 from oscar.core.loading import get_model
@@ -22,7 +20,7 @@ OSCAR_INITIAL_REFUND_LINE_STATUS = 'REFUND_LINE_OPEN'
 @ddt.ddt
 class ApiTests(RefundTestMixin, TestCase):
     def setUp(self):
-        super(ApiTests, self).setUp()
+        super().setUp()
         self.user = UserFactory()
 
     def test_find_orders_associated_with_course(self):

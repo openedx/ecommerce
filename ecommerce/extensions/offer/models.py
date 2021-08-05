@@ -1,4 +1,3 @@
-
 import datetime
 import logging
 import re
@@ -58,11 +57,11 @@ class Benefit(AbstractBenefit):
 
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         self.clean()
-        super(Benefit, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
+        super().save(*args, **kwargs)  # pylint: disable=bad-super-call
 
     def clean(self):
         self.clean_value()
-        super(Benefit, self).clean()  # pylint: disable=bad-super-call
+        super().clean()  # pylint: disable=bad-super-call
 
     def clean_value(self):
         if self.value < 0:
@@ -182,7 +181,7 @@ class Benefit(AbstractBenefit):
                 applicable_lines
             )
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
-        return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
+        return super().get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
 
 class ConditionalOffer(AbstractConditionalOffer):
@@ -232,12 +231,12 @@ class ConditionalOffer(AbstractConditionalOffer):
 
     def save(self, *args, **kwargs):
         self.clean()
-        super(ConditionalOffer, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
+        super().save(*args, **kwargs)  # pylint: disable=bad-super-call
 
     def clean(self):
         self.clean_email_domains()
         self.clean_max_global_applications()  # Our frontend uses the name max_uses instead of max_global_applications
-        super(ConditionalOffer, self).clean()  # pylint: disable=bad-super-call
+        super().clean()  # pylint: disable=bad-super-call
 
     def clean_email_domains(self):
 
@@ -323,7 +322,7 @@ class ConditionalOffer(AbstractConditionalOffer):
         """
         if self.email_domains:
             for domain in self.email_domains.split(','):
-                pattern = r'(?P<username>.+)@(?P<subdomain>\w+\.)*{domain}'.format(domain=domain)
+                pattern = fr'(?P<username>.+)@(?P<subdomain>\w+\.)*{domain}'
                 match = re.match(pattern, email, re.IGNORECASE)
                 if match and match.group(0) == email:
                     return True
@@ -366,7 +365,7 @@ class ConditionalOffer(AbstractConditionalOffer):
 
             return is_satisfied
 
-        return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
+        return super().is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
 
 def validate_credit_seat_type(course_seat_types):
@@ -436,7 +435,7 @@ class Range(AbstractRange):
 
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         self.clean()
-        super(Range, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
+        super().save(*args, **kwargs)  # pylint: disable=bad-super-call
 
     def clean(self):
         """ Validation for model fields. """
@@ -496,7 +495,7 @@ class Range(AbstractRange):
         Assert if the range contains the product.
         """
         # course_catalog is associated with course_seat_types.
-        contains_product = super(Range, self).contains_product(product)  # pylint: disable=bad-super-call
+        contains_product = super().contains_product(product)  # pylint: disable=bad-super-call
         if self.course_catalog and self.course_seat_types:
             # Product certificate type should belongs to range seat types.
             if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
@@ -527,8 +526,8 @@ class Range(AbstractRange):
             return []
         if self.catalog:
             catalog_products = [record.product for record in self.catalog.stock_records.all()]
-            return catalog_products + list(super(Range, self).all_products())  # pylint: disable=bad-super-call
-        return super(Range, self).all_products()  # pylint: disable=bad-super-call
+            return catalog_products + list(super().all_products())  # pylint: disable=bad-super-call
+        return super().all_products()  # pylint: disable=bad-super-call
 
 
 class Condition(AbstractCondition):
@@ -599,7 +598,7 @@ class OfferAssignment(TimeStampedModel):
         ]
 
     def __str__(self):
-        return "{code}-{email}".format(code=self.code, email=self.user_email)
+        return f"{self.code}-{self.user_email}"
 
 
 class OfferAssignmentEmailAttempt(models.Model):

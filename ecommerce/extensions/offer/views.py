@@ -19,7 +19,7 @@ class EmailConfirmationRequiredView(TemplateView):
     template_name = 'edx/email_confirmation_required.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EmailConfirmationRequiredView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         courses = self._get_courses()
         context.update({

@@ -1,5 +1,3 @@
-
-
 from django.test import RequestFactory
 from django.urls import reverse
 from oscar.core.loading import get_class, get_model
@@ -21,7 +19,7 @@ class OrderDetailViewTestMixin(ThrottlingMixin):
         raise NotImplementedError
 
     def setUp(self):
-        super(OrderDetailViewTestMixin, self).setUp()
+        super().setUp()
 
         user = self.create_user()
         self.order = factories.create_order(site=self.site, user=user)
@@ -73,7 +71,7 @@ class ProductSerializerMixin:
         info = Selector().strategy().fetch_for_product(product)
         data.update({
             'is_available_to_buy': info.availability.is_available_to_buy,
-            'price': "{0:.2f}".format(info.price.excl_tax) if info.availability.is_available_to_buy else None
+            'price': f"{info.price.excl_tax:.2f}" if info.availability.is_available_to_buy else None
         })
 
         return data

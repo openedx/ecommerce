@@ -1,5 +1,3 @@
-
-
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
@@ -16,8 +14,8 @@ class RefundSearchForm(UserFormMixin, forms.Form):
     status = forms.MultipleChoiceField(choices=status_choices, label=_('Status'), required=False)
 
     def clean(self):
-        cleaned_data = super(RefundSearchForm, self).clean()
+        cleaned_data = super().clean()
 
         if not cleaned_data.get('status'):
             # If no statuses are specified, default to displaying all those refunds requiring action.
-            cleaned_data['status'] = list(set(Refund.all_statuses()) - set((REFUND.COMPLETE, REFUND.DENIED)))
+            cleaned_data['status'] = list(set(Refund.all_statuses()) - {REFUND.COMPLETE, REFUND.DENIED})

@@ -319,7 +319,7 @@ class SiteConfiguration(models.Model):
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         # Clear Site cache upon SiteConfiguration changed
         Site.objects.clear_cache()
-        super(SiteConfiguration, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def build_ecommerce_url(self, path=''):
         """
@@ -329,7 +329,7 @@ class SiteConfiguration(models.Model):
             str
         """
         scheme = settings.PROTOCOL
-        ecommerce_url_root = "{scheme}://{domain}".format(scheme=scheme, domain=self.site.domain)
+        ecommerce_url_root = f"{scheme}://{self.site.domain}"
         return urljoin(ecommerce_url_root, path)
 
     def build_lms_url(self, path=''):
@@ -352,7 +352,7 @@ class SiteConfiguration(models.Model):
 
     def build_program_dashboard_url(self, uuid):
         """ Returns a URL to a specific student program dashboard (hosted by LMS). """
-        return self.build_lms_url('/dashboard/programs/{}'.format(uuid))
+        return self.build_lms_url(f'/dashboard/programs/{uuid}')
 
     def IDVerification_workflow_url(self, course_id):
         """
@@ -418,12 +418,12 @@ class SiteConfiguration(models.Model):
         Returns:
             str: JWT access token
         """
-        key = 'siteconfiguration_access_token_{}'.format(self.id)
+        key = f'siteconfiguration_access_token_{self.id}'
         access_token_cached_response = TieredCache.get_cached_response(key)
         if access_token_cached_response.is_found:
             return access_token_cached_response.value
 
-        url = '{root}/access_token'.format(root=self.oauth2_provider_url)
+        url = f'{self.oauth2_provider_url}/access_token'
         access_token, expiration_datetime = EdxRestApiClient.get_oauth_access_token(
             url,
             self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_KEY'],  # pylint: disable=unsubscriptable-object
@@ -525,7 +525,7 @@ class User(AbstractUser):
     lms_user_id = models.IntegerField(
         null=True,
         blank=True,
-        help_text=_(u'LMS user id'),
+        help_text=_('LMS user id'),
     )
 
     class Meta:
@@ -544,7 +544,7 @@ class User(AbstractUser):
             edx-oauth2  person@edx.org  123
         """
         try:
-            return self.social_auth.order_by('-id').first().extra_data[u'access_token']  # pylint: disable=no-member
+            return self.social_auth.order_by('-id').first().extra_data['access_token']  # pylint: disable=no-member
         except Exception:  # pylint: disable=broad-except
             return None
 
@@ -614,11 +614,11 @@ class User(AbstractUser):
         # Could not find the lms_user_id
         if allow_missing:
             monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
-            log.info(u'Could not find lms_user_id with metric for user %s for %s. Missing lms_user_id is allowed.',
+            log.info('Could not find lms_user_id with metric for user %s for %s. Missing lms_user_id is allowed.',
                      self.id, usage, exc_info=True)
         else:
             monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
-            log.warning(u'Could not find lms_user_id with metric for user %s for %s.', self.id, usage, exc_info=True)
+            log.warning('Could not find lms_user_id with metric for user %s for %s.', self.id, usage, exc_info=True)
 
         return None
 
@@ -646,7 +646,7 @@ class User(AbstractUser):
             if lms_user_id_social_auth:
                 self.lms_user_id = lms_user_id_social_auth
                 self.save()
-                log.info(u'Saving lms_user_id from social auth with id %s for user %s. Called from %s', social_auth_id,
+                log.info('Saving lms_user_id from social auth with id %s for user %s. Called from %s', social_auth_id,
                          self.id, called_from)
             else:
                 # Could not find the LMS user id
@@ -654,14 +654,14 @@ class User(AbstractUser):
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
                     monitoring_utils.set_custom_metric(missing_metric_key + '_allowed', self.id)
 
-                    error_msg = (u'Could not find lms_user_id for user {user_id}. Missing lms_user_id is allowed. '
-                                 u'Called from {called_from}'.format(user_id=self.id, called_from=called_from))
+                    error_msg = ('Could not find lms_user_id for user {user_id}. Missing lms_user_id is allowed. '
+                                 'Called from {called_from}'.format(user_id=self.id, called_from=called_from))
                     log.info(error_msg, exc_info=True)
                 else:
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
                     monitoring_utils.set_custom_metric(missing_metric_key, self.id)
 
-                    error_msg = u'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
+                    error_msg = 'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
                         user_id=self.id, called_from=called_from)
                     log.error(error_msg, exc_info=True)
 
@@ -680,15 +680,15 @@ class User(AbstractUser):
             auth_entries = self.social_auth.order_by('-id')
             if auth_entries:
                 for auth_entry in auth_entries:
-                    lms_user_id_social_auth = auth_entry.extra_data.get(u'user_id')
+                    lms_user_id_social_auth = auth_entry.extra_data.get('user_id')
                     if lms_user_id_social_auth:
                         return lms_user_id_social_auth, auth_entry.id
         except Exception:  # pylint: disable=broad-except
-            log.warning(u'Exception retrieving lms_user_id from social_auth for user %s.', self.id, exc_info=True)
+            log.warning('Exception retrieving lms_user_id from social_auth for user %s.', self.id, exc_info=True)
         return None, None
 
     def get_full_name(self):
-        return self.full_name or super(User, self).get_full_name()
+        return self.full_name or super().get_full_name()
 
     def account_details(self, request):
         """ Returns the account details from LMS.
@@ -763,7 +763,7 @@ class User(AbstractUser):
             True if the user is verified, false otherwise.
         """
         try:
-            cache_key = 'verification_status_{username}'.format(username=self.username)
+            cache_key = f'verification_status_{self.username}'
             cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
             verification_cached_response = TieredCache.get_cached_response(cache_key)
             if verification_cached_response.is_found:
@@ -782,7 +782,7 @@ class User(AbstractUser):
             log.debug('No verification data found for [%s]', self.username)
             return False
         except (ReqConnectionError, SlumberBaseException, Timeout):
-            msg = 'Failed to retrieve verification status details for [{username}]'.format(username=self.username)
+            msg = f'Failed to retrieve verification status details for [{self.username}]'
             log.warning(msg)
             return False
 
@@ -832,7 +832,7 @@ class BusinessClient(models.Model):
             log_message_and_raise_validation_error(
                 'Failed to create BusinessClient. BusinessClient name may not be empty.'
             )
-        super(BusinessClient, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class EcommerceFeatureRole(UserRole):
@@ -845,7 +845,7 @@ class EcommerceFeatureRole(UserRole):
         """
         Return human-readable string representation.
         """
-        return "<EcommerceFeatureRole {role}>".format(role=self.name)
+        return f"<EcommerceFeatureRole {self.name}>"
 
     def __repr__(self):
         """

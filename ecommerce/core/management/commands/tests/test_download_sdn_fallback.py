@@ -4,7 +4,7 @@ Tests for Django management command to download csv for SDN fallback.
 import requests
 import responses
 from django.core.management import call_command
-from mock import patch
+from unittest.mock import patch
 from testfixtures import LogCapture, StringComparison
 
 from ecommerce.tests.testcases import TestCase

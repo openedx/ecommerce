@@ -1,10 +1,8 @@
-
-
 import ddt
 import httpretty
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
-from mock import patch
+from unittest.mock import patch
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -26,7 +24,7 @@ StockRecord = get_model('partner', 'StockRecord')
 @httpretty.activate
 class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
-        super(EnterpriseAPITests, self).setUp()
+        super().setUp()
         self.course_run = CourseFactory()
         self.learner = self.create_user(is_staff=True)
         self.client.login(username=self.learner.username, password=self.password)

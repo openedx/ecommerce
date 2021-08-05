@@ -1,5 +1,3 @@
-
-
 from decimal import Decimal
 from urllib import parse
 
@@ -7,7 +5,7 @@ import ddt
 import httpretty
 from django.conf import settings
 from django.urls import reverse
-from mock import patch
+from unittest.mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 
@@ -33,7 +31,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     path = reverse('checkout:free-checkout')
 
     def setUp(self):
-        super(FreeCheckoutViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.bundle_attribute_value = TEST_BUNDLE_ID
         self.client.login(username=self.user.username, password=self.password)
@@ -113,7 +111,7 @@ class CancelCheckoutViewTests(TestCase):
     path = reverse('checkout:cancel-checkout')
 
     def setUp(self):
-        super(CancelCheckoutViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -147,7 +145,7 @@ class CheckoutErrorViewTests(TestCase):
     path = reverse('checkout:error')
 
     def setUp(self):
-        super(CheckoutErrorViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -184,7 +182,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     path = reverse('checkout:receipt')
 
     def setUp(self):
-        super(ReceiptResponseViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         # Note: actual response is far more rich. Just including the bits relevant to us
@@ -218,7 +216,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         Returns:
             response (Response): Response object that's returned by a ReceiptResponseView
         """
-        url = '{path}?order_number={order_number}'.format(path=self.path, order_number=order_number)
+        url = f'{self.path}?order_number={order_number}'
         return self.client.get(url)
 
     def _visit_receipt_page_with_another_user(self, order, user):
@@ -302,7 +300,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         order = self.create_order()
         source = factories.SourceFactory(order=order, card_type='Dummy Card', label='Test')
         payment_method = ReceiptResponseView().get_payment_method(order)
-        self.assertEqual(payment_method, '{} {}'.format(source.card_type, source.label))
+        self.assertEqual(payment_method, f'{source.card_type} {source.label}')
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @httpretty.activate
@@ -429,7 +427,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         response = self._get_receipt_response(order.number)
 
         self.assertEqual(response.status_code, 200)
-        order_value_string = 'data-total-amount="{}"'.format(order.total_incl_tax)
+        order_value_string = f'data-total-amount="{order.total_incl_tax}"'
         self.assertContains(response, order_value_string)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
@@ -441,7 +439,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
         self.assertEqual(response.status_code, 200)
         expected_order_product_ids = ','.join(map(str, order.lines.values_list('product_id', flat=True)))
-        expected_order_product_ids_string = 'data-product-ids="{}"'.format(expected_order_product_ids)
+        expected_order_product_ids_string = f'data-product-ids="{expected_order_product_ids}"'
         self.assertContains(response, expected_order_product_ids_string)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
@@ -480,7 +478,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         response = self._get_receipt_response(order.number)
         context_data = {
             'order_dashboard_url': self.site.siteconfiguration.build_lms_url(
-                'dashboard/programs/{}'.format(bundle_id)
+                f'dashboard/programs/{bundle_id}'
             )
         }
 

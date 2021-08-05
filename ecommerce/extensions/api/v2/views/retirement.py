@@ -36,7 +36,7 @@ class EcommerceIdView(APIView):
 
             # If the user does not already have an LMS user id, add it. Note that we allow a missing LMS user id here
             # because this API only reads data from the db.
-            called_from = u'retirement API'
+            called_from = 'retirement API'
             user.add_lms_user_id('ecommerce_missing_lms_user_id_retirement', called_from, allow_missing=True)
 
             return Response(

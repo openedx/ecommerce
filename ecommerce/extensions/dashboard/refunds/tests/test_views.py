@@ -1,5 +1,3 @@
-
-
 from django.urls import reverse
 
 from ecommerce.extensions.refund.status import REFUND
@@ -9,7 +7,7 @@ from ecommerce.tests.testcases import TestCase
 
 class RefundViewTestMixin:
     def setUp(self):
-        super(RefundViewTestMixin, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_superuser=True, is_staff=True)
 
     def assert_successful_response(self, response, refunds=None):
@@ -58,11 +56,11 @@ class RefundListViewTests(RefundViewTestMixin, TestCase):
         self.assert_successful_response(response, [refund, open_refund])
 
         # ID filtering
-        response = self.client.get('{path}?id={id}'.format(path=self.path, id=open_refund.id))
+        response = self.client.get(f'{self.path}?id={open_refund.id}')
         self.assert_successful_response(response, [open_refund])
 
         # Single-choice status filtering
-        response = self.client.get('{path}?status={status}'.format(path=self.path, status=REFUND.COMPLETE))
+        response = self.client.get(f'{self.path}?status={REFUND.COMPLETE}')
         self.assert_successful_response(response, [complete_refund])
 
         # Multiple-choice status filtering
@@ -96,16 +94,16 @@ class RefundListViewTests(RefundViewTestMixin, TestCase):
         refunds = [RefundFactory(), RefundFactory(), RefundFactory()]
         self.client.login(username=self.user.username, password=self.password)
 
-        response = self.client.get('{path}?sort=id&dir=asc'.format(path=self.path))
+        response = self.client.get(f'{self.path}?sort=id&dir=asc')
         self.assert_successful_response(response, refunds)
 
-        response = self.client.get('{path}?sort=id&dir=desc'.format(path=self.path))
+        response = self.client.get(f'{self.path}?sort=id&dir=desc')
         self.assert_successful_response(response, list(reversed(refunds)))
 
 
 class RefundDetailViewTests(RefundViewTestMixin, TestCase):
     def setUp(self):
-        super(RefundDetailViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_superuser=True, is_staff=True)
 
         refund = RefundFactory()

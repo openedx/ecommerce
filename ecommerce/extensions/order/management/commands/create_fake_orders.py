@@ -1,5 +1,3 @@
-
-
 import logging
 
 from django.core.management.base import BaseCommand, CommandError
@@ -55,13 +53,13 @@ class Command(BaseCommand):
             product = stock_record.product
             partner = stock_record.partner
         except StockRecord.DoesNotExist:
-            msg = 'No StockRecord for partner_sku {} exists.'.format(sku)
+            msg = f'No StockRecord for partner_sku {sku} exists.'
             logger.exception(msg)
             raise CommandError(msg)
 
         site = partner.default_site
         if not site:
-            msg = 'No default site exists for partner {}!'.format(partner.id)
+            msg = f'No default site exists for partner {partner.id}!'
             logger.exception(msg)
             raise CommandError(msg)
 

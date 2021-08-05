@@ -25,9 +25,9 @@ class Command(BaseCommand):
         ./manage.py change_priority_of_offers
     """
 
-    help = "Changes conditional offers' priority to {}.".format(OFFER_PRIORITY_VOUCHER)
-    CONFIRMATION_PROMPT = u"You're going to change priority of {count} conditional offer{pluralized}. " \
-                          u"Do you want to continue?"
+    help = f"Changes conditional offers' priority to {OFFER_PRIORITY_VOUCHER}."
+    CONFIRMATION_PROMPT = "You're going to change priority of {count} conditional offer{pluralized}. " \
+                          "Do you want to continue?"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -69,7 +69,7 @@ class Command(BaseCommand):
                 return
 
             line_feed = '\n'
-            offer_names = 'Conditional offers to be updated{line_feed}'.format(line_feed=line_feed)
+            offer_names = f'Conditional offers to be updated{line_feed}'
             for i in range(count):
                 if i == count - 1:
                     line_feed = ''

@@ -1,7 +1,6 @@
 """
 This command generates refunds for orders.
 """
-from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
@@ -41,7 +40,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        order_numbers_file = options[str('order_numbers_file')]
+        order_numbers_file = options['order_numbers_file']
         total_orders, failed_orders = 0, None
         if order_numbers_file:
             if not os.path.exists(order_numbers_file):
@@ -51,10 +50,10 @@ class Command(BaseCommand):
             total_orders, failed_orders = self._create_refunds_from_file(order_numbers_file)
         if failed_orders:
             logger.error(
-                u'[Ecommerce Order Refund]: Completed refund generation. %d of %d failed. '
-                u'Failed orders: \n%s', len(failed_orders), total_orders, '\n'.join(failed_orders))
+                '[Ecommerce Order Refund]: Completed refund generation. %d of %d failed. '
+                'Failed orders: \n%s', len(failed_orders), total_orders, '\n'.join(failed_orders))
         else:
-            logger.info(u'[Ecommerce Order Refund] Generated refunds for the batch of %d orders.', total_orders)
+            logger.info('[Ecommerce Order Refund] Generated refunds for the batch of %d orders.', total_orders)
 
     def _create_refunds_from_file(self, order_numbers_file):
         """
@@ -69,10 +68,10 @@ class Command(BaseCommand):
         """
         failed_orders = []
 
-        with open(order_numbers_file, 'r') as file_handler:
+        with open(order_numbers_file) as file_handler:
             order_numbers = file_handler.readlines()
             total_orders = len(order_numbers)
-            logger.info(u'Creating refund for %d orders.', total_orders)
+            logger.info('Creating refund for %d orders.', total_orders)
             for index, order_number in enumerate(order_numbers, start=1):
                 try:
                     order_number = order_number.strip()
@@ -83,6 +82,6 @@ class Command(BaseCommand):
                 except (Order.DoesNotExist, RefundError, IntegrityError) as e:
                     failed_orders.append(order_number)
                     logger.error(
-                        u'[Ecommerce Order Refund] %d/%d '
-                        u'Failed to generate refund for %s. %s', index, total_orders, order_number, str(e))
+                        '[Ecommerce Order Refund] %d/%d '
+                        'Failed to generate refund for %s. %s', index, total_orders, order_number, str(e))
         return total_orders, failed_orders

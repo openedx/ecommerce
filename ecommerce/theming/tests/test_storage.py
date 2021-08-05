@@ -5,7 +5,7 @@ Tests for comprehensive theme static files storage classes.
 
 from django.conf import settings
 from django.test import override_settings
-from mock import patch
+from unittest.mock import patch
 
 from ecommerce.tests.testcases import TestCase
 from ecommerce.theming.helpers import Theme, get_theme_base_dir
@@ -19,7 +19,7 @@ class TestThemeStorage(TestCase):
     """
 
     def setUp(self):
-        super(TestThemeStorage, self).setUp()
+        super().setUp()
         self.themes_dir = settings.COMPREHENSIVE_THEME_DIRS[0]
         self.enabled_theme = "test-theme"
         self.storage = ThemeStorage(location=self.themes_dir / self.enabled_theme / 'static')

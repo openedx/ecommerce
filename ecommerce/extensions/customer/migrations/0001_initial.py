@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import oscar.models.fields.autoslugfield
 from django.conf import settings
 from django.db import migrations, models

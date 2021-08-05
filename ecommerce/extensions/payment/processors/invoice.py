@@ -18,7 +18,7 @@ class InvoicePayment(BasePaymentProcessor):
     Generate an Invoice for the given basket
     """
 
-    NAME = u'invoice'
+    NAME = 'invoice'
 
     def handle_processor_response(
             self, response, order=None, business_client=None, invoice_data=None

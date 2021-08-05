@@ -1,5 +1,3 @@
-
-
 from django.views.generic import DetailView, ListView
 from oscar.core.loading import get_class, get_model
 from oscar.views import sort_queryset
@@ -20,7 +18,7 @@ class RefundListView(FilterFieldsMixin, ListView):
     form = None
 
     def get_filter_fields(self):
-        fields = super(RefundListView, self).get_filter_fields()
+        fields = super().get_filter_fields()
         fields.update({
             'status': {
                 'query_filter': 'status__in',
@@ -30,7 +28,7 @@ class RefundListView(FilterFieldsMixin, ListView):
         return fields
 
     def get_queryset(self):
-        queryset = super(RefundListView, self).get_queryset()
+        queryset = super().get_queryset()
         queryset = queryset.prefetch_related('lines')
         queryset = sort_queryset(queryset, self.request, ['id', 'created'], 'id')
 
@@ -46,7 +44,7 @@ class RefundListView(FilterFieldsMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(RefundListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['form'] = self.form
         return context
 

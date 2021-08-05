@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from uuid import uuid4
 
 import ddt
@@ -8,7 +5,7 @@ import httpretty
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from edx_django_utils.cache import TieredCache
-from mock import patch
+from unittest.mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -35,7 +32,7 @@ CodeAssignmentNudgeEmailTemplates = get_model('offer', 'CodeAssignmentNudgeEmail
 @httpretty.activate
 class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def setUp(self):
-        super(RangeTests, self).setUp()
+        super().setUp()
 
         self.range = factories.RangeFactory()
         self.range_with_catalog = factories.RangeFactory()
@@ -346,7 +343,7 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     """Tests for custom ConditionalOffer model."""
     def setUp(self):
-        super(ConditionalOfferTests, self).setUp()
+        super().setUp()
 
         self.valid_domain = 'example.com'
         self.valid_sub_domain = 'sub.example2.com'
@@ -373,7 +370,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def test_condition_satisfied(self):
         """Verify a condition is satisfied."""
         self.assertEqual(self.offer.email_domains, self.email_domains)
-        email = 'test@{domain}'.format(domain=self.valid_domain)
+        email = f'test@{self.valid_domain}'
         basket = self.create_basket(email=email)
         self.assertTrue(self.offer.is_condition_satisfied(basket))
 
@@ -385,7 +382,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 
     def test_condition_not_satisfied_for_enterprise(self):
         """Verify a condition is not satisfied."""
-        valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
+        valid_user_email = f'valid@{self.valid_sub_domain}'
         basket = factories.BasketFactory(site=self.site, owner=UserFactory(email=valid_user_email))
 
         _range = factories.RangeFactory(
@@ -404,14 +401,14 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         """
         Verify that a basket satisfies a condition only when all of its products are in its range's catalog queryset.
         """
-        valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
+        valid_user_email = f'valid@{self.valid_sub_domain}'
         basket = factories.BasketFactory(site=self.site, owner=UserFactory(email=valid_user_email))
         product = self.create_entitlement_product()
         another_product = self.create_entitlement_product()
 
         _range = factories.RangeFactory()
         _range.course_seat_types = ','.join(Range.ALLOWED_SEAT_TYPES)
-        _range.catalog_query = 'uuid:{course_uuid}'.format(course_uuid=product.attr.UUID)
+        _range.catalog_query = f'uuid:{product.attr.UUID}'
         benefit = factories.BenefitFactory(range=_range)
         offer = factories.ConditionalOfferFactory(benefit=benefit)
         self.mock_access_token_response()
@@ -434,7 +431,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         """
         Verify that the condition for a single use coupon is only satisfied by single-product baskets.
         """
-        valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
+        valid_user_email = f'valid@{self.valid_sub_domain}'
         basket = factories.BasketFactory(site=self.site, owner=UserFactory(email=valid_user_email))
         product1 = self.create_entitlement_product()
         product2 = self.create_entitlement_product()
@@ -470,10 +467,10 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         invalid_email = 'invalid@email.fake'
         self.assertFalse(self.offer.is_email_valid(invalid_email))
 
-        valid_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
+        valid_email = f'valid@{self.valid_sub_domain}'
         self.assertTrue(self.offer.is_email_valid(valid_email))
 
-        valid_uppercase_email = 'valid@{domain}'.format(domain=self.valid_sub_domain.upper())
+        valid_uppercase_email = f'valid@{self.valid_sub_domain.upper()}'
         self.assertTrue(self.offer.is_email_valid(valid_uppercase_email))
 
         no_email_offer = factories.ConditionalOffer()
@@ -481,13 +478,13 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 
     def test_is_email_with_sub_domain_valid(self):
         """Verify method returns True for valid email domains with sub domain."""
-        invalid_email = 'test@test{domain}'.format(domain=self.valid_sub_domain)  # test@testsub.example2.com
+        invalid_email = f'test@test{self.valid_sub_domain}'  # test@testsub.example2.com
         self.assertFalse(self.offer.is_email_valid(invalid_email))
 
-        valid_email = 'test@{domain}'.format(domain=self.valid_sub_domain)
+        valid_email = f'test@{self.valid_sub_domain}'
         self.assertTrue(self.offer.is_email_valid(valid_email))
 
-        valid_email_2 = 'test@sub2.{domain}'.format(domain=self.valid_domain)
+        valid_email_2 = f'test@sub2.{self.valid_domain}'
         self.assertTrue(self.offer.is_email_valid(valid_email_2))
 
     @ddt.data(
@@ -534,7 +531,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 
 class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def setUp(self):
-        super(BenefitTests, self).setUp()
+        super().setUp()
 
         _range = factories.RangeFactory(
             course_seat_types=','.join(Range.ALLOWED_SEAT_TYPES[1:]),
@@ -618,7 +615,7 @@ class TestOfferAssignmentEmailSentRecord(TestCase):
         """
         template = self._create_template(enterprise_customer, email_type)
         email_record = self._create_email_sent_record(enterprise_customer, email_type, template)
-        expected_str = '{ec}-{email_type}'.format(ec=enterprise_customer, email_type=email_type)
+        expected_str = f'{enterprise_customer}-{email_type}'
         assert expected_str == email_record.__str__()
 
     @ddt.data(

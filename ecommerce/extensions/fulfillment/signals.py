@@ -1,5 +1,3 @@
-
-
 from django.dispatch import receiver
 from oscar.core.loading import get_class, get_model
 

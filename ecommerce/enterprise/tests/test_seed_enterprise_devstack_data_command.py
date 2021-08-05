@@ -1,4 +1,3 @@
-# encoding: utf-8
 """
 Contains the tests for creating an coupon associated with enterprise customer and catalog.
 """
@@ -6,7 +5,7 @@ from uuid import uuid4
 
 from django.core.management import call_command
 from django.utils.timezone import now
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from oscar.core.loading import get_model
 from oscar.test.factories import CategoryFactory
 
@@ -32,7 +31,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         """
         Set up initial data (e.g., site configuration, category) prior to running tests
         """
-        super(SeedEnterpriseDevstackDataTests, self).setUp()
+        super().setUp()
         self.site_config = SiteConfigurationFactory.create(
             oauth_settings=self.site_oauth_settings,
         )
@@ -67,7 +66,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
     @patch.object(seed_command, 'get_access_token')
     def test_get_headers(self, mock_get_access_token):
         """ Verify `get_headers` returns the correct value """
-        expected = {'Authorization': 'JWT {}'.format(self.access_token)}
+        expected = {'Authorization': f'JWT {self.access_token}'}
         mock_get_access_token.return_value = (self.access_token, now())
         result = self.command.get_headers()
         assert result == expected
@@ -75,7 +74,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
     @patch('requests.get')
     def test_get_enterprise_customer(self, mock_request):
         """ Verify `get_enterprise_customer` returns the correct value """
-        url = '{}enterprise-customer/'.format(self.command.site.enterprise_api_url)
+        url = f'{self.command.site.enterprise_api_url}enterprise-customer/'
         expected = {'uuid': self.ent_customer_uuid}
         mock_request.return_value = Mock(
             status_code=200,
@@ -102,7 +101,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         Verify `get_enterprise_customer` returns the correct value and
         does not make a request
         """
-        url = '{}enterprise-customer/'.format(self.command.site.enterprise_api_url)
+        url = f'{self.command.site.enterprise_api_url}enterprise-customer/'
         mock_request.return_value = Mock(
             status_code=200,
             json=lambda: {'results': []},
@@ -115,7 +114,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
     @patch('requests.get')
     def test_get_enterprise_catalog(self, mock_request):
         """ Verify `get_enterprise_catalog` returns the correct value """
-        url = '{}enterprise_catalogs/'.format(self.command.site.enterprise_api_url)
+        url = f'{self.command.site.enterprise_api_url}enterprise_catalogs/'
         self.command.enterprise_customer = {'uuid': self.ent_customer_uuid}
         expected = {'uuid': self.ent_catalog_uuid}
         mock_request.return_value = Mock(
@@ -136,7 +135,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         Verify `get_enterprise_catalog` does not make a request when
         there is no enterprise customer
         """
-        url = '{}enterprise_catalogs/'.format(self.command.site.enterprise_api_url)
+        url = f'{self.command.site.enterprise_api_url}enterprise_catalogs/'
         self.command.get_enterprise_catalog(url=url)
         mock_request.assert_not_called()
 
@@ -146,7 +145,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         Verify `get_enterprise_catalog` returns the correct value when
         there is no catalog returned
         """
-        url = '{}enterprise_catalogs/'.format(self.command.site.enterprise_api_url)
+        url = f'{self.command.site.enterprise_api_url}enterprise_catalogs/'
         self.command.enterprise_customer = {'uuid': self.ent_customer_uuid}
         mock_request.return_value = Mock(
             status_code=200,
@@ -306,8 +305,8 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
             status_code=200,
             json=lambda: expected,
         )
-        call_command('seed_enterprise_devstack_data', '--enterprise-customer={}'.format(self.ent_customer_uuid))
-        url = '{}enterprise-customer/'.format(self.command.site.enterprise_api_url)
+        call_command('seed_enterprise_devstack_data', f'--enterprise-customer={self.ent_customer_uuid}')
+        url = f'{self.command.site.enterprise_api_url}enterprise-customer/'
         mock_ent_customer.assert_called_with(
             enterprise_customer_uuid=self.ent_customer_uuid,
             url=url,

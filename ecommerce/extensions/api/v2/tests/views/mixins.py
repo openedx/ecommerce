@@ -1,5 +1,3 @@
-
-
 from django.urls import reverse
 from oscar.core.loading import get_model
 
@@ -14,7 +12,7 @@ class CatalogMixin(DiscoveryTestMixin):
     """Provide methods for Catalog test cases."""
 
     def setUp(self):
-        super(CatalogMixin, self).setUp()
+        super().setUp()
         # Create the user with staff access.
         self.user = self.create_user(is_staff=True)
 

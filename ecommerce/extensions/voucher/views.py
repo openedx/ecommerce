@@ -1,5 +1,3 @@
-
-
 import csv
 import logging
 
@@ -36,12 +34,12 @@ class CouponReportCSVView(StaffOnlyMixin, View):
         try:
             field_names, rows = generate_coupon_report(coupons_vouchers)
         except StockRecord.DoesNotExist:
-            logger.exception(u'Failed to find StockRecord for Coupon [%d].', coupon.id)
+            logger.exception('Failed to find StockRecord for Coupon [%d].', coupon.id)
             return HttpResponse(_('Failed to find a matching stock record for coupon, report download canceled.'),
                                 status=404)
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+        response['Content-Disposition'] = f'attachment; filename={filename}'
 
         writer = csv.DictWriter(response, fieldnames=field_names)
         writer.writeheader()

@@ -1,11 +1,9 @@
-
-
 import datetime
 import json
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.utils import timezone
 from oscar.core.loading import get_model
 from requests import Timeout
@@ -27,7 +25,7 @@ StockRecord = get_model('partner', 'StockRecord')
 @ddt.ddt
 class LMSPublisherTests(DiscoveryTestMixin, TestCase):
     def setUp(self):
-        super(LMSPublisherTests, self).setUp()
+        super().setUp()
 
         httpretty.enable()
         self.mock_access_token_response()
@@ -39,10 +37,10 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         self.course.create_or_update_seat('honor', False, 0)
         self.course.create_or_update_seat('verified', True, 50)
         self.publisher = LMSPublisher()
-        self.error_message = 'Failed to publish commerce data for {course_id} to LMS.'.format(course_id=self.course.id)
+        self.error_message = f'Failed to publish commerce data for {self.course.id} to LMS.'
 
     def tearDown(self):
-        super(LMSPublisherTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 
@@ -50,13 +48,13 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Commerce API calls.')
 
         body = body or {}
-        url = self.site_configuration.build_lms_url('/api/commerce/v1/courses/{}/'.format(self.course.id))
+        url = self.site_configuration.build_lms_url(f'/api/commerce/v1/courses/{self.course.id}/')
         httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body), content_type=JSON)
 
     def mock_creditcourse_endpoint(self, course_id, status, body=None):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Credit API calls.')
 
-        url = get_lms_url('/api/credit/v1/courses/{}/'.format(course_id))
+        url = get_lms_url(f'/api/credit/v1/courses/{course_id}/')
         httpretty.register_uri(
             httpretty.PUT,
             url,
@@ -74,7 +72,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
                 logger.check(
                     (
                         LOGGER_NAME, 'ERROR',
-                        'Failed to publish commerce data for [{course_id}] to LMS.'.format(course_id=self.course.id)
+                        f'Failed to publish commerce data for [{self.course.id}] to LMS.'
                     )
                 )
                 self.assertEqual(actual, self.error_message)
@@ -106,7 +104,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
             response = self.publisher.publish(self.course)
             self.assertIsNone(response)
 
-            logger.check((LOGGER_NAME, 'INFO', 'Successfully published commerce data for [{}].'.format(self.course.id)))
+            logger.check((LOGGER_NAME, 'INFO', f'Successfully published commerce data for [{self.course.id}].'))
 
         last_request = httpretty.last_request()
 
@@ -203,7 +201,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
     def assert_creditcourse_endpoint_called(self):
         """ Verify the Credit API's CreditCourse endpoint was called. """
         paths = [request.path for request in httpretty.httpretty.latest_requests]
-        self.assertIn('/api/credit/v1/courses/{}/'.format(self.course.id), paths)
+        self.assertIn(f'/api/credit/v1/courses/{self.course.id}/', paths)
 
     def test_credit_publication_success(self):
         """ Verify the endpoint returns successfully when credit publication succeeds. """
@@ -223,7 +221,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
                            'Status was [{status}]. Body was [null].'.format(course_id=course_id, status=status)
             logger.check((LOGGER_NAME, 'ERROR', expected_log))
 
-        expected = 'Failed to publish commerce data for {} to LMS.'.format(course_id)
+        expected = f'Failed to publish commerce data for {course_id} to LMS.'
         self.assertEqual(actual, expected)
         self.assert_creditcourse_endpoint_called()
 
@@ -231,5 +229,5 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
     def test_credit_publication_uncaught_exception(self):
         """ Verify the endpoint fails appropriately when the Credit API fails unexpectedly. """
         actual = self.attempt_credit_publication(500)
-        expected = 'Failed to publish commerce data for {} to LMS.'.format(self.course.id)
+        expected = f'Failed to publish commerce data for {self.course.id} to LMS.'
         self.assertEqual(actual, expected)

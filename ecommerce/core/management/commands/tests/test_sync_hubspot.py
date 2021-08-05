@@ -9,7 +9,7 @@ from io import StringIO
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from factory.django import get_model
-from mock import patch
+from unittest.mock import patch
 from slumber.exceptions import HttpClientError
 
 from ecommerce.core.management.commands.sync_hubspot import Command as sync_command
@@ -31,7 +31,7 @@ class TestSyncHubspotCommand(TestCase):
     hubspot_site_configuration = None
 
     def setUp(self):
-        super(TestSyncHubspotCommand, self).setUp()
+        super().setUp()
         self.hubspot_site_configuration = SiteConfigurationFactory.create(
             hubspot_secret_key='test_key',
         )
@@ -60,13 +60,13 @@ class TestSyncHubspotCommand(TestCase):
         site also update the order's product's title.
         """
         order = create_order(
-            number="order-{order_number}".format(order_number=order_number),
+            number=f"order-{order_number}",
             site=site,
             user=UserFactory()
         )
         order_line = order.lines.first()
         product = order_line.product
-        product.title = "product-title-{order_number}".format(order_number=order_number)
+        product.title = f"product-title-{order_number}"
         product.save()
         basket = order.basket
         basket.date_created = self._get_date(days=2)
@@ -119,7 +119,7 @@ class TestSyncHubspotCommand(TestCase):
         with patch.object(sync_command, '_get_unsynced_carts', return_value=None):
             output = self._get_command_output()
             self.assertIn(
-                'No data found to sync for site {site}'.format(site=self.hubspot_site_configuration.site.domain),
+                f'No data found to sync for site {self.hubspot_site_configuration.site.domain}',
                 output
             )
             self.assertEqual(mocked_hubspot.call_count, 3)

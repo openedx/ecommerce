@@ -1,9 +1,7 @@
-
-
 import stripe
 from django.conf import settings
 from django.urls import reverse
-from mock import mock
+from unittest.mock import mock
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BillingAddressFactory
 
@@ -34,7 +32,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
     path = reverse('stripe:submit')
 
     def setUp(self):
-        super(StripeSubmitViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 

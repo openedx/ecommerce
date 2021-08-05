@@ -136,7 +136,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
             AttributeError: If LANGUAGE_CODE setting is not set.
         """
 
-        super(CybersourceREST, self).__init__(site)
+        super().__init__(site)
         configuration = self.configuration
         self.soap_api_url = configuration['soap_api_url']
         self.merchant_id = configuration['merchant_id']
@@ -444,7 +444,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
             )
 
         except:
-            msg = 'An error occurred while authorizing an Apple Pay (via CyberSource) for basket [{}]'.format(basket.id)
+            msg = f'An error occurred while authorizing an Apple Pay (via CyberSource) for basket [{basket.id}]'
             logger.exception(msg)
             raise GatewayError(msg)
 
@@ -715,7 +715,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
         if program_uuid:
             programInfo = Ptsv2paymentsMerchantDefinedInformation(
                 key="1",
-                value="program,{program_uuid}".format(program_uuid=program_uuid)
+                value=f"program,{program_uuid}"
             )
             merchantDefinedInformation.append(programInfo.__dict__)
 

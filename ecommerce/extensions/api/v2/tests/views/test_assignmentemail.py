@@ -1,5 +1,3 @@
-
-
 import json
 import logging
 
@@ -20,7 +18,7 @@ class AssignmentEmailStatusTests(TestCase):
     path = reverse('api:v2:assignment-email:update_status')
 
     def setUp(self):
-        super(AssignmentEmailStatusTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 

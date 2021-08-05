@@ -139,7 +139,7 @@ class SDNClient:
             api_url=self.api_url,
             params=params
         )
-        auth_header = {'Authorization': 'Bearer {}'.format(self.api_key)}
+        auth_header = {'Authorization': f'Bearer {self.api_key}'}
 
         try:
             response = requests.get(

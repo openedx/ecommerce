@@ -69,7 +69,7 @@ class Command(BaseCommand):
             num = course_settings["number"]
             run = course_settings["run"]
             course_name = course_settings["fields"]["display_name"]
-            course_id = "course-v1:{org}+{num}+{run}".format(org=org, num=num, run=run)
+            course_id = f"course-v1:{org}+{num}+{run}"
             defaults = {'name': course_name}
             course, __ = Course.objects.update_or_create(id=course_id, partner=partner, defaults=defaults)
             logger.info("Created course with id %s", course.id)

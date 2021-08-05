@@ -1,5 +1,3 @@
-
-
 import logging
 
 from django.conf import settings
@@ -193,10 +191,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         notify_email = request_data.get('notify_email')
 
         if benefit_type not in (Benefit.PERCENTAGE, Benefit.FIXED,):
-            raise ValidationError('Benefit type [{type}] is not allowed'.format(type=benefit_type))
+            raise ValidationError(f'Benefit type [{benefit_type}] is not allowed')
 
         if code and Voucher.does_exist(code):
-            validation_message = 'A coupon with code {code} already exists.'.format(code=code)
+            validation_message = f'A coupon with code {code} already exists.'
             raise ValidationError(validation_message)
 
         if course_seat_types:
@@ -291,7 +289,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         stock_records_string = ' '.join(str(id) for id in stock_record_ids)
         coupon_catalog, __ = get_or_create_catalog(
-            name='Catalog for stock records: {}'.format(stock_records_string),
+            name=f'Catalog for stock records: {stock_records_string}',
             partner=partner,
             stock_record_ids=stock_record_ids
         )
@@ -342,7 +340,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         """Update coupon depending on request data sent."""
         try:
-            super(CouponViewSet, self).update(request, *args, **kwargs)
+            super().update(request, *args, **kwargs)
             coupon = self.get_object()
             vouchers = coupon.attr.coupon_vouchers.vouchers.all()
             self.update_voucher_data(request.data, vouchers)

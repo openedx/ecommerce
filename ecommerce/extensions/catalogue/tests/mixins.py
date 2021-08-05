@@ -1,5 +1,3 @@
-
-
 import logging
 from uuid import uuid4
 
@@ -32,7 +30,7 @@ class DiscoveryTestMixin:
     """
 
     def setUp(self):
-        super(DiscoveryTestMixin, self).setUp()
+        super().setUp()
 
         # Force the creation of a seat ProductClass
         self.entitlement_product_class  # pylint: disable=pointless-statement

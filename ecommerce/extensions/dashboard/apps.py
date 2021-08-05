@@ -1,5 +1,3 @@
-
-
 from django.apps import apps
 from django.conf.urls import include, url
 from oscar.apps.dashboard.apps import DashboardConfig as BaseDashboardConfig

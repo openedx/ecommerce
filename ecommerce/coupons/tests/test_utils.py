@@ -1,11 +1,9 @@
-
-
 from datetime import datetime
 
 import ddt
 import httpretty
 from edx_django_utils.cache import TieredCache
-from mock import patch
+from unittest.mock import patch
 from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
 from pytz import UTC
 
@@ -30,7 +28,7 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
         """
         Setup variables for test cases.
         """
-        super(CouponUtilsTests, self).setUp()
+        super().setUp()
 
         self.user = self.create_user(email='test@tester.fake')
         self.request.user = self.user

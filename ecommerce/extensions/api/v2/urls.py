@@ -1,5 +1,3 @@
-
-
 from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_extensions.routers import ExtendedSimpleRouter as SimpleRouter
@@ -30,17 +28,17 @@ BASKET_ID_PATTERN = r'(?P<basket_id>[\d]+)'
 
 # From edx-platform's lms/envs/common.py as of 2018-10-09
 USERNAME_REGEX_PARTIAL = r'[\w .@_+-]+'
-USERNAME_PATTERN = r'(?P<username>{regex})'.format(regex=USERNAME_REGEX_PARTIAL)
+USERNAME_PATTERN = fr'(?P<username>{USERNAME_REGEX_PARTIAL})'
 
 BASKET_URLS = [
     url(r'^$', basket_views.BasketCreateView.as_view(), name='create'),
     url(
-        r'^{basket_id}/$'.format(basket_id=BASKET_ID_PATTERN),
+        fr'^{BASKET_ID_PATTERN}/$',
         basket_views.BasketDestroyView.as_view(),
         name='destroy'
     ),
     url(
-        r'^{basket_id}/order/$'.format(basket_id=BASKET_ID_PATTERN),
+        fr'^{BASKET_ID_PATTERN}/order/$',
         basket_views.OrderByBasketRetrieveView.as_view(),
         name='retrieve_order'
     ),
@@ -57,7 +55,7 @@ REFUND_URLS = [
 ]
 
 RETIREMENT_URLS = [
-    url(r'^tracking_id/{}/$'.format(USERNAME_PATTERN), retirement_views.EcommerceIdView.as_view(), name='tracking_id')
+    url(fr'^tracking_id/{USERNAME_PATTERN}/$', retirement_views.EcommerceIdView.as_view(), name='tracking_id')
 ]
 
 COUPON_URLS = [
@@ -72,7 +70,7 @@ CHECKOUT_URLS = [
 ATOMIC_PUBLICATION_URLS = [
     url(r'^$', publication_views.AtomicPublicationView.as_view(), name='create'),
     url(
-        r'^{course_id}$'.format(course_id=COURSE_ID_PATTERN),
+        fr'^{COURSE_ID_PATTERN}$',
         publication_views.AtomicPublicationView.as_view(),
         name='update'
     ),
@@ -131,7 +129,7 @@ router.register(
     basename='enterprise-offer-assignment-summary',
 )
 router.register(
-    r'enterprise/offer-assignment-email-template/(?P<enterprise_customer>{})'.format(UUID_REGEX_PATTERN),
+    fr'enterprise/offer-assignment-email-template/(?P<enterprise_customer>{UUID_REGEX_PATTERN})',
     enterprise_views.OfferAssignmentEmailTemplatesViewSet,
     basename='enterprise-offer-assignment-email-template',
 )

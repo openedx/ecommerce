@@ -1,8 +1,6 @@
-
-
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 from requests import Timeout
@@ -23,7 +21,7 @@ LOGGER_NAME = 'ecommerce.programs.conditions'
 @ddt.ddt
 class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def setUp(self):
-        super(ProgramCourseRunSeatsConditionTests, self).setUp()
+        super().setUp()
         self.condition = factories.ProgramCourseRunSeatsConditionFactory()
         self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
         self.site.siteconfiguration.enable_partial_program = True
@@ -31,7 +29,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def test_name(self):
         """ The name should contain the program's UUID. """
         condition = factories.ProgramCourseRunSeatsConditionFactory()
-        expected = 'Basket contains a seat for every course in program {}'.format(condition.program_uuid)
+        expected = f'Basket contains a seat for every course in program {condition.program_uuid}'
         self.assertEqual(condition.name, expected)
 
     @httpretty.activate

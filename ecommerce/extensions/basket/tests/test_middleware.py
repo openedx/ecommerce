@@ -1,6 +1,4 @@
-
-
-import mock
+from unittest import mock
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse
@@ -20,7 +18,7 @@ class BasketMiddlewareTests(TestCase):
         return HttpResponse()
 
     def setUp(self):
-        super(BasketMiddlewareTests, self).setUp()
+        super().setUp()
         self.middleware = middleware.BasketMiddleware(self.get_response_for_test)
         self.request = RequestFactory().get('/')
         self.request.user = AnonymousUser()
@@ -99,5 +97,5 @@ class BasketMiddlewareTests(TestCase):
 
     def test_get_cookie_key(self):
         """ Verify the method returns a site-specific key. """
-        expected = '{base}_{site_id}'.format(base=settings.OSCAR_BASKET_COOKIE_OPEN, site_id=self.site.id)
+        expected = f'{settings.OSCAR_BASKET_COOKIE_OPEN}_{self.site.id}'
         self.assertEqual(self.middleware.get_cookie_key(self.request), expected)

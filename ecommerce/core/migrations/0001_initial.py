@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import django.utils.timezone
 import jsonfield.fields
 from django.db import migrations, models

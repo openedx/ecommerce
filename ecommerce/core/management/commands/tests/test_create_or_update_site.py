@@ -1,5 +1,3 @@
-
-
 from ddt import data, ddt
 from django.contrib.sites.models import Site
 from django.core.management import CommandError, call_command
@@ -16,7 +14,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
     command_name = 'create_or_update_site'
 
     def setUp(self):
-        super(CreateOrUpdateSiteCommandTests, self).setUp()
+        super().setUp()
 
         self.partner = 'fake'
         self.lms_url_root = 'http://fake.server'
@@ -111,35 +109,35 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         """
         # Required arguments
         command_args = [
-            '--site-domain={site_domain}'.format(site_domain=site_domain),
-            '--partner-code={partner_code}'.format(partner_code=partner_code),
-            '--lms-url-root={lms_url_root}'.format(lms_url_root=lms_url_root),
-            '--sso-client-id={}'.format(sso_client_id),
-            '--sso-client-secret={}'.format(sso_client_secret),
-            '--backend-service-client-id={}'.format(backend_service_client_id),
-            '--backend-service-client-secret={}'.format(backend_service_client_secret),
-            '--from-email={from_email}'.format(from_email=from_email)
+            f'--site-domain={site_domain}',
+            f'--partner-code={partner_code}',
+            f'--lms-url-root={lms_url_root}',
+            f'--sso-client-id={sso_client_id}',
+            f'--sso-client-secret={sso_client_secret}',
+            f'--backend-service-client-id={backend_service_client_id}',
+            f'--backend-service-client-secret={backend_service_client_secret}',
+            f'--from-email={from_email}'
         ]
 
         # Optional arguments
         if site_id:
-            command_args.append('--site-id={site_id}'.format(site_id=site_id))
+            command_args.append(f'--site-id={site_id}')
         if site_name:
-            command_args.append('--site-name={site_name}'.format(site_name=site_name))
+            command_args.append(f'--site-name={site_name}')
         if lms_public_url_root:
             command_args.append('--lms-public-url-root={lms_public_url_root}'.format(
                 lms_public_url_root=lms_public_url_root
             ))
         if partner_name:
-            command_args.append('--partner-name={partner_name}'.format(partner_name=partner_name))
+            command_args.append(f'--partner-name={partner_name}')
         if payment_processors:
             command_args.append('--payment-processors={payment_processors}'.format(
                 payment_processors=payment_processors
             ))
         if client_side_payment_processor:
-            command_args.append('--client-side-payment-processor={}'.format(client_side_payment_processor))
+            command_args.append(f'--client-side-payment-processor={client_side_payment_processor}')
         if segment_key:
-            command_args.append('--segment-key={segment_key}'.format(segment_key=segment_key))
+            command_args.append(f'--segment-key={segment_key}')
         if enable_enrollment_codes:
             command_args.append('--enable-enrollment-codes={enable_enrollment_codes}'.format(
                 enable_enrollment_codes=enable_enrollment_codes

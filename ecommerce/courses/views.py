@@ -1,5 +1,3 @@
-
-
 import json
 import logging
 import os
@@ -22,7 +20,7 @@ class CourseAppView(StaffOnlyMixin, TemplateView):
     template_name = 'courses/course_app.html'
 
     def get_context_data(self, **kwargs):
-        context = super(CourseAppView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['admin'] = 'course'
 
         user = self.request.user
@@ -63,7 +61,7 @@ class CourseMigrationView(View):
         if not request.user.is_superuser:
             raise Http404
 
-        return super(CourseMigrationView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *_args, **_kwargs):
         course_ids = request.GET.get('course_ids')
@@ -83,11 +81,11 @@ class CourseMigrationView(View):
 
         try:
             # Log who ran this request
-            msg = u'User [%s] requested course migration for [%s]. '
+            msg = 'User [%s] requested course migration for [%s]. '
             if commit:
-                msg += u'The changes will be committed to the database.'
+                msg += 'The changes will be committed to the database.'
             else:
-                msg += u'The changes will NOT be committed to the database.'
+                msg += 'The changes will NOT be committed to the database.'
 
             user = request.user
             logger.info(msg, user.username, course_ids)
@@ -101,7 +99,7 @@ class CourseMigrationView(View):
                          stdout=out, stderr=err)
 
             # Format the output for display
-            output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
+            output = 'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
                                                                             log=log.getvalue())
 
             return HttpResponse(output, content_type='text/plain')
@@ -118,7 +116,7 @@ class ConvertCourseView(View):
         if not request.user.is_superuser:
             raise Http404
 
-        return super(ConvertCourseView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *_args, **_kwargs):
         course_ids = request.GET.get('course_ids')
@@ -140,11 +138,11 @@ class ConvertCourseView(View):
 
         try:
             # Log who ran this request
-            msg = u'User [%s] requested conversion of honor seats to audit seats for [%s]. '
+            msg = 'User [%s] requested conversion of honor seats to audit seats for [%s]. '
             if commit:  # pragma: no cover
-                msg += u'The changes will be committed to the database.'
+                msg += 'The changes will be committed to the database.'
             else:
-                msg += u'The changes will NOT be committed to the database.'
+                msg += 'The changes will NOT be committed to the database.'
 
             user = request.user
             logger.info(msg, user.username, course_ids)
@@ -160,7 +158,7 @@ class ConvertCourseView(View):
             )
 
             # Format the output for display
-            output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
+            output = 'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
                                                                             log=log.getvalue())
 
             return HttpResponse(output, content_type='text/plain')

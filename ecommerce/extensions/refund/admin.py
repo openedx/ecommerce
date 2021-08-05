@@ -1,5 +1,3 @@
-
-
 import waffle
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
@@ -40,7 +38,7 @@ class RefundAdmin(ObjectPermissionsModelAdmin):
             self.message_user(request, msg, level=messages.WARNING)
             return Refund.objects.none()
 
-        queryset = super(RefundAdmin, self).get_queryset(request)
+        queryset = super().get_queryset(request)
         return queryset
 
     def get_object(self, request, object_id, from_field=None):
@@ -58,4 +56,4 @@ class RefundAdmin(ObjectPermissionsModelAdmin):
             except (Refund.DoesNotExist, ValidationError, ValueError):
                 return None
 
-        return super(RefundAdmin, self).get_object(request, object_id, from_field=from_field)
+        return super().get_object(request, object_id, from_field=from_field)

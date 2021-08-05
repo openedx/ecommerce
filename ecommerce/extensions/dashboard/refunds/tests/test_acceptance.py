@@ -1,5 +1,3 @@
-
-
 import os
 from unittest import SkipTest, skip
 
@@ -34,20 +32,20 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
 
         cls.selenium = browser()
         cls.selenium.set_page_load_timeout(30)
-        super(RefundAcceptanceTestMixin, cls).setUpClass()
+        super().setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
-        super(RefundAcceptanceTestMixin, cls).tearDownClass()
+        super().tearDownClass()
 
     def setUp(self):
-        super(RefundAcceptanceTestMixin, self).setUp()
+        super().setUp()
 
         self.refund = self.create_refund()
 
-        self.approve_button_selector = '[data-refund-id="{}"] [data-decision="approve"]'.format(self.refund.id)
-        self.deny_button_selector = '[data-refund-id="{}"] [data-decision="deny"]'.format(self.refund.id)
+        self.approve_button_selector = f'[data-refund-id="{self.refund.id}"] [data-decision="approve"]'
+        self.deny_button_selector = f'[data-refund-id="{self.refund.id}"] [data-decision="deny"]'
 
         self.password = 'test'
         self.user = UserFactory(password=self.password, is_superuser=True, is_staff=True)
@@ -113,7 +111,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         )
 
         # Verify that the refund's status is updated.
-        selector = 'tr[data-refund-id="{}"] .refund-status'.format(self.refund.id)
+        selector = f'tr[data-refund-id="{self.refund.id}"] .refund-status'
         status = self.selenium.find_element_by_css_selector(selector)
         if approve:
             self.assertEqual(REFUND.COMPLETE, status.text)
@@ -121,7 +119,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
             self.assertEqual(REFUND.DENIED, status.text)
 
         # Verify that an alert is displayed.
-        self.assert_alert_displayed('alert-success', 'Refund {} has been processed.'.format(self.refund.id))
+        self.assert_alert_displayed('alert-success', f'Refund {self.refund.id} has been processed.')
 
     @skip("This test is flaky in CI.  Move to e2e and re-enable under ticket XCOM-342.")
     @ddt.data(True, False)
@@ -157,7 +155,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
             )
 
         # Verify that the refund's status is updated.
-        selector = 'tr[data-refund-id="{}"] .refund-status'.format(refund_id)
+        selector = f'tr[data-refund-id="{refund_id}"] .refund-status'
         status = self.selenium.find_element_by_css_selector(selector)
         self.assertEqual('Error', status.text)
 
@@ -221,7 +219,7 @@ class RefundListViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
     """Acceptance tests of the refund list view."""
 
     def setUp(self):
-        super(RefundListViewTests, self).setUp()
+        super().setUp()
         self.path = reverse('dashboard:refunds-list')
 
 
@@ -229,5 +227,5 @@ class RefundDetailViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
     """Acceptance tests of the refund detail view."""
 
     def setUp(self):
-        super(RefundDetailViewTests, self).setUp()
+        super().setUp()
         self.path = reverse('dashboard:refunds-detail', args=[self.refund.id])

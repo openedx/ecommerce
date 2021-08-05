@@ -2,7 +2,7 @@
 
 
 import ddt
-import mock
+from unittest import mock
 import responses
 from django.test.client import RequestFactory
 from django.urls import reverse
@@ -52,7 +52,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
     """Test handling of users redirected by PayPal after approving payment."""
 
     def setUp(self):
-        super(PaypalPaymentExecutionViewTests, self).setUp()
+        super().setUp()
         self.price = '100.0'
         self.user = self.create_user()
         self.seat_product_class, __ = ProductClass.objects.get_or_create(name=SEAT_PRODUCT_CLASS_NAME)
@@ -257,7 +257,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                     (
                         logger_name,
                         'ERROR',
-                        'Attempts to handle payment for basket [{basket_id}] failed.'.format(basket_id=self.basket.id)
+                        f'Attempts to handle payment for basket [{self.basket.id}] failed.'
                     ),
                 )
 
@@ -328,7 +328,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 (
                     logger_name,
                     'WARNING',
-                    'Duplicate payment ID [{payment_id}] received from PayPal.'.format(payment_id=self.PAYMENT_ID),
+                    f'Duplicate payment ID [{self.PAYMENT_ID}] received from PayPal.',
                 ),
             )
 

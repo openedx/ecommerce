@@ -79,7 +79,7 @@ def middle_truncate(provided_string, chars):
 
     slice_size = (chars - indicator_length) // 2
     start, end = provided_string[:slice_size], provided_string[-slice_size:]
-    truncated = u'{start}{indicator}{end}'.format(start=start, indicator=indicator, end=end)
+    truncated = f'{start}{indicator}{end}'
 
     return truncated
 

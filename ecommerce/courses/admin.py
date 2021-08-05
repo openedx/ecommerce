@@ -1,5 +1,3 @@
-
-
 from django.contrib import admin
 
 from ecommerce.courses.models import Course

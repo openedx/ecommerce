@@ -1,5 +1,3 @@
-
-
 from io import StringIO
 
 from django.contrib.sites.models import Site
@@ -18,7 +16,7 @@ class DeleteOrderedBasketsCommandTests(TestCase):
     command = 'delete_ordered_baskets'
 
     def setUp(self):
-        super(DeleteOrderedBasketsCommandTests, self).setUp()
+        super().setUp()
 
         # Create baskets with and without orders
         self.orders = [create_order() for __ in range(0, 2)]
@@ -82,7 +80,7 @@ class AddSiteToBasketsBasketsCommandTests(TestCase):
     command = 'add_site_to_baskets'
 
     def setUp(self):
-        super(AddSiteToBasketsBasketsCommandTests, self).setUp()
+        super().setUp()
         self.site = Site.objects.create(domain='acme.fake')
         site = Site.objects.create(domain='test.fake')
         self.associated_baskets = [factories.BasketFactory(site=site) for __ in range(0, 2)]

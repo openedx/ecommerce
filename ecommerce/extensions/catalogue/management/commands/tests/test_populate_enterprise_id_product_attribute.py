@@ -1,5 +1,3 @@
-
-
 import uuid
 
 from django.core.management import call_command
@@ -46,7 +44,7 @@ class PopulateEnterpriseIDProductAttributeTests(TestCase, CouponMixin):
             (
                 LOGGER_NAME,
                 'INFO',
-                'Setting enterprise id product attribute for Product {} to value {}'.format(coupon.id, enterprise_id)
+                f'Setting enterprise id product attribute for Product {coupon.id} to value {enterprise_id}'
             ),
         ]
 
@@ -65,7 +63,7 @@ class PopulateEnterpriseIDProductAttributeTests(TestCase, CouponMixin):
         log_messages = []
         for idx in range(coupon_count):
             enterprise_id = str(uuid.uuid4())
-            coupon = self.create_coupon(title='Test Coupon {}'.format(idx), enterprise_customer=enterprise_id)
+            coupon = self.create_coupon(title=f'Test Coupon {idx}', enterprise_customer=enterprise_id)
             coupon_ids.append(coupon.id)
             enterprise_ids.append(enterprise_id)
             log_messages.append(
@@ -81,7 +79,7 @@ class PopulateEnterpriseIDProductAttributeTests(TestCase, CouponMixin):
             (
                 LOGGER_NAME,
                 'INFO',
-                'Found {} coupon products to update.'.format(coupon_count)
+                f'Found {coupon_count} coupon products to update.'
             ),
             (
                 LOGGER_NAME,

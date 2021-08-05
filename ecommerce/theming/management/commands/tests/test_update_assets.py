@@ -6,7 +6,7 @@ Tests for Management commands of comprehensive theming.
 from django.conf import settings
 from django.core.management import CommandError, call_command
 from django.test import override_settings
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from path import Path
 
 from ecommerce.tests.testcases import TestCase
@@ -24,7 +24,7 @@ class TestUpdateAssets(TestCase):
     Test management command for updating/compiling themed assets.
     """
     def setUp(self):
-        super(TestUpdateAssets, self).setUp()
+        super().setUp()
         self.themes = get_themes()
 
     def test_errors_for_invalid_arguments(self):

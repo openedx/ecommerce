@@ -1,5 +1,3 @@
-
-
 from oscar.apps.dashboard.users import apps
 
 

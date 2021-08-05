@@ -1,5 +1,3 @@
-
-
 import logging
 
 import pycountry
@@ -45,7 +43,7 @@ class PaymentForm(forms.Form):
     """
 
     def __init__(self, user, request, *args, **kwargs):
-        super(PaymentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.request = request
         self.basket_has_enrollment_code_product = any(
             line.product.is_enrollment_code_product for line in self.request.basket.all_lines()
@@ -162,7 +160,7 @@ class PaymentForm(forms.Form):
         return basket
 
     def clean(self):
-        cleaned_data = super(PaymentForm, self).clean()
+        cleaned_data = super().clean()
 
         # Perform specific validation for the United States and Canada
         country = cleaned_data.get('country')
@@ -220,7 +218,7 @@ class StripeSubmitForm(forms.Form):
     )
 
     def __init__(self, user, request, *args, **kwargs):
-        super(StripeSubmitForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.request = request
         update_basket_queryset_filter(self, user)
 

@@ -1,5 +1,3 @@
-
-
 from django.test.client import RequestFactory
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
@@ -18,7 +16,7 @@ class TrackingMiddlewareTests(TestCase):
     MODEL_LOGGER_NAME = 'ecommerce.core.models'
 
     def setUp(self):
-        super(TrackingMiddlewareTests, self).setUp()
+        super().setUp()
         self.middleware = middleware.TrackingMiddleware()
         self.request_factory = RequestFactory()
         self.user = self.create_user()
@@ -29,7 +27,7 @@ class TrackingMiddlewareTests(TestCase):
         self.middleware.process_view(request, None, None, None)
 
     def _assert_ga_client_id(self, ga_client_id):
-        self.request_factory.cookies['_ga'] = 'GA1.2.{}'.format(ga_client_id)
+        self.request_factory.cookies['_ga'] = f'GA1.2.{ga_client_id}'
         self._process_view(self.user)
         expected_client_id = self.user.tracking_context.get('ga_client_id')
         self.assertEqual(ga_client_id, expected_client_id)
@@ -154,7 +152,7 @@ class TrackingMiddlewareTests(TestCase):
             (
                 self.MODEL_LOGGER_NAME,
                 'WARNING',
-                'Exception retrieving lms_user_id from social_auth for user {}.'.format(user.id)
+                f'Exception retrieving lms_user_id from social_auth for user {user.id}.'
             ),
         ]
 

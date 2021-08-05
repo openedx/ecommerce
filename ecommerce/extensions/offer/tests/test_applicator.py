@@ -1,9 +1,7 @@
-
-
 from uuid import uuid4
 
 import ddt
-import mock
+from unittest import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
 
@@ -43,7 +41,7 @@ class ApplicatorTests(TestCase):
         # No need to pass a request to get_offers since we currently don't support session offers
         with mock.patch('ecommerce.enterprise.utils.get_decoded_jwt') as mock_get_jwt:
             mock_get_jwt.return_value = {
-                'roles': ['{}:{}'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE, uuid4())]
+                'roles': [f'{SYSTEM_ENTERPRISE_LEARNER_ROLE}:{uuid4()}']
             }
             offers = self.applicator.get_offers(self.basket, self.user)  # pylint: disable=protected-access
         self.assertEqual(offers, expected_offers)

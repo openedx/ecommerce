@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Broadly-useful mixins for use in automated tests."""
 
 
@@ -18,7 +17,7 @@ from django.utils.timezone import now
 from edx_django_utils.cache import TieredCache
 from edx_rest_framework_extensions.auth.jwt.cookies import jwt_cookie_name
 from edx_rest_framework_extensions.auth.jwt.tests.utils import generate_jwt_token, generate_unversioned_payload
-from mock import patch
+from unittest.mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.utils import RequestFactory
@@ -108,7 +107,7 @@ class ThrottlingMixin:
     """Provides utility methods for test cases validating the behavior of rate-limited endpoints."""
 
     def setUp(self):
-        super(ThrottlingMixin, self).setUp()
+        super().setUp()
 
         # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
         self.addCleanup(TieredCache.dangerous_clear_all_tiers)
@@ -129,9 +128,9 @@ class JwtMixin:
         """
         Set jwt token in cookies
         """
-        role_data = '{system_wide_role}'.format(system_wide_role=system_wide_role)
+        role_data = f'{system_wide_role}'
         if context is not None:
-            role_data += ':{context}'.format(context=context)
+            role_data += f':{context}'
 
         payload = generate_unversioned_payload(self.user)
         payload.update({
@@ -148,18 +147,18 @@ class BasketCreationMixin(UserMixin, JwtMixin):
     FREE_SKU = 'FREE_PRODUCT'
 
     def setUp(self):
-        super(BasketCreationMixin, self).setUp()
+        super().setUp()
 
         self.user = self.create_user()
 
         product_class = factories.ProductClassFactory(
-            name=u'Áutomobilé',
+            name='Áutomobilé',
             requires_shipping=False,
             track_stock=False
         )
         self.base_product = factories.ProductFactory(
             structure='parent',
-            title=u'Lamborghinï Gallardœ',
+            title='Lamborghinï Gallardœ',
             product_class=product_class,
             stockrecords=None,
         )
@@ -191,7 +190,7 @@ class BasketCreationMixin(UserMixin, JwtMixin):
                 self.PATH,
                 data=json.dumps(request_data),
                 content_type=CONTENT_TYPE,
-                HTTP_AUTHORIZATION='JWT {}'.format(token) if token else self.generate_jwt_token_header(self.user)
+                HTTP_AUTHORIZATION=f'JWT {token}' if token else self.generate_jwt_token_header(self.user)
             )
         else:
             response = self.client.post(
@@ -327,7 +326,7 @@ class BusinessIntelligenceMixin:
 
 class SiteMixin:
     def setUp(self):
-        super(SiteMixin, self).setUp()
+        super().setUp()
 
         # Set the domain used for all test requests
         domain = 'testserver.fake'
@@ -370,7 +369,7 @@ class SiteMixin:
         assert httpretty.is_enabled(), 'httpretty must be enabled to mock the access token response.'
 
         # Use a regex to account for the optional trailing slash
-        url = '{root}/access_token/?'.format(root=self.site.siteconfiguration.oauth2_provider_url)
+        url = f'{self.site.siteconfiguration.oauth2_provider_url}/access_token/?'
         url = re.compile(url)
 
         token = 'abc123'
@@ -389,7 +388,7 @@ class TestServerUrlMixin:
     def get_full_url(self, path, site=None):
         """ Returns a complete URL with the given path. """
         site = site or self.site
-        return 'http://{domain}{path}'.format(domain=site.domain, path=path)
+        return f'http://{site.domain}{path}'
 
 
 class ApiMockMixin:
@@ -423,7 +422,7 @@ class LmsApiMockMixin:
         }
         course_info_json = json.dumps(course_info)
         course_id = course.id if course else 'course-v1:test+test+test'
-        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
+        course_url = get_lms_url(f'api/courses/v1/courses/{course_id}/')
         httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type=CONTENT_TYPE)
 
     def mock_account_api(self, request, username, data):
@@ -512,7 +511,7 @@ class TestWaffleFlagMixin:
     """ Updates or creates a waffle flag and activates to True. Turns on any waffle flag to all tests
     without requiring the addition of the flag in individual methods/classes """
     def setUp(self):
-        super(TestWaffleFlagMixin, self).setUp()
+        super().setUp()
         # Note: if you are adding a waffle flag and need to have unit tests
         # run with the flag on, import and add the flag to the list below.
         # Note 2: Flags should be temporary, pls link the ticket to remove

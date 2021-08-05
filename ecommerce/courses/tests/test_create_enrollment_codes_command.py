@@ -1,4 +1,3 @@
-# encoding: utf-8
 """Contains the tests for enrollment code creation command."""
 import logging
 import os
@@ -26,11 +25,11 @@ class CreateEnrollmentCodesTests(DiscoveryTestMixin, TransactionTestCase):
         """
         Create test courses and and temp file containing course ids.
         """
-        super(CreateEnrollmentCodesTests, self).setUp()
-        self.professional_course_1 = self.create_course(seat_type=str('professional'))
-        self.professional_course_2 = self.create_course(seat_type=str('professional'))
-        self.audit_course = self.create_course(seat_type=str('audit'))
-        self.verified_course = self.create_course(seat_type=str('verified'))
+        super().setUp()
+        self.professional_course_1 = self.create_course(seat_type='professional')
+        self.professional_course_2 = self.create_course(seat_type='professional')
+        self.audit_course = self.create_course(seat_type='audit')
+        self.verified_course = self.create_course(seat_type='verified')
 
         self.create_course_ids_file(
             self.tmp_file_path,
@@ -228,7 +227,7 @@ class CreateEnrollmentCodesTests(DiscoveryTestMixin, TransactionTestCase):
             (
                 LOGGER_NAME,
                 'ERROR',
-                'Enrollment code generation failed for "%s" course. Because %s' % (
+                'Enrollment code generation failed for "{}" course. Because {}'.format(
                     self.professional_course_1.id,
                     'Course "%s" has multiple seats eligible for enrollment codes.' % self.professional_course_1.id
                 )
@@ -309,7 +308,7 @@ class CreateEnrollmentCodesTests(DiscoveryTestMixin, TransactionTestCase):
             (
                 LOGGER_NAME,
                 'ERROR',
-                'Enrollment code generation failed for "%s" course. Because %s' % (
+                'Enrollment code generation failed for "{}" course. Because {}'.format(
                     self.professional_course_1.id,
                     'Course "%s" has multiple seats eligible for enrollment codes.' % self.professional_course_1.id
                 )

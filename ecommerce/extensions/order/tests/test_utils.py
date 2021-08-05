@@ -7,7 +7,7 @@ import logging
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import pytz
 from django.test.client import RequestFactory
 from edx_django_utils.cache import TieredCache
@@ -85,7 +85,7 @@ class OrderCreatorTests(TestCase):
     order_creator = OrderCreator()
 
     def setUp(self):
-        super(OrderCreatorTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.country = Country.objects.create(printable_name='Fake', name='fake')
         self.shipping_address = ShippingAddress.objects.create(line1='Fake Address', country=self.country)
@@ -170,7 +170,7 @@ class OrderCreatorTests(TestCase):
 
         with LogCapture(LOGGER_NAME, level=logging.DEBUG) as logger:
             order = self.create_order_model(basket)
-            message = 'Order [{order_id}] has no referral associated with its basket.'.format(order_id=order.id)
+            message = f'Order [{order.id}] has no referral associated with its basket.'
             logger.check((LOGGER_NAME, 'DEBUG', message))
 
     def test_create_order_model_basket_referral_error(self):
@@ -184,7 +184,7 @@ class OrderCreatorTests(TestCase):
         with LogCapture(LOGGER_NAME, level=logging.ERROR) as logger:
             with mock.patch.object(Referral.objects, 'get', side_effect=Exception):
                 order = self.create_order_model(basket)
-                message = 'Referral for Order [{order_id}] failed to save.'.format(order_id=order.id)
+                message = f'Referral for Order [{order.id}] failed to save.'
                 logger.check((LOGGER_NAME, 'ERROR', message))
 
 
@@ -194,7 +194,7 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
     Tests for Util class UserAlreadyPlacedOrder
     """
     def setUp(self):
-        super(UserAlreadyPlacedOrderTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.order = create_order(site=self.site, user=self.user)
         self.product = self.get_order_product()

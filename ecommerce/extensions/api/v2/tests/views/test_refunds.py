@@ -1,10 +1,8 @@
-
-
 import json
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.urls import reverse
 from oscar.core.loading import get_model
 from rest_framework import status
@@ -31,7 +29,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
     path = reverse('api:v2:refunds:create')
 
     def setUp(self):
-        super(RefundCreateViewTests, self).setUp()
+        super().setUp()
         self.course_id = 'edX/DemoX/Demo_Course'
         self.entitlement_option = Option.objects.get(code='course_entitlement')
         self.user = self.create_user()
@@ -90,7 +88,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         username = 'fakey-userson'
         data = self._get_data(username, self.course_id)
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
-        self.assert_bad_request_response(response, 'User "{}" does not exist.'.format(username))
+        self.assert_bad_request_response(response, f'User "{username}" does not exist.')
 
     def test_authentication_required(self):
         """ Clients MUST be authenticated. """
@@ -201,7 +199,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
             response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
             log.check_present(*expected_logs)
             self.assert_bad_request_response(response,
-                                             'User {} does not have an LMS user id.'.format(user_without_id.id))
+                                             f'User {user_without_id.id} does not have an LMS user id.')
 
     @override_switch(ALLOW_MISSING_LMS_USER_ID, active=True)
     def test_refund_missing_lms_user_id_allow_missing(self):
@@ -237,7 +235,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
         # A second call should result in no additional refunds being created
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
-        self.assert_bad_request_response(response, 'Order {} does not exist.'.format(order.number))
+        self.assert_bad_request_response(response, f'Order {order.number} does not exist.')
 
     def test_invalid_entitlement_order(self):
         """
@@ -260,7 +258,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         data = self._get_data(username=self.user.username, order_number=order.number, entitlement_uuid='11')
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
 
-        self.assert_bad_request_response(response, 'Order {} does not exist.'.format(order.number))
+        self.assert_bad_request_response(response, f'Order {order.number} does not exist.')
 
     def test_refunded_line(self):
         """
@@ -292,14 +290,14 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 @ddt.ddt
 class RefundProcessViewTests(ThrottlingMixin, TestCase):
     def setUp(self):
-        super(RefundProcessViewTests, self).setUp()
+        super().setUp()
 
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.refund = RefundFactory(user=self.user)
 
     def put(self, action):
-        data = '{{"action": "{}"}}'.format(action)
+        data = f'{{"action": "{action}"}}'
         path = reverse('api:v2:refunds:process', kwargs={'pk': self.refund.id})
         return self.client.put(path, data, JSON_CONTENT_TYPE)
 
@@ -318,7 +316,7 @@ class RefundProcessViewTests(ThrottlingMixin, TestCase):
     @ddt.data('approve', 'deny')
     def test_success(self, action):
         """ If the action succeeds, the view should return HTTP 200 and the serialized Refund. """
-        with mock.patch('ecommerce.extensions.refund.models.Refund.{}'.format(action), mock.Mock(return_value=True)):
+        with mock.patch(f'ecommerce.extensions.refund.models.Refund.{action}', mock.Mock(return_value=True)):
             response = self.put(action)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.data, RefundSerializer(self.refund).data)
@@ -347,7 +345,7 @@ class RefundProcessViewTests(ThrottlingMixin, TestCase):
     @ddt.unpack
     def test_failure(self, action, decision):
         """ If the action fails, the view should return HTTP 500 and the serialized Refund. """
-        with mock.patch('ecommerce.extensions.refund.models.Refund.{}'.format(action), mock.Mock(return_value=False)):
+        with mock.patch(f'ecommerce.extensions.refund.models.Refund.{action}', mock.Mock(return_value=False)):
             response = self.put(decision)
             self.assertEqual(response.status_code, 500)
             self.assertEqual(response.data, RefundSerializer(self.refund).data)

@@ -1,12 +1,10 @@
-
-
 import datetime
 import json
 from uuid import uuid4
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import pytz
 import requests
 from django.db import transaction
@@ -60,7 +58,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
     """ Tests for basket utility functions. """
 
     def setUp(self):
-        super(BasketUtilsTests, self).setUp()
+        super().setUp()
         self.request.user = self.create_user()
         self.site_configuration.utm_cookie_name = 'test.edx.utm'
         toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, False)
@@ -525,7 +523,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         for product_class in ProductClass.objects.all():
             product = ProductFactory(
                 product_class=product_class,
-                title='{} product title'.format(product_class.name),
+                title=f'{product_class.name} product title',
                 categories=None,
                 stockrecords__partner=self.partner
             )
@@ -643,7 +641,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         applied, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, basket)
         self.assertEqual(applied, True)
         self.assertIsNotNone(basket.applied_offers())
-        self.assertEqual(msg, "Coupon code '{code}' added to basket.".format(code=voucher.code))
+        self.assertEqual(msg, f"Coupon code '{voucher.code}' added to basket.")
 
     def test_apply_voucher_on_basket_and_check_discount_with_invalid_voucher(self):
         """
@@ -657,7 +655,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         applied, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, basket)
         self.assertEqual(applied, False)
         self.assertEqual(basket.applied_offers(), {})
-        self.assertEqual(msg, 'Basket does not qualify for coupon code {code}.'.format(code=voucher.code))
+        self.assertEqual(msg, f'Basket does not qualify for coupon code {voucher.code}.')
 
     def test_apply_voucher_on_basket_and_check_discount_with_invalid_product(self):
         """
@@ -671,7 +669,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         applied, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, basket)
         self.assertEqual(applied, False)
         self.assertEqual(basket.applied_offers(), {})
-        self.assertEqual(msg, 'Basket does not qualify for coupon code {code}.'.format(code=voucher.code))
+        self.assertEqual(msg, f'Basket does not qualify for coupon code {voucher.code}.')
 
     def test_apply_voucher_on_basket_and_check_discount_with_multiple_vouchers(self):
         """
@@ -686,7 +684,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         basket.vouchers.add(valid_voucher)
         applied, msg = apply_voucher_on_basket_and_check_discount(invalid_voucher, self.request, basket)
         self.assertEqual(applied, False)
-        self.assertEqual(msg, 'Basket does not qualify for coupon code {code}.'.format(code=invalid_voucher.code))
+        self.assertEqual(msg, f'Basket does not qualify for coupon code {invalid_voucher.code}.')
 
     @ddt.data(
         (True, '/payment', False, '/payment'),  # Microfrontend not disabled
@@ -741,7 +739,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
 class BasketUtilsTransactionTests(TransactionTestCase):
     def setUp(self):
-        super(BasketUtilsTransactionTests, self).setUp()
+        super().setUp()
         self.request.user = self.create_user()
         self.site_configuration.utm_cookie_name = 'test.edx.utm'
         toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, False)

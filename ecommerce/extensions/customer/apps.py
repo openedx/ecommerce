@@ -1,5 +1,3 @@
-
-
 from oscar.apps.customer import apps
 
 

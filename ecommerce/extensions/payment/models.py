@@ -98,7 +98,7 @@ class EnterpriseContractMetadata(TimeStampedModel):
         and fixed amounts. We want to add extra validation here on top of the
         normal field validation DecimalField gives us.
         """
-        super(EnterpriseContractMetadata, self).clean()
+        super().clean()
 
         if self.discount_value is not None:
             if self.discount_type == self.FIXED:

@@ -4,7 +4,7 @@
 from time import time
 
 import jwt
-import mock
+from unittest import mock
 from django.conf import settings
 from django.test import override_settings
 from waffle.testutils import override_switch
@@ -36,7 +36,7 @@ class JWTDecodeHandlerTests(TestCase):
     """ Tests for the `jwt_decode_handler` utility function. """
 
     def setUp(self):
-        super(JWTDecodeHandlerTests, self).setUp()
+        super().setUp()
         self.user = UserFactory()
 
     @override_settings(

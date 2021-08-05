@@ -85,10 +85,10 @@ class Command(BaseCommand):
 
         email_body = EMAIL_BODY.format(
             percentage_usage=percentage_usage,
-            total_limit=total_limit if is_enrollment_limit_offer else "{}$".format(total_limit),
+            total_limit=total_limit if is_enrollment_limit_offer else f"{total_limit}$",
             offer_type='Enrollment' if is_enrollment_limit_offer else 'Booking',
             offer_name=offer.name,
-            current_usage=current_usage if is_enrollment_limit_offer else "{}$".format(current_usage),
+            current_usage=current_usage if is_enrollment_limit_offer else f"{current_usage}$",
         )
         return email_body, EMAIL_SUBJECT
 

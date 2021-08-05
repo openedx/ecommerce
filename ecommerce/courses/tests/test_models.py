@@ -1,7 +1,5 @@
-
-
 import ddt
-import mock
+from unittest import mock
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 from freezegun import freeze_time
@@ -25,7 +23,7 @@ StockRecord = get_model('partner', 'StockRecord')
 class CourseTests(DiscoveryTestMixin, TestCase):
     def test_unicode(self):
         """Verify the __unicode__ method returns the Course ID."""
-        course_id = u'edx/Demo_Course/DemoX'
+        course_id = 'edx/Demo_Course/DemoX'
         course = CourseFactory(id=course_id, partner=self.partner)
         self.assertEqual(str(course.id), course_id)
 

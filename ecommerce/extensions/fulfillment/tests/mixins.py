@@ -1,5 +1,3 @@
-
-
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.test.factories import create_order
 
@@ -24,4 +22,4 @@ class FulfillmentTestMixin:
             * The order's lines' statuses are COMPLETE.
         """
         self.assertEqual(order.status, ORDER.COMPLETE)
-        self.assertSetEqual(set(order.lines.values_list('status', flat=True)), set([LINE.COMPLETE]))
+        self.assertSetEqual(set(order.lines.values_list('status', flat=True)), {LINE.COMPLETE})

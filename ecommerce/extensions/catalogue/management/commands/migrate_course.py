@@ -1,5 +1,3 @@
-
-
 import logging
 
 import requests
@@ -41,7 +39,7 @@ class MigratedCourse:
         # We avoid using urljoin here because it URL-encodes the path, and some LMS APIs
         # are not capable of decoding these values.
         host = self.site_configuration.lms_url_root.strip('/')
-        return '{host}/{path}'.format(host=host, path=path)
+        return f'{host}/{path}'
 
     def _query_commerce_api(self):
         """Get course name and verification deadline from the Commerce API."""
@@ -52,7 +50,7 @@ class MigratedCourse:
         course_name = data.get('name')
 
         if course_name is None:
-            message = 'Unable to retrieve course name for {}.'.format(self.course.id)
+            message = f'Unable to retrieve course name for {self.course.id}.'
             logger.error(message)
             raise Exception(message)
 
@@ -72,7 +70,7 @@ class MigratedCourse:
 
         course_name = data.get('name')
         if course_name is None:
-            message = 'Aborting migration. No name is available for {}.'.format(self.course.id)
+            message = f'Aborting migration. No name is available for {self.course.id}.'
             logger.error(message)
             raise Exception(message)
 
@@ -84,7 +82,7 @@ class MigratedCourse:
 
     def _query_enrollment_api(self, headers):
         """Get modes and pricing from Enrollment API."""
-        url = self._build_lms_url('api/enrollment/v1/course/{}?include_expired=1'.format(self.course.id))
+        url = self._build_lms_url(f'api/enrollment/v1/course/{self.course.id}?include_expired=1')
         response = requests.get(url, headers=headers)
 
         if response.status_code != 200:
@@ -183,7 +181,7 @@ class Command(BaseCommand):
                     migrated_course.load_from_lms()
 
                     course = migrated_course.course
-                    msg = 'Retrieved info for {0} ({1}):\n'.format(course.id, course.name)
+                    msg = f'Retrieved info for {course.id} ({course.name}):\n'
                     msg += '\t(cert. type, verified?, price, SKU, slug, expires)\n'
 
                     for seat in course.seat_products:
@@ -191,12 +189,12 @@ class Command(BaseCommand):
                         data = (
                             getattr(seat.attr, 'certificate_type', ''),
                             seat.attr.id_verification_required,
-                            '{0} {1}'.format(stock_record.price_currency, stock_record.price_excl_tax),
+                            f'{stock_record.price_currency} {stock_record.price_excl_tax}',
                             stock_record.partner_sku,
                             seat.slug,
                             seat.expires
                         )
-                        msg += '\t{}\n'.format(data)
+                        msg += f'\t{data}\n'
 
                     logger.info(msg)
 

@@ -1,5 +1,3 @@
-
-
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
@@ -21,7 +19,7 @@ class StockRecordViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         try:
-            return super(StockRecordViewSet, self).get_object()
+            return super().get_object()
         except Http404:
             # Didn't find by id, try looking up by SKU
             queryset = self.filter_queryset(self.get_queryset())
@@ -44,4 +42,4 @@ class StockRecordViewSet(viewsets.ModelViewSet):
             return Response({
                 'message': "Only the price_currency and price_excl_tax fields are allowed to be modified."
             }, status=status.HTTP_400_BAD_REQUEST)
-        return super(StockRecordViewSet, self).update(request, *args, **kwargs)
+        return super().update(request, *args, **kwargs)

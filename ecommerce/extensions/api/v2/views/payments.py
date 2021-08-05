@@ -34,7 +34,7 @@ class PaymentProcessorListView(generics.ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            return super(PaymentProcessorListView, self).get(request, *args, **kwargs)
+            return super().get(request, *args, **kwargs)
         except:  # pylint: disable=broad-except
             LOG.exception("PaymentProcessorListView failed with %r, *%r, **%r", request, args, kwargs)
             raise

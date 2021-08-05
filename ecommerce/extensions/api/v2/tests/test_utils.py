@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
-
-import mock
+from unittest import mock
 
 from ecommerce.extensions.api.v2.utils import SMTPException, send_new_codes_notification_email
 from ecommerce.tests.testcases import TestCase

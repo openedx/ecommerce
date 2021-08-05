@@ -525,7 +525,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         logger.info(msg)
 
         for line in lines:
-            name = 'Enrollment Code Range for {}'.format(line.product.attr.course_key)
+            name = f'Enrollment Code Range for {line.product.attr.course_key}'
             seat = Product.objects.filter(
                 attributes__name='course_key',
                 attribute_values__value_text=line.product.attr.course_key
@@ -543,7 +543,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             _range.save()
 
             vouchers = create_vouchers(
-                name=str('Enrollment code voucher [{}]').format(line.product.title),
+                name=f'Enrollment code voucher [{line.product.title}]',
                 benefit_type=Benefit.PERCENTAGE,
                 benefit_value=100,
                 catalog=coupon_catalog,
@@ -660,7 +660,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         street_address = order.billing_address.line1
         # check if 'line2' is empty, if not then make sure we include that in the address info
         if order.billing_address.line2:
-            street_address = "{}, {}".format(order.billing_address.line1, order.billing_address.line2)
+            street_address = f"{order.billing_address.line1}, {order.billing_address.line2}"
 
         # When filling our our order page and selecting "United States" the string that gets populated in
         # order.billing_address.country.name is 'United States of America'. This will cause the mailing country to not

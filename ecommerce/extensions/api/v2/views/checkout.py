@@ -1,5 +1,3 @@
-
-
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -39,7 +37,7 @@ class CheckoutView(APIView):
         try:
             basket = request.user.baskets.get(id=basket_id)
         except ObjectDoesNotExist:
-            return HttpResponseBadRequest('Basket [{}] not found.'.format(basket_id))
+            return HttpResponseBadRequest(f'Basket [{basket_id}] not found.')
 
         # Freeze the basket so that it cannot be modified
         basket.strategy = request.strategy
@@ -54,7 +52,7 @@ class CheckoutView(APIView):
                              payment_processor_name, basket_id, basket.total_excl_tax)
 
             return HttpResponseBadRequest(
-                'Payment processor [{}] not found.'.format(payment_processor_name)
+                f'Payment processor [{payment_processor_name}] not found.'
             )
 
         parameters = payment_processor.get_transaction_parameters(basket, request=request)

@@ -52,7 +52,7 @@ class TestCreateUpdateSiteTheme(TestCase):
         site = Site.objects.create(domain="test.localhost", name="Test Site")
         call_command(
             "create_or_update_site_theme",
-            "--site-id={}".format(site.id),
+            f"--site-id={site.id}",
             "--site-name=updated name",
             "--site-domain=test.localhost",
             '--site-theme=test',

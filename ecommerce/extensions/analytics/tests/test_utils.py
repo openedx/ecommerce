@@ -1,10 +1,8 @@
-
-
 import json
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from analytics import Client
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -171,7 +169,7 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
 
         ga_client_id = 'test-client-id'
         request_factory = RequestFactory()
-        request_factory.cookies['_ga'] = 'GA1.2.{}'.format(ga_client_id)
+        request_factory.cookies['_ga'] = f'GA1.2.{ga_client_id}'
         request = request_factory.get('/')
 
         expected_client_id = get_google_analytics_client_id(request)

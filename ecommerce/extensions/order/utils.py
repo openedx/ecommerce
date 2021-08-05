@@ -59,7 +59,7 @@ class OrderNumberGenerator:
             string: Order number.
         """
         order_id = int(basket_id) + self.OFFSET
-        return u'{prefix}-{order_id}'.format(prefix=partner.short_code.upper(), order_id=order_id)
+        return f'{partner.short_code.upper()}-{order_id}'
 
     def basket_id(self, order_number):
         """Inverse of order number generation.
@@ -150,7 +150,7 @@ class UserAlreadyPlacedOrder:
         entitlement_api_client = EdxRestApiClient(get_lms_entitlement_api_url(),
                                                   jwt=site.siteconfiguration.access_token)
         partner_short_code = site.siteconfiguration.partner.short_code
-        key = 'course_entitlement_detail_{}{}'.format(entitlement_uuid, partner_short_code)
+        key = f'course_entitlement_detail_{entitlement_uuid}{partner_short_code}'
         entitlement_cached_response = TieredCache.get_cached_response(key)
         if entitlement_cached_response.is_found:
             entitlement = entitlement_cached_response.value

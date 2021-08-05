@@ -1,10 +1,8 @@
-
-
 import uuid
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
@@ -21,7 +19,7 @@ LOGGER_NAME = 'ecommerce.programs.utils'
 @ddt.ddt
 class UtilTests(ProgramTestMixin, TestCase):
     def setUp(self):
-        super(UtilTests, self).setUp()
+        super().setUp()
         self.program_uuid = uuid.uuid4()
         self.discovery_api_url = self.site.siteconfiguration.discovery_api_url
 
@@ -49,7 +47,7 @@ class UtilTests(ProgramTestMixin, TestCase):
             with LogCapture(LOGGER_NAME) as logger:
                 response = get_program(self.program_uuid, self.site.siteconfiguration)
                 self.assertIsNone(response)
-                msg = 'Failed to retrieve program details for {}'.format(self.program_uuid)
+                msg = f'Failed to retrieve program details for {self.program_uuid}'
                 logger.check((LOGGER_NAME, 'DEBUG', msg))
 
     @httpretty.activate
@@ -62,5 +60,5 @@ class UtilTests(ProgramTestMixin, TestCase):
             with LogCapture(LOGGER_NAME) as logger:
                 response = get_program(self.program_uuid, self.site.siteconfiguration)
                 self.assertIsNone(response)
-                msg = 'No program data found for {}'.format(self.program_uuid)
+                msg = f'No program data found for {self.program_uuid}'
                 logger.check((LOGGER_NAME, 'DEBUG', msg))

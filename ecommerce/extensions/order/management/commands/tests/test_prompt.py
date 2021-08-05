@@ -1,10 +1,8 @@
-
-
 import sys
 from io import StringIO
 
 import ddt
-from mock import patch
+from unittest.mock import patch
 
 from ecommerce.tests.testcases import TestCase
 
@@ -15,7 +13,7 @@ from ..prompt import query_yes_no
 class PromptTests(TestCase):
     """Tests for prompt."""
 
-    CONFIRMATION_PROMPT = u'Do you want to continue?'
+    CONFIRMATION_PROMPT = 'Do you want to continue?'
 
     def test_wrong_default(self):
         """Test that query_yes_no raises ValueError with wrong default."""

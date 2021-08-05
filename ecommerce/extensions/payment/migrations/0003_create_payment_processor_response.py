@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import django.db.models.deletion
 import jsonfield.fields
 from django.db import migrations, models
@@ -32,6 +29,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterIndexTogether(
             name='paymentprocessorresponse',
-            index_together=set([('processor_name', 'transaction_id')]),
+            index_together={('processor_name', 'transaction_id')},
         ),
     ]

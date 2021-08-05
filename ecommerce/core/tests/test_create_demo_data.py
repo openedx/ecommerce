@@ -1,11 +1,9 @@
-
-
 import sys
 from datetime import datetime
 from io import StringIO
 
 import httpretty
-import mock
+from unittest import mock
 import pytz
 from django.core.management import call_command
 
@@ -38,7 +36,7 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
         self.mock_access_token_response()
 
         with mock.patch.object(Course, 'publish_to_lms', return_value=None) as mock_publish:
-            call_command('create_demo_data', '--partner={}'.format(self.partner.short_code))
+            call_command('create_demo_data', f'--partner={self.partner.short_code}')
             mock_publish.assert_called_once_with()
 
         self.assert_seats_created('course-v1:edX+DemoX+Demo_Course', 'edX Demonstration Course', 149)
@@ -61,7 +59,7 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
         course.create_or_update_seat(**seat_attrs)
 
         with mock.patch.object(Course, 'publish_to_lms', return_value=None) as mock_publish:
-            call_command('create_demo_data', '--partner={}'.format(self.partner.short_code))
+            call_command('create_demo_data', f'--partner={self.partner.short_code}')
             mock_publish.assert_called_once_with()
 
         self.assert_seats_created('course-v1:edX+DemoX+Demo_Course', 'edX Demonstration Course', 149)
@@ -75,7 +73,7 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
         self.mock_access_token_response()
 
         with mock.patch.object(Course, 'publish_to_lms', return_value=None) as mock_publish:
-            call_command('create_demo_data', '--partner={}'.format(self.partner.short_code), course_id=course_id,
+            call_command('create_demo_data', f'--partner={self.partner.short_code}', course_id=course_id,
                          course_title=course_title, price=price)
             mock_publish.assert_called_once_with()
 
@@ -89,6 +87,6 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
         err_out = StringIO()
         sys.stderr = err_out
         with mock.patch.object(Course, 'publish_to_lms', return_value="Failed to publish"):
-            call_command('create_demo_data', '--partner={}'.format(self.partner.short_code))
+            call_command('create_demo_data', f'--partner={self.partner.short_code}')
             output = err_out.getvalue().strip()
             self.assertIn("An error occurred while attempting to publish", output)

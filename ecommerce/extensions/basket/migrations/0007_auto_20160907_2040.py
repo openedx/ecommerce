@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.db import migrations, models
 
 
@@ -37,6 +34,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='basketattribute',
-            unique_together=set([('basket', 'attribute_type')]),
+            unique_together={('basket', 'attribute_type')},
         ),
     ]

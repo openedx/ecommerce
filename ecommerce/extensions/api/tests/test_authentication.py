@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-
-
 import json
 from urllib.parse import urljoin
 
 import httpretty
-import mock
+from unittest import mock
 from django.test import RequestFactory
 
 from ecommerce.extensions.api.authentication import BearerAuthentication
@@ -19,11 +16,11 @@ class AccessTokenMixin:
     def mock_user_info_response(self, status=200, username='fake-user'):
         data = {
             'preferred_username': username,
-            'email': '{}@example.com'.format(username),
+            'email': f'{username}@example.com',
             'family_name': 'Doe',
             'given_name': 'Jane',
         }
-        url = '{}/user_info/'.format(self.site.siteconfiguration.oauth2_provider_url)
+        url = f'{self.site.siteconfiguration.oauth2_provider_url}/user_info/'
         httpretty.register_uri(httpretty.GET, url, body=json.dumps(data), content_type=self.JSON, status=status)
 
 
@@ -31,13 +28,13 @@ class BearerAuthenticationTests(TestCase):
     """ Tests for the BearerAuthentication class. """
 
     def setUp(self):
-        super(BearerAuthenticationTests, self).setUp()
+        super().setUp()
         self.auth = BearerAuthentication()
         self.factory = RequestFactory()
 
     def create_request(self, token=AccessTokenMixin.DEFAULT_TOKEN):
         """ Returns a Request with the correct authorization header and Site. """
-        auth_header = 'Bearer {}'.format(token)
+        auth_header = f'Bearer {token}'
         request = self.factory.get('/', HTTP_AUTHORIZATION=auth_header)
         request.site = self.site
         return request

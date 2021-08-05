@@ -1,5 +1,3 @@
-
-
 import ddt
 import pycountry
 from oscar.core.loading import get_model
@@ -20,7 +18,7 @@ Product = get_model('catalogue', 'Product')
 @ddt.ddt
 class PaymentFormTests(TestCase):
     def setUp(self):
-        super(PaymentFormTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.basket = create_basket(owner=self.user)
 

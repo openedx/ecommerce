@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import django.core.validators
 import oscar.models.fields.autoslugfield
 from django.db import migrations, models

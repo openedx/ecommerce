@@ -1,5 +1,3 @@
-
-
 import newrelic.agent
 from edx_django_utils import monitoring as monitoring_utils
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
@@ -28,8 +26,8 @@ class BasketMiddleware(OscarBasketMiddleware):
         Returns:
             str - cookie name
         """
-        key = super(BasketMiddleware, self).get_cookie_key(request)
-        key = '{base}_{site_id}'.format(base=key, site_id=request.site.id)
+        key = super().get_cookie_key(request)
+        key = f'{key}_{request.site.id}'
         return key
 
     def get_basket(self, request):

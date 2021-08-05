@@ -1,5 +1,3 @@
-
-
 import operator
 
 from oscar.core.loading import get_model

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.template import Context, Template, TemplateSyntaxError
 
 from ecommerce.tests.testcases import TestCase
@@ -36,7 +34,7 @@ class CoreExtrasTests(TestCase):
         self.assertTextCaptured('42')
 
     def test_captureas_unicode(self):
-        self.assertTextCaptured(u'★❤')
+        self.assertTextCaptured('★❤')
 
     def test_course_organization(self):
         course_id = 'course-v1:edX+Course+100'

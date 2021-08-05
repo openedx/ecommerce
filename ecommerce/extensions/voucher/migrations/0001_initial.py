@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from decimal import Decimal
 
 from django.conf import settings

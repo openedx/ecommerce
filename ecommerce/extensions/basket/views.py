@@ -372,7 +372,7 @@ class BasketLogicMixin:
                     strong_end='</strong>',
                     paragraph_start='<p>',
                     paragraph_end='</p>',
-                    link_start='<a href="{course_about}">'.format(course_about=course_about_url),
+                    link_start=f'<a href="{course_about_url}">',
                     link_end='</a>'
                 ),
                 extra_tags='safe ' + message_code
@@ -519,7 +519,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
 class BasketSummaryView(BasketLogicMixin, BasketView):
     @newrelic.agent.function_trace()
     def get_context_data(self, **kwargs):
-        context = super(BasketSummaryView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         return self._add_to_context_data(context)
 
     @newrelic.agent.function_trace()
@@ -533,7 +533,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         except RedirectException as e:
             return e.response
 
-        return super(BasketSummaryView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def _redirect_to_payment_microfrontend_if_configured(self, request):
         microfrontend_url = get_payment_microfrontend_url_if_configured(request)

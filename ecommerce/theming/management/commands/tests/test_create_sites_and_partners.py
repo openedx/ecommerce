@@ -27,7 +27,7 @@ class TestCreateSitesAndPartners(DjangoTestCase):
     """
 
     def setUp(self):
-        super(TestCreateSitesAndPartners, self).setUp()
+        super().setUp()
         self.dns_name = "dummy-dns"
         self.theme_path = os.path.dirname(__file__)
 
@@ -44,7 +44,7 @@ class TestCreateSitesAndPartners(DjangoTestCase):
                 site_name = site.name
                 self.assertEqual(
                     site.domain,
-                    "ecommerce-{site}-{dns_name}.example.com".format(site=site_name, dns_name=self.dns_name)
+                    f"ecommerce-{site_name}-{self.dns_name}.example.com"
                 )
 
                 site_theme = SiteTheme.objects.get(site=site)
@@ -61,7 +61,7 @@ class TestCreateSitesAndPartners(DjangoTestCase):
 
                 self.assertEqual(
                     site_config.lms_url_root,
-                    "ecommerce-dummy-{dns_name}.example.com".format(dns_name=self.dns_name)
+                    f"ecommerce-dummy-{self.dns_name}.example.com"
                 )
 
                 self.assertTrue(site_config.enable_enrollment_codes)
@@ -72,12 +72,12 @@ class TestCreateSitesAndPartners(DjangoTestCase):
 
                 self.assertEqual(
                     site_config.payment_support_url,
-                    "https://dummy-{dns_name}.example.com/contact".format(dns_name=self.dns_name),
+                    f"https://dummy-{self.dns_name}.example.com/contact",
                 )
 
                 self.assertEqual(
                     site_config.discovery_api_url,
-                    "https://discovery-dummy-{dns_name}.example.com/api/v1/".format(dns_name=self.dns_name)
+                    f"https://discovery-dummy-{self.dns_name}.example.com/api/v1/"
                 )
 
                 self.assertEqual(
@@ -136,7 +136,7 @@ class TestCreateSitesAndPartners(DjangoTestCase):
 
         partners = Partner.objects.all()
         for p in partners:
-            course_id = 'course-v1:{}+DemoX+Demo_Course'.format(p.short_code)
+            course_id = f'course-v1:{p.short_code}+DemoX+Demo_Course'
             courses = Course.objects.filter(id=course_id)
 
             # Check that the course exists

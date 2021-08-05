@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Base class for payment processor implementation test classes."""
 
 
@@ -29,7 +28,7 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, DiscoveryTestMixin, Payment
     CERTIFICATE_TYPE = 'test-certificate-type'
 
     def setUp(self):
-        super(PaymentProcessorTestCaseMixin, self).setUp()
+        super().setUp()
 
         self.course = CourseFactory(id='a/b/c', name='Demo Course', partner=self.partner)
         self.product = self.course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20)

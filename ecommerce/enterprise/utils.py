@@ -60,7 +60,7 @@ def get_enterprise_customer(site, uuid):
     Return a single enterprise customer
     """
     resource = 'enterprise-customer'
-    cache_key = u'{site_domain}_{partner_code}_{resource}_{enterprise_uuid}'.format(
+    cache_key = '{site_domain}_{partner_code}_{resource}_{enterprise_uuid}'.format(
         site_domain=site.domain,
         partner_code=site.siteconfiguration.partner.short_code,
         resource=resource,
@@ -184,7 +184,7 @@ def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_cust
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = u'{site_domain}_{partner_code}_{resource}_{uuid}_{page}'.format(
+    cache_key = '{site_domain}_{partner_code}_{resource}_{uuid}_{page}'.format(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=resource,
@@ -437,7 +437,7 @@ def get_enterprise_customer_data_sharing_consent_token(access_token, course_id, 
     """
     consent_token_hmac = hmac.new(
         str(access_token).encode('utf-8'),
-        u'{course_id}_{enterprise_customer_uuid}'.format(
+        '{course_id}_{enterprise_customer_uuid}'.format(
             course_id=course_id,
             enterprise_customer_uuid=enterprise_customer_uuid,
         ).encode('utf-8'),
@@ -528,7 +528,7 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_reque
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = u'{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
+    cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=resource,
@@ -646,7 +646,7 @@ def convert_comma_separated_string_to_list(comma_separated_string):
     """
     Convert the comma separated string to a valid list.
     """
-    return list(set(item.strip() for item in comma_separated_string.split(",") if item.strip()))
+    return list({item.strip() for item in comma_separated_string.split(",") if item.strip()})
 
 
 def get_enterprise_customer_sender_alias(site, enterprise_customer_uuid):

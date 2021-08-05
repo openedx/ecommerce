@@ -1,5 +1,3 @@
-
-
 import logging
 
 from oscar.core.loading import get_model
@@ -32,7 +30,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         self.queryset = Catalog.objects.all()
         # We are calling the super's .get_queryset() in case of nested
         # catalogs so that they are propery filtered by parent ID first.
-        return super(CatalogViewSet, self).get_queryset().filter(
+        return super().get_queryset().filter(
             partner=self.request.site.siteconfiguration.partner
         )
 

@@ -1,5 +1,3 @@
-
-
 from django.dispatch import Signal, receiver
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME

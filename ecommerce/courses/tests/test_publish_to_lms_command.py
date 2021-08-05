@@ -1,11 +1,10 @@
-# encoding: utf-8
 """Contains the tests for publish to lms command."""
 import logging
 import os
 import tempfile
 
 import ddt
-import mock
+from unittest import mock
 from django.core.management import CommandError, call_command
 from testfixtures import LogCapture
 
@@ -25,7 +24,7 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
     tmp_file_path = os.path.join(tempfile.gettempdir(), "tmp-testfile.txt")
 
     def setUp(self):
-        super(PublishCoursesToLMSTests, self).setUp()
+        super().setUp()
         self.partner.default_site = self.site
         self.course = CourseFactory(partner=self.partner)
         self.create_course_ids_file(self.tmp_file_path, [self.course.id])
@@ -62,7 +61,7 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
             (
                 LOGGER_NAME,
                 "ERROR",
-                u"(1/1) Failed to publish {}: Course does not exist.".format(fake_course_id)
+                f"(1/1) Failed to publish {fake_course_id}: Course does not exist."
             ),
             (
                 LOGGER_NAME,
@@ -88,12 +87,12 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
             (
                 LOGGER_NAME,
                 "INFO",
-                u"(1/2) Successfully published {}.".format(self.course.id)
+                f"(1/2) Successfully published {self.course.id}."
             ),
             (
                 LOGGER_NAME,
                 "INFO",
-                u"(2/2) Successfully published {}.".format(second_course.id)),
+                f"(2/2) Successfully published {second_course.id}."),
             (
                 LOGGER_NAME,
                 "INFO",
@@ -123,7 +122,7 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
             (
                 LOGGER_NAME,
                 "ERROR",
-                u"(1/1) Failed to publish {}: {}".format(self.course.id, error_msg)
+                f"(1/1) Failed to publish {self.course.id}: {error_msg}"
             ),
             (
                 LOGGER_NAME,
@@ -140,7 +139,7 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
 
     def test_unicode_file_name(self):
         """ Verify the unicode files name are read correctly."""
-        unicode_file = os.path.join(tempfile.gettempdir(), u"اول.txt")
+        unicode_file = os.path.join(tempfile.gettempdir(), "اول.txt")
         self.create_course_ids_file(unicode_file, [self.course.id])
         expected = (
             (
@@ -151,7 +150,7 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
             (
                 LOGGER_NAME,
                 "INFO",
-                u"(1/1) Successfully published {}.".format(self.course.id)
+                f"(1/1) Successfully published {self.course.id}."
             ),
             (
                 LOGGER_NAME,

@@ -1,5 +1,3 @@
-
-
 import datetime
 import logging
 import time
@@ -64,7 +62,7 @@ class TestSeatPayment:
                         EC.element_to_be_clickable((locator_type, selector))
                     )
                 except:
-                    raise Exception('Timeout exception with locator (%s, %s).' % (locator_type, selector))
+                    raise Exception(f'Timeout exception with locator ({locator_type}, {selector}).')
 
                 select = Select(element)
                 select.select_by_value(value)

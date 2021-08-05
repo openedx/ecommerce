@@ -1,5 +1,3 @@
-
-
 import requests
 
 from e2e.config import ECOMMERCE_TEST_WEB_SECURITY
@@ -25,7 +23,7 @@ class TestWAF:
     def assert_denial(self, response):
         # We only want to consider 4XX statuses -- 5XX isn't expected as a security denial response
         code = response.status_code
-        assert 400 <= code < 500, 'Unexpected status code {0}'.format(code)
+        assert 400 <= code < 500, f'Unexpected status code {code}'
 
     def request(self, method='GET', **kwargs):
         # Disallow redirects because otherwise we might see 401 if not logged in, etc.

@@ -87,7 +87,7 @@ class Command(BaseCommand):
 
         if demo_course:
             # Create the course, this is used in devstack whitelabel testing
-            course_id = 'course-v1:{}+DemoX+Demo_Course'.format(partner_code)
+            course_id = f'course-v1:{partner_code}+DemoX+Demo_Course'
             one_year = datetime.timedelta(days=365)
             expires = timezone.now() + one_year
             price = 159
@@ -142,7 +142,7 @@ class Command(BaseCommand):
         else:
             configuration_prefix = 'sandbox'
 
-        self.configuration_filename = '{}_configuration.json'.format(configuration_prefix)
+        self.configuration_filename = f'{configuration_prefix}_configuration.json'
         self.dns_name = options['dns_name']
         self.theme_path = options['theme_path']
 

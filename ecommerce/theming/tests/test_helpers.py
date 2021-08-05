@@ -5,7 +5,7 @@ Tests of comprehensive theming.
 
 from django.conf import ImproperlyConfigured, settings
 from django.test import override_settings
-from mock import patch
+from unittest.mock import patch
 
 from ecommerce.tests.testcases import TestCase
 from ecommerce.theming.helpers import (

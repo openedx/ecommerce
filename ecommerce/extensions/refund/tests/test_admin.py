@@ -1,5 +1,3 @@
-
-
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
@@ -18,7 +16,7 @@ class RefundAdminTests(TestCase):
     refund_page_url = reverse('admin:refund_refund_changelist')
 
     def setUp(self):
-        super(RefundAdminTests, self).setUp()
+        super().setUp()
         self.user = UserFactory(is_staff=True, is_superuser=True, password=self.password)
         self.client.login(username=self.user.username, password=self.password)
         self.role = EcommerceFeatureRole.objects.get(name=ORDER_MANAGER_ROLE)

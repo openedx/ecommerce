@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import oscar.models.fields
 import oscar.models.fields.autoslugfield
 from django.conf import settings
@@ -99,7 +96,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='stockrecord',
-            unique_together=set([('partner', 'partner_sku')]),
+            unique_together={('partner', 'partner_sku')},
         ),
         migrations.AddField(
             model_name='stockalert',

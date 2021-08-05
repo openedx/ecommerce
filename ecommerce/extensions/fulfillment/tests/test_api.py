@@ -3,7 +3,7 @@
 
 import ddt
 from django.test.utils import override_settings
-from mock import patch
+from unittest.mock import patch
 from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment import api, exceptions
@@ -25,7 +25,7 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
     """ Tests for the fulfillment.api module. """
 
     def setUp(self):
-        super(FulfillmentApiTests, self).setUp()
+        super().setUp()
         self.order = self.generate_open_order()
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])

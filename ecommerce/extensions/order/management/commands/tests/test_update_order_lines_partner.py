@@ -1,9 +1,7 @@
-
-
 import ddt
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from mock import patch
+from unittest.mock import patch
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.test.factories import create_order
@@ -37,16 +35,16 @@ class UpdateOrderLinePartnerTests(TestCase):
     def test_partner_does_not_exist(self):
         """Test that command raises partner does not exist error."""
         self.assert_error_log(
-            'No Partner exists for code {}.'.format(self.PARTNER_CODE),
+            f'No Partner exists for code {self.PARTNER_CODE}.',
             'sku12345',
-            '--partner={}'.format(self.PARTNER_CODE)
+            f'--partner={self.PARTNER_CODE}'
         )
 
     def test_one_or_more_sku_required(self):
         """Test that command raises one or more SKUs required error."""
         self.assert_error_log(
             'update_order_lines_partner requires one or more <SKU>s.',
-            '--partner={}'.format(self.PARTNER_CODE)
+            f'--partner={self.PARTNER_CODE}'
         )
 
     @ddt.data(True, False)
@@ -58,7 +56,7 @@ class UpdateOrderLinePartnerTests(TestCase):
         self.assertNotEqual(order_line.partner, new_partner)
         with patch(self.YES_NO_PATCH_LOCATION) as mocked_yes_no:
             mocked_yes_no.return_value = yes_no_value
-            call_command('update_order_lines_partner', order_line.partner_sku, '--partner={}'.format(self.PARTNER_CODE))
+            call_command('update_order_lines_partner', order_line.partner_sku, f'--partner={self.PARTNER_CODE}')
             order_line = OrderLine.objects.get(partner_sku=order_line.partner_sku)
             if yes_no_value:
                 # Verify that partner is updated

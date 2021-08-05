@@ -1,5 +1,3 @@
-
-
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 
 

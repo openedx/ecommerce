@@ -1,5 +1,3 @@
-
-
 from ecommerce.extensions.test import factories, mixins
 from ecommerce.tests.testcases import TestCase
 

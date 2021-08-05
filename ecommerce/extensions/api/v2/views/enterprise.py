@@ -1,5 +1,3 @@
-
-
 import logging
 from urllib.parse import urlparse
 
@@ -358,7 +356,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             update_assignments_for_multi_use_per_customer(voucher)
 
         if coupon_was_migrated:
-            super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
+            super().update_range_data(request_data, vouchers)
 
     @action(detail=True, url_path='codes', permission_classes=[IsAuthenticated])
     @permission_required(
@@ -407,7 +405,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer_class = RedeemedCodeUsageSerializer
 
         if not serializer_class:
-            raise serializers.ValidationError('Invalid code_filter specified: {}'.format(code_filter))
+            raise serializers.ValidationError(f'Invalid code_filter specified: {code_filter}')
 
         if visibility_filter == VOUCHER_IS_PUBLIC:
             queryset = queryset.filter(is_public=True)
@@ -415,7 +413,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             queryset = queryset.filter(is_public=False)
         elif visibility_filter is not None:
             raise serializers.ValidationError(
-                "visibility_filter must be specified as 'public' or 'private' received: {}".format(visibility_filter))
+                f"visibility_filter must be specified as 'public' or 'private' received: {visibility_filter}")
 
         if format is None:
             page = self.paginate_queryset(queryset)
@@ -705,10 +703,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
             )
 
         if len(greeting) > max_field_limit:
-            errors['email_greeting'] = 'Email greeting must be {} characters or less'.format(max_field_limit)
+            errors['email_greeting'] = f'Email greeting must be {max_field_limit} characters or less'
 
         if len(closing) > max_field_limit:
-            errors['email_closing'] = 'Email closing must be {} characters or less'.format(max_field_limit)
+            errors['email_closing'] = f'Email closing must be {max_field_limit} characters or less'
 
         if errors:
             raise DRFValidationError({'error': errors})
@@ -911,7 +909,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             elif code_filter == VOUCHER_PARTIAL_REDEEMED:
                 assignment_usages = self._get_partial_redeemed_usages(vouchers)
             else:
-                raise serializers.ValidationError('Invalid code_filter specified: {}'.format(code_filter))
+                raise serializers.ValidationError(f'Invalid code_filter specified: {code_filter}')
 
             assignments = []
             for assignment_usage in assignment_usages:

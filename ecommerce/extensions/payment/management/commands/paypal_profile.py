@@ -1,5 +1,3 @@
-
-
 import json
 import logging
 
@@ -61,7 +59,7 @@ class Command(BaseCommand):
             paypal_configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner.lower()][self.PAYPAL_CONFIG_KEY.lower()]
         except KeyError:
             raise CommandError(
-                "Payment Processor configuration for partner `{0}` does not contain PayPal settings".format(partner)
+                f"Payment Processor configuration for partner `{partner}` does not contain PayPal settings"
             )
 
         # Initialize the PayPal REST SDK
@@ -72,11 +70,11 @@ class Command(BaseCommand):
         })
 
         try:
-            handler = getattr(self, 'handle_{}'.format(action))
+            handler = getattr(self, f'handle_{action}')
         except IndexError:
             raise CommandError("no action specified.")
         except AttributeError:
-            raise CommandError("unrecognized action: {}".format(action))
+            raise CommandError(f"unrecognized action: {action}")
         return handler(options)
 
     def _do_create(self, profile_data):
@@ -86,7 +84,7 @@ class Command(BaseCommand):
         profile = WebProfile(profile_data)
         result = profile.create()
         if not result:
-            raise CommandError("Could not create web profile: {}".format(profile.error))
+            raise CommandError(f"Could not create web profile: {profile.error}")
         log.info("Created profile `%s` (id=%s).", profile.name, profile.id)
         return profile
 
@@ -98,7 +96,7 @@ class Command(BaseCommand):
         profile = WebProfile.find(profile_id)
         result = profile.update(profile_data)
         if not result:
-            raise CommandError("Could not update web profile: {}".format(profile.error))
+            raise CommandError(f"Could not update web profile: {profile.error}")
         # have to re-fetch to show the new state
         profile = WebProfile.find(profile_id)
         log.info("Updated profile %s.", profile.id)
@@ -176,12 +174,12 @@ class Command(BaseCommand):
         profile_id = options.get('profile_id')
         if PaypalWebProfile.objects.filter(id=profile_id).exists():
             raise CommandError(
-                "Web profile {} is currently enabled.  You must disable it before you can delete it.".format(profile_id)
+                f"Web profile {profile_id} is currently enabled.  You must disable it before you can delete it."
             )
 
         profile = WebProfile.find(profile_id)
         if not profile.delete():
-            raise CommandError("Could not delete web profile: {}".format(profile.error))
+            raise CommandError(f"Could not delete web profile: {profile.error}")
         log.info("Deleted profile: %s", profile.id)
         self.print_json(profile.to_dict())
 

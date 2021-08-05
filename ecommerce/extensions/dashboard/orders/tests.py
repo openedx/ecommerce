@@ -1,5 +1,3 @@
-
-
 import os
 from unittest import SkipTest, skipIf
 
@@ -33,7 +31,7 @@ class OrderViewTestsMixin:
     Inheriting classes should have a `create_user` method.
     """
     def setUp(self):
-        super(OrderViewTestsMixin, self).setUp()
+        super().setUp()
 
         # Staff permissions are required for this view
         self.user = self.create_user(is_staff=True)
@@ -53,15 +51,15 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
             raise SkipTest
 
         cls.selenium = browser()
-        super(OrderViewBrowserTestBase, cls).setUpClass()
+        super().setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
-        super(OrderViewBrowserTestBase, cls).tearDownClass()
+        super().tearDownClass()
 
     def setUp(self):
-        super(OrderViewBrowserTestBase, self).setUp()
+        super().setUp()
 
         self.btn_selector = '[data-action=retry-fulfillment]'
         self.password = 'test'
@@ -100,15 +98,15 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
         self.assertRaises(NoSuchElementException, self.selenium.find_element_by_css_selector, self.btn_selector)
 
         # Ensure the status is updated.
-        selector = 'tr[data-order-number="{}"] .order-status'.format(order_number)
+        selector = f'tr[data-order-number="{order_number}"] .order-status'
         status = self.selenium.find_element_by_css_selector(selector)
         self.assertEqual(ORDER.COMPLETE, status.text)
 
         # Ensure an alert is displayed
-        self.assertAlertDisplayed('alert-success', 'Order {} has been fulfilled.'.format(order_number))
+        self.assertAlertDisplayed('alert-success', f'Order {order_number} has been fulfilled.')
 
     def assert_retry_fulfillment_failed(self, order_number):
-        selector = 'tr[data-order-number="{}"] .order-status'.format(order_number)
+        selector = f'tr[data-order-number="{order_number}"] .order-status'
         status = self.selenium.find_element_by_css_selector(selector)
         self.assertEqual(ORDER.FULFILLMENT_ERROR, status.text)
 
@@ -119,7 +117,7 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
 
         # Ensure an alert is displayed)
         self.assertAlertDisplayed('alert-error',
-                                  'Failed to fulfill order {}: Internal Server Error'.format(order_number))
+                                  f'Failed to fulfill order {order_number}: Internal Server Error')
 
 
 class OrderListViewBrowserTests(OrderViewTestsMixin, RefundTestMixin, OrderViewBrowserTestBase):
@@ -191,7 +189,7 @@ class OrderDetailViewTests(DashboardViewTestMixin, OrderViewTestsMixin, RefundTe
         }
 
         for line in order.lines.all():
-            data['selected_line_qty_{}'.format(line.id)] = line.quantity
+            data[f'selected_line_qty_{line.id}'] = line.quantity
 
         response = self.client.post(reverse('dashboard:order-detail', kwargs={'number': order.number}), data=data,
                                     follow=True)

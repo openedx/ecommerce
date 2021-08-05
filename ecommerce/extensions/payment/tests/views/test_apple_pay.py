@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
@@ -12,7 +10,7 @@ class ApplePayMerchantDomainAssociationViewTests(LoginMixin, TestCase):
     url = reverse('apple_pay_domain_association')
 
     def setUp(self):
-        super(ApplePayMerchantDomainAssociationViewTests, self).setUp()
+        super().setUp()
         self.site_configuration.client_side_payment_processor = 'cybersource'
         self.site_configuration.save()
 
@@ -40,5 +38,5 @@ class ApplePayMerchantDomainAssociationViewTests(LoginMixin, TestCase):
         """ The view should return HTTP 501 if Apple Pay is not properly configured. """
         self.set_apple_pay_merchant_id_domain_association(None)
         response = self.client.get(self.url)
-        content = 'Apple Pay is not configured for [{}].'.format(self.site.domain)
+        content = f'Apple Pay is not configured for [{self.site.domain}].'
         self.assert_response_matches(response, 501, content)

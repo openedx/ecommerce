@@ -15,7 +15,7 @@ class TestThemeFinders(TestCase):
     """
 
     def setUp(self):
-        super(TestThemeFinders, self).setUp()
+        super().setUp()
         self.finder = ThemeFilesFinder()
 
     def test_find_first_themed_asset(self):

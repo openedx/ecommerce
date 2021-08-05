@@ -1,5 +1,3 @@
-
-
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import models
@@ -105,7 +103,7 @@ class Product(AbstractProduct):
         except AttributeError:
             pass
 
-        super(Product, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
+        super().save(*args, **kwargs)  # pylint: disable=bad-super-call
 
 
 @receiver(post_init, sender=Product)
@@ -150,7 +148,7 @@ class Catalog(models.Model):
     stock_records = models.ManyToManyField('partner.StockRecord', blank=True, related_name='catalogs')
 
     def __str__(self):
-        return u'{id}: {partner_code}-{catalog_name}'.format(
+        return '{id}: {partner_code}-{catalog_name}'.format(
             id=self.id,
             partner_code=self.partner.short_code,
             catalog_name=self.name

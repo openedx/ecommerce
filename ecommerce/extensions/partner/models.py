@@ -1,5 +1,3 @@
-
-
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.partner.abstract_models import AbstractPartner, AbstractStockRecord

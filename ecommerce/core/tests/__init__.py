@@ -1,5 +1,3 @@
-
-
 from waffle.models import Switch
 
 

@@ -1,5 +1,3 @@
-
-
 import ddt
 from rest_framework import status
 

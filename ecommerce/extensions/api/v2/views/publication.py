@@ -18,7 +18,7 @@ class AtomicPublicationView(generics.CreateAPIView, generics.UpdateAPIView):
     serializer_class = serializers.AtomicPublicationSerializer
 
     def get_serializer_context(self):
-        context = super(AtomicPublicationView, self).get_serializer_context()
+        context = super().get_serializer_context()
         context['access_token'] = self.request.user.access_token if self.request else None
         context['partner'] = get_partner_for_site(self.request)
         return context

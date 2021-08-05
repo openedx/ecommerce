@@ -1,5 +1,3 @@
-
-
 import factory
 from django.contrib.sites.models import Site
 from factory.fuzzy import FuzzyText  # pylint: disable=ungrouped-imports
@@ -40,7 +38,7 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
     enable_sdn_check = False
     enable_embargo_check = False
     enable_partial_program = False
-    discovery_api_url = 'http://{}.fake/'.format(Faker().domain_name())
+    discovery_api_url = f'http://{Faker().domain_name()}.fake/'
 
 
 class StockRecordFactory(OscarStockRecordFactory):

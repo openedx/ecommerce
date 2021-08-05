@@ -1,6 +1,4 @@
-
-
-from mock import Mock
+from unittest.mock import Mock
 
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.tests.testcases import TestCase

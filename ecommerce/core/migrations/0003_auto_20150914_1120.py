@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.db import migrations, models
 
 
@@ -26,6 +23,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='siteconfiguration',
-            unique_together=set([('site', 'partner')]),
+            unique_together={('site', 'partner')},
         ),
     ]

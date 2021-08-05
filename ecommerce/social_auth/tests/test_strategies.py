@@ -27,7 +27,7 @@ class CurrentSiteDjangoStrategyTests(TestCase):
     """Tests of the CurrentSiteDjangoStrategy."""
 
     def setUp(self):
-        super(CurrentSiteDjangoStrategyTests, self).setUp()
+        super().setUp()
         self.strategy = CurrentSiteDjangoStrategy(DjangoStorage, self.request)
 
     def test_get_setting_from_siteconfiguration(self):
@@ -84,7 +84,7 @@ class CurrentSiteDjangoStrategyTests(TestCase):
         assert httpretty.is_enabled(), 'httpretty must be enabled to mock the access token response.'
 
         # Use a regex to account for the optional trailing slash
-        url = '{root}/access_token/?'.format(root=self.site.siteconfiguration.oauth2_provider_url)
+        url = f'{self.site.siteconfiguration.oauth2_provider_url}/access_token/?'
         url = re.compile(url)
 
         token = self.create_jwt(user)

@@ -1,5 +1,3 @@
-
-
 from django.test import RequestFactory
 
 from ecommerce.extensions.analytics.context_processors import analytics

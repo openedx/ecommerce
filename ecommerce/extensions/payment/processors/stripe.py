@@ -36,7 +36,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         Raises:
             KeyError: If no settings configured for this payment processor.
         """
-        super(Stripe, self).__init__(site)
+        super().__init__(site)
         configuration = self.configuration
         self.publishable_key = configuration['publishable_key']
         self.secret_key = configuration['secret_key']
@@ -72,7 +72,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             logger.info('Successfully created Stripe charge [%s] for basket [%d].', transaction_id, basket.id)
         except stripe.error.CardError as ex:
             base_message = "Stripe payment for basket [%d] declined with HTTP status [%d]"
-            exception_format_string = "{}: %s".format(base_message)
+            exception_format_string = f"{base_message}: %s"
             body = ex.json_body
             logger.exception(
                 exception_format_string,

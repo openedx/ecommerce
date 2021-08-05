@@ -1,5 +1,3 @@
-
-
 import logging
 from urllib import parse
 
@@ -57,7 +55,7 @@ def get_receipt_page_url(site_configuration, order_number=None, override_url=Non
 
     return '{base_url}{params}'.format(
         base_url=base_url,
-        params='?{params}'.format(params=params) if params else ''
+        params=f'?{params}' if params else ''
     )
 
 
@@ -82,4 +80,4 @@ def add_currency(amount):
     Returns:
         str: Formatted price with currency.
     """
-    return format_currency(settings.OSCAR_DEFAULT_CURRENCY, amount, u'#,##0.00')
+    return format_currency(settings.OSCAR_DEFAULT_CURRENCY, amount, '#,##0.00')

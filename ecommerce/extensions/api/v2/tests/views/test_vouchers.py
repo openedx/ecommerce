@@ -1,11 +1,9 @@
-
-
 import datetime
 from uuid import uuid4
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import pytz
 from django.http import Http404
 from django.urls import reverse
@@ -49,7 +47,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
     path = reverse('api:v2:vouchers-list')
 
     def setUp(self):
-        super(VoucherViewSetTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
@@ -81,7 +79,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         """ Verify the endpoint list all vouchers, filtered by the specified code. """
         voucher = self.create_vouchers()[0]
 
-        url = '{path}?code={code}'.format(path=self.path, code=voucher.code)
+        url = f'{self.path}?code={voucher.code}'
         response = self.client.get(url)
 
         self.assertEqual(response.data['count'], 1)
@@ -138,7 +136,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         voucher, __ = prepare_voucher(_range=new_range)
 
         factory = APIRequestFactory()
-        request = factory.get('/?code={}&page_size=6'.format(voucher.code))
+        request = factory.get(f'/?code={voucher.code}&page_size=6')
         request.site = self.site
         request.user = self.user
         request.strategy = DefaultStrategy()
@@ -270,7 +268,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
     """ Tests for the VoucherViewSet offers endpoint. """
 
     def setUp(self):
-        super(VoucherViewOffersEndpointTests, self).setUp()
+        super().setUp()
         self.endpointView = VoucherViewSet.as_view({'get': 'offers'})
         self.factory = APIRequestFactory()
         request = self.factory.get('/page=1')
@@ -278,7 +276,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
 
     def prepare_offers_listing_request(self, code):
         factory = APIRequestFactory()
-        request = factory.get('/?code={}&page_size=6'.format(code))
+        request = factory.get(f'/?code={code}&page_size=6')
         request.site = self.site
         request.strategy = DefaultStrategy()
         return request

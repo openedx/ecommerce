@@ -1,5 +1,3 @@
-
-
 import abc
 from collections import namedtuple
 
@@ -27,7 +25,7 @@ class BasePaymentProcessor(metaclass=abc.ABCMeta):  # pragma: no cover
     TITLE = None
 
     def __init__(self, site):
-        super(BasePaymentProcessor, self).__init__()
+        super().__init__()
         self.site = site
 
     @abc.abstractmethod
@@ -146,7 +144,7 @@ class BaseClientSidePaymentProcessor(BasePaymentProcessor, metaclass=abc.ABCMeta
         Returns:
             str
         """
-        return 'payment/{}.html'.format(self.NAME)
+        return f'payment/{self.NAME}.html'
 
 
 class ApplePayMixin:

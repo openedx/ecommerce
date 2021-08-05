@@ -1,11 +1,9 @@
-
-
 import json
 from urllib.parse import quote
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
@@ -49,13 +47,13 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     LOGGER_NAME = 'ecommerce.core.models'
 
     def setUp(self):
-        super(UserTests, self).setUp()
+        super().setUp()
 
         httpretty.enable()
         self.mock_access_token_response()
 
     def tearDown(self):
-        super(UserTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 
@@ -107,7 +105,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'WARNING',
-                'Could not find lms_user_id with metric for user {} for None.'.format(user.id)
+                f'Could not find lms_user_id with metric for user {user.id} for None.'
             ),
         ]
 
@@ -149,7 +147,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         first_name = "Jerry"
         last_name = "Seinfeld"
         user = self.create_user(full_name=None, first_name=first_name, last_name=last_name)
-        expected = "{first_name} {last_name}".format(first_name=first_name, last_name=last_name)
+        expected = f"{first_name} {last_name}"
         self.assertEqual(user.get_full_name(), expected)
 
         user = self.create_user(full_name=full_name, first_name=first_name, last_name=last_name)
@@ -174,7 +172,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         last_request = httpretty.last_request()
 
         # Verify the headers passed to the API were correct.
-        expected = {'Authorization': 'JWT {}'.format(token), }
+        expected = {'Authorization': f'JWT {token}', }
         self.assertDictContainsSubset(expected, last_request.headers)
 
     def test_no_user_details(self):

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import django.core.validators
 import oscar.core.validators
 from django.db import migrations, models
@@ -20,6 +17,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='attributeoption',
-            unique_together=set([('group', 'option')]),
+            unique_together={('group', 'option')},
         ),
     ]

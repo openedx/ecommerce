@@ -5,7 +5,7 @@ ISO_8601_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 # Regex used to match course IDs.
 COURSE_ID_REGEX = r'[^/+]+(/|\+)[^/+]+(/|\+)[^/]+'
-COURSE_ID_PATTERN = r'(?P<course_id>{})'.format(COURSE_ID_REGEX)
+COURSE_ID_PATTERN = fr'(?P<course_id>{COURSE_ID_REGEX})'
 
 UUID_REGEX_PATTERN = r'[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?4[0-9a-fA-F]{3}-?[89abAB][0-9a-fA-F]{3}-?[0-9a-fA-F]{12}'
 

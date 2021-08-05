@@ -1,9 +1,7 @@
-
-
 import ddt
 import httpretty
 from edx_django_utils.cache import TieredCache
-from mock import patch
+from unittest.mock import patch
 from opaque_keys.edx.keys import CourseKey
 from requests.exceptions import ConnectionError as ReqConnectionError
 
@@ -70,7 +68,7 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 
         cache_key = get_cache_key(
             site_domain=self.site.domain,
-            resource="{}-{}".format(resource, key)
+            resource=f"{resource}-{key}"
         )
         course_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_cached_response.is_found)
@@ -172,7 +170,7 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         resource = "catalogs"
         cache_key = get_cache_key(
             site_domain=self.site.domain,
-            resource="{}-{}".format(resource, catalog_id)
+            resource=f"{resource}-{catalog_id}"
         )
         course_catalogs_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_catalogs_cached_response.is_found)

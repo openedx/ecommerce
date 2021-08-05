@@ -1,5 +1,3 @@
-
-
 import logging
 
 from django.http import HttpResponse
@@ -17,7 +15,7 @@ class ApplePayMerchantDomainAssociationView(View):
         status_code = 200
 
         if not content:
-            content = 'Apple Pay is not configured for [{}].'.format(request.site.domain)
+            content = f'Apple Pay is not configured for [{request.site.domain}].'
             # 501 Not Implemented -- https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.2
             status_code = 501
             logger.warning(content)

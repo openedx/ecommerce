@@ -37,7 +37,7 @@ class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
         #   - stockrecord partner: for products that have stockrecords (seats, coupons, ...)
         #   - course partner: for products that don't have a stockrecord (parent course)
         partner = self.request.site.siteconfiguration.partner
-        return super(ProductViewSet, self).get_queryset().filter(
+        return super().get_queryset().filter(
             Q(stockrecords__partner=partner) |
             Q(course__partner=partner)
         )

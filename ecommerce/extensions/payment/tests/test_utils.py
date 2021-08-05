@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import httpretty
@@ -34,7 +33,7 @@ class EmbargoCheckTests(TestCase):
 
     @httpretty.activate
     def setUp(self):
-        super(EmbargoCheckTests, self).setUp()
+        super().setUp()
         self.mock_access_token_response()
         self.params = {
             'user': 'foo',

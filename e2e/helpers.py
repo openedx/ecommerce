@@ -1,5 +1,3 @@
-
-
 from e2e.config import (
     BASIC_AUTH_PASSWORD,
     BASIC_AUTH_USERNAME,
@@ -16,7 +14,7 @@ class LmsHelpers:
         url = '{}/{}'.format(LMS_URL_ROOT, path.lstrip('/'))
 
         if BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD:
-            url = url.replace('://', '://{}:{}@'.format(BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD))
+            url = url.replace('://', f'://{BASIC_AUTH_USERNAME}:{BASIC_AUTH_PASSWORD}@')
 
         return url
 

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.db import migrations, models
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME

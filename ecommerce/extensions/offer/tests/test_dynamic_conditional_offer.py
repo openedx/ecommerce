@@ -1,10 +1,8 @@
-
-
 from decimal import Decimal
 from uuid import uuid4
 
 import ddt
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 from waffle.testutils import override_flag
@@ -29,7 +27,7 @@ def _mock_jwt_decode_handler(jwt):
 
 def _mock_get_decoded_jwt(request):     # pylint: disable=unused-argument
     return {
-        'roles': ['{}:{}'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE, uuid4())]
+        'roles': [f'{SYSTEM_ENTERPRISE_LEARNER_ROLE}:{uuid4()}']
     }
 
 
@@ -92,7 +90,7 @@ class DynamicConditionTests(TestCase):
     """
 
     def setUp(self):
-        super(DynamicConditionTests, self).setUp()
+        super().setUp()
         self.condition = Condition.objects.get(
             proxy_class='ecommerce.extensions.offer.dynamic_conditional_offer.DynamicDiscountCondition').proxy()
         self.offer = ConditionalOffer.objects.get(name='dynamic_conditional_offer')

@@ -1,8 +1,6 @@
-
-
 import itertools
 
-import mock
+from unittest import mock
 from analytics import Client
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 from oscar.core.loading import get_class, get_model
@@ -37,7 +35,7 @@ class BasketTests(CatalogMixin, BasketMixin, TransactionTestCase):
     def test_unicode(self):
         """ Verify the __unicode__ method returns the correct value. """
         basket = self.create_basket(self.create_user(), self.site)
-        expected = u"{id} - {status} basket (owner: {owner}, lines: {num_lines})".format(
+        expected = "{id} - {status} basket (owner: {owner}, lines: {num_lines})".format(
             id=basket.id,
             status=basket.status,
             owner=basket.owner,

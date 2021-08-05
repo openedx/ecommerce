@@ -31,7 +31,7 @@ class Command(BaseCommand):
             raise CommandError('A valid Site ID must be specified!')
 
         if options['commit']:
-            self.stderr.write('Associating [{}] baskets with site [{}]...'.format(count, site))
+            self.stderr.write(f'Associating [{count}] baskets with site [{site}]...')
 
             queryset.update(site=site)
             self.stderr.write('Done.')

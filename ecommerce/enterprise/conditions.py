@@ -1,5 +1,3 @@
-
-
 import logging
 from decimal import Decimal
 from uuid import UUID
@@ -103,7 +101,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
 
     @property
     def name(self):
-        return "Basket contains a seat from {}'s catalog".format(self.enterprise_customer_name)
+        return f"Basket contains a seat from {self.enterprise_customer_name}'s catalog"
 
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
         """
@@ -336,7 +334,7 @@ class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
         Returns:
             bool
         """
-        condition_satisfied = super(AssignableEnterpriseCustomerCondition, self).is_satisfied(offer, basket)
+        condition_satisfied = super().is_satisfied(offer, basket)
         if condition_satisfied is False:
             return False
 

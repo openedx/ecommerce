@@ -1,5 +1,3 @@
-
-
 import logging
 
 from oscar.core.loading import get_class, get_model

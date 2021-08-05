@@ -1,5 +1,3 @@
-
-
 from ecommerce.extensions.payment.processors import BaseClientSidePaymentProcessor, HandledProcessorResponse
 
 

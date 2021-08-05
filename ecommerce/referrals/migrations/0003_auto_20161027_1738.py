@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This migration exists to fix the error introduced by https://github.com/edx/ecommerce/pull/968. The 0002 migration
 has been updated to setup the site column correctly for new installations. This migration ensures installations

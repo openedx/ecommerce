@@ -4,7 +4,7 @@ Tests for the ecommerce.extensions.checkout.mixins module.
 
 
 import ddt
-import mock
+from unittest import mock
 from django.core import mail
 from django.test import RequestFactory
 from oscar.core.loading import get_class, get_model
@@ -67,7 +67,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
     """
 
     def setUp(self):
-        super(EdxOrderPlacementMixinTests, self).setUp()
+        super().setUp()
         self.user = UserFactory(lms_user_id=61710)
         self.order = self.create_order(status=ORDER.OPEN)
 

@@ -1,5 +1,3 @@
-
-
 import datetime
 import json
 import uuid
@@ -30,7 +28,7 @@ PRODUCT_LIST_PATH = reverse('api:v2:product-list')
 
 class ProductViewSetBase(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
-        super(ProductViewSetBase, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(id='edX/DemoX/Demo_Course', name='Test Course', partner=self.partner)
@@ -147,7 +145,7 @@ class ProductViewSetCourseEntitlementTests(ProductViewSetBase):
             'certificate_type': 'verified',
             'uuid': str(uuid.uuid4()),
         }
-        super(ProductViewSetCourseEntitlementTests, self).setUp()
+        super().setUp()
 
     def test_entitlement_post(self):
         """ Verify the view allows individual Course Entitlement products to be made via post"""
@@ -214,7 +212,7 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         response_data = response.json()
         self.assertEqual(response_data['count'], 3)
 
-        filtered_url = '{}?product_class=CoUpOn'.format(PRODUCT_LIST_PATH)
+        filtered_url = f'{PRODUCT_LIST_PATH}?product_class=CoUpOn'
         response = self.client.get(filtered_url)
         self.assertEqual(response.status_code, 200)
         response_data = response.json()

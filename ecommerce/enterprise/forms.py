@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # TODO: Refactor this to consolidate it with `ecommerce.programs.forms`.
 
 
@@ -123,7 +122,7 @@ class EnterpriseOfferForm(forms.ModelForm):
                 'contract_discount_value': contract_discount_value,
                 'prepaid_invoice_amount': prepaid_invoice_amount,
             })
-        super(EnterpriseOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
+        super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
                                                   empty_permitted, instance)
 
         date_ui_class = {'class': 'add-pikaday'}
@@ -229,13 +228,13 @@ class EnterpriseOfferForm(forms.ModelForm):
             except ValidationError:
                 self.add_error(
                     'emails_for_usage_alert',
-                    _('Given email address {email} is not a valid email.'.format(email=email))
+                    _(f'Given email address {email} is not a valid email.')
                 )
                 break
         return emails_for_usage_alert
 
     def clean(self):
-        cleaned_data = super(EnterpriseOfferForm, self).clean()
+        cleaned_data = super().clean()
 
         start_datetime = cleaned_data.get('start_datetime')
         end_datetime = cleaned_data.get('end_datetime')
@@ -300,7 +299,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         # Truncate 'enterprise_customer_name' to 48 characters so that our complete name with
         # format 'Discount of type {site} provided by {enterprise_name} for {catalog_uuid}. does
         # not exceed the limit of 128 characters for Oscar's 'AbstractConditionalOffer' name.
-        offer_name = _(u'Discount of type {} provided by {} for {}.'.format(
+        offer_name = _('Discount of type {} provided by {} for {}.'.format(
             ConditionalOffer.SITE,
             enterprise_customer_name[:48],  # pylint: disable=unsubscriptable-object,
             enterprise_customer_catalog_uuid
@@ -350,4 +349,4 @@ class EnterpriseOfferForm(forms.ModelForm):
                     enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
                 )
 
-        return super(EnterpriseOfferForm, self).save(commit)
+        return super().save(commit)

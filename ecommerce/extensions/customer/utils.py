@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from oscar.apps.customer.utils import *  # pylint: disable=wildcard-import, unused-wildcard-import
@@ -42,7 +40,7 @@ class Dispatcher(Dispatcher):
         database
         """
         if not (recipient or user.email):
-            msg = "Unable to send email messages: No email address for '{username}'.".format(username=user.username)
+            msg = f"Unable to send email messages: No email address for '{user.username}'."
             self.logger.warning(msg)
             return
 

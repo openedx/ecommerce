@@ -1,5 +1,3 @@
-
-
 from django.contrib import messages
 from django.urls import reverse
 
@@ -14,7 +12,7 @@ class OrderAdminTests(TestCase):
     order_page_url = reverse('admin:order_order_changelist')
 
     def setUp(self):
-        super(OrderAdminTests, self).setUp()
+        super().setUp()
         self.user = UserFactory(is_staff=True, is_superuser=True, password=self.password)
         self.client.login(username=self.user.username, password=self.password)
 

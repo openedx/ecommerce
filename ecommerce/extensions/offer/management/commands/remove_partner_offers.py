@@ -30,7 +30,7 @@ class Command(BaseCommand):
     """
 
     help = 'Remove duplicate conditional offers.'
-    CONFIRMATION_PROMPT = u"You're going to remove {count} conditional offer{pluralized}. Do you want to continue?"
+    CONFIRMATION_PROMPT = "You're going to remove {count} conditional offer{pluralized}. Do you want to continue?"
 
     def add_arguments(self, parser):
         parser.add_argument('--partner',

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from hashlib import md5
 
 import ddt
@@ -28,7 +25,7 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
     course_id = 'sku/test_course/course'
 
     def setUp(self):
-        super(UtilsTests, self).setUp()
+        super().setUp()
         self.course = CourseFactory(id=COURSE_ID, name='Test Course', partner=self.partner)
         self.seat = self.course.create_or_update_seat('verified', False, 0)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
@@ -89,7 +86,7 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
 
 class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
-        super(CouponUtilsTests, self).setUp()
+        super().setUp()
         self.course = CourseFactory(id=COURSE_ID, name='Test Course', partner=self.partner)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
 
@@ -109,7 +106,7 @@ class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
 
 class CouponCreationTests(CouponMixin, TestCase):
     def setUp(self):
-        super(CouponCreationTests, self).setUp()
+        super().setUp()
         self.catalog = Catalog.objects.create(partner=self.partner)
 
     def create_custom_coupon(self, benefit_value=100, code='', max_uses=None, note=None, quantity=1,

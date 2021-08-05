@@ -1,5 +1,3 @@
-
-
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -90,7 +88,7 @@ class Basket(AbstractBasket):
                 pass
 
         # Call flush after we fetch all_lines() which is cleared during flush()
-        super(Basket, self).flush()  # pylint: disable=bad-super-call
+        super().flush()  # pylint: disable=bad-super-call
 
     def add_product(self, product, quantity=1, options=None):
         """
@@ -98,7 +96,7 @@ class Basket(AbstractBasket):
 
         Performs AbstractBasket add_product method and fires Google Analytics 'Product Added' event.
         """
-        line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
+        line, created = super().add_product(product, quantity, options)  # pylint: disable=bad-super-call
         cached_response = DEFAULT_REQUEST_CACHE.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
         if cached_response.is_found:
             # Do not track anything. This is a temporary basket calculation.

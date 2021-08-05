@@ -1,6 +1,4 @@
-
-
-import mock
+from unittest import mock
 
 from ecommerce.core.exceptions import MissingRequestError
 from ecommerce.core.url_utils import get_ecommerce_url, get_favicon_url, get_lms_url, get_logo_url

@@ -109,7 +109,7 @@ class Command(BaseCommand):
         """
         failed_courses = []
 
-        with open(course_ids_file, 'r') as file_handler:
+        with open(course_ids_file) as file_handler:
             course_ids = file_handler.readlines()
             total_courses = len(course_ids)
             logger.info('Creating enrollment code for %d courses.', total_courses)

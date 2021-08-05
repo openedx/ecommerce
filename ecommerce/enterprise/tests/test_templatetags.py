@@ -1,7 +1,5 @@
-
-
 import httpretty
-import mock
+from unittest import mock
 from django.conf import settings
 from django.template import Context, Template
 from oscar.core.loading import get_model
@@ -19,7 +17,7 @@ TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 @httpretty.activate
 class EnterpriseTemplateTagsTests(EnterpriseServiceMockMixin, CouponMixin, TestCase):
     def setUp(self):
-        super(EnterpriseTemplateTagsTests, self).setUp()
+        super().setUp()
 
         # Enable enterprise functionality
         toggle_switch(settings.ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH, True)

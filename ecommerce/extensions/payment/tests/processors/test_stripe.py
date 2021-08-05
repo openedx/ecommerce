@@ -1,8 +1,6 @@
-
-
 import logging
 
-import mock
+from unittest import mock
 import stripe
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
@@ -90,7 +88,7 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
 
     def assert_addresses_equal(self, actual, expected):
         for field in ('first_name', 'last_name', 'line1', 'line2', 'line3', 'line4', 'postcode', 'state', 'country'):
-            assert getattr(actual, field) == getattr(expected, field), 'The value of {} differs'.format(field)
+            assert getattr(actual, field) == getattr(expected, field), f'The value of {field} differs'
 
     def test_get_address_from_token(self):
         country, __ = Country.objects.get_or_create(iso_3166_1_a2='US')

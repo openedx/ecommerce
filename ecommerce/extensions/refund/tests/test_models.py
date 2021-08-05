@@ -1,6 +1,6 @@
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
@@ -322,7 +322,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         with mock.patch('ecommerce.extensions.refund.models.RefundLine.deny', side_effect=Exception):
             with LogCapture(REFUND_MODEL_LOGGER_NAME) as logger:
                 self.assertFalse(refund.deny())
-                msg = 'Failed to deny RefundLine [{}].'.format(refund.lines.first().id)
+                msg = f'Failed to deny RefundLine [{refund.lines.first().id}].'
                 logger.check_present((REFUND_MODEL_LOGGER_NAME, 'ERROR', msg))
 
     @ddt.data(REFUND.REVOCATION_ERROR, REFUND.PAYMENT_REFUNDED, REFUND.PAYMENT_REFUND_ERROR, REFUND.COMPLETE)

@@ -1,6 +1,4 @@
-
-
-import mock
+from unittest import mock
 from django.db import transaction
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
@@ -93,7 +91,7 @@ class FulfillFrozenBasketsTests(TestCase):
         response = {
             'req_card_number': card_number,
             'req_card_type': CARD_TYPES['visa']['cybersource_code'],
-            u'decision': u'ACCEPT',
+            'decision': 'ACCEPT',
         }
         PaymentProcessorResponse.objects.create(basket=basket, transaction_id='abc', processor_name='cybersource',
                                                 response=response)
@@ -129,7 +127,7 @@ class FulfillFrozenBasketsTests(TestCase):
         """ Test utility against multiple payment processor responses."""
         basket = self._dummy_basket_data()
         PaymentProcessorResponse.objects.create(basket=basket, transaction_id='abc', processor_name='cybersource',
-                                                response={u'decision': u'ACCEPT'})
+                                                response={'decision': 'ACCEPT'})
         assert FulfillFrozenBaskets().fulfill_basket(basket.id, self.site)
 
     def test_no_successful_transaction(self):

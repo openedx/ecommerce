@@ -1,5 +1,3 @@
-
-
 import json
 
 import ddt
@@ -16,7 +14,7 @@ class ProvidersViewSetTest(TestCase):
     path = reverse('api:v2:providers:list_providers')
 
     def setUp(self):
-        super(ProvidersViewSetTest, self).setUp()
+        super().setUp()
         user = self.create_user()
         self.client.login(username=user.username, password=self.password)
         self.provider = 'test-provider'

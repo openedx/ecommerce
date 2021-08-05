@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import logging
 import random
@@ -8,7 +7,7 @@ from urllib.parse import urlencode
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import RequestFactory, override_settings
@@ -37,7 +36,7 @@ class SDNCheckTests(TestCase):
     """ Tests for the SDN check function. """
 
     def setUp(self):
-        super(SDNCheckTests, self).setUp()
+        super().setUp()
         self.name = 'Dr. Evil'
         self.city = 'Top-secret lair'
         self.country = 'EL'
@@ -113,7 +112,7 @@ class SDNCheckTests(TestCase):
     def test_sdn_check_unicode_match(self):
         """ Verify the SDN check returns the number of matches and records the match. """
         sdn_response = {'total': 1}
-        self.name = u'Keyser Söze'
+        self.name = 'Keyser Söze'
         self.mock_sdn_response(json.dumps(sdn_response))
         response = self.sdn_validator.search(self.name, self.city, self.country)
         self.assertEqual(response, sdn_response)
@@ -155,7 +154,7 @@ class SDNFallbackTests(TestCase):
     LOGGER_NAME = 'ecommerce.extensions.payment.core.sdn'
 
     def setUp(self):
-        super(SDNFallbackTests, self).setUp()
+        super().setUp()
         extensions_factories.SDNFallbackMetadataFactory.create(import_state='Current')
         self.csv_header = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids\n"""  # pylint: disable=line-too-long
 

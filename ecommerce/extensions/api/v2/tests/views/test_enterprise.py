@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import datetime
 import json
 from collections import Counter
@@ -9,7 +6,7 @@ from uuid import uuid4
 import bleach
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import rules
 from django.conf import settings
 from django.test import override_settings
@@ -132,7 +129,7 @@ class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
 class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase):
 
     def setUp(self):
-        super(TestEnterpriseCustomerCatalogsViewSet, self).setUp()
+        super().setUp()
         user = self.create_user(is_staff=True)
         self.client.login(username=user.username, password=self.password)
 
@@ -143,8 +140,8 @@ class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase
             'num_pages': 1,
             'current_page': 1,
             'start': 0,
-            'next': '{}?enterprise_customer={}&page=3'.format(self.ENTERPRISE_CATALOG_URL, self.enterprise),
-            'previous': '{}?enterprise_customer={}&page=1'.format(self.ENTERPRISE_CATALOG_URL, self.enterprise),
+            'next': f'{self.ENTERPRISE_CATALOG_URL}?enterprise_customer={self.enterprise}&page=3',
+            'previous': f'{self.ENTERPRISE_CATALOG_URL}?enterprise_customer={self.enterprise}&page=1',
             'results': [
                 {
                     'enterprise_customer': self.enterprise,
@@ -196,8 +193,8 @@ class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase
                     ]
                 }
             ],
-            "next": '{}{}?page=3'.format(self.ENTERPRISE_CATALOG_URL, self.enterprise_catalog),
-            "previous": '{}{}?page=1'.format(self.ENTERPRISE_CATALOG_URL, self.enterprise_catalog)
+            "next": f'{self.ENTERPRISE_CATALOG_URL}{self.enterprise_catalog}?page=3',
+            "previous": f'{self.ENTERPRISE_CATALOG_URL}{self.enterprise_catalog}?page=1'
         }
 
     @mock.patch('ecommerce.enterprise.utils.EdxRestApiClient')
@@ -303,7 +300,7 @@ class EnterpriseCouponViewSetRbacTests(
     """
 
     def setUp(self):
-        super(EnterpriseCouponViewSetRbacTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
@@ -545,7 +542,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         # `max_uses` should be same for all codes
         max_uses = max_uses or 1
-        self.assertEqual(set(all_received_code_max_uses), set([max_uses]))
+        self.assertEqual(set(all_received_code_max_uses), {max_uses})
         # total count of results returned is correct
         self.assertEqual(total_result_count, results_count)
 
@@ -572,13 +569,13 @@ class EnterpriseCouponViewSetRbacTests(
                 users = [{'email': 'user@example.com'}]
             else:
                 users = [
-                    {'email': 'user{email_index}@example.com'.format(email_index=email_index)}
+                    {'email': f'user{email_index}@example.com'}
                     for email_index in range(code_assignments[i])
                 ]
 
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'users': users,
                     'codes': [voucher.code],
@@ -644,7 +641,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -803,7 +800,7 @@ class EnterpriseCouponViewSetRbacTests(
         for code_filter, expected_response in expected_responses.items():
             response = self.get_response(
                 'GET',
-                '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, code_filter)
+                f'/api/v2/enterprise/coupons/{coupon_id}/codes/?code_filter={code_filter}'
             ).json()
             self.assert_code_detail_response(response['results'], expected_response, codes)
 
@@ -819,7 +816,7 @@ class EnterpriseCouponViewSetRbacTests(
             codes = [voucher.code for voucher in vouchers]
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon.id),
+                f'/api/v2/enterprise/coupons/{coupon.id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -861,7 +858,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'GET',
-            '/api/v2/enterprise/coupons/{}/codes/'.format(coupon_id)
+            f'/api/v2/enterprise/coupons/{coupon_id}/codes/'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
@@ -886,7 +883,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'GET',
-            '/api/v2/enterprise/coupons/{}/codes.csv?code_filter={}'.format(coupon_id, VOUCHER_REDEEMED)
+            f'/api/v2/enterprise/coupons/{coupon_id}/codes.csv?code_filter={VOUCHER_REDEEMED}'
         )
         csv_content = response.content.decode('utf-8').split('\r\n')
         csv_header = csv_content[0]
@@ -996,7 +993,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
+            f'/api/v2/enterprise/coupons/{coupon_id}/codes/?code_filter={VOUCHER_NOT_REDEEMED}'
         ).json()
 
         # Verify that code appears in unredeemed filter.
@@ -1012,7 +1009,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
+            f'/api/v2/enterprise/coupons/{coupon_id}/codes/?code_filter={VOUCHER_NOT_REDEEMED}'
         ).json()
 
         # Now verify that code still appears in unredeemed filter.
@@ -1048,7 +1045,7 @@ class EnterpriseCouponViewSetRbacTests(
         EcommerceFeatureRoleAssignment.objects.all().delete()
         response = self.get_response(
             'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon.id, VOUCHER_NOT_ASSIGNED)
+            f'/api/v2/enterprise/coupons/{coupon.id}/codes/?code_filter={VOUCHER_NOT_ASSIGNED}'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1446,7 +1443,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
+            f'/api/v2/enterprise/coupons/{coupon_id}/codes/?code_filter={VOUCHER_NOT_REDEEMED}'
         ).json()
 
         # Now verify that the dates appear correctly.
@@ -1876,7 +1873,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -1923,7 +1920,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -1962,7 +1959,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -1995,14 +1992,14 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/visibility/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/visibility/',
             {}
         )
         assert response.status_code == 400
 
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/visibility/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/visibility/',
             {
                 'code_ids': code_ids,
                 'is_public': True,
@@ -2034,7 +2031,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2066,7 +2063,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2084,7 +2081,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
                 {'assignments': [{'user': user, 'code': voucher.code}], 'do_not_email': False}
             )
 
@@ -2095,7 +2092,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2128,7 +2125,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2166,7 +2163,7 @@ class EnterpriseCouponViewSetRbacTests(
                 side_effect=Exception()) as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2234,7 +2231,7 @@ class EnterpriseCouponViewSetRbacTests(
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             response = response.json()
             self.assertIn(
-                "'{}' coupon are not supported to refund.".format(voucher_type),
+                f"'{voucher_type}' coupon are not supported to refund.",
                 response['non_field_errors'][0]
             )
             self.assertEqual(vouchers.count(), existing_vouchers_count)
@@ -2328,7 +2325,7 @@ class EnterpriseCouponViewSetRbacTests(
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
         self.assertEqual(
-            "Could note create new voucher for the order: {}".format(order),
+            f"Could note create new voucher for the order: {order}",
             response['non_field_errors'][0]
         )
 
@@ -2346,7 +2343,7 @@ class EnterpriseCouponViewSetRbacTests(
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
         self.assertIn(
-            "Invalid order number or order {} does not exists.".format(order_number),
+            f"Invalid order number or order {order_number} does not exists.",
             response['order'][0]
         )
 
@@ -2367,7 +2364,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2397,7 +2394,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
                 payload
             )
 
@@ -2431,7 +2428,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2449,7 +2446,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
                 payload
             )
 
@@ -2469,7 +2466,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
             {
                 'template': 'Test template',
                 'template_subject': TEMPLATE_SUBJECT,
@@ -2493,7 +2490,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
             {
                 'template': 'Test template',
                 'template_subject': TEMPLATE_SUBJECT,
@@ -2525,7 +2522,7 @@ class EnterpriseCouponViewSetRbacTests(
         voucher = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.first()
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
             {
                 'template': 'Test template',
                 'template_subject': TEMPLATE_SUBJECT,
@@ -2556,7 +2553,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2572,7 +2569,7 @@ class EnterpriseCouponViewSetRbacTests(
                 side_effect=Exception('email_dispatch_failed')) as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2602,7 +2599,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2616,7 +2613,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2732,7 +2729,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2748,7 +2745,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
                 payload
             )
         response = response.json()
@@ -2766,7 +2763,7 @@ class EnterpriseCouponViewSetRbacTests(
         coupon_id = coupon['coupon_id']
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
             {
                 'template': 'Test template',
                 'template_subject': TEMPLATE_SUBJECT,
@@ -2796,7 +2793,7 @@ class EnterpriseCouponViewSetRbacTests(
         voucher = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.first()
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
             {
                 'template': 'Test template',
                 'template_subject': TEMPLATE_SUBJECT,
@@ -2826,7 +2823,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2841,7 +2838,7 @@ class EnterpriseCouponViewSetRbacTests(
                 side_effect=Exception('email_dispatch_failed')) as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2865,7 +2862,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2879,7 +2876,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2923,7 +2920,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2969,7 +2966,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -2997,7 +2994,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
             {
                 'template': 'Test template',
                 'template_subject': TEMPLATE_SUBJECT,
@@ -3018,7 +3015,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+            f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
             {
                 'template': 'Test template',
                 'template_subject': TEMPLATE_SUBJECT,
@@ -3058,7 +3055,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/{action}/'.format(coupon_id, action=action),
+            f'/api/v2/enterprise/coupons/{coupon_id}/{action}/',
             {
                 'template': 'Test template',
                 'template_subject': TEMPLATE_SUBJECT,
@@ -3138,7 +3135,7 @@ class EnterpriseCouponViewSetRbacTests(
             OfferAssignment.objects.create(
                 code=voucher.code,
                 offer=voucher.enterprise_offer,
-                user_email='v{}@example.com'.format(index),
+                user_email=f'v{index}@example.com',
             )
 
         # update coupon with new max_uses, this should not create assignments for non `MULTI_USE_PER_CUSTOMER` coupon
@@ -3158,7 +3155,7 @@ class EnterpriseCouponViewSetRbacTests(
             assignments = OfferAssignment.objects.filter(
                 code=voucher.code,
                 offer=voucher.enterprise_offer,
-                user_email='v{}@example.com'.format(index),
+                user_email=f'v{index}@example.com',
             ).count()
             assert assignments == 1
 
@@ -3174,7 +3171,7 @@ class EnterpriseCouponViewSetRbacTests(
         email_subject_max_limit = OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/{action}/'.format(coupon_id, action=action),
+            f'/api/v2/enterprise/coupons/{coupon_id}/{action}/',
             {
                 'template': 'Test template',
                 'template_subject': 'S' * (email_subject_max_limit + 1),
@@ -3186,9 +3183,9 @@ class EnterpriseCouponViewSetRbacTests(
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             'error': {
-                'email_subject': 'Email subject must be {} characters or less'.format(email_subject_max_limit),
-                'email_greeting': 'Email greeting must be {} characters or less'.format(max_limit),
-                'email_closing': 'Email closing must be {} characters or less'.format(max_limit),
+                'email_subject': f'Email subject must be {email_subject_max_limit} characters or less',
+                'email_greeting': f'Email greeting must be {max_limit} characters or less',
+                'email_closing': f'Email closing must be {max_limit} characters or less',
             }
         }
 
@@ -3196,7 +3193,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch(mock_path):
             response = self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/{action}/'.format(coupon_id, action=email_type),
+                f'/api/v2/enterprise/coupons/{coupon_id}/{email_type}/',
                 request_data
             )
         return response
@@ -3282,7 +3279,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template_id': template_id,
                     'template_subject': TEMPLATE_SUBJECT,
@@ -3308,7 +3305,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/remind/',
                 {
                     'template_id': template_id,
                     'template_subject': TEMPLATE_SUBJECT,
@@ -3331,7 +3328,7 @@ class EnterpriseCouponViewSetRbacTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
                 {
                     'template_id': template_id,
                     'template_subject': TEMPLATE_SUBJECT,
@@ -3357,7 +3354,7 @@ class OfferAssignmentSummaryViewSetTests(
     """
 
     def setUp(self):
-        super(OfferAssignmentSummaryViewSetTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True, email='test@example.com')
         self.client.login(username=self.user.username, password=self.password)
 
@@ -3453,7 +3450,7 @@ class OfferAssignmentSummaryViewSetTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/assign/',
                 {
                     'template': 'Test template',
                     'template_subject': TEMPLATE_SUBJECT,
@@ -3468,7 +3465,7 @@ class OfferAssignmentSummaryViewSetTests(
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
             self.get_response(
                 'POST',
-                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                f'/api/v2/enterprise/coupons/{coupon_id}/revoke/',
                 {'assignments': [{'user': user, 'code': code}], 'do_not_email': False}
             )
 
@@ -3697,7 +3694,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
     """
 
     def setUp(self):
-        super(OfferAssignmentEmailTemplatesViewSetTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True, email='test@example.com')
         self.client.login(username=self.user.username, password=self.password)
         self.enterprise = '5c0dd495-e726-46fa-a6a8-2d8d26c716c9'
@@ -3903,7 +3900,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         self.create_multiple_templates_data()
 
         email_type = expected_template_data[0]['email_type']
-        response = self.client.get('{}?email_type={}'.format(self.url, email_type))
+        response = self.client.get(f'{self.url}?email_type={email_type}')
         assert response.status_code == status.HTTP_200_OK
 
         recieved_template_data = response.json()['results']
@@ -3952,7 +3949,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         """
         self.create_multiple_templates_data()
 
-        response = self.client.get('{}?email_type={}&active=1'.format(self.url, email_type))
+        response = self.client.get(f'{self.url}?email_type={email_type}&active=1')
         assert response.status_code == status.HTTP_200_OK
 
         templates = response.json()['results']
@@ -4067,13 +4064,13 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         )
         assert response == {
             'email_greeting': [
-                'Email greeting must be {} characters or less'.format(max_limit)
+                f'Email greeting must be {max_limit} characters or less'
             ],
             'email_closing': [
-                'Email closing must be {} characters or less'.format(max_limit)
+                f'Email closing must be {max_limit} characters or less'
             ],
             'email_subject': [
-                'Email subject must be {} characters or less'.format(OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT)
+                f'Email subject must be {OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT} characters or less'
             ]
         }
 

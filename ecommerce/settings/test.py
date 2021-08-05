@@ -1,5 +1,3 @@
-
-
 from urllib.parse import urljoin
 
 from path import Path

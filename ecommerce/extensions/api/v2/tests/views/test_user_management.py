@@ -1,9 +1,7 @@
-
-
 import json
 
 import ddt
-import mock
+from unittest import mock
 from django.urls import reverse
 
 from ecommerce.tests.factories import UserFactory
@@ -19,7 +17,7 @@ class UsernameReplacementViewTests(TestCase):
     SERVICE_USERNAME = 'test_replace_username_service_worker'
 
     def setUp(self):
-        super(UsernameReplacementViewTests, self).setUp()
+        super().setUp()
         self.service_user = UserFactory(username=self.SERVICE_USERNAME)
         self.url = reverse("api:v2:user_management:username_replacement")
 

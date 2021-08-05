@@ -1,6 +1,4 @@
-
-
-import mock
+from unittest import mock
 from django.contrib import messages
 from django.urls import reverse
 
@@ -12,7 +10,7 @@ class ManagementViewTests(TestCase):
     path = reverse('management:index')
 
     def setUp(self):
-        super(ManagementViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True, is_superuser=True)
         self.client.login(username=self.user.username, password=self.password)
 

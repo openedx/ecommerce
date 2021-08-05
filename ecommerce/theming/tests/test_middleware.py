@@ -15,7 +15,7 @@ class TestPreviewTheme(TestCase):
         """
         Clear static file finders cache and register cleanup methods.
         """
-        super(TestPreviewTheme, self).setUp()
+        super().setUp()
         self.dashboard_index_url = reverse('dashboard:index')
 
         # create a user and log in

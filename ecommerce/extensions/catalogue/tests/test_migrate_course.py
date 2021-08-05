@@ -1,6 +1,3 @@
-# coding=utf-8
-
-
 import datetime
 import json
 import logging
@@ -8,7 +5,7 @@ from decimal import Decimal
 from urllib.parse import urlparse
 
 import httpretty
-import mock
+from unittest import mock
 import pytz
 from django.core.management import call_command
 from django.test import override_settings
@@ -52,15 +49,15 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
 
     @property
     def commerce_api_url(self):
-        return self.site_configuration.build_lms_url('/api/commerce/v1/courses/{}/'.format(self.course_id))
+        return self.site_configuration.build_lms_url(f'/api/commerce/v1/courses/{self.course_id}/')
 
     @property
     def course_structure_url(self):
-        return self.site_configuration.build_lms_url('/api/course_structure/v0/courses/{}/'.format(self.course_id))
+        return self.site_configuration.build_lms_url(f'/api/course_structure/v0/courses/{self.course_id}/')
 
     @property
     def enrollment_api_url(self):
-        return self.site_configuration.build_lms_url('/api/enrollment/v1/course/{}'.format(self.course_id))
+        return self.site_configuration.build_lms_url(f'/api/enrollment/v1/course/{self.course_id}')
 
     def _mock_lms_apis(self):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock LMS API calls.')
@@ -95,12 +92,12 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
         """ Verify the given seat is configured correctly. """
         certificate_type = Course.certificate_type_for_mode(mode)
 
-        expected_title = 'Seat in {}'.format(self.course_name)
+        expected_title = f'Seat in {self.course_name}'
         if certificate_type != '':
-            expected_title += ' with {} certificate'.format(certificate_type)
+            expected_title += f' with {certificate_type} certificate'
 
             if seat.attr.id_verification_required:
-                expected_title += u' (and ID verification)'
+                expected_title += ' (and ID verification)'
 
         self.assertEqual(seat.title, expected_title)
         self.assertEqual(getattr(seat.attr, 'certificate_type', ''), certificate_type)
@@ -131,13 +128,13 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
 @override_settings(EDX_API_KEY=EDX_API_KEY)
 class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
-        super(MigratedCourseTests, self).setUp()
+        super().setUp()
         toggle_switch('publish_course_modes_to_lms', True)
         httpretty.enable()
         self.mock_access_token_response()
 
     def tearDown(self):
-        super(MigratedCourseTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 
@@ -160,7 +157,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
         # Verify created objects match mocked data
         parent_seat = course.parent_seat_product
-        self.assertEqual(parent_seat.title, 'Seat in {}'.format(self.course_name))
+        self.assertEqual(parent_seat.title, f'Seat in {self.course_name}')
         self.assertEqual(course.verification_deadline, EXPIRES)
 
         for seat in course.seat_products:
@@ -187,7 +184,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             migrated_course.load_from_lms()
         except Exception as ex:  # pylint: disable=broad-except
             self.assertEqual(str(ex),
-                             'Aborting migration. No name is available for {}.'.format(self.course_id))
+                             f'Aborting migration. No name is available for {self.course_id}.')
 
         # Verify the Course Structure API was called.
         last_request = httpretty.last_request()
@@ -214,7 +211,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
         # Verify that created objects match mocked data.
         parent_seat = course.parent_seat_product
-        self.assertEqual(parent_seat.title, 'Seat in {}'.format(self.course_name))
+        self.assertEqual(parent_seat.title, f'Seat in {self.course_name}')
         # Confirm that there is no verification deadline set for the course.
         self.assertEqual(course.verification_deadline, None)
 
@@ -228,7 +225,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
         body = {
             # Wrap the course name with whitespace
-            'name': '  {}  '.format(self.course_name),
+            'name': f'  {self.course_name}  ',
             'verification_deadline': EXPIRES_STRING,
         }
         httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
@@ -241,13 +238,13 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         self.assertEqual(course.name, self.course_name)
 
         parent_seat = course.parent_seat_product
-        self.assertEqual(parent_seat.title, 'Seat in {}'.format(self.course_name))
+        self.assertEqual(parent_seat.title, f'Seat in {self.course_name}')
 
 
 @override_settings(EDX_API_KEY=EDX_API_KEY)
 class CommandTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
-        super(CommandTests, self).setUp()
+        super().setUp()
         toggle_switch('publish_course_modes_to_lms', True)
 
     @httpretty.activate

@@ -1,9 +1,7 @@
-
-
 import json
 
 import httpretty
-import mock
+from unittest import mock
 from django.core import mail
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -36,7 +34,7 @@ LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 
 class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
     def setUp(self):
-        super(SignalTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(email="example@example.com")
         self.request.user = self.user
         toggle_switch('ENABLE_NOTIFICATIONS', True)
@@ -85,7 +83,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         httpretty.register_uri(
             httpretty.GET,
             self.site.siteconfiguration.build_lms_url(
-                'api/credit/v1/providers/{credit_provider_id}/'.format(credit_provider_id=credit_provider_id)
+                f'api/credit/v1/providers/{credit_provider_id}/'
             ),
             body=json.dumps(body),
             content_type='application/json'

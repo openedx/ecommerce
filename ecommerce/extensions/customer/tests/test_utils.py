@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.core import mail
 from django.test import RequestFactory
@@ -16,7 +14,7 @@ CommunicationEventType = get_model('customer', 'CommunicationEventType')
 class CustomerUtilsTests(TestCase):
 
     def setUp(self):
-        super(CustomerUtilsTests, self).setUp()
+        super().setUp()
         self.dispatcher = Dispatcher()
         self.request = RequestFactory()
         self.user = self.create_user()

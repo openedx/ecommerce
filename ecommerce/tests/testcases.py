@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.test import LiveServerTestCase as DjangoLiveServerTestCase
 from django.test import TestCase as DjangoTestCase
@@ -22,18 +20,18 @@ class TieredCacheMixin:
 
     def setUp(self):
         TieredCache.dangerous_clear_all_tiers()
-        super(TieredCacheMixin, self).setUp()
+        super().setUp()
 
     def tearDown(self):
         TieredCache.dangerous_clear_all_tiers()
-        super(TieredCacheMixin, self).tearDown()
+        super().tearDown()
 
 
 class ViewTestMixin(TieredCacheMixin):
     path = None
 
     def setUp(self):
-        super(ViewTestMixin, self).setUp()
+        super().setUp()
         user = self.create_user(is_staff=True)
         self.client.login(username=user.username, password=self.password)
 

@@ -1,5 +1,3 @@
-
-
 import json
 
 import ddt
@@ -7,7 +5,7 @@ import httpretty
 from django.conf import settings
 from django.urls import reverse
 from edx_django_utils.cache import TieredCache
-from mock import patch
+from unittest.mock import patch
 from testfixtures import LogCapture
 
 from ecommerce.core.url_utils import get_lms_url
@@ -189,5 +187,5 @@ class CourseAppViewTests(TestCase):
             response = self.client.get(self.path)
 
             self.assertEqual(response.status_code, 200)
-            expected = 'User [{}] has no access token, and will not be able to edit courses.'.format(user.username)
+            expected = f'User [{user.username}] has no access token, and will not be able to edit courses.'
             logger.check((LOGGER_NAME, 'WARNING', expected))

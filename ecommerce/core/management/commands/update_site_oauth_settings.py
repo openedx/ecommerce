@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
         oauth_settings.update({
             'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': lms_url_root,
-            'SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL': '{lms_url_root}/logout'.format(lms_url_root=lms_url_root),
+            'SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL': f'{lms_url_root}/logout',
             'SOCIAL_AUTH_EDX_OAUTH2_ISSUERS': [lms_url_root],
             'SOCIAL_AUTH_EDX_OAUTH2_KEY': sso_client_id,
             'SOCIAL_AUTH_EDX_OAUTH2_SECRET': sso_client_secret,

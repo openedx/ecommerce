@@ -1,5 +1,3 @@
-
-
 import datetime
 
 from django.core.management.base import BaseCommand
@@ -88,13 +86,13 @@ class Command(BaseCommand):
             'verified', True, price, expires=expires, create_enrollment_code=True, sku=verified_sku
         )
         self.stdout.write(
-            self.style.SUCCESS('Created audit and verified seats for [{course_id}]'.format(course_id=course_id))
+            self.style.SUCCESS(f'Created audit and verified seats for [{course_id}]')
         )
 
         # Publish the data to the LMS
         if course.publish_to_lms():
-            msg = 'An error occurred while attempting to publish [{course_id}] to LMS'.format(course_id=course_id)
+            msg = f'An error occurred while attempting to publish [{course_id}] to LMS'
             self.stderr.write(self.style.ERROR(msg))
         else:
-            msg = 'Published course modes for [{course_id}] to LMS'.format(course_id=course_id)
+            msg = f'Published course modes for [{course_id}] to LMS'
             self.stdout.write(self.style.SUCCESS(msg))

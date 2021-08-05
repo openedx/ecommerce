@@ -3,7 +3,7 @@ Comprehensive Theming tests for Theme App Config.
 """
 
 
-import mock
+from unittest import mock
 from django.conf import settings
 from django.test import override_settings
 

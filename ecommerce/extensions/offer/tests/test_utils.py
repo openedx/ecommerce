@@ -1,9 +1,7 @@
-
-
 from decimal import Decimal
 
 import ddt
-import mock
+from unittest import mock
 from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.test.factories import StockRecord
@@ -46,7 +44,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         '''
 
     def setUp(self):
-        super(UtilTests, self).setUp()
+        super().setUp()
         self.course = CourseFactory(partner=self.partner)
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
@@ -63,19 +61,19 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(benefit_value, '35%')
 
         benefit_value = format_benefit_value(self.value_benefit)
-        expected_benefit = add_currency(Decimal((self.seat_price - 10)))
-        self.assertEqual(benefit_value, '${expected_benefit}'.format(expected_benefit=expected_benefit))
+        expected_benefit = add_currency(Decimal(self.seat_price - 10))
+        self.assertEqual(benefit_value, f'${expected_benefit}')
 
     def test_format_program_benefit_value(self):
         """ format_benefit_value(program_benefit) should format benefit value based on proxy class. """
         percentage_benefit = PercentageDiscountBenefitWithoutRangeFactory()
         benefit_value = format_benefit_value(percentage_benefit)
-        self.assertEqual(benefit_value, '{}%'.format(percentage_benefit.value))
+        self.assertEqual(benefit_value, f'{percentage_benefit.value}%')
 
         absolute_benefit = AbsoluteDiscountBenefitWithoutRangeFactory()
         benefit_value = format_benefit_value(absolute_benefit)
         expected_value = add_currency(Decimal(absolute_benefit.value))
-        self.assertEqual(benefit_value, '${}'.format(expected_value))
+        self.assertEqual(benefit_value, f'${expected_value}')
 
     @ddt.data(
         ('1.0', '1'),

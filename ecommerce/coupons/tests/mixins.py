@@ -1,10 +1,8 @@
-
-
 import datetime
 import json
 
 import httpretty
-import mock
+from unittest import mock
 from django.test import RequestFactory
 from edx_django_utils.cache import TieredCache
 from oscar.core.utils import slugify
@@ -22,13 +20,13 @@ from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, S
 class DiscoveryMockMixin:
     """ Mocks for the Discovery service response. """
     def setUp(self):
-        super(DiscoveryMockMixin, self).setUp()
+        super().setUp()
         TieredCache.dangerous_clear_all_tiers()
 
     @staticmethod
     def build_discovery_catalogs_url(discovery_api_url, catalog_id=''):
-        suffix = '{}/'.format(catalog_id) if catalog_id else ''
-        return '{discovery_api_url}catalogs/{suffix}'.format(discovery_api_url=discovery_api_url, suffix=suffix)
+        suffix = f'{catalog_id}/' if catalog_id else ''
+        return f'{discovery_api_url}catalogs/{suffix}'
 
     def mock_course_run_detail_endpoint(self, course_run, discovery_api_url, course_run_info=None):
         """ Mocks the course run detail endpoint on the Discovery API. """
@@ -433,7 +431,7 @@ class CouponMixin(SiteMixin):
     REDEMPTION_URL = "/coupons/offer/?code={}"
 
     def setUp(self):
-        super(CouponMixin, self).setUp()
+        super().setUp()
         self.category = factories.CategoryFactory()
 
         # Force the creation of a coupon ProductClass

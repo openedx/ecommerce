@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
@@ -15,7 +13,7 @@ class PaymentProcessorListViewTests(TestCase):
     """ Ensures correct behavior of the payment processors list view."""
 
     def setUp(self):
-        super(PaymentProcessorListViewTests, self).setUp()
+        super().setUp()
         self.token = self.generate_jwt_token_header(self.create_user())
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + AnotherDummyProcessor.NAME, True)

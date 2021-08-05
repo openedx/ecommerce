@@ -1,5 +1,3 @@
-
-
 import uuid
 
 import httpretty
@@ -22,13 +20,13 @@ class EnterpriseOfferListViewTests(EnterpriseServiceMockMixin, ViewTestMixin, Te
     path = reverse('enterprise:offers:list')
 
     def setUp(self):
-        super(EnterpriseOfferListViewTests, self).setUp()
+        super().setUp()
 
         httpretty.enable()
         self.mock_access_token_response()
 
     def tearDown(self):
-        super(EnterpriseOfferListViewTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 
@@ -78,7 +76,7 @@ class EnterpriseOfferListViewTests(EnterpriseServiceMockMixin, ViewTestMixin, Te
 class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, TestCase):
 
     def setUp(self):
-        super(EnterpriseOfferUpdateViewTests, self).setUp()
+        super().setUp()
         self.enterprise_offer = factories.EnterpriseOfferFactory(partner=self.partner)
         self.path = reverse('enterprise:offers:edit', kwargs={'pk': self.enterprise_offer.pk})
 
@@ -87,7 +85,7 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         self.mock_specific_enterprise_customer_api(self.enterprise_offer.condition.enterprise_customer_uuid)
 
     def tearDown(self):
-        super(EnterpriseOfferUpdateViewTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 

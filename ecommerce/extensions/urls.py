@@ -1,5 +1,3 @@
-
-
 from django.apps import apps
 from django.conf.urls import include, url
 

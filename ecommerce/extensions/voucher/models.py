@@ -1,5 +1,3 @@
-
-
 import datetime
 import logging
 
@@ -52,7 +50,7 @@ class Voucher(AbstractVoucher):
     )
 
     def is_available_to_user(self, user=None):
-        is_available, message = super(Voucher, self).is_available_to_user(user)  # pylint: disable=bad-super-call
+        is_available, message = super().is_available_to_user(user)  # pylint: disable=bad-super-call
 
         if self.usage == self.MULTI_USE_PER_CUSTOMER:
             is_available = True
@@ -66,12 +64,12 @@ class Voucher(AbstractVoucher):
 
     def save(self, *args, **kwargs):
         self.clean()
-        super(Voucher, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
+        super().save(*args, **kwargs)  # pylint: disable=bad-super-call
 
     def clean(self):
         self.clean_code()
         self.clean_datetimes()
-        super(Voucher, self).clean()  # pylint: disable=bad-super-call
+        super().clean()  # pylint: disable=bad-super-call
 
     def clean_code(self):
         if not self.code:

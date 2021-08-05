@@ -1,5 +1,3 @@
-
-
 import logging
 import operator
 
@@ -27,7 +25,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
 
     @property
     def name(self):
-        return 'Basket contains a seat for every course in program {}'.format(self.program_uuid)
+        return f'Basket contains a seat for every course in program {self.program_uuid}'
 
     def _get_applicable_skus(self, site_configuration):
         """ SKUs to which this condition applies. """

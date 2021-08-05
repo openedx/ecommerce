@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
-
-
 import datetime
 import urllib
 from decimal import Decimal
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import pytz
 from django.conf import settings
 from django.http import HttpResponseRedirect
@@ -57,7 +54,7 @@ ENTERPRISE_CUSTOMER_CATALOG = 'abc18838-adcb-41d5-abec-b28be5bfcc13'
 def format_url(base='', path='', params=None):
     if params:
         return '{base}{path}?{params}'.format(base=base, path=path, params=urllib.parse.urlencode(params))
-    return '{base}{path}'.format(base=base, path=path)
+    return f'{base}{path}'
 
 
 class CouponAppViewTests(TestCase):
@@ -181,7 +178,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
     credit_seat = None
 
     def setUp(self):
-        super(CouponOfferViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -277,11 +274,11 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
         """ Verify that an error is returned if the voucher has no associated EnterpriseCustomer. """
         base_url = self.prepare_url_for_credit_seat(enterprise_customer=None)
         sku = self.credit_seat.stockrecords.first().partner_sku
-        url = '{}&consent_failed={}'.format(base_url, sku)
+        url = f'{base_url}&consent_failed={sku}'
         response = self.client.get(url)
         self.assertEqual(
             response.context['error'],
-            'There is no Enterprise Customer associated with SKU {sku}.'.format(sku=sku)
+            f'There is no Enterprise Customer associated with SKU {sku}.'
         )
 
     @ddt.data(
@@ -303,11 +300,11 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
         )
         base_url = self.prepare_url_for_credit_seat(enterprise_customer=ENTERPRISE_CUSTOMER)
         sku = self.credit_seat.stockrecords.first().partner_sku
-        url = '{}&consent_failed={}'.format(base_url, sku)
+        url = f'{base_url}&consent_failed={sku}'
         response = self.client.get(url)
         self.assertContains(
             response,
-            'Enrollment in {course_name} was not complete.'.format(course_name=self.credit_seat.course.name),
+            f'Enrollment in {self.credit_seat.course.name} was not complete.',
             status_code=200
         )
         self.assertContains(response, expected_response, status_code=200)
@@ -319,7 +316,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     redeem_url = reverse('coupons:redeem')
 
     def setUp(self):
-        super(CouponRedeemViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(email='test@tester.fake')
         self.client.login(username=self.user.username, password=self.password)
         self.course_mode = 'verified'
@@ -428,7 +425,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         code = FuzzyText().fuzz().upper()
         url = format_url(base=self.redeem_url, params={'code': code, 'sku': self.stock_record.partner_sku})
         response = self.client.get(url)
-        msg = 'No voucher found with code {code}'.format(code=code)
+        msg = f'No voucher found with code {code}'
         self.assertEqual(response.context['error'], msg)
 
     def test_no_product(self):
@@ -788,7 +785,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.create_coupon_and_get_code(catalog=self.catalog)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
             response = self.client.get(self.redeem_url_with_params())
-            msg = 'You have already purchased {course} seat.'.format(course=self.course.name)
+            msg = f'You have already purchased {self.course.name} seat.'
             self.assertEqual(response.context['error'], msg)
 
     @httpretty.activate
@@ -854,7 +851,7 @@ class EnrollmentCodeCsvViewTests(TestCase):
     path = 'coupons:enrollment_code_csv'
 
     def setUp(self):
-        super(EnrollmentCodeCsvViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -873,8 +870,8 @@ class EnrollmentCodeCsvViewTests(TestCase):
         self.assertEqual(response['location'], get_lms_url('dashboard'))
 
     @ddt.data(
-        u'Plain English product title',
-        u'Unicode product títle 可以用“我不太懂艺术 但我知道我喜欢什么”做比喻'
+        'Plain English product title',
+        'Unicode product títle 可以用“我不太懂艺术 但我知道我喜欢什么”做比喻'
     )
     def test_successful_response(self, product_title):
         """ Verify a successful response is returned. """

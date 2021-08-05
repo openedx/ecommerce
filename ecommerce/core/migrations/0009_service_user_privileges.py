@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.conf import settings
 from django.contrib.auth.management import create_permissions
 from django.db import migrations

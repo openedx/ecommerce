@@ -1,5 +1,3 @@
-
-
 import factory
 from oscar.test.factories import BasketFactory
 

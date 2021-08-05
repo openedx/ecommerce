@@ -1,12 +1,10 @@
-
-
 import unittest
 from decimal import Decimal
 from uuid import uuid4
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, OrderDiscountFactory, OrderFactory
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -45,7 +43,7 @@ LOGGER_NAME = 'ecommerce.programs.conditions'
 @ddt.ddt
 class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def setUp(self):
-        super(EnterpriseCustomerConditionTests, self).setUp()
+        super().setUp()
         self.user = UserFactory()
         self.condition = factories.EnterpriseCustomerConditionFactory()
 
@@ -63,7 +61,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_name(self):
         """ The name should contain the EnterpriseCustomer's name. """
         condition = factories.EnterpriseCustomerConditionFactory()
-        expected = "Basket contains a seat from {}'s catalog".format(condition.enterprise_customer_name)
+        expected = f"Basket contains a seat from {condition.enterprise_customer_name}'s catalog"
         self.assertEqual(condition.name, expected)
 
     @httpretty.activate
@@ -655,7 +653,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
 @ddt.ddt
 class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, CouponMixin, TestCase):
     def setUp(self):
-        super(AssignableEnterpriseCustomerConditionTests, self).setUp()
+        super().setUp()
         self.condition = factories.AssignableEnterpriseCustomerConditionFactory()
 
     def create_data(self, voucher_type, max_uses, assignments):

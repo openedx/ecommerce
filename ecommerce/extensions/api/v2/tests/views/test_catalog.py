@@ -1,8 +1,6 @@
-
-
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.urls import reverse
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -28,7 +26,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
     catalog_list_path = reverse('api:v2:catalog-list')
 
     def setUp(self):
-        super(CatalogViewSetTest, self).setUp()
+        super().setUp()
         self.client.login(username=self.user.username, password=self.password)
 
     def test_staff_authorization_required(self):
@@ -165,7 +163,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
 
 class PartnerCatalogViewSetTest(CatalogMixin, TestCase):
     def setUp(self):
-        super(PartnerCatalogViewSetTest, self).setUp()
+        super().setUp()
 
         self.client.login(username=self.user.username, password=self.password)
 

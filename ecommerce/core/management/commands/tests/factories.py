@@ -1,5 +1,3 @@
-
-
 import factory
 from factory.fuzzy import FuzzyInteger
 from oscar.core.loading import get_model

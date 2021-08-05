@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.db import migrations
 from oscar.core.loading import get_model
 from oscar.core.utils import slugify

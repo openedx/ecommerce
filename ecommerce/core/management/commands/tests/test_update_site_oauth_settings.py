@@ -1,5 +1,3 @@
-
-
 from django.contrib.sites.models import Site
 from django.core.management import call_command
 from oscar.core.loading import get_model
@@ -15,7 +13,7 @@ class UpdateSiteOauthSettingsCommandTests(TestCase):
     command_name = 'update_site_oauth_settings'
 
     def setUp(self):
-        super(UpdateSiteOauthSettingsCommandTests, self).setUp()
+        super().setUp()
 
         self.partner = 'fake'
         self.lms_url_root = 'http://fake.server'
@@ -39,11 +37,11 @@ class UpdateSiteOauthSettingsCommandTests(TestCase):
         """
         # Required arguments
         command_args = [
-            '--site-id={}'.format(site_id),
-            '--sso-client-id={}'.format(sso_client_id),
-            '--sso-client-secret={}'.format(sso_client_secret),
-            '--backend-service-client-id={}'.format(backend_service_client_id),
-            '--backend-service-client-secret={}'.format(backend_service_client_secret),
+            f'--site-id={site_id}',
+            f'--sso-client-id={sso_client_id}',
+            f'--sso-client-secret={sso_client_secret}',
+            f'--backend-service-client-id={backend_service_client_id}',
+            f'--backend-service-client-secret={backend_service_client_secret}',
         ]
 
         call_command(self.command_name, *command_args)

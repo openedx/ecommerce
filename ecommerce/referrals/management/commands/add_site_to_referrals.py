@@ -34,7 +34,7 @@ class Command(BaseCommand):
             raise CommandError(msg)
 
         if options['commit']:
-            self.stdout.write('Associating [{}] referrals with site [{}]...'.format(count, site))
+            self.stdout.write(f'Associating [{count}] referrals with site [{site}]...')
 
             queryset.update(site=site)
             self.stdout.write('Done.')

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import django.core.validators
 import django.db.models.deletion
 import oscar.models.fields
@@ -211,19 +208,19 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='productrecommendation',
-            unique_together=set([('primary', 'recommendation')]),
+            unique_together={('primary', 'recommendation')},
         ),
         migrations.AlterUniqueTogether(
             name='productimage',
-            unique_together=set([('product', 'display_order')]),
+            unique_together={('product', 'display_order')},
         ),
         migrations.AlterUniqueTogether(
             name='productcategory',
-            unique_together=set([('product', 'category')]),
+            unique_together={('product', 'category')},
         ),
         migrations.AlterUniqueTogether(
             name='productattributevalue',
-            unique_together=set([('attribute', 'product')]),
+            unique_together={('attribute', 'product')},
         ),
         migrations.AddField(
             model_name='productattribute',

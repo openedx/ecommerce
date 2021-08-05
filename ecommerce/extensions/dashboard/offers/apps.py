@@ -1,5 +1,3 @@
-
-
 from oscar.apps.dashboard.offers import apps
 
 

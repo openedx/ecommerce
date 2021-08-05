@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Unit tests of Paypal payment processor implementation."""
 
 
@@ -7,7 +6,7 @@ import logging
 from urllib.parse import urljoin
 
 import ddt
-import mock
+from unittest import mock
 import paypalrestsdk
 import responses
 from django.conf import settings
@@ -48,7 +47,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         """
         Class set up - setting static up paypal sdk configuration to be used in test methods
         """
-        super(PaypalTests, cls).setUpClass()  # required to pass CI build
+        super().setUpClass()  # required to pass CI build
 
         # The test uses objects from paypalrestsdk classes extensively, and those classes require
         # paypal configuration to be passed either globally (via paypalrestsdk.configure) or as a parameter
@@ -64,14 +63,14 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         """
         setUp method
         """
-        super(PaypalTests, self).setUp()
+        super().setUp()
 
         # Dummy request from which an HTTP Host header can be extracted during
         # construction of absolute URLs
         self.request = RequestFactory().post('/')
         self.processor_response_log = (
-            u"Failed to execute PayPal payment on attempt [{attempt_count}]. "
-            u"PayPal's response was recorded in entry [{entry_id}]."
+            "Failed to execute PayPal payment on attempt [{attempt_count}]. "
+            "PayPal's response was recorded in entry [{entry_id}]."
         )
 
     def _assert_transaction_parameters(self):
@@ -160,7 +159,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self._assert_transaction_parameters_retry(
             api_responses,
             response_success,
-            'Creating PayPal payment for basket [{}] was unsuccessful. Will retry.'.format(self.basket.id)
+            f'Creating PayPal payment for basket [{self.basket.id}] was unsuccessful. Will retry.'
         )
 
     @responses.activate
@@ -179,7 +178,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self._assert_transaction_parameters_retry(
             api_responses,
             response_success,
-            'Creating PayPal payment for basket [{}] resulted in an exception. Will retry.'.format(self.basket.id)
+            f'Creating PayPal payment for basket [{self.basket.id}] resulted in an exception. Will retry.'
         )
 
     @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
@@ -234,7 +233,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         payment_creation_payload = mock_payment.call_args[0][0]
         self.assertEqual(payment_creation_payload['experience_profile_id'], 'test-profile-id')
 
-        msg = 'Web Profile[%s] for locale %s created successfully' % (
+        msg = 'Web Profile[{}] for locale {} created successfully'.format(
             mock_web_profile_instance.id,
             mock_web_profile_instance.presentation.locale_code
         )
@@ -426,8 +425,8 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
                     ),
                     (
                         logger_name, 'ERROR',
-                        u"Failed to execute PayPal payment [{payment_id}]. "
-                        u"PayPal's response was recorded in entry [{entry_id}].".format(
+                        "Failed to execute PayPal payment [{payment_id}]. "
+                        "PayPal's response was recorded in entry [{entry_id}].".format(
                             payment_id=self.PAYMENT_ID,
                             entry_id=payment_processor_response
                         )
@@ -470,8 +469,8 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
                     ),
                     (
                         logger_name, 'ERROR',
-                        u"Failed to execute PayPal payment [{payment_id}]. "
-                        u"PayPal's response was recorded in entry [{entry_id}].".format(
+                        "Failed to execute PayPal payment [{payment_id}]. "
+                        "PayPal's response was recorded in entry [{entry_id}].".format(
                             payment_id=self.PAYMENT_ID,
                             entry_id=payment_processor_responses[1]
                         )

@@ -1,5 +1,3 @@
-
-
 from config_models.models import ConfigurationModel
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -48,9 +46,9 @@ class MarkOrdersStatusCompleteConfig(ConfigurationModel):
     .. no_pii:
     """
     txt_file = models.FileField(
-        validators=[FileExtensionValidator(allowed_extensions=[u'txt'])],
+        validators=[FileExtensionValidator(allowed_extensions=['txt'])],
         help_text=_(
-            u"It expect that the order numbers stuck in fulfillment error state will be \
+            "It expect that the order numbers stuck in fulfillment error state will be \
             provided in a txt file format one per line."
         )
     )

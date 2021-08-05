@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.db import migrations
 
 SAMPLE_NAME = 'send_level_2_3_details_to_cybersource'

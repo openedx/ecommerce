@@ -42,7 +42,7 @@ def fulfill_order(order, lines, email_opt_in=False):
     """
     logger.info("Attempting to fulfill products for order [%s]", order.number)
     if ORDER.COMPLETE not in order.available_statuses():
-        error_msg = "Order has a current status of [{status}] which cannot be fulfilled.".format(status=order.status)
+        error_msg = f"Order has a current status of [{order.status}] which cannot be fulfilled."
         logger.error(error_msg)
         raise exceptions.IncorrectOrderStatusError(error_msg)
 

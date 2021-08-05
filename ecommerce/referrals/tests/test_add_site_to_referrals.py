@@ -1,5 +1,3 @@
-
-
 from io import StringIO
 
 from django.core.management import CommandError, call_command
@@ -13,7 +11,7 @@ class AddSiteToReferralsCommandTests(TestCase):
     command = 'add_site_to_referrals'
 
     def setUp(self):
-        super(AddSiteToReferralsCommandTests, self).setUp()
+        super().setUp()
         self.unassociated_referrals = ReferralFactory.create_batch(3, site=None)
 
     def test_without_commit(self):

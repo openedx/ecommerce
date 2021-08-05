@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import datetime
 import json
 from decimal import Decimal
@@ -8,7 +5,7 @@ from uuid import uuid4
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import pytz
 from django.test import RequestFactory
 from django.urls import reverse
@@ -61,7 +58,7 @@ TEST_CATEGORIES = ['Financial Assistance', 'Partner No Rev - RAP', 'Geography Pr
 @httpretty.activate
 class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
-        super(CouponViewSetTest, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
@@ -225,7 +222,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
     """Test the coupon order creation functionality."""
 
     def setUp(self):
-        super(CouponViewSetFunctionalTest, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
@@ -1109,7 +1106,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         """Verify updating coupon with invalid max_uses field returns 400 response."""
         self.data.update({
             'max_uses': 2,
-            'title': 'Coupon update with max uses {}'.format(max_uses),
+            'title': f'Coupon update with max uses {max_uses}',
             'voucher_type': Voucher.MULTI_USE
         })
         details = self._create_and_get_coupon_details()
@@ -1134,7 +1131,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         """Verify updating coupon with invalid note field returns 400 response."""
         self.data.update({
             'note': 'Some valid note.',
-            'title': 'Coupon update with note {}'.format(invalid_note),
+            'title': f'Coupon update with note {invalid_note}',
         })
         details = self._create_and_get_coupon_details()
         self.assertEqual(details['note'], self.data['note'])
@@ -1298,7 +1295,7 @@ class CouponCategoriesListViewTests(TestCase):
     path = reverse('api:v2:coupons:coupons_categories')
 
     def setUp(self):
-        super(CouponCategoriesListViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 

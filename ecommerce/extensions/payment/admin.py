@@ -1,5 +1,3 @@
-
-
 from pprint import pformat
 
 from django.utils.html import format_html

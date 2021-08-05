@@ -1,5 +1,3 @@
-
-
 from oscar.apps.dashboard.orders.forms import OrderSearchForm as CoreOrderSearchForm
 
 from ecommerce.extensions.dashboard.forms import UserFormMixin

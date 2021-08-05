@@ -6,7 +6,7 @@ import json
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 import responses
 from CyberSource.rest import ApiException, RESTResponse
 from django.contrib.auth import get_user
@@ -46,7 +46,7 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 
 class LoginMixin:
     def setUp(self):
-        super(LoginMixin, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -251,7 +251,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
                         (
                             logger_name,
                             'INFO',
-                            'SDNCheck function called for basket [{}]. It received 1 hit(s).'.format(basket_id)
+                            f'SDNCheck function called for basket [{basket_id}]. It received 1 hit(s).'
                         ),
                     )
                     # Make sure user is logged out
@@ -517,7 +517,7 @@ class ApplePayStartSessionViewTests(LoginMixin, TestCase):
     @ddt.unpack
     def test_with_microfrontend(self, request_from_mfe, enable_microfrontend):
         self.site.siteconfiguration.enable_microfrontend_for_basket_page = enable_microfrontend
-        self.site.siteconfiguration.payment_microfrontend_url = 'http://{}'.format(self.payment_microfrontend_domain)
+        self.site.siteconfiguration.payment_microfrontend_url = f'http://{self.payment_microfrontend_domain}'
         self.site.siteconfiguration.save()
 
         self._call_to_apple_pay_and_assert_response(

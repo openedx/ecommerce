@@ -1,5 +1,3 @@
-
-
 import logging
 
 from django.conf import settings
@@ -31,7 +29,7 @@ class ProgramsApiClient:
             dict
         """
         program_uuid = str(uuid)
-        cache_key = '{site_domain}-program-{uuid}'.format(site_domain=self.site_domain, uuid=program_uuid)
+        cache_key = f'{self.site_domain}-program-{program_uuid}'
 
         program_cached_response = TieredCache.get_cached_response(cache_key)
 

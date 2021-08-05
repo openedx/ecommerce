@@ -3,7 +3,7 @@ class BenefitTestMixin:
     name_format = ''
 
     def setUp(self):
-        super(BenefitTestMixin, self).setUp()
+        super().setUp()
         self.benefit = self.factory_class()  # pylint: disable=not-callable
 
     def test_name(self):

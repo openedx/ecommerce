@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 
 import ddt
 import httpretty
-import mock
+from unittest import mock
 from django.conf import settings
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
@@ -88,7 +88,7 @@ class EnrollmentFulfillmentModuleTests(
     provider = None
 
     def setUp(self):
-        super(EnrollmentFulfillmentModuleTests, self).setUp()
+        super().setUp()
 
         self.user = UserFactory()
         self.user.tracking_context = {
@@ -381,7 +381,7 @@ class EnrollmentFulfillmentModuleTests(
         bypassed, and return True.
         """
         message = 'Enrollment mode mismatch: active mode=x, requested mode=y. Won\'t deactivate.'
-        body = '{{"message": "{}"}}'.format(message)
+        body = f'{{"message": "{message}"}}'
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=400, body=body, content_type=JSON)
 
         line = self.order.lines.first()
@@ -389,7 +389,7 @@ class EnrollmentFulfillmentModuleTests(
         with LogCapture(logger_name) as logger:
             self.assertTrue(EnrollmentFulfillmentModule().revoke_line(line))
             logger.check_present(
-                (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
+                (logger_name, 'INFO', f'Attempting to revoke fulfillment of Line [{line.id}]...'),
                 (logger_name, 'INFO', 'Skipping revocation for line [%d]: %s' % (line.id, message))
             )
 
@@ -397,7 +397,7 @@ class EnrollmentFulfillmentModuleTests(
     def test_revoke_product_unexpected_error(self):
         """ If the Enrollment API responds with a non-200 status, the method should log an error and return False. """
         message = 'Meh.'
-        body = '{{"message": "{}"}}'.format(message)
+        body = f'{{"message": "{message}"}}'
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=500, body=body, content_type=JSON)
 
         line = self.order.lines.first()
@@ -405,7 +405,7 @@ class EnrollmentFulfillmentModuleTests(
         with LogCapture(logger_name) as logger:
             self.assertFalse(EnrollmentFulfillmentModule().revoke_line(line))
             logger.check_present(
-                (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
+                (logger_name, 'INFO', f'Attempting to revoke fulfillment of Line [{line.id}]...'),
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [%d]: %s' % (line.id, message))
             )
 
@@ -425,8 +425,8 @@ class EnrollmentFulfillmentModuleTests(
         with LogCapture(logger_name) as logger:
             self.assertFalse(EnrollmentFulfillmentModule().revoke_line(line))
             logger.check_present(
-                (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
-                (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [{}].'.format(line.id))
+                (logger_name, 'INFO', f'Attempting to revoke fulfillment of Line [{line.id}]...'),
+                (logger_name, 'ERROR', f'Failed to revoke fulfillment of Line [{line.id}].')
             )
 
     @httpretty.activate
@@ -544,7 +544,7 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
     """ Test coupon fulfillment. """
 
     def setUp(self):
-        super(CouponFulfillmentModuleTest, self).setUp()
+        super().setUp()
         coupon = self.create_coupon()
         user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
@@ -579,7 +579,7 @@ class DonationsFromCheckoutTestFulfillmentModuleTest(FulfillmentTestMixin, TestC
     """ Test donation fulfillment. """
 
     def setUp(self):
-        super(DonationsFromCheckoutTestFulfillmentModuleTest, self).setUp()
+        super().setUp()
         donation_class = ProductClass.objects.get(
             name=DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
             track_stock=False
@@ -650,7 +650,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         # add organization and purchaser attributes manually to the basket for testing purposes
         basket_data = {
             'organization': 'Dummy Business Client',
-            PURCHASER_BEHALF_ATTRIBUTE: '{}'.format(purchased_by_org)
+            PURCHASER_BEHALF_ATTRIBUTE: f'{purchased_by_org}'
         }
         basket_add_organization_attribute(order.basket, basket_data)
 
@@ -667,7 +667,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
             settings.HUBSPOT_SALES_LEAD_FORM_GUID)
 
     def setUp(self):
-        super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
+        super().setUp()
         course = CourseFactory(partner=self.partner)
         course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
@@ -788,12 +788,12 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                 (
                     logger_name,
                     'INFO',
-                    'Gathering fulfillment data for submission to HubSpot for order [{}]'.format(order.number)
+                    f'Gathering fulfillment data for submission to HubSpot for order [{order.number}]'
                 ),
                 (
                     logger_name,
                     'INFO',
-                    'Sending data to HubSpot for order [{}]'.format(order.number)
+                    f'Sending data to HubSpot for order [{order.number}]'
                 ),
                 (
                     logger_name,
@@ -815,7 +815,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                 (
                     logger_name,
                     'ERROR',
-                    'Timeout occurred attempting to send data to HubSpot for order [{}]'.format(order.number)
+                    f'Timeout occurred attempting to send data to HubSpot for order [{order.number}]'
                 )
             )
 
@@ -832,7 +832,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                 (
                     logger_name,
                     'ERROR',
-                    'Error occurred attempting to send data to HubSpot for order [{}]'.format(order.number)
+                    f'Error occurred attempting to send data to HubSpot for order [{order.number}]'
                 )
             )
 
@@ -862,17 +862,17 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                 (
                     logger_name,
                     'INFO',
-                    'Attempting to fulfill \'Enrollment Code\' product types for order [{}]'.format(order.number)
+                    f'Attempting to fulfill \'Enrollment Code\' product types for order [{order.number}]'
                 ),
                 (
                     logger_name,
                     'INFO',
-                    'Gathering fulfillment data for submission to HubSpot for order [{}]'.format(order.number)
+                    f'Gathering fulfillment data for submission to HubSpot for order [{order.number}]'
                 ),
                 (
                     logger_name,
                     'INFO',
-                    'Sending data to HubSpot for order [{}]'.format(order.number)
+                    f'Sending data to HubSpot for order [{order.number}]'
                 ),
                 (
                     logger_name,
@@ -882,7 +882,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                 (
                     logger_name,
                     'INFO',
-                    'Finished fulfilling \'Enrollment code\' product types for order [{}]'.format(order.number)
+                    f'Finished fulfilling \'Enrollment code\' product types for order [{order.number}]'
                 )
             )
 
@@ -904,12 +904,12 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                 (
                     logger_name,
                     'INFO',
-                    'Attempting to fulfill \'Enrollment Code\' product types for order [{}]'.format(order.number)
+                    f'Attempting to fulfill \'Enrollment Code\' product types for order [{order.number}]'
                 ),
                 (
                     logger_name,
                     'INFO',
-                    'Finished fulfilling \'Enrollment code\' product types for order [{}]'.format(order.number)
+                    f'Finished fulfilling \'Enrollment code\' product types for order [{order.number}]'
                 )
             )
 
@@ -919,7 +919,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscount
     """ Test Course Entitlement Fulfillment """
 
     def setUp(self):
-        super(EntitlementFulfillmentModuleTests, self).setUp()
+        super().setUp()
         self.user = UserFactory()
         self.course_entitlement = create_or_update_course_entitlement(
             'verified', 100, self.partner, '111-222-333-444', 'Course Entitlement')

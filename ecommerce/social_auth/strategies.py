@@ -1,5 +1,3 @@
-
-
 from auth_backends.strategies import EdxDjangoStrategy
 
 
@@ -14,6 +12,6 @@ class CurrentSiteDjangoStrategy(EdxDjangoStrategy):
         value = self.request.site.siteconfiguration.oauth_settings.get(name)
 
         if not value:
-            value = super(CurrentSiteDjangoStrategy, self).get_setting(name)
+            value = super().get_setting(name)
 
         return value
