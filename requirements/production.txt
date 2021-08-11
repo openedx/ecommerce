@@ -205,7 +205,7 @@ edx-django-utils==4.2.0
     #   django-config-models
     #   edx-drf-extensions
     #   edx-rest-api-client
-edx-drf-extensions==7.0.0
+edx-drf-extensions==7.0.1
     # via
     #   -r requirements/base.in
     #   edx-rbac
