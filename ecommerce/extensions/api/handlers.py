@@ -38,8 +38,10 @@ def _ecommerce_jwt_decode_handler_multiple_issuers(token):
 
     """
     options = {
+        'require': ["exp", "aud"],
         'verify_exp': api_settings.JWT_VERIFY_EXPIRATION,
         'verify_aud': settings.JWT_AUTH['JWT_VERIFY_AUDIENCE'],
+        'verify_signature': False,
     }
     error_msg = ''
 
@@ -52,12 +54,11 @@ def _ecommerce_jwt_decode_handler_multiple_issuers(token):
             return jwt.decode(
                 token,
                 issuer['SECRET_KEY'],
-                api_settings.JWT_VERIFY,
                 options=options,
                 leeway=api_settings.JWT_LEEWAY,
                 audience=issuer['AUDIENCE'],
                 issuer=issuer['ISSUER'],
-                algorithms=[api_settings.JWT_ALGORITHM]
+                algorithms=[api_settings.JWT_ALGORITHM],
             )
         except jwt.InvalidIssuerError:
             # Ignore these errors since we have multiple issuers
