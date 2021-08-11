@@ -40,6 +40,7 @@ def _ecommerce_jwt_decode_handler_multiple_issuers(token):
     options = {
         'verify_exp': api_settings.JWT_VERIFY_EXPIRATION,
         'verify_aud': settings.JWT_AUTH['JWT_VERIFY_AUDIENCE'],
+        'verify_signature':  api_settings.JWT_VERIFY,
     }
     error_msg = ''
 
