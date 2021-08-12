@@ -32,6 +32,7 @@ help:
 	@echo '    make production-requirements               install requirements for production'
 	@echo '    make validate_translations                 validate translations'
 	@echo '    make check_keywords                        scan Django models in installed apps for restricted field names'
+	@echo '    make docs                                  build the sphinx docs for this project'
 	@echo ''
 
 requirements.js:
@@ -161,7 +162,11 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
 	mv requirements/test.tmp requirements/test.txt
 
+docs:
+	tox -e docs
+
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \
 	extract_translations dummy_translations compile_translations fake_translations pull_translations \
-	push_translations update_translations fast_validate_python clean_static production-requirements
+	push_translations update_translations fast_validate_python clean_static production-requirements \
+	docs
