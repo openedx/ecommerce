@@ -20,6 +20,8 @@ following steps.
  run the E-Commerce service locally on your computer instead of on the virtual
  machine (VM) that devstack uses, see :`Development Outside Devstack`_.
 
+.. _Set Up a Virtual Environment:
+
 ****************************
 Set Up a Virtual Environment
 ****************************
@@ -74,6 +76,9 @@ procedures.
 .. contents::
    :depth: 1
    :local:
+
+
+.. _Create Register Client:
 
 ============================
 Create and Register a Client
