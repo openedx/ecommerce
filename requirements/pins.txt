@@ -40,7 +40,6 @@ pylint==2.4.4
 
 # greater versions failing with extract-tranlsations step.
 tox==3.14.6
-tox-battery==0.5.2
 
 # cybersource-rest-client-python requires 2.7, but requests gives 2.10 by default
 idna==2.7
