@@ -5,8 +5,10 @@ Create Course Seats
 ####################
 
 A course seat represents an enrollment track, sometimes called an enrollment
-mode. For information about the enrollment tracks that edX offers, see
-:ref:`enrollment track<enrollment_track_g>`.
+mode. For information about the enrollment tracks that edX offers, see the
+definition of `enrollment tracks`_.
+
+.. _enrollment tracks: https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/glossary.html#enrollment-track-g
 
 You create course seats by creating a course on the **Create New Course** page
 in the course administration tool, which is located at

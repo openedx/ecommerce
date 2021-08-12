@@ -136,13 +136,12 @@ CyberSource
 ***********
 Our CyberSource integration supports using the `Flex Microform API`_ for accepting payments.
 
-In addition to Secure Acceptance, this processor plugin also makes use of the `Simple Order API`_ to facilitate payments
+In addition to Secure Acceptance, this processor plugin also makes use of the Simple Order API to facilitate payments
 made via Apple Pay and refunds (for all payment methods).
 
 When testing payments with your test profiles, use test card numbers from https://www.cybersource.com/developers/other_resources/quick_references/test_cc_numbers/.
 
 .. _Flex Microform API: https://developer.cybersource.com/api/developer-guides/dita-flex/SAFlexibleToken/FlexMicroform.html
-
 
 Settings
 --------

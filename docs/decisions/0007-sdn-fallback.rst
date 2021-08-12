@@ -30,21 +30,21 @@ We are only going to use the CSV when the API is down, not replace the API calls
 
 1a. **Selection of which worker will run the task to download the CSV**
 
-As per OEP-0003, we generally use Celery to run asynchronous tasks, with some scheduler (Jenkins, Kubernetes) if task runs periodically. 
-Ecommerce is an exception/antipattern to this general approach; it doesn't use Celery directly. Instead, we have a separate service called ecommerce-worker that has a Celery integration. 
-Ecommerce-worker doesn't have access to the ecommerce database, so any database interaction with ecommerce needs to happen on the main ecommerce server machine. 
+As per OEP-0003, we generally use Celery to run asynchronous tasks, with some scheduler (Jenkins, Kubernetes) if task runs periodically.
+Ecommerce is an exception/antipattern to this general approach; it doesn't use Celery directly. Instead, we have a separate service called ecommerce-worker that has a Celery integration.
+Ecommerce-worker doesn't have access to the ecommerce database, so any database interaction with ecommerce needs to happen on the main ecommerce server machine.
 
-Our workaround for cases like this is to do the work on a Jenkins machine (so Jenkins is both the scheduler and the worker). The download task is fairly lightweight, and impact is small if a run fails to complete. 
+Our workaround for cases like this is to do the work on a Jenkins machine (so Jenkins is both the scheduler and the worker). The download task is fairly lightweight, and impact is small if a run fails to complete.
 (Other options would be adding a Celery integration to ecommerce so it could follow the pattern above, OR running the code in ecommerce-worker and calling ecommerce APIs to create/delete records, OR running the task on the ecommerce machine using an API call. Given the low complexity and low criticality of the download task, those options were less suitable than our typical workaround.)
 
 2. **Storing the data**
 
-When activating the fallback one consideration was whether we would retrieve and process the CSV during the lifecycle of the request or do so ahead of time and store the data. The decision was to process the CSV in an automated job and store the data. 
+When activating the fallback one consideration was whether we would retrieve and process the CSV during the lifecycle of the request or do so ahead of time and store the data. The decision was to process the CSV in an automated job and store the data.
 One reason is that the fallback wouldn't work reliably if the CSV has periods of downtime like the API. With this approach we would use a request cache, but if the cache expired during downtime of the CSV then the fallback wouldn't have any data available. By storing the data there will always be a somewhat recent set of data to check the transaction against.
 A second reason is that by having the processed data stored in a database, debugging of any production issues with the related code should be simpler.
 This approach would have a more expensive engineering implementation cost, but we are willing to make that trade off.
 
-3. **Denormalizing the data*
+3. **Denormalizing the data**
 
 One option was to denormalize the data, where each row would be a unique combination of person, country, and type. The benefit would be having better performance in the query to filter the data, for example when filtering by country. However, more space would be used in the database since one record could have multiple rows.
 The second option was to keep the data normalized, where we would have one row in the database per record in the CSV. This would more closely match the API and more closely match the data from the imported CSV. The database would also require less space.
@@ -85,12 +85,14 @@ However, it is important to note that if the fallback was implemented to have th
 9. **Importing all the rows**
 We intentionally tried to import all the rows from the csv regardless of whether we could ever match those rows or not.
 For example, many rows do not have an address and our matching algorithm will never match records with no address. However, we chose to import those rows anyway and not run any input validation.
-The reasoning was that this would keep things clear and simple and decouple the import logic from the matching logic (in case the matching logic changed down the line). 
+The reasoning was that this would keep things clear and simple and decouple the import logic from the matching logic (in case the matching logic changed down the line).
 
 10. **Transliterating unicode characters**
 We decided to transliterate unicode characters where possible for both addresses and names.
 Rationale:
+
     - Names: Found an example where stripping an accents was necessary to get a match for a name
+
     - Addresses: We did not see such an example for addresses because they are stored with the accented characters. However, we decided to strip the accents for both the input addresses and stored addresses, which will also work and would then behave more similarly to the names.
 
 Consequences
