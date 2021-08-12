@@ -23,10 +23,8 @@ tox==3.14.6
     #   -c requirements/pins.txt
     #   -r requirements/tox.in
     #   tox-battery
-tox-battery==0.5.2
-    # via
-    #   -c requirements/pins.txt
-    #   -r requirements/tox.in
+tox-battery==0.6.1
+    # via -r requirements/tox.in
 virtualenv==16.7.9
     # via
     #   -c requirements/pins.txt
