@@ -4,7 +4,7 @@ Please give the pull request a short but descriptive title.
 Use this template as a guide. Omit sections that don't apply. You may link to information rather than copy it.
 -->
 
-## edX Internal Developers are expected to [release and monitor their changes](https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories)
+## Anyone merging to this repository is expected to [release and monitor their changes](https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories); if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
 
 ## Description
 
