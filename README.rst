@@ -23,7 +23,9 @@ The code in this repository is licensed under version 3 of the AGPL unless other
 How To Contribute
 -----------------
 
-Contributions are welcome. Please read `How To Contribute <https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst>`_ for details. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
+Anyone merging to this repository is expected to `release and monitor their changes <https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories>`__; if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
+
+Please also read `How To Contribute <https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst>`__. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
 
 Reporting Security Issues
 -------------------------
