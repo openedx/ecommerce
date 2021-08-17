@@ -202,7 +202,7 @@ edx-drf-extensions==6.5.0
     # via
     #   -r requirements/base.in
     #   edx-rbac
-edx-ecommerce-worker==2.2.1
+edx-ecommerce-worker==2.2.2
     # via -r requirements/base.in
 edx-opaque-keys==2.2.1
     # via
