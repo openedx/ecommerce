@@ -31,7 +31,7 @@ edx-ecommerce-worker
 edx-opaque-keys
 edx-rbac
 edx-rest-api-client
-jsonfield2
+jsonfield
 libsass==0.9.2
 markdown==2.6.9
 mysqlclient<1.5

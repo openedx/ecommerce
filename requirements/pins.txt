@@ -17,9 +17,6 @@ django-oscar<2.1
 # causing tests failures
 httpretty==0.9.7
 
-# jsonfield2 > 3.0.3 dropped support for python 3.5
-jsonfield2<=3.0.3
-
 # 5.4 introduces test order problems that need to be resolved.
 pytest<5.4.0
 pytest-django<4.0 # Newer versions require pytest >= 5.4.0

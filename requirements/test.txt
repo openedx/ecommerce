@@ -242,7 +242,7 @@ django-widget-tweaks==1.4.8
     #   edx-drf-extensions
     #   edx-i18n-tools
     #   edx-rbac
-    #   jsonfield2
+    #   jsonfield
     #   mock-django
     #   pytest-django-ordering
     #   rest-condition
@@ -379,7 +379,7 @@ jinja2==3.0.1
     #   coreschema
     #   diff-cover
     #   jinja2-pluralize
-jsonfield2==3.0.3
+jsonfield==3.1.0
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
