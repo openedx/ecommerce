@@ -3,7 +3,6 @@
 import logging
 
 from django.db.models import Q
-from oscar.apps.partner import strategy
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -20,6 +19,7 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 Order = get_model('order', 'Order')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 ShippingEventType = get_model('order', 'ShippingEventType')
+Selector = get_class('partner.strategy', 'Selector')
 
 SHIPPING_EVENT_NAME = 'Shipped'
 
@@ -44,7 +44,7 @@ def refund_basket_transactions(site, basket_ids):
     failure_count = 0
 
     for basket in baskets:
-        basket.strategy = strategy.Default()
+        basket.strategy = Selector().strategy()
         Applicator().apply(basket, basket.owner, None)
 
         logger.info('Refunding transactions for basket [%d]...', basket.id)
@@ -140,7 +140,7 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
 
         # if no order exists we need to create a new order.
         if not order:
-            basket.strategy = strategy.Default()
+            basket.strategy = Selector().strategy(user=basket.owner)
 
             # Need to handle the case that applied voucher has been expired.
             # This will create the order  with out discount but subsequently

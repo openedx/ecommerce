@@ -12,7 +12,6 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import View
-from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 
@@ -31,6 +30,7 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+Selector = get_class('partner.strategy', 'Selector')
 
 
 class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
@@ -65,7 +65,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 processor_name=self.payment_processor.NAME,
                 transaction_id=payment_id
             ).basket
-            basket.strategy = strategy.Default()
+            basket.strategy = Selector().strategy()
 
             Applicator().apply(basket, basket.owner, self.request)
 

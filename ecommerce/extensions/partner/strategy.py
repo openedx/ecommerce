@@ -1,5 +1,8 @@
 
 
+from decimal import Decimal
+
+from django.conf import settings
 from django.utils import timezone
 from oscar.apps.partner import availability, strategy
 from oscar.core.loading import get_model
@@ -33,8 +36,19 @@ class CourseSeatAvailabilityPolicyMixin(strategy.StockRequired):
         return availability.Unavailable()
 
 
+class TaxStrategyMixin(strategy.FixedRateTax):
+    """
+    Tax strategy for e-commerce pricing.
+    Defaults to 0% tax, but allows setting a fixed tax rate through Django settings.
+    """
+
+    @property
+    def rate(self):
+        return Decimal(settings.TAX_RATE)
+
+
 class DefaultStrategy(strategy.UseFirstStockRecord, CourseSeatAvailabilityPolicyMixin,
-                      strategy.NoTax, strategy.Structured):
+                      TaxStrategyMixin, strategy.Structured):
     """ Default Strategy """
 
 

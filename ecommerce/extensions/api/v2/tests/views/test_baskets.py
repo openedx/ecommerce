@@ -423,6 +423,19 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 401)
 
+    @override_settings(TAX_RATE=0.1)
+    def test_basket_calculate_with_tax_different_than_zero(self):
+        """ Verify that total value(including tax) uses the tax rate defined on settings(TAX_RATE) """
+        expected = {
+            'total_incl_tax_excl_discounts': Decimal("32.97"),
+            'total_incl_tax': Decimal("32.97"),
+            'currency': 'GBP'
+        }
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
     def test_basket_calculate_no_offers(self):
         """ Verify a successful basket calculation with no offers"""
 

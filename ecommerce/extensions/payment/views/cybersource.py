@@ -9,7 +9,6 @@ from django.http import JsonResponse
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
 from edx_django_utils import monitoring as monitoring_utils
-from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
 from rest_framework import permissions, status
@@ -51,6 +50,7 @@ Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+Selector = get_class('partner.strategy', 'Selector')
 
 
 class CyberSourceProcessorMixin:
@@ -301,7 +301,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         try:
             basket_id = int(basket_id)
             basket = Basket.objects.get(id=basket_id)
-            basket.strategy = strategy.Default()
+            basket.strategy = Selector().strategy()
 
             Applicator().apply(basket, basket.owner, self.request)
             logger.info(

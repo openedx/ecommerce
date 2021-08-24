@@ -825,3 +825,6 @@ AWIN_ADVERTISER_ID = None
 ################# Settings for brand logos. #################
 LOGO_URL = None
 FAVICON_URL = None
+
+# Set a fixed tax rate for all products
+TAX_RATE = '0.0'
