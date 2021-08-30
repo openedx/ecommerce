@@ -1,7 +1,8 @@
+from contextlib import contextmanager
 from unittest import mock
+
 from django.conf import settings
 from django.test import override_settings
-from mock_django import mock_signal_receiver
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory
 
@@ -19,6 +20,30 @@ Option = get_model('catalogue', 'Option')
 Refund = get_model('refund', 'Refund')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
+
+
+@contextmanager
+def mock_signal_receiver(signal, wraps=None, **kwargs):
+    """
+    Temporarily attaches a receiver to the provided ``signal`` within the scope
+    of the context manager.
+    The mocked receiver is returned as the ``as`` target of the ``with``
+    statement.
+    To have the mocked receiver wrap a callable, pass the callable as the
+    ``wraps`` keyword argument. All other keyword arguments provided are passed
+    through to the signal's ``connect`` method.
+    >>> with mock_signal_receiver(post_save, sender=Model) as receiver:
+    >>>     Model.objects.create()
+    >>>     assert receiver.call_count = 1
+    """
+    if wraps is None:
+        def wraps(*args, **kwrags):
+            return None
+
+    receiver = mock.Mock(wraps=wraps)
+    signal.connect(receiver, **kwargs)
+    yield receiver
+    signal.disconnect(receiver)
 
 
 class RefundTestMixin(DiscoveryTestMixin):
