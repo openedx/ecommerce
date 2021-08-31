@@ -48,4 +48,3 @@ idna==2.7
 celery<5.0.0
 
 # Latest version requires PyJWT>=2.0.0 but drf-jwt requires PyJWT[crypto]<2.0.0,>=1.5.2
-social-auth-core<4.0.3
