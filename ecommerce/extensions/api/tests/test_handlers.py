@@ -16,7 +16,7 @@ from ecommerce.tests.testcases import TestCase
 
 def generate_jwt_token(payload, signing_key):
     """Generate a valid JWT token for authenticated requests."""
-    return jwt.encode(payload, signing_key)
+    return jwt.encode(payload, signing_key).decode('utf-8')
 
 
 def generate_jwt_payload(user, issuer_name):
