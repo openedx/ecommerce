@@ -101,7 +101,7 @@ class UserMixin:
             'email': user.email,
             'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
         }
-        return "JWT {token}".format(token=jwt.encode(payload, secret).decode('utf-8'))
+        return "JWT {token}".format(token=jwt.encode(payload, secret))
 
 
 class ThrottlingMixin:
@@ -122,7 +122,7 @@ class JwtMixin:
     def generate_token(self, payload, secret=None):
         """Generate a JWT token with the provided payload."""
         secret = secret or self.JWT_SECRET_KEY
-        token = jwt.encode(dict(payload, iss=self.issuer), secret).decode('utf-8')
+        token = jwt.encode(dict(payload, iss=self.issuer), secret)
         return token
 
     def set_jwt_cookie(self, system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context='some_context'):
