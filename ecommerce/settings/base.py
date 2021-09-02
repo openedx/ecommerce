@@ -826,3 +826,7 @@ AWIN_ADVERTISER_ID = None
 ################# Settings for brand logos. #################
 LOGO_URL = None
 FAVICON_URL = None
+
+# s3 files for email-template, code management credentials
+S3_ENTERPRISE_COUPON_BUCKET_NAME = ''
+

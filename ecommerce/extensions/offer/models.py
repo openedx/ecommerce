@@ -1,14 +1,17 @@
-
 import datetime
 import logging
 import re
 
+import boto3
+from botocore.exceptions import ClientError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
 from edx_django_utils.cache import TieredCache
@@ -651,6 +654,43 @@ class OfferAssignmentEmailTemplates(AbstractBaseEmailTemplate):
             ec=self.enterprise_customer,
             email_type=self.email_type,
             active=self.active
+        )
+
+
+class TemplateFileAttachment(models.Model):
+    name = models.CharField(max_length=256)
+    size = models.PositiveIntegerField()
+    url = models.URLField(max_length=300)
+    template = models.ForeignKey(OfferAssignmentEmailTemplates, on_delete=models.CASCADE, related_name="email_files")
+
+    def __str__(self):
+        return 'name={}, size={}, url={}, template={}'.format(self.name, self.size, self.url, self.template)
+
+
+@receiver(post_delete, sender=TemplateFileAttachment)
+def delete_files_from_s3(sender, instance, using, **kwargs):  # pylint: disable=unused-argument
+    delete_file_from_s3_with_key(instance.name)
+
+
+def delete_file_from_s3_with_key(key):
+    try:
+        bucket_name = settings.S3_ENTERPRISE_COUPON_BUCKET_NAME
+        session = boto3.Session()
+        s3 = session.client('s3')
+        s3.delete_object(Bucket=bucket_name, Key=key)
+    except ClientError as error:
+        logger.error(
+            '[TemplateFileAttachment] Raised an error while deleting the object  %s,'
+            'Message: %s',
+            key,
+            error.response['Error']['Message']
+        )
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(
+            '[TemplateFileAttachment] Raised an error while deleting the object %s,'
+            'Message: %s',
+            key,
+            ex
         )
 
 

@@ -2,6 +2,7 @@
 
 analytics-python
 bleach
+boto3>=1.17.80
 coreapi
 cybersource-rest-client-python
 django<3.0

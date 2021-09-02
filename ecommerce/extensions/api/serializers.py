@@ -1,6 +1,5 @@
 """Serializers for data manipulated by ecommerce API endpoints."""
 
-
 import logging
 from collections import OrderedDict
 from decimal import Decimal
@@ -81,6 +80,7 @@ Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
+TemplateFileAttachment = get_model('offer', 'TemplateFileAttachment')
 OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
@@ -263,6 +263,7 @@ class BillingAddressSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializes user information. """
+
     class Meta:
         model = User
         fields = ('email', 'username')
@@ -439,7 +440,6 @@ class BasketSerializer(serializers.ModelSerializer):
         products = [line.product for line in lines]
         serialized_data = []
         for product in products:
-
             serialized_data.append(ProductAttributeValueSerializer(
                 product.attr,
                 many=True,
@@ -803,7 +803,7 @@ class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-m
     def get_assignment_date(self, obj):
         assignment = self._get_assignment(obj)
         if assignment:
-            return assignment.assignment_date.strftime("%B %d, %Y %H:%M")\
+            return assignment.assignment_date.strftime("%B %d, %Y %H:%M") \
                 if assignment.assignment_date else assignment.created.strftime("%B %d, %Y %H:%M")
         return ''
 
@@ -964,9 +964,16 @@ class OfferAssignmentSummarySerializer(serializers.BaseSerializer):  # pylint: d
         return representation
 
 
+class TemplateFileAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemplateFileAttachment
+        fields = "__all__"
+
+
 class OfferAssignmentEmailTemplatesSerializer(serializers.ModelSerializer):
     enterprise_customer = serializers.UUIDField(read_only=True)
     email_body = serializers.SerializerMethodField()
+    email_files = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = OfferAssignmentEmailTemplates
@@ -1024,11 +1031,18 @@ class OfferAssignmentEmailTemplatesSerializer(serializers.ModelSerializer):
     def get_email_body(self, obj):
         return settings.OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP[obj.email_type]
 
+    def get_email_files(self, obj):
+        template = OfferAssignmentEmailTemplates.objects.get(id=obj.id)
+        files = TemplateFileAttachment.objects.filter(template=template).all()
+        files = TemplateFileAttachmentSerializer(files, many=True)
+        return files.data
+
 
 class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
     """
     Serializer for Enterprise Coupons list overview.
     """
+
     def _get_num_unassigned(self, vouchers):
         """
         Return number of available assignments.
@@ -1448,6 +1462,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         subject = validated_data.pop('subject')
         greeting = validated_data.pop('greeting')
         closing = validated_data.pop('closing')
+        files = self.context.get('files', [])
         sender_id = validated_data.pop('sender_id')
         template = validated_data.pop('template')
         enterprise_customer_uuid = validated_data.pop('enterprise_customer_uuid')
@@ -1489,7 +1504,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                     reply_to = get_enterprise_customer_reply_to_email(site, enterprise_customer_uuid)
                     self._trigger_email_sending_task(
                         subject, greeting, closing, new_offer_assignment, voucher_usage_type, sender_alias,
-                        reply_to, base_enterprise_url,
+                        reply_to, base_enterprise_url, attachments=files,
                     )
                     # Create a record of the email sent
                     create_offer_assignment_email_sent_record(
@@ -1587,7 +1602,6 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         # If we got through all the vouchers and don't have enough slots for the emails given, the request isn't valid.
         if total_slots < len(emails):
             raise serializers.ValidationError('Not enough available codes for assignment!')
-
         # Add available_assignments to the validated data so that we can perform the assignments in create.
         attrs['voucher_usage_type'] = voucher_usage_type
         attrs['available_assignments'] = available_assignments
@@ -1599,8 +1613,9 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         attrs['enterprise_customer_uuid'] = enterprise_customer_uuid
         return attrs
 
+    # pylint: disable=dangerous-default-value
     def _trigger_email_sending_task(self, subject, greeting, closing, assigned_offer, voucher_usage_type, sender_alias,
-                                    reply_to, base_enterprise_url=''):
+                                    reply_to, base_enterprise_url='', attachments=[]):
         """
         Schedule async task to send email to the learner who has been assigned the code.
         """
@@ -1622,15 +1637,17 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 sender_alias=sender_alias,
                 reply_to=reply_to,
                 base_enterprise_url=base_enterprise_url,
+                attachments=attachments,
             )
         except Exception as exc:  # pylint: disable=broad-except
-            logger.exception(
+            logger.exception(  # pylint: disable=logging-too-many-args
                 '[Offer Assignment] Email for offer_assignment_id: %d with subject %r, '
-                'greeting %r and closing %r raised exception: %r',
+                'greeting %r closing %r and attachments %r, raised exception: %r',
                 assigned_offer.id,
                 subject,
                 greeting,
                 closing,
+                attachments,
                 exc
             )
 
@@ -1878,6 +1895,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
         greeting = self.context.get('greeting')
         closing = self.context.get('closing')
         base_enterprise_url = self.context.get('base_enterprise_url', '')
+        files = self.context.get('files', [])
         site = self.context.get('site')
         detail = 'success'
         current_date_time = timezone.now()
@@ -1900,6 +1918,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
                     sender_alias=sender_alias,
                     reply_to=reply_to,
                     base_enterprise_url=base_enterprise_url,
+                    attachments=files,
                 )
                 # Create a record of the email sent
                 create_offer_assignment_email_sent_record(
@@ -1914,8 +1933,8 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(
                 '[Offer Revocation] Encountered error when revoking code %s for user %s with '
-                'subject %r, greeting %r closing %r and base_enterprise_url %r',
-                code, user['email'], subject, greeting, closing, base_enterprise_url
+                'subject %r, greeting %r closing %r base_enterprise_url %r and files %r',
+                code, user['email'], subject, greeting, closing, base_enterprise_url, files
             )
             detail = str(exc)
 
@@ -1969,6 +1988,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         subject = self.context.get('subject')
         greeting = self.context.get('greeting')
         closing = self.context.get('closing')
+        files = self.context.get('files', [])
         base_enterprise_url = self.context.get('base_enterprise_url', '')
         detail = 'success'
         current_date_time = timezone.now()
@@ -1987,6 +2007,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 sender_alias,
                 reply_to,
                 base_enterprise_url,
+                attachments=files,
             )
             # Create a record of the email sent
             create_offer_assignment_email_sent_record(
@@ -2036,9 +2057,10 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         attrs['enterprise_customer_uuid'] = enterprise_customer_uuid
         return attrs
 
+    # pylint: disable=dangerous-default-value
     def _trigger_email_sending_task(
             self, subject, greeting, closing, assigned_offer, redeemed_offer_count, total_offer_count, sender_alias,
-            reply_to, base_enterprise_url='',
+            reply_to, base_enterprise_url='', attachments=[],
     ):
         """
         Schedule async task to send email to the learner who has been assigned the code.
@@ -2057,17 +2079,19 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 code_expiration_date=code_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
                 sender_alias=sender_alias,
                 reply_to=reply_to,
+                attachments=attachments,
                 base_enterprise_url=base_enterprise_url,
             )
         except Exception as exc:  # pylint: disable=broad-except
             # Log the exception here to help diagnose any template issues, then raise it for backwards compatibility
-            logger.exception(
+            logger.exception(  # pylint: disable=logging-too-many-args
                 '[Offer Reminder] Email for offer_assignment_id: %d with subject %r, '
-                'greeting %r and closing %r and base_enterprise_url %r raised exception: %r',
+                'greeting %r closing %r attachments %r, and base_enterprise_url %r raised exception: %r',
                 assigned_offer.id,
                 subject,
                 greeting,
                 closing,
+                attachments,
                 base_enterprise_url,
                 exc
             )

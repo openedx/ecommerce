@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
-
+import botocore
 import mock
 
-from ecommerce.extensions.api.v2.utils import SMTPException, send_new_codes_notification_email
+from ecommerce.extensions.api.v2.utils import (
+    SMTPException,
+    send_new_codes_notification_email,
+    upload_files_for_enterprise_coupons
+)
 from ecommerce.tests.testcases import TestCase
 
 
@@ -50,3 +54,44 @@ class ViewUtilsTests(TestCase):
                     self.enterprise_id,
                     self.coupon_id
                 )
+
+    def mock_make_api_call(self, operation_name, kwarg):
+        orig = botocore.client.BaseClient._make_api_call  # pylint: disable=protected-access
+        put_object_response = {
+            "ResponseMetadata": {
+                "RequestId": "5994D680BF127CE3",
+                "HTTPStatusCode": 200,
+                "RetryAttempts": 1,
+            },
+            "ETag": '"6299528715bad0e3510d1e4c4952ee7e"',
+        }
+        if operation_name == 'GetBucketLocation':  # pylint: disable=no-else-return
+            return {'LocationConstraint': 'dummy_location'}
+        elif operation_name == 'PutObject':
+            return put_object_response
+        else:
+            return orig(self, operation_name, kwarg)
+
+    def test_files_uploads_to_s3(self):
+        """ verify that files are uploaded to s3 correctly"""
+        un_uploaded_files = [{'name': 'abc.png', 'size': 123, 'contents': 'dummy_contents'},
+                             {'name': 'def.png', 'size': 456, 'contents': 'dummy_contents'}]
+        with mock.patch('botocore.client.BaseClient._make_api_call', new=self.mock_make_api_call):
+            res = upload_files_for_enterprise_coupons(un_uploaded_files)
+            assert res[0]['size'] == un_uploaded_files[0]['size']
+            assert res[1]['size'] == un_uploaded_files[1]['size']
+            assert res[0]['url'].startswith('https://.s3.dummy_location.amazonaws.com')
+            assert res[1]['url'].startswith('https://.s3.dummy_location.amazonaws.com')
+            assert res[0]['url'].endswith('abcpng')
+            assert res[1]['url'].endswith('defpng')
+
+    def test_file_uploads_to_s3_with_no_bucket_name(self):
+        """ Verify that exception log message is correct on file uploads with no bucket name. """
+        un_uploaded_files = [{'name': 'abc.png', 'size': 123, 'contents': 'dummy_contents'},
+                             {'name': 'def.png', 'size': 456, 'contents': 'dummy_contents'}]
+        with mock.patch('ecommerce.extensions.api.v2.utils.logger') as mock_logger:
+            ret = upload_files_for_enterprise_coupons(un_uploaded_files)
+            assert '[upload_files_for_enterprise_coupons] Raised an error while uploading the files,Message' \
+                   in mock_logger.exception.call_args[0][0]
+            assert 'Invalid bucket name ' in str(mock_logger.exception.call_args[0][1])
+            assert ret == []
