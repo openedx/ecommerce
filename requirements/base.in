@@ -42,6 +42,7 @@ paypalrestsdk
 premailer==2.9.2
 pycountry==17.1.8
 pygments
+pyjwt[crypto]>=2.1.0      # depends on newer jwt.decode and jwt.encode
 python-dateutil
 python3-openid>=3
 pytz
