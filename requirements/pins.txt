@@ -49,3 +49,9 @@ celery<5.0.0
 
 # Latest version requires PyJWT>=2.0.0 but drf-jwt requires PyJWT[crypto]<2.0.0,>=1.5.2
 social-auth-core<4.0.3
+
+# Versions higher than this need new PyJWT 2.1.0
+# pinning these to unstick 'make upgrade' until we're ready to upgrade PyJWT
+edx-drf-extensions<7.0.0
+edx-auth-backends<4.0.0
+social-auth-app-django<5.0.0  # version 5.0.0 requires social-auth-core>=4.1.0
