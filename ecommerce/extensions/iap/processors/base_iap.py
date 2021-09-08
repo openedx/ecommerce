@@ -70,7 +70,7 @@ class BaseIAP(BasePaymentProcessor):
         """
         available_attempts = 1
         product_id = response.get('productId')
-        transaction_id = response.get('transactionId')
+
         if waffle.switch_is_active('IAP_RETRY_ATTEMPTS'):
             available_attempts = available_attempts + self.retry_attempts
 
@@ -104,13 +104,14 @@ class BaseIAP(BasePaymentProcessor):
                 )
                 raise GatewayError
 
+        transaction_id = response.get('transactionId')
+        if not transaction_id:
+            transaction_id = validation_response.get('receipt', {}).get('in_app', [])[0].get('transaction_id')
         self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket)
-        order_id = validation_response['resource']['orderId']
-        logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, order_id, basket.id)
+        logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
 
         currency = basket.currency
         total = basket.total_incl_tax
-        transaction_id = transaction_id
         email = basket.owner.email
         label = '{} ({})'.format(self.NAME, email) if email else '{} Account'.format(self.NAME)
 
