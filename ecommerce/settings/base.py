@@ -308,6 +308,7 @@ DJANGO_APPS = [
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
     'rules.apps.AutodiscoverRulesConfig',
     'xss_utils',
+    'edx_django_utils.user',
 ]
 
 # Apps specific to this project go here.
