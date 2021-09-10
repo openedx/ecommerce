@@ -232,7 +232,6 @@ MIDDLEWARE = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
-    'threadlocals.middleware.ThreadLocalMiddleware',
     'ecommerce.theming.middleware.CurrentSiteThemeMiddleware',
     'ecommerce.theming.middleware.ThemePreviewMiddleware',
     'edx_django_utils.cache.middleware.TieredCacheMiddleware',
