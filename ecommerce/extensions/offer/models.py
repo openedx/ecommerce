@@ -3,6 +3,7 @@ import datetime
 import logging
 import re
 
+from crum import get_current_request
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -25,7 +26,6 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from simple_history.models import HistoricalRecords
 from slumber.exceptions import SlumberBaseException
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 from ecommerce.extensions.offer.constants import (

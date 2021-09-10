@@ -16,7 +16,6 @@ django-oscar
 django-rest-swagger
 django-simple-history
 django-solo
-django-threadlocals
 django-waffle
 djangorestframework
 djangorestframework-csv

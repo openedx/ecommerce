@@ -23,7 +23,6 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
-from threadlocals.threadlocals import set_thread_variable
 from waffle.models import Flag
 
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, SYSTEM_ENTERPRISE_ADMIN_ROLE, SYSTEM_ENTERPRISE_OPERATOR_ROLE

@@ -2,11 +2,11 @@
 
 import warnings
 
+from crum import get_current_request
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.exceptions import MissingRequestError
 
@@ -18,7 +18,7 @@ def _get_site_configuration():
         This is a stopgap. Do NOT use this with any expectation that it will remain in place.
         This function WILL be removed.
     """
-    warnings.warn('Usage of _get_site_configuration and django-threadlocals is deprecated. '
+    warnings.warn('Usage of _get_site_configuration is deprecated. '
                   'Use the helper methods on the SiteConfiguration model.', DeprecationWarning)
 
     request = get_current_request()
