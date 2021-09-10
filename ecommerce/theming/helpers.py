@@ -7,7 +7,7 @@ import logging
 import os
 
 import waffle
-from crum import get_current_request
+from ecommerce.utils import get_current_request
 from django.conf import ImproperlyConfigured, settings
 from path import Path
 

@@ -3,7 +3,7 @@ import datetime
 import logging
 import re
 
-from crum import get_current_request
+from ecommerce.utils import get_current_request
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey

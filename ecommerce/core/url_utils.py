@@ -2,7 +2,7 @@
 
 import warnings
 
-from crum import get_current_request
+from ecommerce.utils import get_current_request
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponseRedirect

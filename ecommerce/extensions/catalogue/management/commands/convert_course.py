@@ -2,7 +2,7 @@
 
 import logging
 
-from crum import set_current_request
+from ecommerce.utils import set_current_request
 from django.core.management import BaseCommand
 from django.db import transaction
 from oscar.core.loading import get_model

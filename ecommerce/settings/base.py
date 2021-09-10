@@ -226,6 +226,7 @@ MIDDLEWARE = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'waffle.middleware.WaffleMiddleware',
     'ecommerce.extensions.analytics.middleware.TrackingMiddleware',
+    'ecommerce.utils.GlobalRequestMiddleware',
     # NOTE: The overridden BasketMiddleware relies on request.site. This middleware
     # MUST appear AFTER CurrentSiteMiddleware.
     'ecommerce.extensions.basket.middleware.BasketMiddleware',

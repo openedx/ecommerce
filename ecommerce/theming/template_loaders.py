@@ -3,7 +3,7 @@ Theming aware template loaders.
 """
 
 
-from crum import get_current_request
+from ecommerce.utils import get_current_request
 from django.template.loaders.filesystem import Loader
 
 from ecommerce.theming.helpers import get_all_theme_template_dirs, get_current_theme

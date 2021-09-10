@@ -10,7 +10,7 @@ from collections import OrderedDict
 from functools import reduce  # pylint: disable=redefined-builtin
 from urllib.parse import parse_qsl, urlencode, urlparse
 
-import crum
+from ecommerce.utils import get_current_request
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -560,7 +560,7 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_reque
 
 
 def get_enterprise_id_for_current_request_user_from_jwt():
-    request = crum.get_current_request()
+    request = get_current_request()
     decoded_jwt = get_decoded_jwt(request)
     if decoded_jwt:
         roles_claim = decoded_jwt.get('roles', [])

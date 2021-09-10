@@ -4,7 +4,7 @@
 import logging
 
 import waffle
-from crum import get_current_request
+from ecommerce.utils import get_current_request
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import EdxRestApiClient

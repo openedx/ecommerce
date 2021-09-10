@@ -9,7 +9,7 @@ from decimal import Decimal
 
 import httpretty
 import jwt
-from crum import set_current_request
+from ecommerce.utils import set_current_request
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
