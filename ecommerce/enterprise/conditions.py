@@ -4,7 +4,6 @@ import logging
 from decimal import Decimal
 from uuid import UUID
 
-import crum
 from django.contrib import messages
 from django.db.models import Sum
 from django.utils.translation import ugettext as _
@@ -23,6 +22,7 @@ from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, Single
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.extensions.offer.utils import get_benefit_type, get_discount_value
 from ecommerce.extensions.refund.status import REFUND
+from ecommerce.utils import get_current_request
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -209,7 +209,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                         'To redeem this coupon, you must first logout. When you log back in, '
                         'please select {new_enterprise} as your enterprise '
                         'and try again.').format(new_enterprise=enterprise_name_in_condition)
-                messages.warning(crum.get_current_request(), msg,)
+                messages.warning(get_current_request(), msg,)
 
             return False
 
@@ -358,7 +358,7 @@ class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
             return True
 
         messages.warning(
-            crum.get_current_request(),
+            get_current_request(),
             _('This code is not valid with your email. '
               'Please login with the correct email assigned '
               'to the code or contact your Learning Manager '
