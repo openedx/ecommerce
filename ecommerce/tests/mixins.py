@@ -360,7 +360,6 @@ class SiteMixin:
         self.request = RequestFactory(SERVER_NAME=domain).get('')
         self.request.session = None
         self.request.site = self.site
-        set_thread_variable('request', self.request)
         set_current_request(self.request)
         self.addCleanup(set_current_request)
 
