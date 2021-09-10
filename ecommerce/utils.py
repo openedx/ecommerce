@@ -2,11 +2,14 @@ from threading import current_thread
 
 _requests = {}
 
+
 def get_current_request():
     return _requests.get(current_thread(), None)
 
+
 def set_current_request(request=None):
     _requests[current_thread()] = request
+
 
 class GlobalRequestMiddleware:
     def __init__(self, get_response):
