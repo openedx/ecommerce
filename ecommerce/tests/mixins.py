@@ -9,7 +9,6 @@ from decimal import Decimal
 
 import httpretty
 import jwt
-from ecommerce.utils import set_current_request
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
@@ -32,6 +31,7 @@ from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.payment.helpers import get_default_processor_class, get_processor_class_by_name
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
+from ecommerce.utils import set_current_request
 
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')

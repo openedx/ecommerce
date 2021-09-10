@@ -3,7 +3,6 @@ import datetime
 import logging
 import re
 
-from ecommerce.utils import get_current_request
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -41,6 +40,7 @@ from ecommerce.extensions.offer.constants import (
     SENDER_CATEGORY_TYPES
 )
 from ecommerce.extensions.offer.utils import format_assigned_offer_email
+from ecommerce.utils import get_current_request
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20

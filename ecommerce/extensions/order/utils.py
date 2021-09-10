@@ -4,7 +4,6 @@
 import logging
 
 import waffle
-from ecommerce.utils import get_current_request
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import EdxRestApiClient
@@ -18,6 +17,7 @@ from ecommerce.core.url_utils import get_lms_entitlement_api_url
 from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
 from ecommerce.extensions.refund.status import REFUND_LINE
 from ecommerce.referrals.models import Referral
+from ecommerce.utils import get_current_request
 
 logger = logging.getLogger(__name__)
 

@@ -7,9 +7,10 @@ import logging
 import os
 
 import waffle
-from ecommerce.utils import get_current_request
 from django.conf import ImproperlyConfigured, settings
 from path import Path
+
+from ecommerce.utils import get_current_request
 
 logger = logging.getLogger(__name__)
 

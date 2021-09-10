@@ -10,7 +10,6 @@ from collections import OrderedDict
 from functools import reduce  # pylint: disable=redefined-builtin
 from urllib.parse import parse_qsl, urlencode, urlparse
 
-from ecommerce.utils import get_current_request
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -27,6 +26,7 @@ from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
 from ecommerce.enterprise.constants import SENDER_ALIAS
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
+from ecommerce.utils import get_current_request
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 StockRecord = get_model('partner', 'StockRecord')

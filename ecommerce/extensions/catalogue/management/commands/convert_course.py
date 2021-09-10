@@ -2,7 +2,6 @@
 
 import logging
 
-from ecommerce.utils import set_current_request
 from django.core.management import BaseCommand
 from django.db import transaction
 from oscar.core.loading import get_model
@@ -10,6 +9,7 @@ from oscar.test.utils import RequestFactory
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.utils import generate_sku
+from ecommerce.utils import set_current_request
 
 logger = logging.getLogger(__name__)
 Line = get_model('order', 'Line')

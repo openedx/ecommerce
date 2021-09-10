@@ -2,13 +2,13 @@
 
 import warnings
 
-from ecommerce.utils import get_current_request
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from ecommerce.core.exceptions import MissingRequestError
+from ecommerce.utils import get_current_request
 
 
 def _get_site_configuration():
