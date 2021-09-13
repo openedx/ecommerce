@@ -2,7 +2,6 @@
 Django rules for Refund
 """
 
-import crum
 import rules
 from edx_rbac.utils import request_user_has_implicit_access_via_jwt, user_has_access_via_database
 # pylint: disable=no-name-in-module
@@ -11,6 +10,7 @@ from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 
 from ecommerce.core.constants import ORDER_MANAGER_ROLE
 from ecommerce.core.models import EcommerceFeatureRoleAssignment
+from ecommerce.utils import get_current_request
 
 
 @rules.predicate
@@ -20,7 +20,7 @@ def request_user_has_implicit_access(user):  # pylint: disable=unused-argument
      Returns:
         boolean: whether the request user has access or not
     """
-    request = crum.get_current_request()
+    request = get_current_request()
     decoded_jwt = get_decoded_jwt(request) or get_decoded_jwt_from_auth(request)
 
     return request_user_has_implicit_access_via_jwt(decoded_jwt, ORDER_MANAGER_ROLE)

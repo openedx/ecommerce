@@ -2,11 +2,12 @@
 
 import logging
 
-import crum
 from django.urls import reverse
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
+from ecommerce.utils import get_current_request
+
 
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -33,7 +34,7 @@ class ManualEnrollmentOrderDiscountCondition(
         else
             return False
         """
-        if crum.get_current_request().META['PATH_INFO'] != reverse('api:v2:manual-course-enrollment-order-list'):
+        if get_current_request().META['PATH_INFO'] != reverse('api:v2:manual-course-enrollment-order-list'):
             self.log_error_message(
                 'This condition is only applicable to manual course enrollement orders.',
                 offer,

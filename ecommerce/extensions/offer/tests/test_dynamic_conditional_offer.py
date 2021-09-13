@@ -42,7 +42,7 @@ class DynamicPercentageDiscountBenefitTests(BenefitTestMixin, TestCase):
     name_format = 'dynamic_discount_benefit'
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
-    @patch('crum.get_current_request')
+    @patch('ecommerce.utils.get_current_request')
     @patch('ecommerce.extensions.offer.dynamic_conditional_offer.jwt_decode_handler',
            side_effect=_mock_jwt_decode_handler)
     @patch('ecommerce.enterprise.utils.get_decoded_jwt',
@@ -103,7 +103,7 @@ class DynamicConditionTests(TestCase):
         self.assertTrue(self.condition.name == 'dynamic_discount_condition')
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
-    @patch('crum.get_current_request')
+    @patch('ecommerce.utils.get_current_request')
     @patch('ecommerce.extensions.offer.dynamic_conditional_offer.jwt_decode_handler',
            side_effect=_mock_jwt_decode_handler)
     @ddt.data(
@@ -121,7 +121,7 @@ class DynamicConditionTests(TestCase):
             self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
-    @patch('crum.get_current_request')
+    @patch('ecommerce.utils.get_current_request')
     def test_is_satisfied_quantity_more_than_1(self, request):   # pylint: disable=unused-argument
         """
         This discount should not apply if are buying more than one of the same course.
@@ -131,7 +131,7 @@ class DynamicConditionTests(TestCase):
         self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
-    @patch('crum.get_current_request')
+    @patch('ecommerce.utils.get_current_request')
     def test_is_satisfied_not_seat_product(self, request):   # pylint: disable=unused-argument
         """
         This discount should not apply if are not purchasing a seat product.

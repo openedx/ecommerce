@@ -160,7 +160,7 @@ def track_segment_event(site, user, event, properties, traits=None):
     # construct a URL, so that hostname can be sent to GA.
     # For now, send a dummy value for path.  Segment parses the URL and sends
     # the host and path separately. When needed, the path can be fetched by adding:
-    # request = crum.get_current_request()
+    # request = get_current_request()
     # if request:
     #     path = request.META.get('PATH_INFO')
     hostname = site.domain

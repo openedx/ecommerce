@@ -2,7 +2,6 @@
 Dynamic conditional offers allow us to calculate discount percentages and whether a course and user are eligible
 for a discount elsewhere, and pass it in. We pass this information through a jwt on the request.
 """
-import crum
 import waffle
 from oscar.core.loading import get_class, get_model
 
@@ -14,6 +13,8 @@ from ecommerce.extensions.offer.mixins import (
     PercentageBenefitMixin,
     SingleItemConsumptionConditionMixin
 )
+from ecommerce.utils import get_current_request
+
 
 Condition = get_model('offer', 'Condition')
 PercentageDiscountBenefit = get_model('offer', 'PercentageDiscountBenefit')
@@ -21,7 +22,7 @@ ZERO_DISCOUNT = get_class('offer.results', 'ZERO_DISCOUNT')
 
 
 def get_decoded_jwt_discount_from_request():
-    request = crum.get_current_request()
+    request = get_current_request()
 
     # We use a get request for display on the basket page,
     # and we use a post request for submitting  payment.
@@ -64,7 +65,7 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
         We haven't plumbed the discount_percent all the way through, so we will get the discount
         percent from the request.
         """
-        if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
+        if not waffle.flag_is_active(get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return ZERO_DISCOUNT
         percent = self.benefit_class_value
         if percent:
@@ -94,7 +95,7 @@ class DynamicDiscountCondition(ConditionWithoutRangeMixin, SingleItemConsumption
         We haven't plumbed the condition all the way through, so we will get the discount condition from the request
         here.
         """
-        if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
+        if not waffle.flag_is_active(get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return False
 
         if basket.num_items > 1:

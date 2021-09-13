@@ -42,7 +42,7 @@ class ManualEnrollmentOrderDiscountConditionTests(TestCase):
             attribute_values__value_text='audit'
         ).first()
 
-        request_patcher = patch('crum.get_current_request')
+        request_patcher = patch('get_current_request')
         self.request_patcher = request_patcher.start()
         self.request_patcher.return_value = RequestFactory().post(
             reverse('api:v2:manual-course-enrollment-order-list')
@@ -109,7 +109,7 @@ class ManualEnrollmentOrderDiscountConditionTests(TestCase):
         """
         Test `ManualEnrollmentOrderDiscountCondition.is_satisfied` works as expected when request path_info is wrong.
         """
-        with patch('crum.get_current_request') as request_patcher:
+        with patch('get_current_request') as request_patcher:
             request_patcher.return_value = RequestFactory().post('some_view_path')
             offer = ManualEnrollmentOrderOfferFactory()
             self.basket.add_product(self.seat_product)
