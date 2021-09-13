@@ -15,7 +15,6 @@ from ecommerce.extensions.offer.mixins import (
 )
 from ecommerce.utils import get_current_request
 
-
 Condition = get_model('offer', 'Condition')
 PercentageDiscountBenefit = get_model('offer', 'PercentageDiscountBenefit')
 ZERO_DISCOUNT = get_class('offer.results', 'ZERO_DISCOUNT')
