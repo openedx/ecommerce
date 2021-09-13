@@ -720,7 +720,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
                     assignment.status = OFFER_REDEEMED
                     assignment.save()
 
-    @mock.patch('ecommerce.enterprise.conditions.crum.get_current_request')
+    @mock.patch('ecommerce.enterprise.conditions.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     @ddt.data(
         (0, 'test1@example.com', OFFER_ASSIGNMENT_EMAIL_PENDING, True),
@@ -747,7 +747,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
 
         assert self.condition.is_satisfied(enterprise_offer, basket) == condition_result
 
-    @mock.patch('ecommerce.enterprise.conditions.crum.get_current_request')
+    @mock.patch('ecommerce.enterprise.conditions.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     def test_is_satisfied_with_different_users(self, mock_request):
         """
@@ -775,7 +775,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
 
         assert self.condition.is_satisfied(enterprise_offers[1], basket) is False
 
-    @mock.patch('ecommerce.enterprise.conditions.crum.get_current_request')
+    @mock.patch('ecommerce.enterprise.conditions.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email', mock.Mock())
     @ddt.data(
@@ -930,7 +930,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
             self.assert_condition(voucher_type, assignments, True)
         self.assert_condition(voucher_type, wrong_assignments, False)
 
-    @mock.patch('ecommerce.enterprise.conditions.crum.get_current_request')
+    @mock.patch('ecommerce.enterprise.conditions.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     def test_is_satisfied_when_owner_has_no_assignment(self, mock_request):
         """
@@ -957,7 +957,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
 
         assert self.condition.is_satisfied(enterprise_offer, basket) is True
 
-    @mock.patch('ecommerce.enterprise.conditions.crum.get_current_request')
+    @mock.patch('ecommerce.enterprise.conditions.get_current_request')
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email', mock.Mock())
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     def test_is_satisfied_when_user_has_no_assignment(self, mock_request):
@@ -999,7 +999,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         # no redemption available
         self.assert_condition(voucher_type, user_with_no_assignment, False)
 
-    @mock.patch('ecommerce.enterprise.conditions.crum.get_current_request')
+    @mock.patch('ecommerce.enterprise.conditions.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     @ddt.data(
         (0, True),
