@@ -28,9 +28,9 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/base.in
-boto3==1.18.35
+boto3==1.18.41
     # via django-ses
-botocore==1.21.35
+botocore==1.21.41
     # via
     #   boto3
     #   s3transfer
@@ -512,7 +512,7 @@ social-auth-core==4.0.2
     #   social-auth-app-django
 sorl-thumbnail==12.7.0
     # via -r requirements/base.in
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
 stevedore==3.4.0
     # via

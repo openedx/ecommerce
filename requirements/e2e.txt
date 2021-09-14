@@ -137,7 +137,7 @@ slumber==0.7.1
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via
     #   -c requirements/base.txt
     #   django

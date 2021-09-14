@@ -482,7 +482,7 @@ social-auth-core==4.0.2
     #   social-auth-app-django
 sorl-thumbnail==12.7.0
     # via -r requirements/base.in
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
 stevedore==3.4.0
     # via
