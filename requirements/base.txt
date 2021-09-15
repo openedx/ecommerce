@@ -46,7 +46,7 @@ cffi==1.14.6
     #   pynacl
 chardet==4.0.0
     # via cybersource-rest-client-python
-charset-normalizer==2.0.4
+charset-normalizer==2.0.5
     # via requests
 configparser==5.0.2
     # via cybersource-rest-client-python
@@ -127,7 +127,7 @@ django-crum==0.7.9
     #   edx-rbac
 django-extensions==3.1.3
     # via -r requirements/base.in
-django-extra-views==0.11.0
+django-extra-views==0.13.0
     # via django-oscar
 django-filter==2.4.0
     # via -r requirements/base.in
@@ -221,7 +221,7 @@ extras==1.0.0
     #   testtools
 factory-boy==2.12.0
     # via django-oscar
-faker==8.12.1
+faker==8.13.1
     # via factory-boy
 fixtures==3.0.0
     # via
@@ -482,7 +482,7 @@ social-auth-core==4.0.2
     #   social-auth-app-django
 sorl-thumbnail==12.7.0
     # via -r requirements/base.in
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
 stevedore==3.4.0
     # via
