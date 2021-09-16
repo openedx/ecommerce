@@ -195,7 +195,7 @@ django-extra-views==0.11.0
     #   django-oscar
 django-filter==2.4.0
     # via -r requirements/base.txt
-django-haystack==2.8.1
+django-haystack==3.1.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -209,7 +209,7 @@ django-oscar==2.0.4
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
-django-phonenumber-field==2.0.1
+django-phonenumber-field==3.0.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -219,7 +219,7 @@ django-simple-history==3.0.0
     # via -r requirements/base.txt
 django-solo==1.1.5
     # via -r requirements/base.txt
-django-tables2==1.21.2
+django-tables2==2.2.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
