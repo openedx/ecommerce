@@ -1877,6 +1877,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
         subject = self.context.get('subject')
         greeting = self.context.get('greeting')
         closing = self.context.get('closing')
+        base_enterprise_url = self.context.get('base_enterprise_url', '')
         site = self.context.get('site')
         detail = 'success'
         current_date_time = timezone.now()
@@ -1898,6 +1899,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
                     code=code,
                     sender_alias=sender_alias,
                     reply_to=reply_to,
+                    base_enterprise_url=base_enterprise_url,
                 )
                 # Create a record of the email sent
                 create_offer_assignment_email_sent_record(
@@ -1910,8 +1912,11 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
                     sender_id=sender_id
                 )
         except Exception as exc:  # pylint: disable=broad-except
-            logger.exception('[Offer Revocation] Encountered error when revoking code %s for user %s with '
-                             'subject %r, greeting %r and closing %r', code, user['email'], subject, greeting, closing)
+            logger.exception(
+                '[Offer Revocation] Encountered error when revoking code %s for user %s with '
+                'subject %r, greeting %r closing %r and base_enterprise_url %r',
+                code, user['email'], subject, greeting, closing, base_enterprise_url
+            )
             detail = str(exc)
 
         validated_data['detail'] = detail

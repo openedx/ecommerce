@@ -107,10 +107,12 @@ class Command(BaseCommand):
                 )
                 continue
 
+            base_enterprise_url = nudge_email.options.get('base_enterprise_url', '')
             # Get the formatted email body and subject on the bases of given code.
             email_body, email_subject = nudge_email.email_template.get_email_content(
                 nudge_email.user_email,
-                nudge_email.code
+                nudge_email.code,
+                base_enterprise_url=base_enterprise_url,
             )
             if email_body:
                 nudge_email.already_sent = True
@@ -124,7 +126,7 @@ class Command(BaseCommand):
                     email_body,
                     sender_alias,
                     reply_to,
-                    base_enterprise_url=nudge_email.options.get('base_enterprise_url', '')
+                    base_enterprise_url=base_enterprise_url,
                 )
                 self.set_last_reminder_date(nudge_email.user_email, nudge_email.code)
                 self._create_email_sent_record(site, nudge_email)

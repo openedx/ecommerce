@@ -26,7 +26,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     GREETING = 'Hello '
     CLOSING = ' Bye'
     BASE_ENTERPRISE_URL = 'https://bears.party'
-    SENDER_ALIAS = 'edx Support Team'
+    SENDER_ALIAS = 'edX Support Team'
     REPLY_TO = 'edx@example.com'
 
     def setUp(self):
@@ -252,6 +252,37 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 )
         log.check_present(*expected)
 
+    @mock.patch('ecommerce.extensions.api.serializers.send_revoked_offer_email')
+    def test_send_revoke_email_args_with_base_url(self, mock_revoke_email):
+        """ Test that revoke email is passed correct enterprise_base_url """
+        context = {
+            'coupon': self.coupon,
+            'subject': self.SUBJECT,
+            'greeting': self.GREETING,
+            'closing': self.CLOSING,
+            'base_enterprise_url': self.BASE_ENTERPRISE_URL,
+        }
+        validated_data = {
+            'code': self.code,
+            'user': {'email': self.email},
+            'offer_assignments': self.offer_assignments,
+            'sender_id': None,
+            'template': None,
+            'enterprise_customer_uuid': uuid4()
+        }
+        serializer = CouponCodeRevokeSerializer(data=self.data, context=context)
+        serializer.create(validated_data=validated_data)
+        mock_revoke_email.assert_called_with(
+            subject=self.SUBJECT,
+            greeting=self.GREETING,
+            closing=self.CLOSING,
+            learner_email=self.email,
+            code=self.code,
+            sender_alias=self.SENDER_ALIAS,
+            reply_to='',
+            base_enterprise_url=self.BASE_ENTERPRISE_URL
+        )
+
     def test_send_revocation_email_error_no_greeting(self):
         """ Test that we log an appropriate message if the code revocation email cannot be sent. """
         serializer = CouponCodeRevokeSerializer(data=self.data, context={'coupon': self.coupon})
@@ -261,12 +292,13 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 self.LOGGER_NAME,
                 'ERROR',
                 '[Offer Revocation] Encountered error when revoking code {} for user {} with subject {}, '
-                'greeting {} and closing {}'.format(
+                'greeting {} closing {} and base_enterprise_url \'{}\''.format(
                     None,
                     None,
                     None,
                     None,
-                    None
+                    None,
+                    '',
                 )
             ),
         ]
@@ -298,6 +330,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             'subject': self.SUBJECT,
             'greeting': self.GREETING,
             'closing': self.CLOSING,
+            'base_enterprise_url': self.BASE_ENTERPRISE_URL,
         }
         serializer = CouponCodeRevokeSerializer(data=self.data, context=context)
 
@@ -306,12 +339,13 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 self.LOGGER_NAME,
                 'ERROR',
                 '[Offer Revocation] Encountered error when revoking code {} for user {} with subject \'{}\', '
-                'greeting \'{}\' and closing \'{}\''.format(
+                'greeting \'{}\' closing \'{}\' and base_enterprise_url \'{}\''.format(
                     self.code,
                     self.email,
                     self.SUBJECT,
                     self.GREETING,
                     self.CLOSING,
+                    self.BASE_ENTERPRISE_URL,
                 )
             ),
         ]

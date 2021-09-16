@@ -215,6 +215,7 @@ def send_revoked_offer_email(
         code,
         sender_alias,
         reply_to,
+        base_enterprise_url='',
 ):
     """
     Arguments:
@@ -232,13 +233,21 @@ def send_revoked_offer_email(
            Enterprise customer sender alias.
         *reply_to*
            Enterprise customer reply to email address.
+        *base_enterprise_url*
+           URL for enterprise learner portal if learner portal is enabled.
     """
     email_template = settings.OFFER_REVOKE_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
         USER_EMAIL=learner_email,
         CODE=code,
     )
-    email_body = format_email(email_template, placeholder_dict, greeting, closing)
+    email_body = format_email(
+        email_template,
+        placeholder_dict,
+        greeting,
+        closing,
+        base_enterprise_url
+    )
 
     if settings.DEBUG:  # pragma: no cover
         # Avoid breaking devstack when no such service is available.
