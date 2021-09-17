@@ -201,13 +201,13 @@ django-debug-toolbar==3.2.2
     # via -r requirements/dev.in
 django-extensions==3.1.3
     # via -r requirements/test.txt
-django-extra-views==0.11.0
+django-extra-views==0.13.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
 django-filter==21.1
     # via -r requirements/test.txt
-django-haystack==2.8.1
+django-haystack==3.1.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -217,9 +217,9 @@ django-model-utils==4.1.1
     # via
     #   -r requirements/test.txt
     #   edx-rbac
-django-oscar==2.0.4
+django-oscar==2.1
     # via -r requirements/test.txt
-django-phonenumber-field==2.0.1
+django-phonenumber-field==3.0.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -229,7 +229,7 @@ django-simple-history==3.0.0
     # via -r requirements/test.txt
 django-solo==1.2.0
     # via -r requirements/test.txt
-django-tables2==1.21.2
+django-tables2==2.2.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -519,7 +519,6 @@ phonenumbers==8.12.34
     # via
     #   -r requirements/test.txt
     #   django-oscar
-    #   django-phonenumber-field
 pillow==8.3.2
     # via
     #   -r requirements/test.txt
