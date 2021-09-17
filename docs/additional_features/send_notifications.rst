@@ -25,7 +25,7 @@ Create an Email Message
 
 The E-Commerce service can send both HTML and plain text email messages. To
 create an email message, create the following three files in the
-``ecommerce/ecommerce/templates/customer/emails/`` folder.
+``ecommerce/ecommerce/templates/oscar/communication/emails/`` folder.
 
    * An HTML template that extends ``email_base.html`` and includes the body of
      the email.
