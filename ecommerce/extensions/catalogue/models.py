@@ -162,6 +162,9 @@ class Category(AbstractCategory):
     # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
     history = CreateSafeHistoricalRecords(excluded_fields=['slug'])
 
+    def set_ancestors_are_public(self):
+        pass
+
 
 class Option(AbstractOption):
     # Do not record the code field in the history table because AutoSlugField is not compatible with
