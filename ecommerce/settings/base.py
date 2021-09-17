@@ -311,6 +311,11 @@ DJANGO_APPS = [
     'edx_django_utils.user',
 ]
 
+# Apps specific to django-oscar go here.
+OSCAR_APPS = [
+    'oscar.apps.communication.apps.CommunicationConfig',
+    ]
+
 # Apps specific to this project go here.
 LOCAL_APPS = [
     'ecommerce.core',
