@@ -52,9 +52,9 @@ idna==2.7
     #   requests
 importlib-metadata==4.8.1
     # via pytest-randomly
-more-itertools==8.9.0
+more-itertools==8.10.0
     # via pytest
-newrelic==6.8.1.164
+newrelic==6.10.0.165
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
