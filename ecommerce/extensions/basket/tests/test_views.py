@@ -1658,7 +1658,7 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
         expected_messages = [
             {
                 'message_type': 'warning',
-                'user_message': "Your cart couldn't be updated. Please correct any validation errors below.",
+                'user_message': "Your basket couldn't be updated. Please correct any validation errors below.",
             },
             {
                 'message_type': 'warning',
