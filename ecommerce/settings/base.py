@@ -197,7 +197,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'oscar.apps.search.context_processors.search_form',
                 'oscar.apps.checkout.context_processors.checkout',
-                'oscar.apps.customer.notifications.context_processors.notifications',
+                'oscar.apps.communication.notifications.context_processors.notifications',
                 'oscar.core.context_processors.metadata',
                 'ecommerce.core.context_processors.core',
                 'ecommerce.extensions.analytics.context_processors.analytics',
@@ -310,11 +310,6 @@ DJANGO_APPS = [
     'xss_utils',
     'edx_django_utils.user',
 ]
-
-# Apps specific to django-oscar go here.
-OSCAR_APPS = [
-    'oscar.apps.communication.apps.CommunicationConfig',
-    ]
 
 # Apps specific to this project go here.
 LOCAL_APPS = [

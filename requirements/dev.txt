@@ -89,7 +89,7 @@ chardet==4.0.0
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
     #   diff-cover
-charset-normalizer==2.0.5
+charset-normalizer==2.0.6
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -346,7 +346,7 @@ future==0.18.2
     #   pyjwkest
 gitdb==4.0.7
     # via gitpython
-gitpython==3.1.18
+gitpython==3.1.24
     # via transifex-client
 httpretty==0.9.7
     # via -r requirements/test.txt
@@ -909,7 +909,7 @@ tenacity==6.3.1
     # via
     #   -r requirements/test.txt
     #   pytest-selenium
-testfixtures==6.18.1
+testfixtures==6.18.2
     # via -r requirements/test.txt
 testtools==2.5.0
     # via
@@ -943,6 +943,8 @@ typing==3.7.4.3
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
+typing-extensions==3.10.0.2
+    # via gitpython
 unicodecsv==0.14.1
     # via
     #   -r requirements/test.txt
