@@ -21,7 +21,7 @@ from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMEN
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.invoice.models import Invoice
 
-CommunicationEventType = get_model('customer', 'CommunicationEventType')
+CommunicationEventType = get_model('communication', 'CommunicationEventType')
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
