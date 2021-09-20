@@ -16,6 +16,7 @@ OSCAR_HOMEPAGE = reverse_lazy('dashboard:index')
 OSCAR_APPS = [
     'oscar',
     'oscar.apps.address',
+    'oscar.apps.communication.apps.CommunicationConfig',
     'oscar.apps.shipping',
     'oscar.apps.catalogue.reviews',
     'oscar.apps.search',
@@ -36,6 +37,9 @@ OSCAR_APPS = [
     'ecommerce.extensions.payment',
     'ecommerce.extensions.voucher',
 
+    # Dashboard applications depend on models declared in the core applications (basket, catalogue, etc).
+    # To prevent issues with Oscar’s dynamic model loading, overrides of dashboard applications should 
+    # follow overrides of core applications 
     'oscar.apps.dashboard.reports',
     'oscar.apps.dashboard.catalogue',
     'oscar.apps.dashboard.partners',
