@@ -75,7 +75,7 @@ chardet==4.0.0
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
     #   diff-cover
-charset-normalizer==2.0.5
+charset-normalizer==2.0.6
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -135,7 +135,7 @@ defusedxml==0.7.1
     #   -r requirements/base.txt
     #   python3-openid
     #   social-auth-core
-diff-cover==6.3.5
+diff-cover==6.4.0
     # via -r requirements/test.in
     # via
     #   -r requirements/base.txt
@@ -429,7 +429,7 @@ monotonic==1.6
     # via
     #   -r requirements/base.txt
     #   analytics-python
-more-itertools==8.9.0
+more-itertools==8.10.0
     # via
     #   -r requirements/e2e.txt
     #   pytest
@@ -442,7 +442,7 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.txt
-newrelic==6.8.1.164
+newrelic==6.10.0.165
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt

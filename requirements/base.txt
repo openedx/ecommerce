@@ -46,7 +46,7 @@ cffi==1.14.6
     #   pynacl
 chardet==4.0.0
     # via cybersource-rest-client-python
-charset-normalizer==2.0.5
+charset-normalizer==2.0.6
     # via requests
 configparser==5.0.2
     # via cybersource-rest-client-python
@@ -280,7 +280,7 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.in
-newrelic==6.8.1.164
+newrelic==6.10.0.165
     # via
     #   -r requirements/base.in
     #   edx-django-utils
