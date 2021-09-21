@@ -336,7 +336,7 @@ def format_email(template, placeholder_dict, greeting, closing, base_enterprise_
     if waffle.switch_is_active(ENABLE_BRAZE):
         search_url = base_enterprise_url + "/search" if base_enterprise_url else "https://www.edx.org/search"
         search_url = search_url.replace('\"', '\'')
-        email_body = (greeting + email_body + closing).replace('\"', '\'')
+        email_body = (greeting + email_body + closing).replace('\n', '\t\n')
         return render_to_string('coupons/offer_email.html', {'body': email_body, 'search_url': search_url})
 
     # \n\n is being treated as single line except of two lines in HTML template,
