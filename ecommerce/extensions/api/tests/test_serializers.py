@@ -274,6 +274,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             'subject': self.SUBJECT,
             'greeting': self.GREETING,
             'closing': self.CLOSING,
+            'files': self.ATTACHMENTS,
             'base_enterprise_url': self.BASE_ENTERPRISE_URL,
         }
         validated_data = {
@@ -294,7 +295,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             code=self.code,
             sender_alias=self.SENDER_ALIAS,
             reply_to='',
-            base_enterprise_url=self.BASE_ENTERPRISE_URL
+            base_enterprise_url=self.BASE_ENTERPRISE_URL,
+            attachments=self.ATTACHMENTS
         )
 
     def test_send_revocation_email_error_no_greeting(self):
