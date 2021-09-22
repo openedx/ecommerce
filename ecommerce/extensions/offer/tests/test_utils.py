@@ -403,6 +403,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
             },
+            'https://bears.party',
             None,
         ),
     )
@@ -415,6 +416,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             reply_to,
             tokens,
+            base_enterprise_url,
             side_effect,
             mock_email_task,
     ):
@@ -430,6 +432,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code'),
             sender_alias,
             reply_to,
+            base_enterprise_url,
         )
         mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),

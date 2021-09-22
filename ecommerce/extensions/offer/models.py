@@ -749,7 +749,7 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
             )
         return nudge_email_template
 
-    def get_email_content(self, user_email, code):
+    def get_email_content(self, user_email, code, base_enterprise_url=''):
         """
         Return the formatted email body and subject.
         """
@@ -766,7 +766,8 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
                 user_email,
                 code,
                 max_usage_limit if offer.max_global_applications == Voucher.MULTI_USE_PER_CUSTOMER else 1,
-                voucher.end_datetime
+                voucher.end_datetime,
+                base_enterprise_url
             )
         else:
             logger.warning(

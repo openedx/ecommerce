@@ -844,6 +844,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
         template_id = request.data.pop('template_id', None)
+        base_enterprise_url = request.data.pop('base_enterprise_url', '')
         sender_id = request.user.lms_user_id
         self._validate_email_fields(subject, greeting, closing)
         self._validate_assignments_data(request.data.get('assignments'))
@@ -859,7 +860,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             'closing': closing,
             'template_id': template_id,
             'sender_id': sender_id,
-            'site': request.site
+            'site': request.site,
+            'base_enterprise_url': base_enterprise_url,
         }
         self.add_extra_user_info_in_assignments(assignments)
 
