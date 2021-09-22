@@ -518,7 +518,7 @@ unicodecsv==0.14.1
     #   djangorestframework-csv
 uritemplate==3.0.1
     # via coreapi
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -c requirements/pins.txt
     #   botocore

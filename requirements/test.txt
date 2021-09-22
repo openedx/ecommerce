@@ -900,7 +900,7 @@ uritemplate==3.0.1
     # via
     #   -r requirements/base.txt
     #   coreapi
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.txt

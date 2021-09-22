@@ -147,7 +147,7 @@ stevedore==3.4.0
     #   edx-django-utils
 tenacity==6.3.1
     # via pytest-selenium
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -c requirements/base.txt
     #   -c requirements/pins.txt

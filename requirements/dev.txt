@@ -953,7 +953,7 @@ uritemplate==3.0.1
     # via
     #   -r requirements/test.txt
     #   coreapi
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
