@@ -828,5 +828,5 @@ LOGO_URL = None
 FAVICON_URL = None
 
 # s3 files for email-template, code management credentials
-S3_ENTERPRISE_COUPON_BUCKET_NAME = ''
+ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_NAME = ''
 

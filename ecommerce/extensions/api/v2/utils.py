@@ -66,7 +66,7 @@ def upload_files_for_enterprise_coupons(files):
     uploaded_files = []
     if files and len(files) > 0:
         try:
-            bucket_name = settings.S3_ENTERPRISE_COUPON_BUCKET_NAME
+            bucket_name = settings.ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_NAME
             session = boto3.Session()
             s3 = session.client('s3')
 

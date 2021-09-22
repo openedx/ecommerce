@@ -674,7 +674,7 @@ def delete_files_from_s3(sender, instance, using, **kwargs):  # pylint: disable=
 
 def delete_file_from_s3_with_key(key):
     try:
-        bucket_name = settings.S3_ENTERPRISE_COUPON_BUCKET_NAME
+        bucket_name = settings.ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_NAME
         session = boto3.Session()
         s3 = session.client('s3')
         s3.delete_object(Bucket=bucket_name, Key=key)
