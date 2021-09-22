@@ -28,17 +28,11 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/base.in
-<<<<<<< HEAD
 boto3==1.18.58
     # via
     #   -r requirements/base.in
     #   django-ses
 botocore==1.21.58
-=======
-boto3==1.18.44
-    # via django-ses
-botocore==1.21.44
->>>>>>> 0e9130644e... fix: various changes needed based on django-oscar 2.1 release notes
     # via
     #   boto3
     #   s3transfer
