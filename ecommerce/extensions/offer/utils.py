@@ -10,6 +10,7 @@ import bleach
 import waffle
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import ugettext as _
 from ecommerce_worker.email.v1.api import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
@@ -345,8 +346,11 @@ def format_email(template, placeholder_dict, greeting, closing, base_enterprise_
     if waffle.switch_is_active(ENABLE_BRAZE):
         search_url = base_enterprise_url + "/search" if base_enterprise_url else "https://www.edx.org/search"
         search_url = search_url.replace('\"', '\'')
-        email_body = (greeting + email_body + closing).replace('\"', '\'')
-        return render_to_string('coupons/offer_email.html', {'body': email_body, 'search_url': search_url})
+        email_body = (greeting + email_body + closing).replace('\n', '\t\n')
+        current_year = timezone.now().year
+        return render_to_string('coupons/offer_email.html', {'body': email_body, 'search_url': search_url,
+                                                             'current_year': current_year,
+                                                             })
 
     # \n\n is being treated as single line except of two lines in HTML template,
     #  so separating them with &nbsp; tag to render them as expected.
