@@ -759,10 +759,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         closing = request.data.pop('template_closing', '')
         template_id = request.data.pop('template_id', None)
         sender_id = request.user.lms_user_id
-        all_files = request.data.pop('template_files', [])
+        all_uploaded_un_uploaded_files = request.data.pop('template_files', [])
         self._validate_email_fields(subject, greeting, closing)
-        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_files if 'url' in file]
-        un_uploaded_files = [file for file in all_files if 'contents' in file]
+        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_uploaded_un_uploaded_files if 'url' in file]
+        un_uploaded_files = [file for file in all_uploaded_un_uploaded_files if 'contents' in file]
         uploaded_files = upload_files_for_enterprise_coupons(un_uploaded_files)
         for file in uploaded_files:
             files_with_url.append({'file_name': file['name'], 'url': file['url']})
@@ -855,15 +855,15 @@ class EnterpriseCouponViewSet(CouponViewSet):
         subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
-        all_files = request.data.pop('template_files', [])
+        all_uploaded_un_uploaded_files = request.data.pop('template_files', [])
         template_id = request.data.pop('template_id', None)
         base_enterprise_url = request.data.pop('base_enterprise_url', '')
         sender_id = request.user.lms_user_id
         self._validate_email_fields(subject, greeting, closing)
         self._validate_assignments_data(request.data.get('assignments'))
 
-        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_files if 'url' in file]
-        un_uploaded_files = [file for file in all_files if 'contents' in file]
+        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_uploaded_un_uploaded_files if 'url' in file]
+        un_uploaded_files = [file for file in all_uploaded_un_uploaded_files if 'contents' in file]
         uploaded_files = upload_files_for_enterprise_coupons(un_uploaded_files)
         for file in uploaded_files:
             files_with_url.append({'file_name': file['name'], 'url': file['url']})
@@ -897,7 +897,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     map(lambda assignment: assignment['code'], assignments),
                     map(lambda assignment: assignment['user']['email'], assignments)
                 )
-                if all([e['detail'] == 'failure' for e in serializer.data]):
+                if any([e['detail'] == 'failure' for e in serializer.data]):
                     for file in uploaded_files:
                         delete_file_from_s3_with_key(file['name'])
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -916,7 +916,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
-        all_files = request.data.pop('template_files', [])
+        all_uploaded_un_uploaded_files = request.data.pop('template_files', [])
         template_id = request.data.pop('template_id', None)
         base_enterprise_url = request.data.pop('base_enterprise_url', '')
         sender_id = request.user.lms_user_id
@@ -948,8 +948,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     }
                 )
 
-        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_files if 'url' in file]
-        un_uploaded_files = [file for file in all_files if 'contents' in file]
+        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_uploaded_un_uploaded_files if 'url' in file]
+        un_uploaded_files = [file for file in all_uploaded_un_uploaded_files if 'contents' in file]
         uploaded_files = upload_files_for_enterprise_coupons(un_uploaded_files)
         for file in uploaded_files:
             files_with_url.append({'file_name': file['name'], 'url': file['url']})
@@ -971,7 +971,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer = CouponCodeRemindSerializer(data=assignments, many=True, context=context)
             if serializer.is_valid():
                 serializer.save()
-                if all([e['detail'] == 'failure' for e in serializer.data]):
+                if any([e['detail'] == 'failure' for e in serializer.data]):
                     for file in uploaded_files:
                         delete_file_from_s3_with_key(file['name'])
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1009,12 +1009,12 @@ class OfferAssignmentEmailTemplatesViewSet(PermissionRequiredMixin, ModelViewSet
             saved_template_id = saved_template_response.data['id']
             uploaded_files = upload_files_for_enterprise_coupons(email_files)
             email_files = [{**file, 'template': saved_template_id} for file in uploaded_files]
-            files_saved = TemplateFileAttachmentSerializer(data=email_files, many=True)
-            if files_saved.is_valid():
-                files_saved.save()
-                files_data = files_saved.data
+            file_attachment_serializer = TemplateFileAttachmentSerializer(data=email_files, many=True)
+            if file_attachment_serializer.is_valid():
+                file_attachment_serializer.save()
+                files_data = file_attachment_serializer.data
             else:
-                files_data = files_saved.errors
+                files_data = file_attachment_serializer.errors
             saved_template_response.data.update({'email_files': files_data})
         return saved_template_response
 
@@ -1033,11 +1033,11 @@ class OfferAssignmentEmailTemplatesViewSet(PermissionRequiredMixin, ModelViewSet
         if len(files_to_upload) > 0:
             uploaded_files = upload_files_for_enterprise_coupons(files_to_upload)
             email_files = [{**file, 'template': template_id} for file in uploaded_files]
-            files_to_save = TemplateFileAttachmentSerializer(data=email_files, many=True)
-            if files_to_save.is_valid():
-                files_to_save.save()
+            file_attachment_serializer = TemplateFileAttachmentSerializer(data=email_files, many=True)
+            if file_attachment_serializer.is_valid():
+                file_attachment_serializer.save()
             else:
-                return updated_template_response.data.update({'email_files': files_to_save.errors})
+                return updated_template_response.data.update({'email_files': file_attachment_serializer.errors})
         files_to_send = TemplateFileAttachment.objects.filter(template=template_id).all()
         files_to_send = TemplateFileAttachmentSerializer(files_to_send, many=True)
         updated_template_response.data.update({'email_files': files_to_send.data})

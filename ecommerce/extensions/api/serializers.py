@@ -1613,9 +1613,8 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         attrs['enterprise_customer_uuid'] = enterprise_customer_uuid
         return attrs
 
-    # pylint: disable=dangerous-default-value
     def _trigger_email_sending_task(self, subject, greeting, closing, assigned_offer, voucher_usage_type, sender_alias,
-                                    reply_to, base_enterprise_url='', attachments=[]):
+                                    reply_to, base_enterprise_url='', attachments=None):
         """
         Schedule async task to send email to the learner who has been assigned the code.
         """
@@ -2057,10 +2056,9 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         attrs['enterprise_customer_uuid'] = enterprise_customer_uuid
         return attrs
 
-    # pylint: disable=dangerous-default-value
     def _trigger_email_sending_task(
             self, subject, greeting, closing, assigned_offer, redeemed_offer_count, total_offer_count, sender_alias,
-            reply_to, base_enterprise_url='', attachments=[],
+            reply_to, base_enterprise_url='', attachments=None,
     ):
         """
         Schedule async task to send email to the learner who has been assigned the code.

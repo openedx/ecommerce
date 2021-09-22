@@ -158,7 +158,7 @@ def format_assigned_offer_email(
     return format_email(email_template, placeholder_dict, greeting, closing, base_enterprise_url)
 
 
-def send_assigned_offer_email(  # pylint: disable=dangerous-default-value
+def send_assigned_offer_email(
         subject,
         greeting,
         closing,
@@ -170,7 +170,7 @@ def send_assigned_offer_email(  # pylint: disable=dangerous-default-value
         sender_alias,
         reply_to,
         base_enterprise_url='',
-        attachments=[]):
+        attachments=None):
     """
     Arguments:
         *subject*
@@ -192,6 +192,7 @@ def send_assigned_offer_email(  # pylint: disable=dangerous-default-value
         *attachments*
             Attachments to be sent with email.
     """
+    attachments = [] if attachments is None else attachments
     email_body = format_assigned_offer_email(
         greeting,
         closing,
@@ -211,7 +212,7 @@ def send_assigned_offer_email(  # pylint: disable=dangerous-default-value
                                       reply_to, attachments=attachments, base_enterprise_url=base_enterprise_url)
 
 
-def send_revoked_offer_email(  # pylint: disable=dangerous-default-value
+def send_revoked_offer_email(
         subject,
         greeting,
         closing,
@@ -220,7 +221,7 @@ def send_revoked_offer_email(  # pylint: disable=dangerous-default-value
         sender_alias,
         reply_to,
         base_enterprise_url='',
-        attachments=[],
+        attachments=None,
 ):
     """
     Arguments:
@@ -243,6 +244,7 @@ def send_revoked_offer_email(  # pylint: disable=dangerous-default-value
         *attachments*
             Attachments to be sent with email.
     """
+    attachments = [] if attachments is None else attachments
     email_template = settings.OFFER_REVOKE_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
         USER_EMAIL=learner_email,
@@ -264,7 +266,7 @@ def send_revoked_offer_email(  # pylint: disable=dangerous-default-value
     send_offer_update_email.delay(learner_email, subject, email_body, sender_alias, reply_to, attachments=attachments)
 
 
-def send_assigned_offer_reminder_email(  # pylint: disable=dangerous-default-value
+def send_assigned_offer_reminder_email(
         subject,
         greeting,
         closing,
@@ -275,7 +277,7 @@ def send_assigned_offer_reminder_email(  # pylint: disable=dangerous-default-val
         code_expiration_date,
         sender_alias,
         reply_to,
-        attachments=[],
+        attachments=None,
         base_enterprise_url=''):
     """
     Arguments:
@@ -304,6 +306,7 @@ def send_assigned_offer_reminder_email(  # pylint: disable=dangerous-default-val
        *base_enterprise_url*
            Url for the enterprise's learner portal
     """
+    attachments = [] if attachments is None else attachments
     email_template = settings.OFFER_REMINDER_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
         REDEEMED_OFFER_COUNT=redeemed_offer_count,
