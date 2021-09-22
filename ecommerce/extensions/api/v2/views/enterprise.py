@@ -761,7 +761,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
         sender_id = request.user.lms_user_id
         all_uploaded_un_uploaded_files = request.data.pop('template_files', [])
         self._validate_email_fields(subject, greeting, closing)
-        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_uploaded_un_uploaded_files if 'url' in file]
+        files_with_url = [
+            {'file_name': file['name'], 'url':file['url']}
+            for file in all_uploaded_un_uploaded_files
+            if 'url' in file
+        ]
         un_uploaded_files = [file for file in all_uploaded_un_uploaded_files if 'contents' in file]
         uploaded_files = upload_files_for_enterprise_coupons(un_uploaded_files)
         for file in uploaded_files:
@@ -862,7 +866,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
         self._validate_email_fields(subject, greeting, closing)
         self._validate_assignments_data(request.data.get('assignments'))
 
-        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_uploaded_un_uploaded_files if 'url' in file]
+        files_with_url = [
+            {'file_name': file['name'], 'url':file['url']}
+            for file in all_uploaded_un_uploaded_files
+            if 'url' in file
+        ]
         un_uploaded_files = [file for file in all_uploaded_un_uploaded_files if 'contents' in file]
         uploaded_files = upload_files_for_enterprise_coupons(un_uploaded_files)
         for file in uploaded_files:
@@ -948,7 +956,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     }
                 )
 
-        files_with_url = [{'file_name': file['name'], 'url':file['url']} for file in all_uploaded_un_uploaded_files if 'url' in file]
+        files_with_url = [
+            {'file_name': file['name'], 'url':file['url']}
+            for file in all_uploaded_un_uploaded_files
+            if 'url' in file
+        ]
         un_uploaded_files = [file for file in all_uploaded_un_uploaded_files if 'contents' in file]
         uploaded_files = upload_files_for_enterprise_coupons(un_uploaded_files)
         for file in uploaded_files:
