@@ -114,6 +114,7 @@ class OrderCreator(OscarOrderCreator):
             order_data['status'] = status
         if extra_order_fields:
             order_data.update(extra_order_fields)
+        Order.surcharges = None
         order = Order(**order_data)
         order.save()
 
