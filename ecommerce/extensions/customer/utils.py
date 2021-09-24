@@ -5,6 +5,8 @@ from django.core.mail import EmailMessage, EmailMultiAlternatives
 from oscar.apps.customer.utils import *  # pylint: disable=wildcard-import, unused-wildcard-import
 # @TODO: check if the above import is obviated (does it still have other classes we need)
 from oscar.apps.communication.utils import Dispatcher
+from ecommerce.extensions.order.models import CommunicationEvent
+from ecommerce.extensions.communication.models import Email
 
 # pylint: disable=abstract-method, function-redefined
 class Dispatcher(Dispatcher):
