@@ -98,6 +98,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            [{'name': 'abc.png', 'url': 'https://www.example.com'},
+             {'name': 'def.png', 'url': 'https://www.example.com'}],
             {
                 'offer_assignment_id': 555,
                 'learner_email': 'johndoe@unknown.com',
@@ -114,6 +116,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            [{'name': 'abc.png', 'url': 'https://www.example.com'},
+             {'name': 'def.png', 'url': 'https://www.example.com'}],
             {
                 'offer_assignment_id': 555,
                 'learner_email': 'johndoe@unknown.com',
@@ -133,6 +137,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            attachments,
             tokens,
             side_effect,
             sender_alias,
@@ -154,6 +159,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             reply_to,
             base_enterprise_url,
+            attachments,
         )
         mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
@@ -163,6 +169,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             reply_to,
             base_enterprise_url=base_enterprise_url,
+            attachments=attachments,
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
@@ -171,6 +178,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            [{'name': 'abc.png', 'url': 'https://www.example.com'},
+             {'name': 'def.png', 'url': 'https://www.example.com'}],
             {
                 'offer_assignment_id': 555,
                 'learner_email': 'johndoe@unknown.com',
@@ -188,6 +197,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            [{'name': 'abc.png', 'url': 'https://www.example.com'},
+             {'name': 'def.png', 'url': 'https://www.example.com'}],
             {
                 'offer_assignment_id': 555,
                 'learner_email': 'johndoe@unknown.com',
@@ -208,6 +219,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            attachments,
             tokens,
             side_effect,
             sender_alias,
@@ -233,6 +245,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             reply_to,
             base_enterprise_url,
+            attachments
         )
         email_body = format_assigned_offer_email(
             greeting,
@@ -251,10 +264,11 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             reply_to,
             base_enterprise_url=base_enterprise_url,
+            attachments=attachments,
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
-    def test_send_assigned_offer_email_without_base_ent_url(self, mock_email_task):
+    def test_send_assigned_offer_email_without_base_ent_url_and_attachments(self, mock_email_task):
         send_assigned_offer_email(
             "You have mail",
             "you",
@@ -275,7 +289,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             mock.ANY,
             'sender alias',
             'edx@example.com',
-            base_enterprise_url='',
+            attachments=[],
+            base_enterprise_url=''
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
@@ -284,6 +299,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            [{'name': 'abc.png', 'url': 'https://www.example.com'},
+             {'name': 'def.png', 'url': 'https://www.example.com'}],
             'sender_alias',
             'edx@example.com',
             {
@@ -302,6 +319,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            attachments,
             sender_alias,
             reply_to,
             tokens,
@@ -323,6 +341,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code_expiration_date'),
             sender_alias,
             reply_to,
+            attachments=attachments
         )
         mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
@@ -331,7 +350,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             reply_to,
             # base_enterprise_url should be blank as it was not passed in
-            base_enterprise_url=''
+            base_enterprise_url='',
+            attachments=attachments,
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
@@ -340,6 +360,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            [{'name': 'abc.png', 'url': 'https://www.example.com'},
+             {'name': 'def.png', 'url': 'https://www.example.com'}],
             'sender_alias',
             'edx@example.com',
             {
@@ -359,6 +381,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            attachments,
             sender_alias,
             reply_to,
             tokens,
@@ -380,6 +403,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code_expiration_date'),
             sender_alias,
             reply_to,
+            attachments,
             tokens.get('base_enterprise_url'),
         )
         mock_email_task.delay.assert_called_once_with(
@@ -389,6 +413,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             reply_to,
             base_enterprise_url=tokens.get('base_enterprise_url'),
+            attachments=attachments
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
@@ -397,6 +422,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            [{'name': 'abc.png', 'url': 'https://www.example.com'},
+             {'name': 'def.png', 'url': 'https://www.example.com'}],
             'sender_alias',
             'edx@example.com',
             {
@@ -413,6 +440,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            attachments,
             sender_alias,
             reply_to,
             tokens,
@@ -433,6 +461,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             reply_to,
             base_enterprise_url,
+            attachments,
         )
         mock_email_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
@@ -440,6 +469,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             mock.ANY,
             sender_alias,
             reply_to,
+            attachments=attachments,
         )
 
     @ddt.data(

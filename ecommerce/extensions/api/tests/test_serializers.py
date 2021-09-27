@@ -28,6 +28,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     BASE_ENTERPRISE_URL = 'https://bears.party'
     SENDER_ALIAS = 'edX Support Team'
     REPLY_TO = 'edx@example.com'
+    ATTACHMENTS = [{'name': 'abc.png', 'url': 'https://www.example.com'},
+                   {'name': 'def.png', 'url': 'https://www.example.com'}]
 
     def setUp(self):
         super(CouponCodeSerializerTests, self).setUp()
@@ -78,6 +80,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER,
             sender_alias=self.SENDER_ALIAS,
             reply_to=self.REPLY_TO,
+            attachments=self.ATTACHMENTS,
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
 
@@ -93,6 +96,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         assert assign_email_args['base_enterprise_url'] == ''
         assert assign_email_args['sender_alias'] == self.SENDER_ALIAS
         assert assign_email_args['reply_to'] == self.REPLY_TO
+        assert assign_email_args['attachments'] == self.ATTACHMENTS
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
     def test_send_assigned_offer_email_args_with_enterprise_url(self, mock_assign_email):
@@ -107,6 +111,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER,
             sender_alias=self.SENDER_ALIAS,
             reply_to=self.REPLY_TO,
+            attachments=self.ATTACHMENTS,
             base_enterprise_url=self.BASE_ENTERPRISE_URL,
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
@@ -123,6 +128,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         assert assign_email_args['base_enterprise_url'] == self.BASE_ENTERPRISE_URL
         assert assign_email_args['sender_alias'] == self.SENDER_ALIAS
         assert assign_email_args['reply_to'] == self.REPLY_TO
+        assert assign_email_args['attachments'] == self.ATTACHMENTS
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_reminder_email')
     def test_send_assigned_offer_reminder_email_args(self, mock_remind_email):
@@ -137,6 +143,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             total_offer_count=5,
             sender_alias=self.SENDER_ALIAS,
             reply_to=self.REPLY_TO,
+            attachments=self.ATTACHMENTS,
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
         mock_remind_email.assert_called_with(
@@ -150,6 +157,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
             sender_alias=self.SENDER_ALIAS,
             reply_to=self.REPLY_TO,
+            attachments=self.ATTACHMENTS,
             base_enterprise_url=''
         )
 
@@ -166,6 +174,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             total_offer_count=5,
             sender_alias=self.SENDER_ALIAS,
             reply_to=self.REPLY_TO,
+            attachments=self.ATTACHMENTS,
             base_enterprise_url=self.BASE_ENTERPRISE_URL
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
@@ -180,6 +189,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
             sender_alias=self.SENDER_ALIAS,
             reply_to=self.REPLY_TO,
+            attachments=self.ATTACHMENTS,
             base_enterprise_url=self.BASE_ENTERPRISE_URL,
         )
 
@@ -193,12 +203,13 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Assignment] Email for offer_assignment_id: {} with subject \'{}\', greeting \'{}\' and closing '
-                '\'{}\' raised exception: {}'.format(
+                '[Offer Assignment] Email for offer_assignment_id: {} with subject \'{}\', greeting \'{}\' closing '
+                '\'{}\' and attachments {}, raised exception: {}'.format(
                     self.offer_assignment.id,
                     self.SUBJECT,
                     self.GREETING,
                     self.CLOSING,
+                    self.ATTACHMENTS,
                     repr(Exception('Ignore me - assignment'))
                 )
             ),
@@ -213,6 +224,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER,
                 sender_alias=self.SENDER_ALIAS,
                 reply_to=self.REPLY_TO,
+                attachments=self.ATTACHMENTS,
             )
             log.check_present(*expected)
 
@@ -226,11 +238,12 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 self.LOGGER_NAME,
                 'ERROR',
                 '[Offer Reminder] Email for offer_assignment_id: {} with subject \'{}\', greeting \'{}\' '
-                'and closing \'{}\' and base_enterprise_url \'{}\' raised exception: {}'.format(
+                'closing \'{}\' attachments {}, and base_enterprise_url \'{}\' raised exception: {}'.format(
                     self.offer_assignment.id,
                     self.SUBJECT,
                     self.GREETING,
                     self.CLOSING,
+                    self.ATTACHMENTS,
                     self.BASE_ENTERPRISE_URL,
                     repr(Exception('Ignore me - reminder'))
                 )
@@ -248,6 +261,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                     total_offer_count=5,
                     sender_alias=self.SENDER_ALIAS,
                     reply_to=self.REPLY_TO,
+                    attachments=self.ATTACHMENTS,
                     base_enterprise_url=self.BASE_ENTERPRISE_URL,
                 )
         log.check_present(*expected)
@@ -260,6 +274,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             'subject': self.SUBJECT,
             'greeting': self.GREETING,
             'closing': self.CLOSING,
+            'files': self.ATTACHMENTS,
             'base_enterprise_url': self.BASE_ENTERPRISE_URL,
         }
         validated_data = {
@@ -280,7 +295,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             code=self.code,
             sender_alias=self.SENDER_ALIAS,
             reply_to='',
-            base_enterprise_url=self.BASE_ENTERPRISE_URL
+            base_enterprise_url=self.BASE_ENTERPRISE_URL,
+            attachments=self.ATTACHMENTS
         )
 
     def test_send_revocation_email_error_no_greeting(self):
@@ -288,11 +304,11 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         serializer = CouponCodeRevokeSerializer(data=self.data, context={'coupon': self.coupon})
 
         expected = [
-            (
+            (   # pylint: disable=too-many-format-args
                 self.LOGGER_NAME,
                 'ERROR',
                 '[Offer Revocation] Encountered error when revoking code {} for user {} with subject {}, '
-                'greeting {} closing {} and base_enterprise_url \'{}\''.format(
+                'greeting {} closing {} base_enterprise_url \'{}\' and files []'.format(
                     None,
                     None,
                     None,
@@ -331,6 +347,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             'greeting': self.GREETING,
             'closing': self.CLOSING,
             'base_enterprise_url': self.BASE_ENTERPRISE_URL,
+            'files': self.ATTACHMENTS
         }
         serializer = CouponCodeRevokeSerializer(data=self.data, context=context)
 
@@ -339,13 +356,14 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 self.LOGGER_NAME,
                 'ERROR',
                 '[Offer Revocation] Encountered error when revoking code {} for user {} with subject \'{}\', '
-                'greeting \'{}\' closing \'{}\' and base_enterprise_url \'{}\''.format(
+                'greeting \'{}\' closing \'{}\' base_enterprise_url \'{}\' and files {}'.format(
                     self.code,
                     self.email,
                     self.SUBJECT,
                     self.GREETING,
                     self.CLOSING,
                     self.BASE_ENTERPRISE_URL,
+                    self.ATTACHMENTS,
                 )
             ),
         ]

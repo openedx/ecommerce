@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 
 
+import logging
+from collections import namedtuple
 from uuid import uuid4
 
+import botocore
 import ddt
 import httpretty
+import mock
+from botocore.exceptions import ClientError
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_delete
 from django.utils.timezone import now
 from edx_django_utils.cache import TieredCache
 from mock import patch
@@ -18,13 +24,17 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import ASSIGN, DAY3, DAY10, DAY19, REMIND, REVOKE
+from ecommerce.extensions.offer.models import delete_files_from_s3
 from ecommerce.extensions.test.factories import CodeAssignmentNudgeEmailTemplatesFactory
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
+LOGGER = logging.getLogger(__name__)
+
 Catalog = get_model('catalogue', 'Catalog')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
+TemplateFileAttachment = get_model('offer', 'TemplateFileAttachment')
 OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 Range = get_model('offer', 'Range')
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
@@ -661,3 +671,98 @@ class TestCodeAssignmentNudgeEmails(TestCase):
         assert not nudge_email.already_sent
         assert nudge_email.is_subscribed
         assert nudge_email.options['base_enterprise_url'] == ''
+
+
+@ddt.ddt
+class TestTemplateFileAttachment(TestCase):
+    """Tests for the TemplateFileAttachment."""
+
+    def _create_template(self, enterprise_customer, email_type):
+        """Helper method to create OfferAssignmentEmailTemplates instance with the given email type."""
+        return OfferAssignmentEmailTemplates.objects.create(
+            enterprise_customer=enterprise_customer,
+            email_type=email_type,
+            email_greeting='test greeting',
+            email_closing='test closing',
+            email_subject='template subject',
+            active=True,
+            name='test template'
+        )
+
+    def _create_template_file_attachment(self, name, size, url, template):
+        """Helper method to create TemplateFileAttachment obj from given data"""
+        template_file = TemplateFileAttachment(
+            name=name,
+            size=size,
+            url=url,
+            template=template
+        )
+        template_file.save()
+        return template_file
+
+    @ddt.data(
+        (str(uuid4()), ASSIGN, "abc.png", 123, "www.example.com/abc-png"),
+        (str(uuid4()), REMIND, "def.png", 456, "www.example.com/def-png"),
+        (str(uuid4()), REVOKE, "ghi.png", 789, "www.example.com/ghi-png"),
+    )
+    @ddt.unpack
+    def test_models_is_created_with_correct_values(self, enterprise_customer, email_type, name, size, url):
+        """ verify that template files are created and saved with correct data"""
+        template = self._create_template(enterprise_customer, email_type)
+        template_file = self._create_template_file_attachment(name, size, url, template)
+        assert 'name={}, size={}, url={}, template={}'.format(name, size, url, template) == str(template_file)
+
+    @ddt.data(
+        (str(uuid4()), ASSIGN, "abc.png", 123, "www.example.com/abc-png"),
+        (str(uuid4()), REMIND, "def.png", 456, "www.example.com/def-png"),
+        (str(uuid4()), REVOKE, "ghi.png", 789, "www.example.com/ghi-png"),
+    )
+    @ddt.unpack
+    def test_post_delete_signal_called_on_file_delete(self, enterprise_customer, email_type, name, size, url):
+        """ verify that post del signal to delete files from s3 is called in TemplateFileAttachment deletions"""
+        template = self._create_template(enterprise_customer, email_type)
+        template_file = self._create_template_file_attachment(name, size, url, template)
+        post_delete.disconnect(delete_files_from_s3, TemplateFileAttachment)
+        with patch('ecommerce.extensions.offer.models.delete_files_from_s3', autospec=True) as post_del_signal:
+            post_delete.connect(post_del_signal, sender=TemplateFileAttachment)
+            template_file.delete()
+        assert post_del_signal.call_count == 1
+
+    def mock_make_api_call(self, operation_name, kwarg):
+        orig = botocore.client.BaseClient._make_api_call  # pylint: disable=protected-access
+        if operation_name == 'DeleteObject':  # pylint: disable=no-else-return
+            return "ok"
+        return orig(self, operation_name, kwarg)
+
+    def test_delete_files_from_s3(self):
+        """ verify that files are correctly deleted"""
+        template = self._create_template(uuid4(), ASSIGN)
+        template_file = self._create_template_file_attachment('abc.png', 123, 'www.example.com/abc-png', template)
+        with mock.patch('botocore.client.BaseClient._make_api_call', new=self.mock_make_api_call):
+            delete_files_from_s3(sender=TemplateFileAttachment, instance=template_file, using=None)
+
+
+def mock_make_api_call(self, operation_name, kwarg):
+    orig = botocore.client.BaseClient._make_api_call  # pylint: disable=protected-access
+    if operation_name == 'DeleteObject':  # pylint: disable=no-else-return
+        raise ClientError({'Error': {'Message': 'error while deleting object.'}}, operation_name=operation_name)
+    return orig(self, operation_name, kwarg)
+
+
+def test_post_delete_signal_logs_error(caplog):
+    """ tests whether delete_file_from_s3 logs error on facing exception """
+    FakeInstance = namedtuple('FakeInstnace', ['name'])
+    caplog.set_level(logging.ERROR)
+    with mock.patch('botocore.client.BaseClient._make_api_call', new=mock_make_api_call):
+        delete_files_from_s3(sender=TemplateFileAttachment, instance=FakeInstance(''), using=None)
+    assert '[TemplateFileAttachment] Raised an error while deleting the object' in caplog.text
+    assert 'Message: error while deleting object' in caplog.text
+
+
+def test_file_delete_without_bucket_name(caplog):
+    """ tests whether delete_file_from_s3 logs correct error on having no bucket name """
+    FakeInstance = namedtuple('FakeInstnace', ['name'])
+    caplog.set_level(logging.ERROR)
+    delete_files_from_s3(sender=TemplateFileAttachment, instance=FakeInstance('xyz'), using=None)
+    assert '[TemplateFileAttachment] Raised an error while deleting the object xyz' in caplog.text
+    assert 'Parameter validation failed:\nInvalid bucket name' in caplog.text

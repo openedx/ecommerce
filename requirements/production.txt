@@ -28,9 +28,11 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/base.in
-boto3==1.18.42
-    # via django-ses
-botocore==1.21.42
+boto3==1.18.37
+    # via
+    #   -r requirements/base.in
+    #   django-ses
+botocore==1.21.37
     # via
     #   boto3
     #   s3transfer

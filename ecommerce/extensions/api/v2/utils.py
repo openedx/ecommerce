@@ -1,10 +1,13 @@
 
-
+import datetime
+import io
 import logging
 from smtplib import SMTPException
 
+import boto3
 from django.conf import settings
 from django.core.mail import send_mail
+from django.utils.text import slugify
 from oscar.core.loading import get_model
 
 from ecommerce.enterprise.utils import get_enterprise_customer
@@ -57,3 +60,28 @@ def get_enterprise_from_product(product_id):
         return product.attr.enterprise_customer_uuid
     except Product.DoesNotExist:
         return None
+
+
+def upload_files_for_enterprise_coupons(files):
+    uploaded_files = []
+    if files and len(files) > 0:
+        try:
+            bucket_name = settings.ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_NAME
+            session = boto3.Session()
+            s3 = session.client('s3')
+
+            for file in files:
+                file_buf = io.BytesIO(bytes(file['contents'], encoding="raw_unicode_escape"))
+                file_buf.seek(0)
+                filename = datetime.datetime.now().strftime("%d-%m-%Y at %H.%M.%S") + " " + file['name']
+                key = slugify(filename)
+                s3.upload_fileobj(file_buf, bucket_name, key)
+                location = s3.get_bucket_location(Bucket=bucket_name)['LocationConstraint']
+                url = f"https://{bucket_name}.s3.{location}.amazonaws.com/{key}"
+                uploaded_files.append({'name': key, 'size': file['size'], 'url': url})
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.exception(
+                '[upload_files_for_enterprise_coupons] Raised an error while uploading the files,Message: %s',
+                ex
+            )
+    return uploaded_files
