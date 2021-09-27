@@ -213,6 +213,7 @@ TEMPLATES = [
 # See: https://docs.djangoproject.com/en/1.11/ref/settings/#middleware
 MIDDLEWARE = (
     'corsheaders.middleware.CorsMiddleware',
+    'edx_django_utils.monitoring.DeploymentMonitoringMiddleware',
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
