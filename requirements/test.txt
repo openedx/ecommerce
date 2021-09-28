@@ -47,9 +47,9 @@ bleach==4.1.0
     # via -r requirements/base.txt
 bok-choy==1.1.1
     # via -r requirements/test.in
-boto3==1.18.37
+boto3==1.18.49
     # via -r requirements/base.txt
-botocore==1.21.37
+botocore==1.21.49
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -82,7 +82,7 @@ chardet==4.0.0
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
     #   diff-cover
-charset-normalizer==2.0.5
+charset-normalizer==2.0.6
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -135,14 +135,14 @@ datetime==4.3
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-ddt==1.4.2
+ddt==1.4.3
     # via -r requirements/test.in
 defusedxml==0.7.1
     # via
     #   -r requirements/base.txt
     #   python3-openid
     #   social-auth-core
-diff-cover==6.3.5
+diff-cover==6.4.1
     # via -r requirements/test.in
     # via
     #   -r requirements/base.txt
@@ -174,7 +174,7 @@ diff-cover==6.3.5
     #   pytest-django-ordering
     #   rest-condition
     #   xss-utils
-django-appconf==1.0.4
+django-appconf==1.0.5
     # via
     #   -r requirements/base.txt
     #   django-compressor
@@ -200,7 +200,7 @@ django-extra-views==0.11.0
     # via
     #   -r requirements/base.txt
     #   django-oscar
-django-filter==2.4.0
+django-filter==21.1
     # via -r requirements/base.txt
 django-haystack==2.8.1
     # via
@@ -224,7 +224,7 @@ django-rest-swagger==2.2.0
     # via -r requirements/base.txt
 django-simple-history==3.0.0
     # via -r requirements/base.txt
-django-solo==1.1.5
+django-solo==1.2.0
     # via -r requirements/base.txt
 django-tables2==1.21.2
     # via
@@ -319,11 +319,11 @@ factory-boy==2.12.0
     #   -r requirements/base.txt
     #   -r requirements/test.in
     #   django-oscar
-faker==8.13.2
+faker==8.14.0
     # via
     #   -r requirements/base.txt
     #   factory-boy
-filelock==3.0.12
+filelock==3.1.0
     # via
     #   -r requirements/tox.txt
     #   tox
@@ -441,7 +441,7 @@ monotonic==1.6
     # via
     #   -r requirements/base.txt
     #   analytics-python
-more-itertools==8.9.0
+more-itertools==8.10.0
     # via
     #   -r requirements/e2e.txt
     #   pytest
@@ -454,7 +454,7 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.txt
-newrelic==6.8.1.164
+newrelic==7.0.0.166
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -498,7 +498,7 @@ pbr==5.6.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.31
+phonenumbers==8.12.33
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -507,7 +507,7 @@ pillow==8.3.2
     # via
     #   -r requirements/base.txt
     #   django-oscar
-platformdirs==2.3.0
+platformdirs==2.4.0
     # via
     #   -r requirements/base.txt
     #   zeep
@@ -554,11 +554,11 @@ pycparser==2.20
     #   -r requirements/e2e.txt
     #   cffi
     #   cybersource-rest-client-python
-pycryptodome==3.10.1
+pycryptodome==3.10.4
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-pycryptodomex==3.10.1
+pycryptodomex==3.10.4
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
@@ -861,7 +861,7 @@ tenacity==6.3.1
     # via
     #   -r requirements/e2e.txt
     #   pytest-selenium
-testfixtures==6.18.1
+testfixtures==6.18.2
     # via -r requirements/test.in
 testtools==2.5.0
     # via
@@ -901,7 +901,7 @@ uritemplate==3.0.1
     # via
     #   -r requirements/base.txt
     #   coreapi
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
