@@ -1,6 +1,7 @@
 """Serializers for data manipulated by ecommerce API endpoints."""
 
 import logging
+import re
 from collections import OrderedDict
 from decimal import Decimal
 from urllib.parse import urljoin
@@ -1199,6 +1200,17 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
     prepaid_invoice_amount = serializers.SerializerMethodField()
     sales_force_id = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Product
+        fields = (
+            'benefit_type', 'benefit_value', 'catalog_query', 'course_catalog', 'category',
+            'client', 'code', 'code_status', 'coupon_type', 'course_seat_types', 'email_domains',
+            'end_date', 'enterprise_catalog_content_metadata_url', 'enterprise_customer', 'enterprise_customer_catalog',
+            'id', 'inactive', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
+            'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
+            'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount', 'sales_force_id',
+        )
+
     def get_prepaid_invoice_amount(self, obj):
         try:
             return obj.attr.enterprise_contract_metadata.amount_paid
@@ -1368,9 +1380,26 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
     def get_voucher_type(self, obj):
         return retrieve_voucher_usage(obj)
 
-    def validate(self, attrs):
-        validated_data = super(CouponSerializer, self).validate(attrs)
+    def validate_sales_force_id_format(self):
+        """
+        Validate sales_force_id format
+        """
+        sales_force_id = self.initial_data.get('sales_force_id')
+        if sales_force_id and not re.match(r'^006[a-zA-Z0-9]{15}$|^none$', sales_force_id):
+            raise ValidationError({
+                'sales_force_id': 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'
+            })
 
+
+class CouponUpdateSerializer(CouponSerializer):
+    """
+    Serializer to update the Coupon.
+    """
+    def validate(self, attrs):
+        """
+        Validates the data.
+        """
+        validated_data = super(CouponUpdateSerializer, self).validate(attrs)
         # Validate max_uses
         max_uses = self.initial_data.get('max_uses')
         if max_uses is not None:
@@ -1389,16 +1418,45 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
 
         return validated_data
 
-    class Meta:
-        model = Product
-        fields = (
-            'benefit_type', 'benefit_value', 'catalog_query', 'course_catalog', 'category',
-            'client', 'code', 'code_status', 'coupon_type', 'course_seat_types', 'email_domains',
-            'end_date', 'enterprise_catalog_content_metadata_url', 'enterprise_customer', 'enterprise_customer_catalog',
-            'id', 'inactive', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
-            'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
-            'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount', 'sales_force_id',
-        )
+
+class EnterpriseCouponCreateSerializer(CouponSerializer):
+    """
+    Serializer to create the Enterprise Coupon.
+    """
+    def validate(self, attrs):
+        """
+        Validates the data.
+        """
+        validated_data = super(EnterpriseCouponCreateSerializer, self).validate(attrs)
+
+        # Validate sales_force_id
+        sales_force_id = self.initial_data.get('sales_force_id')
+        if not sales_force_id:
+            raise ValidationError({
+                'sales_force_id': 'This field is required.'
+            })
+        self.validate_sales_force_id_format()
+        return validated_data
+
+
+class EnterpriseCouponUpdateSerializer(CouponUpdateSerializer):
+    """
+    Serializer to create the Enterprise Coupon.
+    """
+    def validate(self, attrs):
+        """
+        Validates the data.
+        """
+        validated_data = super(EnterpriseCouponUpdateSerializer, self).validate(attrs)
+
+        # Validate sales_force_id
+        sales_force_id = self.initial_data.get('sales_force_id')
+        if 'sales_force_id' in self.initial_data and not sales_force_id:
+            raise ValidationError({
+                'sales_force_id': 'This field is required.'
+            })
+        self.validate_sales_force_id_format()
+        return validated_data
 
 
 class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-method

@@ -245,6 +245,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'stock_record_ids': [seat.stockrecords.first().id, other_seat.stockrecords.first().id],
             'title': 'Tešt čoupon',
             'voucher_type': Voucher.SINGLE_USE,
+            'sales_force_id': '006ABCDE0123456789',
         }
         self.response = self.get_response('POST', COUPONS_LINK, self.data)
         self.coupon = Product.objects.get(title=self.data['title'])
@@ -692,17 +693,23 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         new_coupon = Product.objects.get(id=self.coupon.id)
         self.assertEqual(new_coupon.attr.note, note)
 
-    def test_update_sales_force_id(self):
+    @ddt.data(
+        '006abcde0123456789', 'otherSalesForce', ''
+    )
+    def test_update_sales_force_id(self, sales_force_id):
+        """
+        Test sales force id update.
+        """
         path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
-        sales_force_id = 'otherSalesForceID123'
         data = {
-            'id': self.coupon.id,
             'sales_force_id': sales_force_id
         }
-        self.get_response('PUT', path, data)
+        response = self.get_response('PUT', path, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         new_coupon = Product.objects.get(id=self.coupon.id)
-        self.assertEqual(new_coupon.attr.sales_force_id, sales_force_id)
+        if sales_force_id:
+            self.assertEqual(new_coupon.attr.sales_force_id, sales_force_id)
 
     def test_update_dynamic_range_values(self):
         """ Verify dynamic range values are updated in case range has no catalog. """

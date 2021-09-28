@@ -83,9 +83,6 @@ define([
                     }
                     return undefined;
                 },
-                sales_force_id: {
-                    required: false
-                },
                 end_date: function(val) {
                     var startDate,
                         endDate;
@@ -198,6 +195,9 @@ define([
                     required: function() {
                         return this.get('catalog_type') === CATALOG_TYPES.single_course;
                     }
+                },
+                sales_force_id: {
+                    required: false
                 }
             },
 

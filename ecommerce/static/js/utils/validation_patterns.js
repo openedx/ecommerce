@@ -25,5 +25,13 @@ define([
         _.extend(Backbone.Validation.messages, {
             productName: gettext('The product name cannot contain HTML.')
         });
+
+        _.extend(Backbone.Validation.patterns, {
+            sales_force_id: /^006[a-zA-Z0-9]{15}$|^none$/
+        });
+
+        _.extend(Backbone.Validation.messages, {
+            sales_force_id: gettext('Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006')
+        });
     }
 );
