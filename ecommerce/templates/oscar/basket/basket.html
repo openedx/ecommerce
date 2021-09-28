@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load django_markup %}
 {% load static %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
 
 {% block title %}
 {% trans 'Basket' as tmsg %}{{ tmsg | force_escape }}
@@ -38,7 +39,7 @@
 {% endblock skip_link %}
 
 {% block content %}
-    <main id="main-content" aria-label="Checkout" tabindex=-1>
+    <main dir="{{ LANGUAGE_BIDI|yesno:"rtl,ltr" }}" id="main-content" aria-label="Checkout" tabindex=-1>
         <div class="basket {% if enable_client_side_checkout %}basket-client-side{% endif %}">
             <div class="container">
                 {# Use a partial template so that AJAX can be used to re-render basket #}

@@ -4,6 +4,7 @@
 {% load currency_filters %}
 {% load purchase_info_tags %}
 {% load widget_tweaks %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
 
 {% if not is_bulk_purchase %}
     {% include 'oscar/partials/alert_messages.html' %}
@@ -24,12 +25,12 @@
                         </p>
                     {% endif %}
                     <div class="row">
-                        <div class="col-md-2 col-sm-12 product-image">
+                        <div class="col-md-2 col-sm-12 product-image pull-{{ LANGUAGE_BIDI|yesno:"right, left" }}">
                             {{ form.id }}
                             <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}"
                                  alt="{{ line_data.product_title|default_if_none:'' }}"/>
                         </div>
-                        <div class="col-md-5 col-sm-12">
+                        <div class="col-md-5 col-sm-12 pull-{{ LANGUAGE_BIDI|yesno:"right, left" }}">
                             <p class="product-title">{{ line_data.product_title }} {% if line_data.course_key %}- {{ line_data.course_key.org }}
                                 ({{ line_data.course_key.run }}) {% endif %}</p>
                             <p class="product-description">{{ line_data.product_description|default_if_none:'' }}</p>
@@ -58,7 +59,7 @@
                                 </div>
                             </div>
                         {% endif %}
-                        <div class="col-md-{% if line_data.enrollment_code %}1{% else %}5{% endif %} col-xs-12 product-prices pull-right">
+                        <div class="col-md-{% if line_data.enrollment_code %}1{% else %}5{% endif %} col-xs-12 product-prices pull-{{ LANGUAGE_BIDI|yesno:"left, right" }}">
                             {% if line_data.enrollment_code %}
                                 <label class="product-price-label text-muted">{% trans 'Price' as tmsg %}{{ tmsg | force_escape }}</label>
                             {% endif %}
@@ -92,7 +93,7 @@
             {% if show_voucher_form %}
                 {% block vouchers %}
                     {% if basket.contains_a_voucher %}
-                        <div class="vouchers col-sm-7 col-xs-8">
+                        <div class="vouchers col-sm-7 col-xs-8 pull-{{ LANGUAGE_BIDI|yesno:"right, left" }}">
                             {% for voucher in basket.vouchers.all %}
                                 <p class="voucher">
                                     {% filter force_escape %}
@@ -111,7 +112,8 @@
                     {% else %}
                         {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
                         {% if voucher_form %}
-                            <div class="use-voucher col-sm-7 col-xs-8">
+                            <div class="use-voucher col-sm-7 col-xs-8 pull-{{ LANGUAGE_BIDI|yesno:"right, left" }}">
+
                                 <p id="voucher_form_link">
                                     <a href="#voucher">{% trans "Apply a coupon code" as tmsg %}{{ tmsg | force_escape }}</a>
                                 </p>
@@ -122,7 +124,7 @@
                 {% endblock vouchers %}
             {% endif %}
 
-            <div id="basket_totals" class="col-xs-4">
+            <div id="basket_totals" class="col-xs-4 pull-{{ LANGUAGE_BIDI|yesno:"left, right" }}">
                 {% block order_total %}
                     {% trans "Total:" as tmsg %}{{ tmsg | force_escape }}
                     {{ order_total.incl_tax|currency:basket.currency }}
@@ -135,14 +137,14 @@
         <div class="col-sm-12">
             {# Switch Basket view in between single and bulk purchase items #}
             {% if partner_sku %}
-                <div class="pull-left basket-switch-link">
+            <div class="pull-{{ LANGUAGE_BIDI|yesno:"right,left" }} basket-switch-link">
                     <a href="/basket/add/?sku={{ partner_sku }}" class="btn btn-link">
                         {{ switch_link_text }}
                     </a>
                 </div>
             {% endif %}
 
-            <div class="pull-right payment-buttons" data-basket-id="{{ basket.id }}">
+            <div class="pull-{{ LANGUAGE_BIDI|yesno:"left,right" }} payment-buttons" data-basket-id="{{ basket.id }}">
                 {% if free_basket %}
                     <a href="{% url 'checkout:free-checkout' %}"
                        data-track-type="click"
@@ -160,10 +162,13 @@
                                 data-track-checkout-type="hosted"
                                 class="btn payment-button"
                                 id="{{ processor.NAME|lower }}">
-                            {% if processor.TITLE %}
-                                {% blocktrans with title=processor.TITLE %}Checkout with {{ title }}{% endblocktrans %}
-                            {% else %}
+                            {% if processor.NAME == 'cybersource' %}
                                 {% trans "Checkout" as tmsg %}{{ tmsg | force_escape }}
+                            {% elif processor.NAME == 'paypal' %}
+                                {# Translators: Do NOT translate the name PayPal. #}
+                                {% trans "Checkout with PayPal" as tmsg %}{{ tmsg | force_escape }}
+                            {%  else  %}
+                                {{ processor.CHECKOUT_TEXT | force_escape }}
                             {% endif %}
                         </button>
                     {% endfor %}
