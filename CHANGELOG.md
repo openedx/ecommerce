@@ -9,6 +9,10 @@ release.
 
 ## [Unreleased]
 
+### Fixed
+
+- Upgrade requests to v2.26.0 to recognize Let's Encrypt certificate
+
 ## [dogwood.3] - 2020-01-03
 
 ### Added
