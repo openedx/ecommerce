@@ -9,6 +9,8 @@ release.
 
 ## [Unreleased]
 
+## [dogwood.3-2021.10.01] - 2021-10-01
+
 ### Fixed
 
 - Upgrade requests to v2.26.0 to recognize Let's Encrypt certificate
@@ -22,5 +24,6 @@ release.
   [openfun/openedx-ecommerce-docker](https://github.com/openfun/openedx-ecommerce-docker)
   project.
 
-[unreleased]: https://github.com/openfun/ecommerce/compare/dogwood.3...fun/ecommerce-ol
+[unreleased]: https://github.com/openfun/ecommerce/compare/dogwood.3-2021.10.01...fun/ecommerce-ol
+[dogwood.3-2021.10.01]: https://github.com/openfun/ecommerce/compare/dogwood.3...dogwood.3-2021.10.01
 [dogwood.3]: https://github.com/openfun/ecommerce/releases/tag/dogwood.3
