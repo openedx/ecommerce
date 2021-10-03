@@ -7,8 +7,9 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Adem Özgür <admozgur@gmail.com>, 2015
-# Ali Işıngör <ali@artistanbul.io>, 2017-2020
+# Ali Işıngör <ali@artistanbul.io>, 2017-2021
 # ali selek <aliselek01@gmail.com>, 2015
 # Bilal Oğuz marifet <bilalmarifet@gmail.com>, 2016
 # Emrah Emirtekin <eemirtekin@gmail.com>, 2015
@@ -19,9 +20,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
-"PO-Revision-Date: 2020-11-24 09:15+0000\n"
-"Last-Translator: Transifex Bot <>\n"
+"POT-Creation-Date: 2021-10-03 20:13+0000\n"
+"PO-Revision-Date: 2021-09-29 15:44+0000\n"
+"Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -261,7 +262,7 @@ msgstr "Kurumsal Kupon Kodları"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
-msgstr ""
+msgstr "Mahsuplaşma"
 
 #: ecommerce/static/js/pages/receipt_page.js:21
 msgid ""
@@ -376,7 +377,7 @@ msgstr "Önceki"
 #. them.
 #: ecommerce/static/js/views/coupon_list_view.js:112
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
-msgstr ""
+msgstr "_START_ to _END_ of _TOTAL_ kuponları gösteriliyor"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/coupon_list_view.js:115
@@ -469,7 +470,7 @@ msgstr "Bir müşteri tarafından çok kez kullanılabilir"
 
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
 msgid "Create and Add More"
-msgstr ""
+msgstr "Oluştur ve Eklemeye Devam Et"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
@@ -481,7 +482,7 @@ msgstr "Kurumsal Müşteri"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:56
 msgid "Enterprise Customer Catalog"
-msgstr ""
+msgstr "Kurumsal Müşteri Kataloğu"
 
 #: ecommerce/static/js/views/form_view.js:71
 msgid "A course with the specified ID already exists."
