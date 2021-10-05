@@ -5,7 +5,7 @@ from django.core import mail
 from django.test import RequestFactory
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.customer.utils import Dispatcher
+from ecommerce.extensions.communication.utils import Dispatcher
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
