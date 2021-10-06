@@ -18,7 +18,12 @@ from ecommerce.core.models import BusinessClient
 from ecommerce.coupons.utils import prepare_course_seat_types
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
-from ecommerce.extensions.api.serializers import CategorySerializer, CouponListSerializer, CouponSerializer
+from ecommerce.extensions.api.serializers import (
+    CategorySerializer,
+    CouponListSerializer,
+    CouponSerializer,
+    CouponUpdateSerializer
+)
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import (
     attach_or_update_contract_metadata_on_coupon,
@@ -71,6 +76,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return CouponListSerializer
+        if self.action == 'update':
+            return CouponUpdateSerializer
         return CouponSerializer
 
     def create(self, request, *args, **kwargs):
@@ -97,6 +104,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 try:
+                    serializer = self.get_serializer(data=request.data)
+                    serializer.is_valid(raise_exception=True)
                     self.validate_access_for_enterprise(request.data)
                     cleaned_voucher_data = self.clean_voucher_request_data(
                         request.data, request.site.siteconfiguration.partner

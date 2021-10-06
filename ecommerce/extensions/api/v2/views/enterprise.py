@@ -34,9 +34,11 @@ from ecommerce.extensions.api.serializers import (
     CouponCodeRemindSerializer,
     CouponCodeRevokeSerializer,
     CouponSerializer,
+    EnterpriseCouponCreateSerializer,
     EnterpriseCouponListSerializer,
     EnterpriseCouponOverviewListSerializer,
     EnterpriseCouponSearchSerializer,
+    EnterpriseCouponUpdateSerializer,
     NotAssignedCodeUsageSerializer,
     NotRedeemedCodeUsageSerializer,
     OfferAssignmentEmailTemplatesSerializer,
@@ -239,6 +241,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return EnterpriseCouponListSerializer
         if self.action == 'overview':
             return EnterpriseCouponOverviewListSerializer
+        if self.action == 'create':
+            return EnterpriseCouponCreateSerializer
+        if self.action == 'update':
+            return EnterpriseCouponUpdateSerializer
         return CouponSerializer
 
     def validate_access_for_enterprise(self, request_data):

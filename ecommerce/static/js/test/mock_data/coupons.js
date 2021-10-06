@@ -261,7 +261,9 @@ define([], function() {
             enterprise_customer_catalog: 'f9098aab-1842-45c8-81a2-0e53d8e7609a',
             notify_email: 'batman@gotham.comics',
             contract_discount_value: 30,
-            prepaid_invoice_amount: 10000
+            prepaid_invoice_amount: 10000,
+            sales_force_id: '006ABCDE0123456789',
+            invoice_type: 'Not-Applicable'
         },
         couponAPIResponseData = {
             count: 1,

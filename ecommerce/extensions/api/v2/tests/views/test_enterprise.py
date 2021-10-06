@@ -336,6 +336,7 @@ class EnterpriseCouponViewSetRbacTests(
             'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
             'contract_discount_value': '12.35',
             'notify_learners': True,
+            'sales_force_id': '006ABCDE0123456789',
         }
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
@@ -359,6 +360,74 @@ class EnterpriseCouponViewSetRbacTests(
         Helper method to get coupon voucher.
         """
         return coupon.attr.coupon_vouchers.vouchers.first()
+
+    def _test_sales_force_id_on_create_coupon(self, sales_force_id, expected_status_code, expected_error,
+                                              add_sales_forces_id_param=True):
+        """
+        Test sales force id with creating the Enterprise Coupon.
+        """
+        data = {**self.data}
+        del data['sales_force_id']
+        if add_sales_forces_id_param:
+            data['sales_force_id'] = sales_force_id
+        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, data)
+        self.assertEqual(response.status_code, expected_status_code)
+        response = response.json()
+        if expected_status_code == status.HTTP_400_BAD_REQUEST:
+            self.assertEqual(response['sales_force_id'][0], expected_error)
+        else:
+            coupon = Product.objects.get(pk=response['coupon_id'])
+            self.assertEqual(coupon.attr.sales_force_id, sales_force_id)
+
+    def _test_sales_force_id_on_update_coupon(self, sales_force_id, expected_status_code, expected_error):
+        """
+        Test sales force id with updating the Enterprise Coupon.
+        """
+        coupon_response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
+        coupon_response = coupon_response.json()
+        coupon_id = coupon_response['coupon_id']
+        coupon = Product.objects.get(pk=coupon_id)
+
+        response = self.get_response(
+            'PUT',
+            reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon.id}),
+            data={
+                'sales_force_id': sales_force_id
+            }
+        )
+        self.assertEqual(response.status_code, expected_status_code)
+
+        response = response.json()
+        if expected_status_code == status.HTTP_400_BAD_REQUEST:
+            self.assertEqual(response['sales_force_id'][0], expected_error)
+        else:
+            coupon.refresh_from_db()
+            self.assertEqual(coupon.attr.sales_force_id, sales_force_id)
+
+    @ddt.data(
+        ('006abcde0123456789', 200, None),
+        ('006ABCDE0123456789', 200, None),
+        ('none', 200, None),
+        (None, 400, 'This field is required.'),
+        (
+            '006ABCDE012345678123143',
+            400,
+            'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'
+        ),
+        ('006ABCDE01234', 400, 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
+        ('007ABCDE0123456789', 400, 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
+        ('006ABCDE0 12345678', 400, 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
+    )
+    @ddt.unpack
+    def test_sales_force_id(self, sales_force_id, expected_status_code, error_mesg):
+        """
+        Test sales force id.
+        """
+        self._test_sales_force_id_on_create_coupon(sales_force_id, expected_status_code, error_mesg)
+        self._test_sales_force_id_on_update_coupon(sales_force_id, expected_status_code, error_mesg)
+
+    def test_sales_force_id_missing_sales_force_id(self):
+        self._test_sales_force_id_on_create_coupon('', 400, 'This field is required.', add_sales_forces_id_param=False)
 
     def get_coupon_data(self, coupon_title):
         """

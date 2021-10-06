@@ -33,6 +33,10 @@ define([
                     spyOn($, 'ajax');
                     model = EnterpriseCoupon.findOrCreate(enterpriseCouponData, {parse: true});
                 });
+                it('it should validate with valid data', function() {
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+                });
 
                 it('should validate enterprise customer is required', function() {
                     model.set('enterprise_customer', '');
@@ -40,7 +44,7 @@ define([
                     expect(model.isValid()).toBeFalsy();
                 });
 
-                it('should validate enterprise customer is required', function() {
+                it('should validate enterprise customer catalog is required', function() {
                     model.set('enterprise_customer_catalog', '');
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
@@ -48,6 +52,24 @@ define([
 
                 it('should validate notify email is correct', function() {
                     model.set('notify_email', 'batman');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                });
+
+                it('should validate sales_force_id is correct', function() {
+                    model.set('sales_force_id', 'Invalid_ID');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                });
+
+                it('should validate sales_force_id with "none" value', function() {
+                    model.set('sales_force_id', 'none');
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+                });
+
+                it('should validate sales_force_id is required', function() {
+                    model.set('sales_force_id', '');
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
                 });

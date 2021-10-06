@@ -54,6 +54,10 @@ define([
                         return this.get('contract_discount_type') === 'Absolute';
                     },
                     pattern: 'number'
+                },
+                sales_force_id: {
+                    required: true,
+                    pattern: 'sales_force_id'
                 }
             },
 
