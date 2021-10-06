@@ -2,6 +2,7 @@
 
 import botocore
 import mock
+from django.conf import settings
 
 from ecommerce.extensions.api.v2.utils import (
     SMTPException,
@@ -66,7 +67,7 @@ class ViewUtilsTests(TestCase):
             "ETag": '"6299528715bad0e3510d1e4c4952ee7e"',
         }
         if operation_name == 'GetBucketLocation':  # pylint: disable=no-else-return
-            return {'LocationConstraint': 'dummy_location'}
+            return {'LocationConstraint': settings.ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_LOCATION}
         elif operation_name == 'PutObject':
             return put_object_response
         else:
@@ -80,8 +81,10 @@ class ViewUtilsTests(TestCase):
             res = upload_files_for_enterprise_coupons(un_uploaded_files)
             assert res[0]['size'] == un_uploaded_files[0]['size']
             assert res[1]['size'] == un_uploaded_files[1]['size']
-            assert res[0]['url'].startswith('https://.s3.dummy_location.amazonaws.com')
-            assert res[1]['url'].startswith('https://.s3.dummy_location.amazonaws.com')
+            assert res[0]['url'].startswith(
+                f'https://.s3.{settings.ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_LOCATION}.amazonaws.com')
+            assert res[1]['url'].startswith(
+                f'https://.s3.{settings.ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_LOCATION}.amazonaws.com')
             assert res[0]['url'].endswith('abcpng')
             assert res[1]['url'].endswith('defpng')
 
