@@ -67,6 +67,7 @@ def upload_files_for_enterprise_coupons(files):
     if files and len(files) > 0:
         try:
             bucket_name = settings.ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_NAME
+            bucket_location = settings.ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_NAME
             session = boto3.Session()
             s3 = session.client('s3')
 
@@ -76,8 +77,7 @@ def upload_files_for_enterprise_coupons(files):
                 filename = datetime.datetime.now().strftime("%d-%m-%Y at %H.%M.%S") + " " + file['name']
                 key = slugify(filename)
                 s3.upload_fileobj(file_buf, bucket_name, key)
-                location = s3.get_bucket_location(Bucket=bucket_name)['LocationConstraint']
-                url = f"https://{bucket_name}.s3.{location}.amazonaws.com/{key}"
+                url = f"https://{bucket_name}.s3.{bucket_location}.amazonaws.com/{key}"
                 uploaded_files.append({'name': key, 'size': file['size'], 'url': url})
         except Exception as ex:  # pylint: disable=broad-except
             logger.exception(

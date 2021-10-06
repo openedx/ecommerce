@@ -829,4 +829,5 @@ FAVICON_URL = None
 
 # s3 files for email-template, code management credentials
 ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_NAME = ''
+ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_LOCATION = 'us-east-1'  # change this when developing with your own bucket
 
