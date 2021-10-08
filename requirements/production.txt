@@ -212,7 +212,7 @@ edx-drf-extensions==6.6.0
     #   -c requirements/pins.txt
     #   -r requirements/base.in
     #   edx-rbac
-edx-ecommerce-worker==2.3.0
+edx-ecommerce-worker==3.0.0
     # via -r requirements/base.in
 edx-opaque-keys==2.2.2
     # via
@@ -357,9 +357,9 @@ pycparser==2.20
     # via
     #   cffi
     #   cybersource-rest-client-python
-pycryptodome==3.10.4
+pycryptodome==3.11.0
     # via cybersource-rest-client-python
-pycryptodomex==3.10.4
+pycryptodomex==3.11.0
     # via
     #   cybersource-rest-client-python
     #   pyjwkest
