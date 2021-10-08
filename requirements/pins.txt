@@ -55,3 +55,8 @@ social-auth-core<4.0.3
 edx-drf-extensions<7.0.0
 edx-auth-backends<4.0.0
 social-auth-app-django<5.0.0  # version 5.0.0 requires social-auth-core>=4.1.0
+
+# greater version of cryptography has some backward incompatible changes.
+# We are planning django32 upgrade so pinning it to avoid any issue. After upgrade to 32, remove this.
+cryptography==3.4.8
+jsonschema==3.2.0
