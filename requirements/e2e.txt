@@ -16,13 +16,14 @@ cffi==1.14.6
     # via
     #   -c requirements/base.txt
     #   cryptography
-charset-normalizer==2.0.5
+charset-normalizer==2.0.6
     # via
     #   -c requirements/base.txt
     #   requests
 cryptography==3.4.8
     # via
     #   -c requirements/base.txt
+    #   -c requirements/pins.txt
     #   pyjwt
 django==2.2.24
     # via
@@ -52,9 +53,9 @@ idna==2.7
     #   requests
 importlib-metadata==4.8.1
     # via pytest-randomly
-more-itertools==8.9.0
+more-itertools==8.10.0
     # via pytest
-newrelic==6.8.1.164
+newrelic==7.0.0.166
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
@@ -147,7 +148,7 @@ stevedore==3.4.0
     #   edx-django-utils
 tenacity==6.3.1
     # via pytest-selenium
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
@@ -155,5 +156,5 @@ urllib3==1.26.6
     #   selenium
 wcwidth==0.2.5
     # via pytest
-zipp==3.5.0
+zipp==3.6.0
     # via importlib-metadata
