@@ -291,7 +291,7 @@ naked==0.1.31
     # via
     #   crypto
     #   cybersource-rest-client-python
-ndg-httpsclient==0.5.1q
+ndg-httpsclient==0.5.1
     # via -r requirements/base.in
 newrelic==7.0.0.166
     # via
