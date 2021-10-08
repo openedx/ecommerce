@@ -20,10 +20,6 @@ httpretty==0.9.7
 # jsonfield2 > 3.0.3 dropped support for python 3.5
 jsonfield2<=3.0.3
 
-# 5.4 introduces test order problems that need to be resolved.
-pytest<5.4.0
-pytest-django<4.0 # Newer versions require pytest >= 5.4.0
-
 # Pinned to preserve the status quo
 pytz==2016.10
 
@@ -38,8 +34,9 @@ virtualenv==16.7.9
 # removing this pin, then this pin can be removed.
 pylint==2.4.4
 
-# greater versions failing with extract-tranlsations step.
+# greater versions failing with extract-translations step.
 tox==3.14.6
+pluggy<1.0.0  # pluggy==1.0.0 requires tox>3.14.6
 
 # cybersource-rest-client-python requires 2.7, but requests gives 2.10 by default
 idna==2.7
