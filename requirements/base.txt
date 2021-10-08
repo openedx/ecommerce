@@ -259,7 +259,7 @@ jsonfield2==3.0.3
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.in
-jsonschema==4.0.1
+jsonschema==3.2.0
     # via
     #   -c requirements/pins.txt
     #   cybersource-rest-client-python
@@ -473,6 +473,7 @@ six==1.16.0
     #   edx-rbac
     #   fixtures
     #   isodate
+    #   jsonschema
     #   libsass
     #   paypalrestsdk
     #   purl

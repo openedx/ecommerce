@@ -403,7 +403,7 @@ jmespath==0.10.0
     #   botocore
 jsonfield2==3.0.3
     # via -r requirements/test.txt
-jsonschema==4.0.1
+jsonschema==3.2.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -824,6 +824,7 @@ six==1.16.0
     #   fixtures
     #   httpretty
     #   isodate
+    #   jsonschema
     #   libsass
     #   paypalrestsdk
     #   purl
