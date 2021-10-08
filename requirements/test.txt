@@ -290,7 +290,7 @@ edx-drf-extensions==6.6.0
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
     #   edx-rbac
-edx-ecommerce-worker==2.3.0
+edx-ecommerce-worker==3.0.0
     # via -r requirements/base.txt
 edx-i18n-tools==0.8.1
     # via -r requirements/test.in
@@ -556,11 +556,11 @@ pycparser==2.20
     #   -r requirements/e2e.txt
     #   cffi
     #   cybersource-rest-client-python
-pycryptodome==3.10.4
+pycryptodome==3.11.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-pycryptodomex==3.10.4
+pycryptodomex==3.11.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
