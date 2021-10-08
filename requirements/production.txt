@@ -269,7 +269,9 @@ jsonfield2==3.0.3
     #   -c requirements/pins.txt
     #   -r requirements/base.in
 jsonschema==4.0.1
-    # via cybersource-rest-client-python
+    # via
+    #   -c requirements/pins.txt
+    #   cybersource-rest-client-python
 kombu==4.6.11
     # via celery
 libsass==0.9.2

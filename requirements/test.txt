@@ -395,6 +395,7 @@ jsonfield2==3.0.3
     #   -r requirements/base.txt
 jsonschema==4.0.1
     # via
+    #   -c requirements/pins.txt
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
 kombu==4.6.11
