@@ -57,10 +57,11 @@ configparser==5.2.0
 coreapi==2.3.3
     # via
     #   -r requirements/base.in
-    #   django-rest-swagger
-    #   openapi-codec
+    #   drf-yasg
 coreschema==0.0.4
-    # via coreapi
+    # via
+    #   coreapi
+    #   drf-yasg
 coverage==6.2
     # via cybersource-rest-client-python
 crypto==1.4.1
@@ -108,6 +109,7 @@ django==2.2.26
     #   django-treebeard
     #   djangorestframework
     #   drf-jwt
+    #   drf-yasg
     #   edx-auth-backends
     #   edx-django-release-util
     #   edx-django-sites-extensions
@@ -151,8 +153,6 @@ django-oscar==2.2
     #   -r requirements/base.in
 django-phonenumber-field==5.0.0
     # via django-oscar
-django-rest-swagger==2.2.0
-    # via -r requirements/base.in
 django-simple-history==3.0.0
     # via -r requirements/base.in
 django-solo==2.0.0
@@ -174,11 +174,11 @@ djangorestframework==3.13.1
     # via
     #   -r requirements/base.in
     #   django-config-models
-    #   django-rest-swagger
     #   djangorestframework-csv
     #   djangorestframework-datatables
     #   drf-extensions
     #   drf-jwt
+    #   drf-yasg
     #   edx-drf-extensions
     #   rest-condition
 djangorestframework-csv==2.1.1
@@ -189,6 +189,8 @@ drf-extensions==0.7.1
     # via -r requirements/base.in
 drf-jwt==1.19.2
     # via edx-drf-extensions
+drf-yasg==1.20.0
+    # via -r requirements/base.in
 edx-auth-backends==3.4.0
     # via
     #   -c requirements/pins.txt
@@ -244,6 +246,8 @@ idna==2.7
     #   -c requirements/pins.txt
     #   cybersource-rest-client-python
     #   requests
+inflection==0.5.1
+    # via drf-yasg
 ipaddress==1.0.23
     # via cybersource-rest-client-python
 isodate==0.6.1
@@ -304,11 +308,10 @@ oauthlib==3.1.1
     # via
     #   requests-oauthlib
     #   social-auth-core
-openapi-codec==1.3.2
-    # via django-rest-swagger
 packaging==21.3
     # via
     #   bleach
+    #   drf-yasg
     #   redis
 paramiko==2.9.2
     # via cybersource-rest-client-python
@@ -448,6 +451,10 @@ rjsmin==1.2.0
     # via django-compressor
 rsa==4.8
     # via cybersource-rest-client-python
+ruamel.yaml==0.17.21
+    # via drf-yasg
+ruamel.yaml.clib==0.2.6
+    # via ruamel.yaml
 rules==3.1
     # via -r requirements/base.in
 s3transfer==0.5.0
@@ -458,8 +465,6 @@ shellescape==3.8.1
     # via
     #   crypto
     #   cybersource-rest-client-python
-simplejson==3.17.6
-    # via django-rest-swagger
 six==1.16.0
     # via
     #   analytics-python
@@ -523,7 +528,9 @@ unicodecsv==0.14.1
     #   -r requirements/base.in
     #   djangorestframework-csv
 uritemplate==4.1.1
-    # via coreapi
+    # via
+    #   coreapi
+    #   drf-yasg
 urllib3==1.26.8
     # via
     #   -c requirements/pins.txt

@@ -305,7 +305,7 @@ DJANGO_APPS = [
     'crispy_forms',
     'solo',
     'social_django',
-    'rest_framework_swagger',
+    'drf_yasg',
     'rest_framework_datatables',
     'django_sites_extensions',
     # edx-drf-extensions
