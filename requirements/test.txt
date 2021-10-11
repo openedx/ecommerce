@@ -213,7 +213,7 @@ django-model-utils==4.1.1
     # via
     #   -r requirements/base.txt
     #   edx-rbac
-django-oscar==2.0.4
+django-oscar==2.1
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
