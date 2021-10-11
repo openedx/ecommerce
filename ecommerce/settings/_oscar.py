@@ -20,7 +20,7 @@ OSCAR_APPS = [
     'oscar.apps.catalogue.reviews',
     'oscar.apps.search',
     'oscar.apps.wishlists',
-
+    'ecommerce.extensions.communication.apps.CommunicationConfig',
     'ecommerce.extensions',
     'ecommerce.extensions.api',
     'ecommerce.extensions.fulfillment',
