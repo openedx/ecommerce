@@ -47,9 +47,9 @@ bleach==4.1.0
     # via -r requirements/base.txt
 bok-choy==1.1.1
     # via -r requirements/test.in
-boto3==1.18.57
+boto3==1.18.59
     # via -r requirements/base.txt
-botocore==1.21.57
+botocore==1.21.59
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -63,7 +63,7 @@ celery==4.4.7
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
     #   edx-ecommerce-worker
-certifi==2021.5.30
+certifi==2021.10.8
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -82,7 +82,7 @@ chardet==4.0.0
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
     #   diff-cover
-charset-normalizer==2.0.6
+charset-normalizer==2.0.7
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -100,7 +100,7 @@ coreschema==0.0.4
     # via
     #   -r requirements/base.txt
     #   coreapi
-coverage[toml]==6.0.1
+coverage[toml]==6.0.2
     # via
     #   -r requirements/base.txt
     #   -r requirements/test.in
@@ -197,13 +197,13 @@ django-crum==0.7.9
     #   edx-rbac
 django-extensions==3.1.3
     # via -r requirements/base.txt
-django-extra-views==0.11.0
+django-extra-views==0.13.0
     # via
     #   -r requirements/base.txt
     #   django-oscar
 django-filter==21.1
     # via -r requirements/base.txt
-django-haystack==2.8.1
+django-haystack==3.1.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -213,11 +213,9 @@ django-model-utils==4.1.1
     # via
     #   -r requirements/base.txt
     #   edx-rbac
-django-oscar==2.0.4
-    # via
-    #   -c requirements/pins.txt
-    #   -r requirements/base.txt
-django-phonenumber-field==2.0.1
+django-oscar==2.1
+    # via -r requirements/base.txt
+django-phonenumber-field==3.0.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -227,7 +225,7 @@ django-simple-history==3.0.0
     # via -r requirements/base.txt
 django-solo==1.2.0
     # via -r requirements/base.txt
-django-tables2==1.21.2
+django-tables2==2.2.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -320,7 +318,7 @@ factory-boy==2.12.0
     #   -r requirements/base.txt
     #   -r requirements/test.in
     #   django-oscar
-faker==9.2.0
+faker==9.3.1
     # via
     #   -r requirements/base.txt
     #   factory-boy
@@ -482,7 +480,7 @@ packaging==21.0
     #   bleach
     #   pytest
     #   tox
-paramiko==2.7.2
+paramiko==2.8.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
@@ -504,7 +502,6 @@ phonenumbers==8.12.34
     # via
     #   -r requirements/base.txt
     #   django-oscar
-    #   django-phonenumber-field
 pillow==8.3.2
     # via
     #   -r requirements/base.txt
@@ -546,7 +543,7 @@ pyasn1==0.4.8
     #   ndg-httpsclient
     #   rsa
     #   x509
-pycodestyle==2.7.0
+pycodestyle==2.8.0
     # via -r requirements/test.in
 pycountry==17.1.8
     # via -r requirements/base.txt
@@ -655,7 +652,7 @@ pytest-randomly==3.10.1
     # via -r requirements/e2e.txt
 pytest-selenium==2.0.1
     # via -r requirements/e2e.txt
-pytest-timeout==1.4.2
+pytest-timeout==2.0.1
     # via -r requirements/e2e.txt
 pytest-variables==1.9.0
     # via
@@ -669,7 +666,7 @@ python-dateutil==2.8.2
     #   edx-drf-extensions
     #   faker
     #   freezegun
-python-dotenv==0.19.0
+python-dotenv==0.19.1
     # via -r requirements/e2e.txt
 python-memcached==1.58
     # via -r requirements/test.in
@@ -899,7 +896,7 @@ unicodecsv==0.14.1
     # via
     #   -r requirements/base.txt
     #   djangorestframework-csv
-uritemplate==3.0.1
+uritemplate==4.0.0
     # via
     #   -r requirements/base.txt
     #   coreapi

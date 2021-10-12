@@ -13,7 +13,7 @@ django-crispy-forms<1.9.0
 django_extensions
 django-filter
 django-libsass
-django-oscar
+django-oscar==2.1
 django-rest-swagger
 django-simple-history
 django-solo
