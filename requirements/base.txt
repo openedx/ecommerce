@@ -28,9 +28,9 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/base.in
-boto3==1.18.58
+boto3==1.18.61
     # via -r requirements/base.in
-botocore==1.21.58
+botocore==1.21.61
     # via
     #   boto3
     #   s3transfer
@@ -44,7 +44,7 @@ certifi==2021.10.8
     # via
     #   cybersource-rest-client-python
     #   requests
-cffi==1.14.6
+cffi==1.15.0
     # via
     #   bcrypt
     #   cryptography
@@ -52,7 +52,7 @@ cffi==1.14.6
     #   pynacl
 chardet==4.0.0
     # via cybersource-rest-client-python
-charset-normalizer==2.0.6
+charset-normalizer==2.0.7
     # via requests
 configparser==5.0.2
     # via cybersource-rest-client-python
@@ -63,7 +63,7 @@ coreapi==2.3.3
     #   openapi-codec
 coreschema==0.0.4
     # via coreapi
-coverage==6.0.1
+coverage==6.0.2
     # via cybersource-rest-client-python
 crypto==1.4.1
     # via cybersource-rest-client-python
@@ -142,7 +142,7 @@ django-haystack==3.1.1
     # via django-oscar
 django-libsass==0.9
     # via -r requirements/base.in
-django-model-utils==4.1.1
+django-model-utils==4.2.0
     # via edx-rbac
 django-oscar==2.1
     # via
@@ -228,7 +228,7 @@ extras==1.0.0
     #   testtools
 factory-boy==2.12.0
     # via django-oscar
-faker==9.2.0
+faker==9.3.1
     # via factory-boy
 fixtures==3.0.0
     # via
@@ -293,7 +293,7 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.in
-newrelic==7.0.0.166
+newrelic==7.2.1.168
     # via
     #   -r requirements/base.in
     #   edx-django-utils
@@ -319,10 +319,8 @@ pbr==5.6.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.34
-    # via
-    #   django-oscar
-    #   django-phonenumber-field
+phonenumbers==8.12.35
+    # via django-oscar
 pillow==8.3.2
     # via django-oscar
 platformdirs==2.4.0
@@ -406,7 +404,7 @@ pytz==2016.10
     #   datetime
     #   django
     #   zeep
-pyyaml==5.4.1
+pyyaml==6.0
     # via
     #   cybersource-rest-client-python
     #   edx-django-release-util
@@ -521,7 +519,7 @@ unicodecsv==0.14.1
     # via
     #   -r requirements/base.in
     #   djangorestframework-csv
-uritemplate==4.0.0
+uritemplate==4.1.1
     # via coreapi
 urllib3==1.26.7
     # via

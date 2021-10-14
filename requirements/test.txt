@@ -47,9 +47,9 @@ bleach==4.1.0
     # via -r requirements/base.txt
 bok-choy==1.1.1
     # via -r requirements/test.in
-boto3==1.18.58
+boto3==1.18.61
     # via -r requirements/base.txt
-botocore==1.21.58
+botocore==1.21.61
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -69,7 +69,7 @@ certifi==2021.10.8
     #   -r requirements/e2e.txt
     #   cybersource-rest-client-python
     #   requests
-cffi==1.14.6
+cffi==1.15.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -82,7 +82,7 @@ chardet==4.0.0
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
     #   diff-cover
-charset-normalizer==2.0.6
+charset-normalizer==2.0.7
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -100,7 +100,7 @@ coreschema==0.0.4
     # via
     #   -r requirements/base.txt
     #   coreapi
-coverage[toml]==6.0.1
+coverage[toml]==6.0.2
     # via
     #   -r requirements/base.txt
     #   -r requirements/test.in
@@ -208,7 +208,7 @@ django-haystack==3.1.1
     #   django-oscar
 django-libsass==0.9
     # via -r requirements/base.txt
-django-model-utils==4.1.1
+django-model-utils==4.2.0
     # via
     #   -r requirements/base.txt
     #   edx-rbac
@@ -319,7 +319,7 @@ factory-boy==2.12.0
     #   -r requirements/base.txt
     #   -r requirements/test.in
     #   django-oscar
-faker==9.2.0
+faker==9.3.1
     # via
     #   -r requirements/base.txt
     #   factory-boy
@@ -455,7 +455,7 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.txt
-newrelic==7.0.0.166
+newrelic==7.2.1.168
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -499,7 +499,7 @@ pbr==5.6.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.34
+phonenumbers==8.12.35
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -648,7 +648,7 @@ pytest-randomly==3.10.1
     # via -r requirements/e2e.txt
 pytest-selenium==2.0.1
     # via -r requirements/e2e.txt
-pytest-timeout==2.0.0
+pytest-timeout==2.0.1
     # via -r requirements/e2e.txt
 pytest-variables==1.9.0
     # via
@@ -693,7 +693,7 @@ pytz==2016.10
     #   datetime
     #   django
     #   zeep
-pyyaml==5.4.1
+pyyaml==6.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
@@ -764,6 +764,7 @@ s3transfer==0.5.0
     #   boto3
 selenium==3.141.0
     # via
+    #   -c requirements/pins.txt
     #   -r requirements/e2e.txt
     #   -r requirements/test.in
     #   bok-choy
@@ -894,7 +895,7 @@ unicodecsv==0.14.1
     # via
     #   -r requirements/base.txt
     #   djangorestframework-csv
-uritemplate==4.0.0
+uritemplate==4.1.1
     # via
     #   -r requirements/base.txt
     #   coreapi
