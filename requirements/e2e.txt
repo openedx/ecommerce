@@ -8,15 +8,15 @@ attrs==21.2.0
     # via
     #   -c requirements/base.txt
     #   pytest
-certifi==2021.5.30
+certifi==2021.10.8
     # via
     #   -c requirements/base.txt
     #   requests
-cffi==1.14.6
+cffi==1.15.0
     # via
     #   -c requirements/base.txt
     #   cryptography
-charset-normalizer==2.0.6
+charset-normalizer==2.0.7
     # via
     #   -c requirements/base.txt
     #   requests
@@ -55,7 +55,7 @@ importlib-metadata==4.8.1
     # via pytest-randomly
 more-itertools==8.10.0
     # via pytest
-newrelic==7.0.0.166
+newrelic==7.2.1.168
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
@@ -108,11 +108,11 @@ pytest-randomly==3.10.1
     # via -r requirements/e2e.in
 pytest-selenium==2.0.1
     # via -r requirements/e2e.in
-pytest-timeout==1.4.2
+pytest-timeout==2.0.1
     # via -r requirements/e2e.in
 pytest-variables==1.9.0
     # via pytest-selenium
-python-dotenv==0.19.0
+python-dotenv==0.19.1
     # via -r requirements/e2e.in
 pytz==2016.10
     # via
@@ -128,6 +128,7 @@ requests==2.26.0
     #   slumber
 selenium==3.141.0
     # via
+    #   -c requirements/pins.txt
     #   -r requirements/e2e.in
     #   pytest-selenium
 six==1.16.0
