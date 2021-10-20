@@ -56,9 +56,9 @@ bleach==4.1.0
     # via -r requirements/test.txt
 bok-choy==1.1.1
     # via -r requirements/test.txt
-boto3==1.18.57
+boto3==1.18.65
     # via -r requirements/test.txt
-botocore==1.21.57
+botocore==1.21.65
     # via
     #   -r requirements/test.txt
     #   boto3
@@ -71,13 +71,13 @@ celery==4.4.7
     # via
     #   -r requirements/test.txt
     #   edx-ecommerce-worker
-certifi==2021.5.30
+certifi==2021.10.8
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
     #   requests
-cffi==1.14.6
+cffi==1.15.0
     # via
     #   -r requirements/test.txt
     #   bcrypt
@@ -89,7 +89,7 @@ chardet==4.0.0
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
     #   diff-cover
-charset-normalizer==2.0.6
+charset-normalizer==2.0.7
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -107,7 +107,7 @@ coreschema==0.0.4
     # via
     #   -r requirements/test.txt
     #   coreapi
-coverage[toml]==6.0.1
+coverage[toml]==6.0.2
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -201,25 +201,25 @@ django-debug-toolbar==3.2.2
     # via -r requirements/dev.in
 django-extensions==3.1.3
     # via -r requirements/test.txt
-django-extra-views==0.11.0
+django-extra-views==0.13.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
 django-filter==21.1
     # via -r requirements/test.txt
-django-haystack==2.8.1
+django-haystack==3.1.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
 django-libsass==0.9
     # via -r requirements/test.txt
-django-model-utils==4.1.1
+django-model-utils==4.2.0
     # via
     #   -r requirements/test.txt
     #   edx-rbac
-django-oscar==2.0.4
+django-oscar==2.1
     # via -r requirements/test.txt
-django-phonenumber-field==2.0.1
+django-phonenumber-field==3.0.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -229,7 +229,7 @@ django-simple-history==3.0.0
     # via -r requirements/test.txt
 django-solo==1.2.0
     # via -r requirements/test.txt
-django-tables2==1.21.2
+django-tables2==2.2.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -321,11 +321,11 @@ factory-boy==2.12.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
-faker==9.2.0
+faker==9.5.0
     # via
     #   -r requirements/test.txt
     #   factory-boy
-filelock==3.3.0
+filelock==3.3.1
     # via
     #   -r requirements/test.txt
     #   tox
@@ -471,7 +471,7 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/test.txt
-newrelic==7.0.0.166
+newrelic==7.2.2.169
     # via
     #   -r requirements/test.txt
     #   edx-django-utils
@@ -496,7 +496,7 @@ packaging==21.0
     #   pytest
     #   sphinx
     #   tox
-paramiko==2.7.2
+paramiko==2.8.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -515,12 +515,11 @@ pbr==5.6.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.34
+phonenumbers==8.12.35
     # via
     #   -r requirements/test.txt
     #   django-oscar
-    #   django-phonenumber-field
-pillow==8.3.2
+pillow==8.4.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -562,7 +561,7 @@ pyasn1==0.4.8
     #   ndg-httpsclient
     #   rsa
     #   x509
-pycodestyle==2.7.0
+pycodestyle==2.8.0
     # via -r requirements/test.txt
 pycountry==17.1.8
     # via -r requirements/test.txt
@@ -600,7 +599,7 @@ pyjwt[crypto]==1.7.1
     #   social-auth-core
 pylint==2.4.4
     # via -r requirements/test.txt
-pymongo==3.12.0
+pymongo==3.12.1
     # via
     #   -r requirements/test.txt
     #   edx-opaque-keys
@@ -665,7 +664,7 @@ pytest-randomly==3.10.1
     # via -r requirements/test.txt
 pytest-selenium==2.0.1
     # via -r requirements/test.txt
-pytest-timeout==1.4.2
+pytest-timeout==2.0.1
     # via -r requirements/test.txt
 pytest-variables==1.9.0
     # via
@@ -679,7 +678,7 @@ python-dateutil==2.8.2
     #   edx-drf-extensions
     #   faker
     #   freezegun
-python-dotenv==0.19.0
+python-dotenv==0.19.1
     # via -r requirements/test.txt
 python-memcached==1.58
     # via -r requirements/test.txt
@@ -713,7 +712,7 @@ pytz==2016.10
     #   zeep
 pywatchman==1.4.1
     # via -r requirements/dev.in
-pyyaml==5.4.1
+pyyaml==6.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -898,7 +897,7 @@ sqlparse==0.4.2
     #   -r requirements/test.txt
     #   django
     #   django-debug-toolbar
-stevedore==3.4.0
+stevedore==3.5.0
     # via
     #   -r requirements/test.txt
     #   edx-django-utils
@@ -952,7 +951,7 @@ unicodecsv==0.14.1
     # via
     #   -r requirements/test.txt
     #   djangorestframework-csv
-uritemplate==3.0.1
+uritemplate==4.1.1
     # via
     #   -r requirements/test.txt
     #   coreapi
