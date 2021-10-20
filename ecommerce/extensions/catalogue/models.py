@@ -174,6 +174,9 @@ class Category(AbstractCategory):
         db_index=True,
         help_text=_("The ancestors of this category are public"))
 
+    def set_ancestors_are_public(self):
+        pass
+
 
 class Option(AbstractOption):
     # Do not record the code field in the history table because AutoSlugField is not compatible with
