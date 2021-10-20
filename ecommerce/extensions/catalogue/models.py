@@ -160,7 +160,19 @@ class Catalog(models.Model):
 class Category(AbstractCategory):
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
     # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+
     history = CreateSafeHistoricalRecords(excluded_fields=['slug'])
+    is_public = models.BooleanField(
+        _('Is public'),
+        default=True,
+        db_index=True,
+        help_text=_("Show this category in search results and catalogue listings."))
+
+    ancestors_are_public = models.BooleanField(
+        _('Ancestor categories are public'),
+        default=True,
+        db_index=True,
+        help_text=_("The ancestors of this category are public"))
 
 
 class Option(AbstractOption):
