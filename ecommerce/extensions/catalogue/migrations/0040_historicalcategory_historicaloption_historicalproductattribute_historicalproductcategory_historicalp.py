@@ -75,6 +75,8 @@ class Migration(migrations.Migration):
                 ('history_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
                 ('option_group', models.ForeignKey(blank=True, db_constraint=False, help_text='Select an option group if using type "Option" or "Multi Option"', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='catalogue.AttributeOptionGroup', verbose_name='Option Group')),
                 ('product_class', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='catalogue.ProductClass', verbose_name='Product type')),
+                ('is_public', models.BooleanField(default=False, verbose_name='is_public')),
+                ('ancestors_are_public', models.BooleanField(default=False, verbose_name='ancestors_are_public')),
             ],
             options={
                 'ordering': ('-history_date', '-history_id'),
