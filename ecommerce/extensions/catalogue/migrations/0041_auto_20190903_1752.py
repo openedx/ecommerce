@@ -40,12 +40,15 @@ def create_product_class(apps, schema_editor):
     pa1.save()
 
     # Create a category for the journal
-    Category.add_root(
+    c = Category(
         description="All journals",
         slug="journals",
         image="",
-        name="Journals"
+        name="Journals",
+        depth=1,
+        path='0005',
     )
+    c.save()
 
 
 def remove_product_class(apps, schema_editor):
