@@ -23,6 +23,7 @@ OSCAR_APPS = [
 
     'ecommerce.extensions',
     'ecommerce.extensions.api',
+    'ecommerce.extensions.communication.apps.CommunicationConfig',
     'ecommerce.extensions.fulfillment',
     'ecommerce.extensions.refund',
     'ecommerce.extensions.analytics',
