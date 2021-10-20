@@ -53,6 +53,16 @@ class Migration(migrations.Migration):
                 ('image', models.ImageField(upload_to='categories', verbose_name='Image', max_length=255, blank=True, null=True)),
                 ('slug', models.SlugField(max_length=255, editable=False, verbose_name='Slug')),
                 ('full_name', models.CharField(max_length=255, editable=False, db_index=True, verbose_name='Full Name')),
+                ('is_public', models.BooleanField(
+                    db_index=True, default=True,
+                    help_text='Show this category in search results and catalogue listings.',
+                    verbose_name='Is public'),
+                 ),
+                ('ancestors_are_public', models.BooleanField(
+                    db_index=True, default=True,
+                    help_text='Show this category in search results and catalogue listings.',
+                    verbose_name='Is public'),
+                 ),
             ],
             options={
                 'ordering': ['full_name'],
