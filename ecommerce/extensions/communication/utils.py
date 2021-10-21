@@ -20,7 +20,9 @@ class Dispatcher(Dispatcher):
         if messages['subject'] and messages['body']:
             self.send_email_messages(recipient, messages, site)
 
-    def dispatch_order_messages(self, order, messages, event_type=None, site=None, **kwargs):  # pylint: disable=arguments-differ
+    def dispatch_order_messages(self, order, messages, event_type=None, site=None, **kwargs):
+        # pylint: disable=arguments-differ
+        # pylint: pylint: disable=unused-argument
         """
         Dispatch order-related messages to the customer
         """
