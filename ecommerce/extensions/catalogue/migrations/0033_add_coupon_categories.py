@@ -3,10 +3,8 @@
 
 
 from django.db import migrations
-from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from oscar.core.loading import get_model
 
-Category = get_model('catalogue', 'Category')
+from ecommerce.extensions.catalogue.utils import create_subcategories
 
 COUPON_CATEGORY_NAME = 'Coupons'
 
@@ -18,14 +16,16 @@ DEFAULT_CATEGORIES = [
 
 def create_default_categories(apps, schema_editor):
     """Create default coupon categories."""
-    Category.skip_history_when_saving = True
+    Category = apps.get_model("catalogue", "Category")
 
-    for category in DEFAULT_CATEGORIES:
-        create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, category))
+    Category.skip_history_when_saving = True
+    create_subcategories(Category, COUPON_CATEGORY_NAME, DEFAULT_CATEGORIES)
 
 
 def remove_default_categories(apps, schema_editor):
     """Remove default coupon categories."""
+    Category = apps.get_model("catalogue", "Category")
+
     Category.skip_history_when_saving = True
     Category.objects.get(name=COUPON_CATEGORY_NAME).get_children().filter(
         name__in=DEFAULT_CATEGORIES
