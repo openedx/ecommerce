@@ -238,6 +238,9 @@ def get_or_create_catalog(name, partner, stock_record_ids):
 
 
 def _get_next_character(character):
+    """
+    Provides next alphabetic character
+    """
     ascii_code = ord(character)
     # If character is 'Z', then return 'A' and indicate that next character should also be updated
     if ascii_code + 1 > 90:
@@ -249,6 +252,9 @@ def _get_next_character(character):
 
 
 def _get_path_for_next(old_path):
+    """
+    Provides path for the next child
+    """
     path = list(old_path)
     for i in reversed(range(len(path))):
         updated_character, to_update_next = _get_next_character(old_path[i])
@@ -260,7 +266,13 @@ def _get_path_for_next(old_path):
 
 
 def create_subcategories(model, parent_category_name, categories):
-    """Create default coupon categories."""
+    """
+    Create children for parent category. An alternative from create_from_breadcrumbs method of django-oscar
+    as that method can't be used in data migrations. This model requests the model class as a parameter
+    so we can provide an historical version.
+    """
+    if model.__name__ != 'Category':
+        return
     Category = model
     parent_category = Category.objects.get(name=parent_category_name)
     last_path = Category.objects.filter(path__contains=parent_category.path).order_by('-path')[0].path
