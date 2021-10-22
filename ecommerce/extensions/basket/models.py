@@ -1,7 +1,6 @@
 
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 from oscar.apps.basket.abstract_models import AbstractBasket
@@ -16,7 +15,6 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
 
 
-@python_2_unicode_compatible
 class Basket(AbstractBasket):
     site = models.ForeignKey(
         'sites.Site', verbose_name=_("Site"), null=True, blank=True, default=None, on_delete=models.SET_NULL

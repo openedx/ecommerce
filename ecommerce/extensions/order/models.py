@@ -3,7 +3,6 @@
 from config_models.models import ConfigurationModel
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.order.abstract_models import AbstractLine, AbstractOrder, AbstractOrderDiscount, AbstractPaymentEvent
 from simple_history.models import HistoricalRecords
@@ -40,7 +39,6 @@ class PaymentEvent(AbstractPaymentEvent):
     processor_name = models.CharField(_('Payment Processor'), max_length=32, blank=True, null=True)
 
 
-@python_2_unicode_compatible
 class MarkOrdersStatusCompleteConfig(ConfigurationModel):
     """
     Configuration model for `mark_orders_status_complete` management command.
