@@ -12,7 +12,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
-from django.utils.timezone import now
+from django.utils.timezone import is_aware, make_aware, now
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
@@ -775,7 +775,12 @@ class User(AbstractUser):
             verification = response.get('is_verified', False)
             expiration_datetime = response.get('expiration_datetime', False)
             if verification and expiration_datetime:
-                cache_timeout = int((parse(expiration_datetime) - now()).total_seconds())
+                parsed_expiration = parse(expiration_datetime)
+                # REV-2430: we're seeing errors where the expiration_datetime is naive so we're making it
+                # timezone aware here if it's not already
+                if not is_aware(parsed_expiration):
+                    parsed_expiration = make_aware(parsed_expiration)
+                cache_timeout = int((parsed_expiration - now()).total_seconds())
                 TieredCache.set_all_tiers(cache_key, verification, cache_timeout)
             return verification
         except HttpNotFoundError:
