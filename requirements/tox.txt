@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-filelock==3.3.0
+filelock==3.3.1
     # via tox
 packaging==21.0
     # via tox
@@ -12,7 +12,7 @@ pluggy==0.13.1
     # via tox
 py==1.10.0
     # via tox
-pyparsing==2.4.7
+pyparsing==3.0.1
     # via packaging
 six==1.16.0
     # via tox
