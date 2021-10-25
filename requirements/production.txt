@@ -147,10 +147,8 @@ django-libsass==0.9
     # via -r requirements/base.in
 django-model-utils==4.2.0
     # via edx-rbac
-django-oscar==2.1
-    # via
-    #   -c requirements/pins.txt
-    #   -r requirements/base.in
+django-oscar @ git+https://github.com/mzulqarnain1/django-oscar.git@05a8e30b80113758729d5072949ad8462ef33b0d
+    # via -r requirements/base.in
 django-phonenumber-field==3.0.1
     # via django-oscar
 django-rest-swagger==2.2.0
@@ -161,7 +159,7 @@ django-simple-history==3.0.0
     # via -r requirements/base.in
 django-solo==1.2.0
     # via -r requirements/base.in
-django-tables2==2.2.1
+django-tables2==2.4.1
     # via django-oscar
 django-threadlocals==0.10
     # via -r requirements/base.in

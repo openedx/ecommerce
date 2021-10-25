@@ -13,7 +13,7 @@ django-crispy-forms<1.9.0
 django_extensions
 django-filter
 django-libsass
-django-oscar
+git+https://github.com/mzulqarnain1/django-oscar.git@05a8e30b80113758729d5072949ad8462ef33b0d#egg=django-oscar
 django-rest-swagger
 django-simple-history
 django-solo

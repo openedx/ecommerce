@@ -213,10 +213,8 @@ django-model-utils==4.2.0
     # via
     #   -r requirements/base.txt
     #   edx-rbac
-django-oscar==2.1
-    # via
-    #   -c requirements/pins.txt
-    #   -r requirements/base.txt
+django-oscar @ git+https://github.com/mzulqarnain1/django-oscar.git@05a8e30b80113758729d5072949ad8462ef33b0d
+    # via -r requirements/base.txt
 django-phonenumber-field==3.0.1
     # via
     #   -r requirements/base.txt
@@ -227,7 +225,7 @@ django-simple-history==3.0.0
     # via -r requirements/base.txt
 django-solo==1.2.0
     # via -r requirements/base.txt
-django-tables2==2.2.1
+django-tables2==2.4.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
