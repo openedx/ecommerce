@@ -21,8 +21,7 @@ class Dispatcher(Dispatcher):
             self.send_email_messages(recipient, messages, site)
 
     def dispatch_order_messages(self, order, messages, event_type=None, site=None, **kwargs):
-        # pylint: disable=arguments-differ
-        # pylint: pylint: disable=unused-argument
+        # pylint: disable=arguments-differ,unused-argument
         """
         Dispatch order-related messages to the customer
         """
