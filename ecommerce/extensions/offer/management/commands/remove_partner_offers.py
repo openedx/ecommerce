@@ -46,7 +46,10 @@ class Command(BaseCommand):
         catalogs = Catalog.objects.filter(partner__short_code__iexact=partner_code)
         ranges = Range.objects.filter(catalog__in=catalogs).distinct()
         benefits = Benefit.objects.filter(range__in=ranges).distinct()
-        conditional_offers = ConditionalOffer.objects.filter(benefit__in=benefits).distinct()
+        conditional_ids = ConditionalOffer.objects.filter(benefit__in=benefits).distinct().values_list('id', flat=True)
+
+        # distinct query with delete is not working in django32.
+        conditional_offers = ConditionalOffer.objects.filter(id__in=conditional_ids)
 
         count = len(conditional_offers)
         if count == 0:
