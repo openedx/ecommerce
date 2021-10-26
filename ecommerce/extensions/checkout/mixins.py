@@ -281,7 +281,6 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
 
         return order
 
-
     def handle_post_order(self, order):
         """
         Handle extra processing of order after its placed.

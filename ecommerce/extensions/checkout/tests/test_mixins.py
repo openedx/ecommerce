@@ -383,7 +383,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         with self.assertRaises(BasketNotFreeError):
             EdxOrderPlacementMixin().place_free_order(basket)
 
-
     def test_valid_payment_segment_logging(self, mock_track):
         """
         Verify the "Payment Info Entered" Segment event is fired after payment info is validated
