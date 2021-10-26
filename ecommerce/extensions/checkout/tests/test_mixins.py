@@ -5,8 +5,6 @@ Tests for the ecommerce.extensions.checkout.mixins module.
 
 import ddt
 import mock
-from django.core import mail
-from django.test import RequestFactory
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory, ProductFactory
 from testfixtures import LogCapture
@@ -40,7 +38,7 @@ from ecommerce.extensions.test.factories import (
     create_order
 )
 from ecommerce.invoice.models import Invoice
-from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TransactionTestCase
 
