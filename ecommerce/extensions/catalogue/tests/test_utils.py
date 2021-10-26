@@ -10,8 +10,12 @@ from oscar.core.loading import get_model
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
-from ecommerce.extensions.catalogue.utils import create_coupon_product, generate_sku, get_or_create_catalog, \
-    create_subcategories
+from ecommerce.extensions.catalogue.utils import (
+    create_coupon_product,
+    create_subcategories,
+    generate_sku,
+    get_or_create_catalog
+)
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
