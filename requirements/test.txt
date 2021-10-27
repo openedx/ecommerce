@@ -359,6 +359,10 @@ importlib-metadata==4.8.1
     #   pytest-randomly
 inflect==5.3.0
     # via jinja2-pluralize
+iniconfig==1.1.1
+    # via
+    #   -r requirements/e2e.txt
+    #   pytest
 ipaddress==1.0.23
     # via
     #   -r requirements/base.txt
@@ -442,10 +446,6 @@ monotonic==1.6
     # via
     #   -r requirements/base.txt
     #   analytics-python
-more-itertools==8.10.0
-    # via
-    #   -r requirements/e2e.txt
-    #   pytest
 mysqlclient==1.4.6
     # via -r requirements/base.txt
 naked==0.1.31
@@ -514,6 +514,7 @@ platformdirs==2.4.0
     #   zeep
 pluggy==0.13.1
     # via
+    #   -c requirements/pins.txt
     #   -r requirements/e2e.txt
     #   -r requirements/tox.txt
     #   diff-cover
@@ -614,9 +615,8 @@ pyrsistent==0.18.0
     # via
     #   -r requirements/base.txt
     #   jsonschema
-pytest==5.3.5
+pytest==6.2.5
     # via
-    #   -c requirements/pins.txt
     #   -r requirements/e2e.txt
     #   -r requirements/test.in
     #   pytest-base-url
@@ -634,9 +634,8 @@ pytest-base-url==1.4.2
     #   pytest-selenium
 pytest-cov==3.0.0
     # via -r requirements/test.in
-pytest-django==3.10.0
+pytest-django==4.4.0
     # via
-    #   -c requirements/pins.txt
     #   -r requirements/test.in
 pytest-html==3.1.1
     # via
@@ -871,7 +870,9 @@ text-unidecode==1.3
     #   faker
 toml==0.10.2
     # via
+    #   -r requirements/e2e.txt
     #   -r requirements/tox.txt
+    #   pytest
     #   tox
 tomli==1.2.1
     # via coverage
@@ -920,10 +921,6 @@ virtualenv==16.7.9
     #   tox
 waitress==2.0.0
     # via webtest
-wcwidth==0.2.5
-    # via
-    #   -r requirements/e2e.txt
-    #   pytest
 webencodings==0.5.1
     # via
     #   -r requirements/base.txt
