@@ -8,7 +8,7 @@ attrs==21.2.0
     # via
     #   -c requirements/base.txt
     #   pytest
-certifi==2021.5.30
+certifi==2021.10.8
     # via
     #   -c requirements/base.txt
     #   requests
@@ -108,11 +108,11 @@ pytest-randomly==3.10.1
     # via -r requirements/e2e.in
 pytest-selenium==2.0.1
     # via -r requirements/e2e.in
-pytest-timeout==1.4.2
+pytest-timeout==2.0.0
     # via -r requirements/e2e.in
 pytest-variables==1.9.0
     # via pytest-selenium
-python-dotenv==0.19.0
+python-dotenv==0.19.1
     # via -r requirements/e2e.in
 pytz==2016.10
     # via
