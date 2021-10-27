@@ -53,7 +53,7 @@ idna==2.7
     #   requests
 importlib-metadata==4.8.1
     # via pytest-randomly
-more-itertools==8.10.0
+iniconfig==1.1.1
     # via pytest
 newrelic==7.0.0.166
     # via
@@ -68,7 +68,9 @@ pbr==5.6.0
     #   -c requirements/base.txt
     #   stevedore
 pluggy==0.13.1
-    # via pytest
+    # via
+    #   -c requirements/pins.txt
+    #   pytest
 psutil==5.8.0
     # via
     #   -c requirements/base.txt
@@ -87,9 +89,8 @@ pyparsing==2.4.7
     # via
     #   -c requirements/base.txt
     #   packaging
-pytest==5.3.5
+pytest==6.2.5
     # via
-    #   -c requirements/pins.txt
     #   -r requirements/e2e.in
     #   pytest-base-url
     #   pytest-html
@@ -148,13 +149,13 @@ stevedore==3.4.0
     #   edx-django-utils
 tenacity==6.3.1
     # via pytest-selenium
+toml==0.10.2
+    # via pytest
 urllib3==1.26.7
     # via
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   requests
     #   selenium
-wcwidth==0.2.5
-    # via pytest
 zipp==3.6.0
     # via importlib-metadata
