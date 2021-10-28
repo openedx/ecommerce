@@ -114,6 +114,11 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
         for category in test_categories:
             assert parent.get_children().filter(name=category).count() == 1
 
+    def test_create_subcategories_no_category(self):
+        """Verify that create_subcategories returns gracefully when model isn't Category"""
+        test_categories = ['Test 1', 'Test 2', 'Test 3']
+        create_subcategories(Product, COUPON_CATEGORY_NAME, test_categories)
+
 
 class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
