@@ -10,11 +10,11 @@ from ecommerce.core.constants import (
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.catalogue.utils import create_subcategories
 from ecommerce.extensions.checkout.signals import BUNDLE
 from ecommerce.core.constants import ORDER_MANAGER_ROLE
 from ecommerce.core.constants import DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME
 from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE
-from oscar.apps.catalogue.categories import create_from_breadcrumbs
 
 
 COUPON_CATEGORY_NAME = 'Coupons'
@@ -316,6 +316,5 @@ def django_db_setup(django_db_setup, django_db_blocker, django_db_use_migrations
 
         EcommerceFeatureRole.objects.get_or_create(name=ENTERPRISE_COUPON_ADMIN_ROLE)
 
-        for category in DEFAULT_CATEGORIES:
-            create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, category))
+        create_subcategories(Category, COUPON_CATEGORY_NAME, DEFAULT_CATEGORIES)
 

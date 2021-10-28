@@ -3,10 +3,8 @@
 
 
 from django.db import migrations
-from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from oscar.core.loading import get_model
 
-Category = get_model('catalogue', 'Category')
+from ecommerce.extensions.catalogue.utils import create_subcategories
 
 COUPON_CATEGORY_NAME = 'Coupons'
 
@@ -17,13 +15,16 @@ RAP_CATEGORIES = [
 
 def create_rap_categories(apps, schema_editor):
     """Create rap coupon categories."""
+    Category = apps.get_model("catalogue", "Category")
+
     Category.skip_history_when_saving = True
-    for category in RAP_CATEGORIES:
-        create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, category))
+    create_subcategories(Category, COUPON_CATEGORY_NAME, RAP_CATEGORIES)
 
 
 def remove_rap_categories(apps, schema_editor):
     """Remove rap coupon categories."""
+    Category = apps.get_model("catalogue", "Category")
+
     Category.skip_history_when_saving = True
     Category.objects.get(name=COUPON_CATEGORY_NAME).get_children().filter(
         name__in=RAP_CATEGORIES

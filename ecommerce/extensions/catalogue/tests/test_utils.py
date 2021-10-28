@@ -10,17 +10,24 @@ from oscar.core.loading import get_model
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
-from ecommerce.extensions.catalogue.utils import create_coupon_product, generate_sku, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import (
+    create_coupon_product,
+    create_subcategories,
+    generate_sku,
+    get_or_create_catalog
+)
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
 COURSE_ID = 'sku/test_course/course'
+COUPON_CATEGORY_NAME = 'Coupons'
 
 
 @ddt.ddt
@@ -85,6 +92,32 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
         self.assertTrue(created)
         self.assertNotEqual(self.catalog, new_catalog)
         self.assertEqual(Catalog.objects.count(), 2)
+
+    def test_create_subcategories(self):
+        """Verify that create_subcategories method is working as per expectations."""
+        parent = Category.objects.get(name=COUPON_CATEGORY_NAME)
+        existing_children = parent.get_children_count()
+        test_categories = ['Test 1', 'Test 2', 'Test 3']
+
+        for category in test_categories:
+            assert parent.get_children().filter(name=category).count() == 0
+
+        create_subcategories(Category, COUPON_CATEGORY_NAME, test_categories)
+
+        # Get latest state of parent object from database
+        parent.refresh_from_db()
+        # Check that number of children for parent is updated after creating subcategories
+        assert parent.get_children_count() == existing_children + len(test_categories), \
+            "Number of children for parent object isn't updated"
+
+        # Now as we created the sub categories, filter should return that
+        for category in test_categories:
+            assert parent.get_children().filter(name=category).count() == 1
+
+    def test_create_subcategories_no_category(self):
+        """Verify that create_subcategories returns gracefully when model isn't Category"""
+        test_categories = ['Test 1', 'Test 2', 'Test 3']
+        create_subcategories(Product, COUPON_CATEGORY_NAME, test_categories)
 
 
 class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
