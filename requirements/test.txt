@@ -172,7 +172,6 @@ diff-cover==6.4.2
     #   edx-rbac
     #   jsonfield2
     #   mock-django
-    #   pytest-django-ordering
     #   rest-condition
     #   xss-utils
 django-appconf==1.0.5
@@ -623,7 +622,6 @@ pytest==5.3.5
     #   pytest-base-url
     #   pytest-cov
     #   pytest-django
-    #   pytest-django-ordering
     #   pytest-html
     #   pytest-metadata
     #   pytest-randomly
@@ -640,9 +638,6 @@ pytest-django==3.10.0
     # via
     #   -c requirements/pins.txt
     #   -r requirements/test.in
-    #   pytest-django-ordering
-pytest-django-ordering==1.2.0
-    # via -r requirements/test.in
 pytest-html==3.1.1
     # via
     #   -r requirements/e2e.txt
