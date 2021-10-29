@@ -57,3 +57,6 @@ social-auth-app-django<5.0.0  # version 5.0.0 requires social-auth-core>=4.1.0
 # We are planning django32 upgrade so pinning it to avoid any issue. After upgrade to 32, remove this.
 cryptography==3.4.8
 jsonschema==3.2.0
+
+# bok-choy 1.1.1 requires <4 (can remove once we have a version without that requirement)
+selenium<4.0.0
