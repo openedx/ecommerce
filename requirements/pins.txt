@@ -11,7 +11,7 @@
 # Tests failing in test_cybersouce.py on version 0.0.23
 cybersource-rest-client-python==0.0.21
 
-# Newer version introduces `No installed app with label 'communication'.`
+# Newer version introduces `No installed app with label 'communication'.` @TODO: update this note for 2.1
 django-oscar==2.1
 
 # causing tests failures

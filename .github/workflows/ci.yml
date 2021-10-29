@@ -10,6 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false # DKTEMP, remove after build checks pass
       matrix:
         include:
           - django-env: django22
