@@ -145,7 +145,11 @@ defusedxml==0.7.1
     #   -r requirements/test.txt
     #   python3-openid
     #   social-auth-core
+<<<<<<< HEAD
 diff-cover==6.4.2
+=======
+diff-cover==6.4.0
+>>>>>>> 93d0ab5ebde2513929738078af64cc725ad5fd24
     # via -r requirements/test.txt
 django==2.2.24
     # via
@@ -461,6 +465,13 @@ monotonic==1.6
     # via
     #   -r requirements/test.txt
     #   analytics-python
+<<<<<<< HEAD
+=======
+more-itertools==8.10.0
+    # via
+    #   -r requirements/test.txt
+    #   pytest
+>>>>>>> 93d0ab5ebde2513929738078af64cc725ad5fd24
 mysqlclient==1.4.6
     # via -r requirements/test.txt
 naked==0.1.31
@@ -470,7 +481,11 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/test.txt
+<<<<<<< HEAD
 newrelic==7.0.0.166
+=======
+newrelic==6.10.0.165
+>>>>>>> 93d0ab5ebde2513929738078af64cc725ad5fd24
     # via
     #   -r requirements/test.txt
     #   edx-django-utils
