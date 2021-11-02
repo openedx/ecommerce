@@ -28,9 +28,9 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/base.in
-boto3==1.19.6
+boto3==1.19.8
     # via -r requirements/base.in
-botocore==1.22.6
+botocore==1.22.8
     # via
     #   boto3
     #   s3transfer
@@ -63,7 +63,7 @@ coreapi==2.3.3
     #   openapi-codec
 coreschema==0.0.4
     # via coreapi
-coverage==6.0.2
+coverage==6.1.1
     # via cybersource-rest-client-python
 crypto==1.4.1
     # via cybersource-rest-client-python
