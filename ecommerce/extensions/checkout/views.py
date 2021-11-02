@@ -2,6 +2,7 @@
 
 
 import logging
+import waffle
 from decimal import Decimal
 
 from django.conf import settings
@@ -26,6 +27,7 @@ from ecommerce.core.url_utils import (
 )
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.utils import has_enterprise_offer
+from ecommerce.extensions.checkout.constants import DISABLE_VERIFICATION
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -188,8 +190,11 @@ class ReceiptResponseView(ThankYouView):
             'display_credit_messaging': self.order_contains_credit_seat(order),
         })
         context.update(self.get_order_dashboard_context(order))
-        context.update(self.get_order_verification_context(order))
-        context.update(self.get_show_verification_banner_context(context))
+
+        if waffle.switch_is_active(DISABLE_VERIFICATION):
+            context.update(self.get_order_verification_context(order))
+            context.update(self.get_show_verification_banner_context(context))
+
         context.update({
             'explore_courses_url': get_lms_explore_courses_url(),
             'has_enrollment_code_product': has_enrollment_code_product,

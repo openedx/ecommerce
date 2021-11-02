@@ -61,6 +61,7 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
+from ecommerce.extensions.checkout.constants import DISABLE_VERIFICATION
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request
 from ecommerce.extensions.offer.utils import (
@@ -382,6 +383,7 @@ class BasketLogicMixin:
     @newrelic.agent.function_trace()
     def _is_id_verification_required(self, product):
         return (
+            not waffle.switch_is_active(DISABLE_VERIFICATION) and
             getattr(product.attr, 'id_verification_required', False) and
             product.attr.certificate_type != 'credit'
         )
