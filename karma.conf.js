@@ -24,6 +24,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
 	files: [
+      'node_modules/jquery/dist/jquery.min.js',
 	  'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
       {pattern: 'ecommerce/static/bower_components/**/*.js', included: false},
       {pattern: 'ecommerce/static/js/**/*.js', included: false},
@@ -43,7 +44,6 @@ module.exports = function(config) {
 
     // enabled plugins
     plugins:[
-       'karma-jquery',
        'karma-jasmine',
        'karma-requirejs',
        'karma-firefox-launcher',
