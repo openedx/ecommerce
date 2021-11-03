@@ -176,13 +176,8 @@
         <div class="col-sm-12">
             <span><i class="fa fa-exclamation-circle"></i></span>
             {# Translators: <strong></strong> tags will bold the text within. Keep the tags and translate the text within. #}
-            {% if display_verification_message %}
-                {% trans "{strong_start}Note:{strong_end} To earn a verified certificate, you must verify your identity with a {strong_start}webcam{strong_end} and a {strong_start}government-issued photo ID{strong_end}. " as tmsg %}
-                {% interpolate_html tmsg strong_start='<strong>'|safe strong_end='</strong>'|safe %}
-            {% else %}
-                {% trans "{strong_start}Note:{strong_end} To complete your enrollment, select Checkout or Checkout with PayPal." as tmsg %}
-                {% interpolate_html tmsg strong_start='<strong>'|safe strong_end='</strong>'|safe %}
-            {% endif %}
+            {% trans "{strong_start}Note:{strong_end} To complete your enrollment, select Checkout or Checkout with PayPal." as tmsg %}
+            {% interpolate_html tmsg strong_start='<strong>'|safe strong_end='</strong>'|safe %}
         </div>
     </div>
     <div class="row help">

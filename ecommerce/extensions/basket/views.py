@@ -61,7 +61,6 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
-from ecommerce.extensions.checkout.constants import DISABLE_VERIFICATION
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request
 from ecommerce.extensions.offer.utils import (
@@ -99,7 +98,6 @@ class BasketLogicMixin:
         """
         Processes the basket lines and extracts information for the view's context.
         In addition determines whether:
-            * verification message should be displayed
             * voucher form should be displayed
             * switch link (for switching between seat and enrollment code products) should be displayed
         and returns that information for the basket view context to be updated with it.
@@ -112,7 +110,6 @@ class BasketLogicMixin:
             lines_data (list): List of information about the basket lines.
         """
         context_updates = {
-            'display_verification_message': False,
             'order_details_msg': None,
             'partner_sku': None,
             'switch_link_text': None,
@@ -125,11 +122,6 @@ class BasketLogicMixin:
             product = line.product
             if product.is_seat_product or product.is_course_entitlement_product:
                 line_data, _ = self._get_course_data(product)
-
-                # TODO this is only used by hosted_checkout_basket template, which may no longer be
-                # used. Consider removing both.
-                if self._is_id_verification_required(product):
-                    context_updates['display_verification_message'] = True
             elif product.is_enrollment_code_product:
                 line_data, course = self._get_course_data(product)
                 self._set_single_enrollment_code_warning_if_needed(product, course)
@@ -379,14 +371,6 @@ class BasketLogicMixin:
                 extra_tags='safe ' + message_code
             )
             message_utils.add_message_data(message_code, 'course_about_url', course_about_url)
-
-    @newrelic.agent.function_trace()
-    def _is_id_verification_required(self, product):
-        return (
-            not waffle.switch_is_active(DISABLE_VERIFICATION) and
-            getattr(product.attr, 'id_verification_required', False) and
-            product.attr.certificate_type != 'credit'
-        )
 
     @newrelic.agent.function_trace()
     def _get_benefit_value(self, line):

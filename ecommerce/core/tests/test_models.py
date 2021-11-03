@@ -1,7 +1,6 @@
 
 
 import json
-from urllib.parse import quote
 
 import ddt
 import httpretty
@@ -203,46 +202,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         user, course_key = self.prepare_credit_eligibility_info(eligible=False)
         self.assertFalse(user.is_eligible_for_credit(course_key, site_config))
 
-    @ddt.data(
-        (200, True),
-        (200, True, None),
-        (200, False),
-        (404, False)
-    )
-    @ddt.unpack
-    def test_user_verification_status(self, status_code, is_verified,
-                                      expiration=LmsApiMockMixin.get_default_expiration):
-        """ Verify the method returns correct response. """
-        if callable(expiration):
-            expiration = expiration()
-        user = self.create_user()
-        self.mock_verification_status_api(self.site, user, status=status_code, is_verified=is_verified,
-                                          expiration=expiration)
-        self.assertEqual(user.is_verified(self.site), is_verified)
-
-    def test_user_verification_connection_error(self):
-        """ Verify verification status exception is raised for connection issues. """
-        user = self.create_user()
-        self.assertFalse(user.is_verified(self.site))
-
-    def test_user_verification_status_cache(self):
-        """ Verify the user verification status values are cached. """
-        user = self.create_user()
-        self.mock_verification_status_api(self.site, user)
-        self.assertTrue(user.is_verified(self.site))
-
-        httpretty.disable()
-        self.assertTrue(user.is_verified(self.site))
-
-    def test_user_verification_status_not_cached(self):
-        """ Verify the user verification status values is not cached when user is not verified. """
-        user = self.create_user()
-        self.mock_verification_status_api(self.site, user, is_verified=False)
-        self.assertFalse(user.is_verified(self.site))
-
-        httpretty.disable()
-        self.assertFalse(user.is_verified(self.site))
-
     def test_deactivation(self):
         """Verify the deactivation endpoint is called for the user."""
         user = self.create_user()
@@ -443,46 +402,6 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(client_store['base_url'], self.site_configuration.enrollment_api_url)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
-
-    @ddt.data(None, 'test_course_id')
-    def test_IDVerification_workflow_url_not_configured(self, course_id):
-        self.assertEqual(self.site.siteconfiguration.account_microfrontend_url, None)
-        expected = self.site.siteconfiguration.build_lms_url('verify_student/reverify')
-        self.assertEqual(
-            self.site.siteconfiguration.IDVerification_workflow_url(course_id),
-            expected
-        )
-
-    def _validate_IDVerification_workflow_url(self, site_config, account_url, course_id):
-        expected = None
-        if course_id:
-            expected = account_url + '/id-verification?course_id={}'.format(quote(str(course_id)))
-        else:
-            expected = account_url + '/id-verification'
-        self.assertEqual(
-            site_config.IDVerification_workflow_url(course_id),
-            expected
-        )
-
-    @ddt.data(None, 'course-v1:edX+DemoX+Demo_Course')
-    def test_IDVerification_workflow_url_configured(self, course_id):
-        account_url = 'https://account.edx.org'
-        site_config = SiteConfigurationFactory(
-            account_microfrontend_url=account_url
-        )
-        self.assertEqual(site_config.account_microfrontend_url, account_url)
-        self._validate_IDVerification_workflow_url(site_config, account_url, course_id)
-
-    @ddt.data(None, 'course-v1:edX+DemoX+Demo_Course')
-    @override_settings(ACCOUNT_MICROFRONTEND_URL='https://test.edx.org')
-    def test_IDVerification_workflow_url_settings_configured(self, course_id):
-        account_url = 'https://test.edx.org'
-        self.assertEqual(self.site.siteconfiguration.account_microfrontend_url, None)
-        self._validate_IDVerification_workflow_url(
-            self.site.siteconfiguration,
-            account_url,
-            course_id
-        )
 
 
 class EcommerceFeatureRoleTests(TestCase):

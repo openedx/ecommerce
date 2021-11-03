@@ -195,18 +195,11 @@
         {% endif %}
       </div>
 
-      {% if not has_enrollment_code_product and show_verification_banner  %}
-        <div class="nav-wizard row">
-            {% include 'oscar/checkout/_verification_data.html' %}
-        </div>
-      {% endif %}
       <div id="cta-nav-links" class="row">
         <div class="col-xs-12 text-right">
-          {% if not show_verification_banner %}
           <a class="dashboard-link nav-link" href="{{ order_dashboard_url }}">
             {% trans "Go to dashboard" as tmsg %}{{ tmsg | force_escape }}
           </a>
-          {% endif %}
           <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}">
             {% trans "Find more courses" as tmsg %}{{ tmsg | force_escape }}
           </a>

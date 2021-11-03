@@ -4,7 +4,6 @@
 import logging
 from decimal import Decimal
 
-import waffle
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -27,7 +26,6 @@ from ecommerce.core.url_utils import (
 )
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.utils import has_enterprise_offer
-from ecommerce.extensions.checkout.constants import DISABLE_VERIFICATION
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -190,11 +188,6 @@ class ReceiptResponseView(ThankYouView):
             'display_credit_messaging': self.order_contains_credit_seat(order),
         })
         context.update(self.get_order_dashboard_context(order))
-
-        if waffle.switch_is_active(DISABLE_VERIFICATION):
-            context.update(self.get_order_verification_context(order))
-            context.update(self.get_show_verification_banner_context(context))
-
         context.update({
             'explore_courses_url': get_lms_explore_courses_url(),
             'has_enrollment_code_product': has_enrollment_code_product,
@@ -258,38 +251,6 @@ class ReceiptResponseView(ThankYouView):
         else:
             order_dashboard_url = get_lms_dashboard_url()
         return {'order_dashboard_url': order_dashboard_url}
-
-    def get_order_verification_context(self, order):
-        context = {}
-        request = self.request
-        site = request.site
-
-        # NOTE: Only display verification and credit completion details to the user who actually placed the order.
-        if request.user != order.user:
-            return context
-
-        for line in order.lines.all():
-            product = line.product
-            id_verification_required = getattr(product.attr, 'id_verification_required', False)
-            course_key = getattr(product.attr, 'course_key', '')
-            product_uuid = getattr(product.attr, 'UUID', False)
-            if (id_verification_required and (course_key or product_uuid)):
-                context.update({
-                    'verification_url': site.siteconfiguration.IDVerification_workflow_url(course_key),
-                    'user_verified': request.user.is_verified(site),
-                })
-                return context
-
-        return context
-
-    def get_show_verification_banner_context(self, original_context):
-        context = {}
-        verification_url = original_context.get('verification_url')
-        user_verified = original_context.get('user_verified')
-        context.update({
-            'show_verification_banner': verification_url and not user_verified
-        })
-        return context
 
     def add_message_if_enterprise_user(self, request):
         try:
