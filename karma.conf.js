@@ -19,11 +19,12 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jquery-3.2.1', 'jasmine', 'requirejs', 'sinon'],
+    frameworks: ['jasmine', 'requirejs', 'sinon'],
 
 
     // list of files / patterns to load in the browser
 	files: [
+      'node_modules/jquery/dist/jquery.min.js',
 	  'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
       {pattern: 'ecommerce/static/bower_components/**/*.js', included: false},
       {pattern: 'ecommerce/static/js/**/*.js', included: false},
@@ -43,7 +44,6 @@ module.exports = function(config) {
 
     // enabled plugins
     plugins:[
-       'karma-jquery',
        'karma-jasmine',
        'karma-requirejs',
        'karma-firefox-launcher',
