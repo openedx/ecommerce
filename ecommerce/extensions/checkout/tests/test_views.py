@@ -11,10 +11,12 @@ from mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_program_dashboard_url
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
+from ecommerce.extensions.checkout.constants import DISABLE_VERIFICATION
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.checkout.views import ReceiptResponseView
@@ -315,6 +317,24 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
             'payment_method': None,
             'display_credit_messaging': False,
             'verification_url': self.site.siteconfiguration.IDVerification_workflow_url(self.course.id),
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset(context_data, response.context_data)
+
+    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @httpretty.activate
+    def test_get_receipt_verification_disabled(self, mock_learner_data):
+        """ The Receipt Page should not show verification banner if disabled flag is true."""
+        toggle_switch(DISABLE_VERIFICATION, True)
+        mock_learner_data.return_value = self.non_enterprise_learner_data
+        order = self._create_order_for_receipt(self.user)
+        response = self._get_receipt_response(order.number)
+        context_data = {
+            'payment_method': None,
+            'display_credit_messaging': False,
+            'show_verification_banner': False,
+            'verification_url': None,
         }
 
         self.assertEqual(response.status_code, 200)
