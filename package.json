@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "bower": "1.8.8",
+    "jquery": "^3.2.1",
     "requirejs": "2.3.3"
   },
   "devDependencies": {
@@ -24,7 +25,6 @@
     "karma-coverage-allsources": "0.0.4",
     "karma-firefox-launcher": "1.2.0",
     "karma-jasmine": "1.1.0",
-    "karma-jquery": "0.2.2",
     "karma-requirejs": "1.1.0",
     "karma-selenium-webdriver-launcher": "0.0.4",
     "karma-sinon": "1.0.5",
