@@ -28,9 +28,9 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/base.in
-boto3==1.19.6
+boto3==1.19.10
     # via -r requirements/base.in
-botocore==1.22.6
+botocore==1.22.10
     # via
     #   boto3
     #   s3transfer
@@ -63,7 +63,7 @@ coreapi==2.3.3
     #   openapi-codec
 coreschema==0.0.4
     # via coreapi
-coverage==6.0.2
+coverage==6.1.1
     # via cybersource-rest-client-python
 crypto==1.4.1
     # via cybersource-rest-client-python
@@ -213,7 +213,7 @@ edx-opaque-keys==2.2.2
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
-edx-rbac==1.5.0
+edx-rbac==1.5.1
     # via -r requirements/base.in
 edx-rest-api-client==5.4.0
     # via
@@ -228,7 +228,7 @@ extras==1.0.0
     #   testtools
 factory-boy==2.12.0
     # via django-oscar
-faker==9.7.1
+faker==9.8.0
     # via factory-boy
 fixtures==3.0.0
     # via
@@ -275,7 +275,7 @@ linecache2==1.0.0
     #   traceback2
 logger==1.4
     # via cybersource-rest-client-python
-lxml==4.6.3
+lxml==4.6.4
     # via
     #   premailer
     #   zeep
