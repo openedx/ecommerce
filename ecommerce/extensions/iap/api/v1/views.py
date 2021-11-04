@@ -154,13 +154,18 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         properties = {'emitted_at': time.time()}
         track_segment_event(request.site, request.user, 'Mobile Course Purchase View Called', properties)
         receipt = request.data
-        basket_id = receipt['basket_id']
+
+        basket_id = receipt.get('basket_id')
+        if not basket_id:
+            return JsonResponse({'error': 'Basket id is not provided'}, status=400)
+
+        # todo: fix None transaction id in case of ios
         logger.info('Payment [%s] approved by payer [%s]', receipt.get('transactionId'), request.user.id)
 
         try:
             basket = self._get_basket(request, basket_id)
         except ObjectDoesNotExist:
-            logger.exception('Basket [%s] not found', basket_id)
+            logger.exception('Basket [%s] not found.', basket_id)
             return JsonResponse({'error': 'Basket [{}] not found.'.format(basket_id)}, status=400)
         except Exception as ex:  # pylint: disable=broad-except
             logger.exception('An unexpected exception occured while obtaining basket for user [%s].', request.user.email)
@@ -171,6 +176,7 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
                 try:
                     self.handle_payment(receipt, basket)
                 except PaymentError:
+                    # todo: return error from payment gateway
                     return JsonResponse({'error': 'An error occured during payment handling.'}, status=400)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)

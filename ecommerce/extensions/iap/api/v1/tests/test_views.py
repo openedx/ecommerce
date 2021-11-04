@@ -335,13 +335,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         self.post_data['basket_id'] = dummy_basket_id
         with LogCapture(self.logger_name) as logger:
             self._assert_response({'error': 'Basket [{}] not found.'.format(dummy_basket_id)})
-            logger.check_present(
-                (
-                    self.logger_name,
-                    'ERROR',
-                    'Basket [{}] not found.'.format(dummy_basket_id)
-                ),
-            )
+            logger.check_present((self.logger_name,'ERROR','Basket [{}] not found.'.format(dummy_basket_id)),)
 
     def test_payment_error_with_unanticipated_error_while_getting_basket(self):
         """
