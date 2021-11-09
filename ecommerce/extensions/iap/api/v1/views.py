@@ -192,3 +192,12 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
             return JsonResponse({'error': 'An error occured during post order operations.'}, status=200)
 
         return JsonResponse({'order_data': OrderSerializer(order, context={'request': request}).data}, status=200)
+
+
+class IOSRefundNotificationView(APIView):
+
+    def post(self, request):
+        print("\n\n\n  Refund notification received \n")
+        print(request.body)
+        print("\n\n")
+        return JsonResponse({'test': '123'}, status=200)
