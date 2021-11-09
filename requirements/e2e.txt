@@ -51,11 +51,11 @@ idna==2.7
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   requests
-importlib-metadata==4.8.1
+importlib-metadata==4.8.2
     # via pytest-randomly
 iniconfig==1.1.1
     # via pytest
-newrelic==7.2.2.169
+newrelic==7.2.3.170
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
@@ -63,7 +63,7 @@ packaging==21.2
     # via
     #   -c requirements/base.txt
     #   pytest
-pbr==5.6.0
+pbr==5.7.0
     # via
     #   -c requirements/base.txt
     #   stevedore
@@ -75,9 +75,9 @@ psutil==5.8.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-py==1.10.0
+py==1.11.0
     # via pytest
-pycparser==2.20
+pycparser==2.21
     # via
     #   -c requirements/base.txt
     #   cffi
