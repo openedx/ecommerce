@@ -11,8 +11,8 @@
 # Tests failing in test_cybersouce.py on version 0.0.23
 cybersource-rest-client-python==0.0.21
 
-# REV-2370 2.0->2.1 upgrade will be major, temporarily pinning at 2.1 to miminize the change
-django-oscar==2.1
+# django-oscar 2.2 has Django 3.2 support and also 2.2 is the LTS version
+django-oscar==2.2
 
 # causing tests failures
 httpretty==0.9.7

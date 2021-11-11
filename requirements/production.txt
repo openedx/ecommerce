@@ -8,6 +8,8 @@ amqp==2.6.1
     # via kombu
 analytics-python==1.4.0
     # via -r requirements/base.in
+asgiref==3.4.1
+    # via django
 asn1crypto==1.4.0
     # via cybersource-rest-client-python
 attrs==21.2.0
@@ -91,7 +93,7 @@ defusedxml==0.7.1
     # via
     #   python3-openid
     #   social-auth-core
-django==2.2.25
+django==3.2.9
     # via
     #   -r requirements/base.in
     #   django-appconf
@@ -147,7 +149,7 @@ django-libsass==0.9
     # via -r requirements/base.in
 django-model-utils==4.1.1
     # via edx-rbac
-django-oscar==2.1
+django-oscar==2.2
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.in
@@ -161,11 +163,11 @@ django-simple-history==3.0.0
     # via -r requirements/base.in
 django-solo==1.2.0
     # via -r requirements/base.in
-django-tables2==2.2.1
+django-tables2==2.4.1
     # via django-oscar
 django-threadlocals==0.10
     # via -r requirements/base.in
-django-treebeard==4.5.1
+django-treebeard==4.4
     # via django-oscar
 django-waffle==2.2.1
     # via

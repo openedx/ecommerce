@@ -10,6 +10,11 @@ amqp==2.6.1
     #   kombu
 analytics-python==1.4.0
     # via -r requirements/base.txt
+asgiref==3.4.1
+    # via
+    #   -r requirements/base.txt
+    #   -r requirements/e2e.txt
+    #   django
 asn1crypto==1.4.0
     # via
     #   -r requirements/base.txt
@@ -212,7 +217,7 @@ django-model-utils==4.1.1
     # via
     #   -r requirements/base.txt
     #   edx-rbac
-django-oscar==2.1
+django-oscar==2.2
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
@@ -226,13 +231,13 @@ django-simple-history==3.0.0
     # via -r requirements/base.txt
 django-solo==1.2.0
     # via -r requirements/base.txt
-django-tables2==2.2.1
+django-tables2==2.4.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
 django-threadlocals==0.10
     # via -r requirements/base.txt
-django-treebeard==4.5.1
+django-treebeard==4.4
     # via
     #   -r requirements/base.txt
     #   django-oscar
