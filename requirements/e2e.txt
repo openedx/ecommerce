@@ -63,7 +63,7 @@ packaging==21.0
     # via
     #   -c requirements/base.txt
     #   pytest
-pbr==5.6.0
+pbr==5.7.0
     # via
     #   -c requirements/base.txt
     #   stevedore
