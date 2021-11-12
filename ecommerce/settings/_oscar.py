@@ -23,6 +23,7 @@ OSCAR_APPS = [
 
     'ecommerce.extensions',
     'ecommerce.extensions.api',
+    'ecommerce.extensions.communication.apps.CommunicationConfig',
     'ecommerce.extensions.fulfillment',
     'ecommerce.extensions.refund',
     'ecommerce.extensions.analytics',
@@ -36,6 +37,9 @@ OSCAR_APPS = [
     'ecommerce.extensions.payment',
     'ecommerce.extensions.voucher',
 
+    # Dashboard applications depend on models declared in the core applications (basket, catalogue, etc).
+    # To prevent issues with Oscar’s dynamic model loading, overrides of dashboard applications should 
+    # follow overrides of core applications 
     'oscar.apps.dashboard.reports',
     'oscar.apps.dashboard.catalogue',
     'oscar.apps.dashboard.partners',

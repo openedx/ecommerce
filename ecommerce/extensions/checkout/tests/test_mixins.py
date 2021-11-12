@@ -5,8 +5,6 @@ Tests for the ecommerce.extensions.checkout.mixins module.
 
 import ddt
 import mock
-from django.core import mail
-from django.test import RequestFactory
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory, ProductFactory
 from testfixtures import LogCapture
@@ -40,7 +38,7 @@ from ecommerce.extensions.test.factories import (
     create_order
 )
 from ecommerce.invoice.models import Invoice
-from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TransactionTestCase
 
@@ -382,45 +380,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
         with self.assertRaises(BasketNotFreeError):
             EdxOrderPlacementMixin().place_free_order(basket)
-
-    def test_send_confirmation_message(self, __):
-        """
-        Verify the send confirmation message override functions as expected
-        """
-        factory = RequestFactory()
-        request = factory.get('example.com')
-        user = self.create_user()
-        user.email = 'test_user@example.com'
-        request.user = user
-        site_from_email = 'from@example.com'
-        site_configuration = SiteConfigurationFactory(partner__name='Tester', from_email=site_from_email)
-        request.site = site_configuration.site
-        order = create_order()
-        order.user = user
-        mixin = EdxOrderPlacementMixin()
-        mixin.request = request
-
-        # Happy path
-        mixin.send_confirmation_message(order, 'ORDER_PLACED', request.site)
-        self.assertEqual(mail.outbox[0].from_email, site_from_email)
-        mail.outbox = []
-
-        # Invalid code path (graceful exit)
-        mixin.send_confirmation_message(order, 'INVALID_CODE', request.site)
-        self.assertEqual(len(mail.outbox), 0)
-
-        # Invalid messages container path (graceful exit)
-        with mock.patch('ecommerce.extensions.checkout.mixins.CommunicationEventType.objects.get') as mock_get:
-            mock_event_type = mock.Mock()
-            mock_event_type.get_messages.return_value = {}
-            mock_get.return_value = mock_event_type
-            mixin.send_confirmation_message(order, 'ORDER_PLACED', request.site)
-            self.assertEqual(len(mail.outbox), 0)
-
-            mock_event_type.get_messages.return_value = {'body': None}
-            mock_get.return_value = mock_event_type
-            mixin.send_confirmation_message(order, 'ORDER_PLACED', request.site)
-            self.assertEqual(len(mail.outbox), 0)
 
     def test_valid_payment_segment_logging(self, mock_track):
         """
