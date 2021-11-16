@@ -314,7 +314,7 @@ class EnrollmentCodeCsvView(View):
 
            > Order Number:,EDX-100001
 
-           > Seat in Demo with verified certificate (and ID verification)
+           > Seat in Demo with verified certificate
            > Code,Redemption URL
            > J4HDI5OAUGCSUJJ3,ecommerce.server?code=J4HDI5OAUGCSUJJ3
            > OZCRR6WXLWGAFWZR,ecommerce.server?code=OZCRR6WXLWGAFWZR
