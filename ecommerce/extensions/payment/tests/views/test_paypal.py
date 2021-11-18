@@ -368,7 +368,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
         self.assertRedirects(
             response,
-            self.processor.error_url,
+            'http://testserver.fake/checkout/error/',
             fetch_redirect_response=False
         )
 

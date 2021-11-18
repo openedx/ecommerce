@@ -63,7 +63,7 @@ class OrderNumberGeneratorTests(TestCase):
         request.session = None
         request.site = site
 
-        with mock.patch('ecommerce.extensions.order.utils.get_current_request', mock.Mock(return_value=request)):
+        with mock.patch('crum.get_current_request', mock.Mock(return_value=request)):
             self.assert_order_number_matches_basket(basket, partner)
 
     def test_order_number_from_basket_id(self):

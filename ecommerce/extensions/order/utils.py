@@ -3,6 +3,7 @@
 
 import logging
 
+import crum
 import waffle
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
@@ -12,7 +13,6 @@ from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError  # pylint: disable=ungrouped-imports
 from requests.exceptions import ConnectTimeout
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.url_utils import get_lms_entitlement_api_url
 from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
@@ -42,7 +42,7 @@ class OrderNumberGenerator:
         """
         site = basket.site
         if not site:
-            site = get_current_request().site
+            site = crum.get_current_request().site
             logger.warning('Basket [%d] is not associated with a Site. Defaulting to Site [%d].', basket.id, site.id)
 
         partner = site.siteconfiguration.partner
@@ -91,7 +91,7 @@ class OrderCreator(OscarOrderCreator):
         # from the current request.
         site = basket.site
         if not site:
-            site = get_current_request().site
+            site = crum.get_current_request().site
 
         order_data = {'basket': basket,
                       'number': order_number,

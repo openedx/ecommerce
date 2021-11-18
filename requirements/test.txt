@@ -230,8 +230,6 @@ django-tables2==2.2.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
-django-threadlocals==0.10
-    # via -r requirements/base.txt
 django-treebeard==4.5.1
     # via
     #   -r requirements/base.txt

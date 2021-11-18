@@ -29,7 +29,7 @@ from waffle.testutils import override_flag
 
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import absolute_url, get_lms_url
+from ecommerce.core.url_utils import absolute_url
 from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -736,12 +736,14 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         self.verify_exception_logged_on_segment_error()
 
     @httpretty.activate
-    def test_enterprise_offer_free_basket_redirect_to_dsc(self):
+    @mock.patch('crum.get_current_request')
+    def test_enterprise_offer_free_basket_redirect_to_dsc(self, mock_crum_request):
         """
         Verify redirect to Data Sharing Consent page if basket is free
         and an Enterprise-related offer is applied and Enterprise customer
         required the consent.
         """
+        mock_crum_request.return_value = self.request
         self.course_run.create_or_update_seat('verified', True, Decimal(10))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
         enterprise_offer = self.prepare_enterprise_offer()
@@ -811,7 +813,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         logger_name = 'ecommerce.extensions.basket.views'
         self.mock_api_error(
             error=error,
-            url=get_lms_url('api/courses/v1/courses/{}/'.format(self.course.id))
+            url=f"http://lms.testserver.fake/api/courses/v1/courses/{self.course.id}/"
         )
 
         with LogCapture(logger_name) as logger:

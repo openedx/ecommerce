@@ -121,7 +121,7 @@ class TestHelpers(TestCase):
         Tests current site theme returns None and does not errors out if it is accessed inside management commands
         and request object is not present.
         """
-        with patch("ecommerce.theming.helpers.get_current_request", return_value=None):
+        with patch("crum.get_current_request", return_value=None):
             theme = get_current_theme()
             self.assertIsNone(theme)
 

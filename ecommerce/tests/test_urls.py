@@ -2,7 +2,6 @@
 
 from django.urls import reverse
 
-from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.tests.testcases import TestCase
 
 
@@ -40,7 +39,7 @@ class TestUrls(TestCase):
 
         # Test client can't fetch external URLs, so fetch_redirect_response is set to
         # False to avoid loading the final page
-        self.assertRedirects(response, get_lms_dashboard_url(), fetch_redirect_response=False)
+        self.assertRedirects(response, "http://lms.testserver.fake/dashboard", fetch_redirect_response=False)
 
     def test_authorized_homepage_redirection(self):
         """Test that users authorized to access the Oscar front-end are redirected to Oscar Dashboard."""

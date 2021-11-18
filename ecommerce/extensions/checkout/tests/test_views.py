@@ -11,7 +11,6 @@ from mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 
-from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_program_dashboard_url
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
@@ -75,8 +74,11 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
 
-        expected_url = get_lms_program_dashboard_url(self.bundle_attribute_value)
-        self.assertRedirects(response, expected_url, fetch_redirect_response=False)
+        self.assertRedirects(
+            response,
+            f"http://lms.testserver.fake/dashboard/programs/{self.bundle_attribute_value}",
+            fetch_redirect_response=False
+        )
 
     @httpretty.activate
     def test_enterprise_offer_course_redirect(self):
@@ -87,8 +89,11 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
 
-        expected_url = get_lms_courseware_url(self.course_run.id)
-        self.assertRedirects(response, expected_url, fetch_redirect_response=False)
+        self.assertRedirects(
+            response,
+            f"http://lms.testserver.fake/courses/{self.course_run.id}/info",
+            fetch_redirect_response=False
+        )
 
     @httpretty.activate
     def test_successful_redirect(self):

@@ -45,7 +45,7 @@ class BearerAuthenticationTests(TestCase):
     def test_get_user_info_url(self):
         """ Verify the method returns a user info URL specific to the Site's LMS instance. """
         request = self.create_request()
-        with mock.patch('ecommerce.extensions.order.utils.get_current_request', mock.Mock(return_value=request)):
+        with mock.patch('crum.get_current_request', mock.Mock(return_value=request)):
             actual = self.auth.get_user_info_url()
             expected = urljoin(self.site.siteconfiguration.lms_url_root, '/oauth2/user_info/')
             self.assertEqual(actual, expected)

@@ -31,7 +31,6 @@ from ecommerce.core.constants import (
     SYSTEM_ENTERPRISE_OPERATOR_ROLE
 )
 from ecommerce.core.models import EcommerceFeatureRole, EcommerceFeatureRoleAssignment
-from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.tests.factories import CourseFactory
@@ -714,7 +713,7 @@ class EnterpriseCouponViewSetRbacTests(
             expected_result = result
             expected_result['code'] = codes[result['code']]
             expected_result['redeem_url'] = '{url}?code={code}'.format(
-                url=get_ecommerce_url('/coupons/offer/'),
+                url='http://testserver.fake/coupons/offer/',
                 code=expected_result['code']
             )
             assignment = OfferAssignment.objects.filter(

@@ -163,8 +163,6 @@ django-solo==1.2.0
     # via -r requirements/base.in
 django-tables2==2.2.1
     # via django-oscar
-django-threadlocals==0.10
-    # via -r requirements/base.in
 django-treebeard==4.5.1
     # via django-oscar
 django-waffle==2.2.1

@@ -17,7 +17,6 @@ from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import OrderFactory, OrderLineFactory, ProductFactory, RangeFactory, VoucherFactory
 
-from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
@@ -664,7 +663,11 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         )
 
         response = self.redeem_coupon(code=code, consent_token=consent_token)
-        self.assertRedirects(response, get_lms_courseware_url(self.course.id), fetch_redirect_response=False)
+        self.assertRedirects(
+            response,
+            f"http://lms.testserver.fake/courses/{self.course.id}/info",
+            fetch_redirect_response=False
+        )
 
         last_request = httpretty.last_request()
         self.assertEqual(last_request.path, '/api/enrollment/v1/enrollment')
@@ -682,7 +685,11 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.mock_enterprise_learner_post_api()
 
         response = self.client.get(self.redeem_url_with_params(code=code), follow=False)
-        self.assertRedirects(response, get_lms_courseware_url(self.course.id), fetch_redirect_response=False)
+        self.assertRedirects(
+            response,
+            f"http://lms.testserver.fake/courses/{self.course.id}/info",
+            fetch_redirect_response=False
+        )
 
     @httpretty.activate
     def test_enterprise_customer_successful_redemption_message(self):
@@ -870,7 +877,7 @@ class EnrollmentCodeCsvViewTests(TestCase):
         response = self.client.get(reverse(self.path, args=[order.number]))
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], get_lms_url('dashboard'))
+        self.assertEqual(response['location'], "http://lms.testserver.fake/dashboard")
 
     @ddt.data(
         u'Plain English product title',

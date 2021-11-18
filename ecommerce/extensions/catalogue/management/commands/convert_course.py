@@ -2,11 +2,11 @@
 
 import logging
 
+import crum
 from django.core.management import BaseCommand
 from django.db import transaction
 from oscar.core.loading import get_model
 from oscar.test.utils import RequestFactory
-from threadlocals.threadlocals import set_thread_variable
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.utils import generate_sku
@@ -132,4 +132,4 @@ class Command(BaseCommand):
         """
         request = RequestFactory()
         request.site = site
-        set_thread_variable('request', request)
+        crum.set_current_request(request)

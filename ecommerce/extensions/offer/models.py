@@ -3,6 +3,7 @@ import logging
 import re
 
 import boto3
+import crum
 from botocore.exceptions import ClientError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -28,7 +29,6 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from simple_history.models import HistoricalRecords
 from slumber.exceptions import SlumberBaseException
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 from ecommerce.extensions.offer.constants import (
@@ -466,7 +466,7 @@ class Range(AbstractRange):
         Retrieve the results from using the catalog contains endpoint for
         catalog service for the catalog id contained in field "course_catalog".
         """
-        request = get_current_request()
+        request = crum.get_current_request()
         partner_code = request.site.siteconfiguration.partner.short_code
         cache_key = get_cache_key(
             site_domain=request.site.domain,

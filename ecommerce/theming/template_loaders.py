@@ -2,9 +2,8 @@
 Theming aware template loaders.
 """
 
-
+import crum
 from django.template.loaders.filesystem import Loader
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.theming.helpers import get_all_theme_template_dirs, get_current_theme
 
@@ -17,7 +16,7 @@ class ThemeTemplateLoader(Loader):
         dirs = super(ThemeTemplateLoader, self).get_dirs()
         theme_dirs = []
 
-        if get_current_request():
+        if crum.get_current_request():
             # If the template is being loaded in a request, prepend the current theme's template directories
             # so the theme's templates take precedence.
             theme = get_current_theme()

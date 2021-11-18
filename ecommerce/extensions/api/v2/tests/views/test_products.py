@@ -4,6 +4,7 @@ import datetime
 import json
 import uuid
 
+import crum
 import ddt
 import pytz
 from django.test import RequestFactory
@@ -189,6 +190,7 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         request = RequestFactory(SERVER_NAME=self.site.domain).get('/')
         request.user = self.user
         request.site = self.site
+        crum.set_current_request(request)
         expected = ProductSerializer(coupon, context={'request': request}).data
         self.assertDictEqual(response.data, expected)
 

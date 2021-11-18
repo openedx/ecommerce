@@ -6,10 +6,10 @@
 import logging
 import os
 
+import crum
 import waffle
 from django.conf import ImproperlyConfigured, settings
 from path import Path
-from threadlocals.threadlocals import get_current_request
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def get_current_site_theme():
     if not is_comprehensive_theming_enabled():
         return None
 
-    request = get_current_request()
+    request = crum.get_current_request()
     if not request:
         return None
     return getattr(request, 'site_theme', None)
@@ -98,7 +98,7 @@ def is_comprehensive_theming_enabled():
         return False
 
     # Return False if we're currently processing a request and theming is disabled via runtime switch
-    if bool(get_current_request()) and waffle.switch_is_active(settings.DISABLE_THEMING_ON_RUNTIME_SWITCH):
+    if bool(crum.get_current_request()) and waffle.switch_is_active(settings.DISABLE_THEMING_ON_RUNTIME_SWITCH):
         return False
 
     # Return True indicating theming is enabled
