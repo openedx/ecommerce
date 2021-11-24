@@ -204,13 +204,6 @@ class SiteConfiguration(models.Model):
         blank=True
     )
 
-    account_microfrontend_url = models.URLField(
-        verbose_name=_('Account Microfrontend URL'),
-        help_text=_('URL for the Account Microfrontend (used to lead learners to ID verification workflow)'),
-        null=True,
-        blank=True
-    )
-
     @property
     def payment_processors_set(self):
         """
