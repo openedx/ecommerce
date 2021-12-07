@@ -72,11 +72,13 @@ def upload_files_for_enterprise_coupons(files):
             s3 = session.client('s3')
 
             for file in files:
-                file_buf = io.BytesIO(bytes(file['contents'], encoding="raw_unicode_escape"))
+                file_bytes = bytearray([int(b) for b in file['contents'].split(',')])
+                file_buf = io.BytesIO(file_bytes)
                 file_buf.seek(0)
                 filename = datetime.datetime.now().strftime("%d-%m-%Y at %H.%M.%S") + " " + file['name']
                 key = slugify(filename)
-                s3.upload_fileobj(file_buf, bucket_name, key)
+                s3.upload_fileobj(file_buf, bucket_name, key,
+                                  ExtraArgs={'ContentType': file['type'], 'ACL': 'public-read'})
                 url = f"https://{bucket_name}.s3.{bucket_location}.amazonaws.com/{key}"
                 uploaded_files.append({'name': key, 'size': file['size'], 'url': url})
         except Exception as ex:  # pylint: disable=broad-except

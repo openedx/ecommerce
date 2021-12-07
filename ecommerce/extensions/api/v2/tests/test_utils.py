@@ -75,8 +75,8 @@ class ViewUtilsTests(TestCase):
 
     def test_files_uploads_to_s3(self):
         """ verify that files are uploaded to s3 correctly"""
-        un_uploaded_files = [{'name': 'abc.png', 'size': 123, 'contents': 'dummy_contents'},
-                             {'name': 'def.png', 'size': 456, 'contents': 'dummy_contents'}]
+        un_uploaded_files = [{'name': 'abc.png', 'size': 123, 'contents': '1,2,3', 'type': 'image/png'},
+                             {'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}]
         with mock.patch('botocore.client.BaseClient._make_api_call', new=self.mock_make_api_call):
             res = upload_files_for_enterprise_coupons(un_uploaded_files)
             assert res[0]['size'] == un_uploaded_files[0]['size']
@@ -90,8 +90,8 @@ class ViewUtilsTests(TestCase):
 
     def test_file_uploads_to_s3_with_no_bucket_name(self):
         """ Verify that exception log message is correct on file uploads with no bucket name. """
-        un_uploaded_files = [{'name': 'abc.png', 'size': 123, 'contents': 'dummy_contents'},
-                             {'name': 'def.png', 'size': 456, 'contents': 'dummy_contents'}]
+        un_uploaded_files = [{'name': 'abc.png', 'size': 123, 'contents': '1,2,3', 'type': 'image/png'},
+                             {'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}]
         with mock.patch('ecommerce.extensions.api.v2.utils.logger') as mock_logger:
             ret = upload_files_for_enterprise_coupons(un_uploaded_files)
             assert '[upload_files_for_enterprise_coupons] Raised an error while uploading the files,Message' \
