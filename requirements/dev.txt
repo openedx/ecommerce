@@ -147,7 +147,7 @@ defusedxml==0.7.1
     #   social-auth-core
 diff-cover==6.4.2
     # via -r requirements/test.txt
-django==2.2.24
+django==2.2.25
     # via
     #   -r requirements/test.txt
     #   django-appconf

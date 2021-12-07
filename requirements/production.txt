@@ -91,7 +91,7 @@ defusedxml==0.7.1
     # via
     #   python3-openid
     #   social-auth-core
-django==2.2.24
+django==2.2.25
     # via
     #   -r requirements/base.in
     #   django-appconf
