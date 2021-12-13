@@ -126,15 +126,12 @@ class Course(models.Model):
                 return enrollment_code
         return None
 
-    def get_course_seat_name(self, certificate_type, id_verification_required):
+    def get_course_seat_name(self, certificate_type):
         """ Returns the name for a course seat. """
         name = u'Seat in {}'.format(self.name)
 
         if certificate_type != '':
             name += u' with {} certificate'.format(certificate_type)
-
-            if id_verification_required:
-                name += u' (and ID verification)'
 
         return name
 
@@ -204,7 +201,7 @@ class Course(models.Model):
             attributes__name='id_verification_required',
             attribute_values__value_boolean=id_verification_required
         )
-        seat.title = self.get_course_seat_name(certificate_type, id_verification_required)
+        seat.title = self.get_course_seat_name(certificate_type)
 
         seat.save()
 

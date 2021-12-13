@@ -99,9 +99,6 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
         if certificate_type != '':
             expected_title += ' with {} certificate'.format(certificate_type)
 
-            if seat.attr.id_verification_required:
-                expected_title += u' (and ID verification)'
-
         self.assertEqual(seat.title, expected_title)
         self.assertEqual(getattr(seat.attr, 'certificate_type', ''), certificate_type)
         self.assertEqual(seat.expires, EXPIRES)

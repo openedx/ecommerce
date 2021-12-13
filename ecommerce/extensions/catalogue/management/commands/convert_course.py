@@ -86,7 +86,7 @@ class Command(BaseCommand):
 
         audit_seat = audit_seats[0]
 
-        audit_seat.title = course.get_course_seat_name('honor', False)
+        audit_seat.title = course.get_course_seat_name('honor')
         audit_seat.attr.certificate_type = 'honor'
         audit_seat.save()
 
@@ -107,7 +107,7 @@ class Command(BaseCommand):
 
         honor_seat = honor_seats[0]
 
-        honor_seat.title = course.get_course_seat_name('', False)
+        honor_seat.title = course.get_course_seat_name('')
         honor_seat.attr.certificate_type = ''
         honor_seat.save()
 

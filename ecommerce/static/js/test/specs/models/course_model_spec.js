@@ -71,7 +71,7 @@ define([
                 url: 'http://ecommerce.local:8002/api/v2/products/9/',
                 structure: 'child',
                 product_class: 'Seat',
-                title: 'Seat in edX Demonstration Course with verified certificate (and ID verification)',
+                title: 'Seat in edX Demonstration Course with verified certificate',
                 price: '15.00',
                 expires: '2015-01-01T00:00:00+00:00',
                 attribute_values: [
@@ -95,7 +95,7 @@ define([
                 url: 'http://ecommerce.local:8002/api/v2/products/10/',
                 structure: 'child',
                 product_class: 'Seat',
-                title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)',
+                title: 'Seat in edX Demonstration Course with credit certificate',
                 price: '200.00',
                 expires: null,
                 attribute_values: [
@@ -127,7 +127,7 @@ define([
                 url: 'http://ecommerce.local:8002/api/v2/products/11/',
                 structure: 'child',
                 product_class: 'Seat',
-                title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)',
+                title: 'Seat in edX Demonstration Course with credit certificate',
                 price: '300.00',
                 expires: null,
                 attribute_values: [
