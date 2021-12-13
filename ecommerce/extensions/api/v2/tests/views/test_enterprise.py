@@ -87,9 +87,9 @@ TEMPLATE_SUBJECT = 'Test Subject '
 TEMPLATE_GREETING = 'hello there '
 TEMPLATE_CLOSING = ' kind regards'
 TEMPLATE_FILES_MIXED = [{'name': 'abc.png', 'size': 123, 'url': 'https://www.example.com/abc-png'},
-                        {'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}]
-TEMPLATE_FILES_WITH_CONTENTS = [{'name': 'abc.png', 'size': 123, 'contents': 'dummy-contents'},
-                                {'name': 'def.png', 'size': 456, 'contents': 'dummy-contents'}]
+                        {'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}]
+TEMPLATE_FILES_WITH_CONTENTS = [{'name': 'abc.png', 'size': 123, 'contents': '1,2,3', 'type': 'image/png'},
+                                {'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}]
 TEMPLATE_FILES_WITH_URLS = [{'name': 'abc.png', 'size': 123, 'url': 'https://www.example.com'},
                             {'name': 'def.png', 'size': 456, 'url': 'https://www.example.com'}]
 UPLOAD_FILES_TO_S3_PATH = 'ecommerce.extensions.api.v2.views.enterprise.upload_files_for_enterprise_coupons'
@@ -675,7 +675,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
     def use_voucher(self, voucher, user):
         """
@@ -929,7 +929,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
                 assert response.status_code == 200
 
     def test_coupon_codes_detail_with_invalid_coupon_id(self):
@@ -1992,7 +1992,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         response = response.json()
         assert mock_send_email.call_count == len(users)
         for i, user in enumerate(users):
@@ -2046,7 +2046,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         response = response.json()
         assert mock_send_email.call_count == len(users)
         for i, user in enumerate(users):
@@ -2091,7 +2091,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         response = response.json()
         assert mock_send_email.call_count == len(users)
         for i, user in enumerate(users):
@@ -2170,7 +2170,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         response = response.json()
         assert mock_send_email.call_count == len(users)
         for i, user in enumerate(users):
@@ -2209,7 +2209,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert mock_send_email.call_count == 1
@@ -2246,7 +2246,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         response = response.json()
         assert mock_send_email.call_count == 1
         assert response['offer_assignments'][0]['user_email'] == user['email']
@@ -2289,7 +2289,7 @@ class EnterpriseCouponViewSetRbacTests(
                     )
                     mock_file_deleter.assert_called_once_with('def.png')
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
             response = response.json()
         assert response['non_field_errors'] == ['Not enough available codes for assignment!']
         assert mock_send_email.call_count == 0
@@ -2335,7 +2335,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         response = response.json()
         assert mock_send_email.call_count == len(users)
         for i, user in enumerate(users):
@@ -2543,7 +2543,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         offer_assignment = OfferAssignment.objects.filter(user_email=user['email']).first()
 
@@ -2680,7 +2680,7 @@ class EnterpriseCouponViewSetRbacTests(
                 )
                 mock_file_deleter.assert_called_once_with('def.png')
             mock_file_uploader.assert_called_once_with(
-                [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert response == [
@@ -2722,7 +2722,7 @@ class EnterpriseCouponViewSetRbacTests(
                 )
                 mock_file_deleter.assert_called_once_with('def.png')
             mock_file_uploader.assert_called_once_with(
-                [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert response == [
@@ -2776,7 +2776,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert response == [
@@ -2814,7 +2814,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         offer_assignment = OfferAssignment.objects.first()
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
@@ -2840,7 +2840,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert response == [
@@ -2894,7 +2894,8 @@ class EnterpriseCouponViewSetRbacTests(
                     'notify_learners': False,
                 }
             )
-            mock_file_uploader.assert_called_once_with([{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+            mock_file_uploader.assert_called_once_with([{'name': 'def.png', 'size': 456, 'contents': '1,2,3',
+                                                         'type': 'image/png'}])
 
         # assert there has been no email sent record created
         self.assertIsNone(OfferAssignmentEmailSentRecord.objects.first())
@@ -2936,7 +2937,8 @@ class EnterpriseCouponViewSetRbacTests(
                 reverse('api:v2:enterprise-coupons-assign', args=[coupon_id]),
                 options
             )
-            mock_file_uploader.assert_called_once_with([{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+            mock_file_uploader.assert_called_once_with([{'name': 'def.png', 'size': 456, 'contents': '1,2,3',
+                                                         'type': 'image/png'}])
 
         # assert there has been an email sent record created
         self.assertIsNotNone(OfferAssignmentEmailSentRecord.objects.first())
@@ -2977,7 +2979,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         offer_assignment = OfferAssignment.objects.filter(user_email=user['email']).first()
         self.assertIsNone(offer_assignment.last_reminder_date)
         payload = {'assignments': [{'user': user, 'code': offer_assignment.code}]}
@@ -3021,7 +3023,7 @@ class EnterpriseCouponViewSetRbacTests(
                 )
                 mock_file_deleter.assert_called_once_with('def.png')
             mock_file_uploader.assert_called_once_with(
-                [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert response == [
@@ -3061,7 +3063,7 @@ class EnterpriseCouponViewSetRbacTests(
                 )
                 mock_file_deleter.assert_called_once_with('def.png')
             mock_file_uploader.assert_called_once_with(
-                [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert response == [
@@ -3098,7 +3100,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         offer_assignment = OfferAssignment.objects.filter(user_email=user['email']).first()
         with mock.patch(
                 'ecommerce.extensions.offer.utils.send_offer_update_email.delay',
@@ -3120,7 +3122,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert response == [{'user': user, 'code': offer_assignment.code, 'detail': 'email_dispatch_failed'}]
@@ -3153,7 +3155,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         offer_assignment = OfferAssignment.objects.first()
         self.assertIsNone(offer_assignment.last_reminder_date)
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
@@ -3178,7 +3180,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         response = response.json()
         assert response == [
@@ -3227,7 +3229,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         response = response.json()
         assert response == [
             {'code': offer_assignment.code, 'user': {'email': offer_assignment.user_email}, 'detail': 'success'}
@@ -3281,7 +3283,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         response = response.json()
         assert offer_assignments.count() == 1
         assert response == [{'code': offer_assignments.first().code, 'user': users[0], 'detail': 'success'}]
@@ -3647,7 +3649,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
 
         # verify that records have been created with 'remind' email type equal to the bulk count
         assert OfferAssignmentEmailSentRecord.objects.filter(email_type=REMIND).count() == offer_assignments.count()
@@ -3680,7 +3682,7 @@ class EnterpriseCouponViewSetRbacTests(
                     }
                 )
                 mock_file_uploader.assert_called_once_with(
-                    [{'name': 'def.png', 'size': 456, 'contents': 'dummy-content'}])
+                    [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         # verify that records have been created with 'revoke' email type equal to the bulk count
         assert OfferAssignmentEmailSentRecord.objects.filter(email_type=REVOKE).count() == offer_assignments.count()
 
