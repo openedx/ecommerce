@@ -288,7 +288,7 @@ linecache2==1.0.0
     #   traceback2
 logger==1.4
     # via cybersource-rest-client-python
-lxml==4.7.0
+lxml==4.6.5
     # via
     #   premailer
     #   zeep

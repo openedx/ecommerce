@@ -430,7 +430,7 @@ logger==1.4
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-lxml==4.7.0
+lxml==4.6.5
     # via
     #   -r requirements/test.txt
     #   premailer
