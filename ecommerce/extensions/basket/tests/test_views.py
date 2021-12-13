@@ -1029,28 +1029,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertEqual(line_data.get('image_url'), None)
         self.assertEqual(line_data.get('course_short_description'), None)
 
-    @ddt.data(
-        ('verified', True),
-        ('credit', False)
-    )
-    @ddt.unpack
-    def test_verification_message(self, cert_type, ver_req):
-        """ Verify the variable for verification requirement is False for credit seats. """
-        seat = self.create_seat(self.course, cert_type=cert_type)
-        self.create_basket_and_add_product(seat)
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['display_verification_message'], ver_req)
-
-    def test_verification_attribute_missing(self):
-        """ Verify the variable for verification requirement is False when the attribute is missing. """
-        seat = self.create_seat(self.course)
-        ProductAttribute.objects.filter(name='id_verification_required').delete()
-        self.create_basket_and_add_product(seat)
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['display_verification_message'], False)
-
     def assert_order_details_in_context(self, product):
         """Assert order details message is in basket context for passed product."""
         self.create_basket_and_add_product(product)

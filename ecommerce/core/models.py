@@ -1,18 +1,15 @@
 import datetime
-import hashlib
 import logging
-from urllib.parse import quote, urljoin, urlsplit
+from urllib.parse import urljoin, urlsplit
 
 import waffle
 from analytics import Client as SegmentClient
-from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
-from django.utils.timezone import is_aware, make_aware, now
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
@@ -22,7 +19,7 @@ from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from simple_history.models import HistoricalRecords
-from slumber.exceptions import HttpNotFoundError, SlumberBaseException
+from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, ALLOW_MISSING_LMS_USER_ID
 from ecommerce.core.exceptions import MissingLmsUserIdException
@@ -353,23 +350,6 @@ class SiteConfiguration(models.Model):
     def build_program_dashboard_url(self, uuid):
         """ Returns a URL to a specific student program dashboard (hosted by LMS). """
         return self.build_lms_url('/dashboard/programs/{}'.format(uuid))
-
-    def IDVerification_workflow_url(self, course_id):
-        """
-        Returns the URL of the ID Verification workflow based on the course_id
-
-        returns:
-            str
-        """
-        path = 'id-verification'
-        if course_id:
-            path += '?course_id={}'.format(quote(str(course_id)))
-
-        if self.account_microfrontend_url:
-            return urljoin(self.account_microfrontend_url, path)
-        if settings.ACCOUNT_MICROFRONTEND_URL:
-            return urljoin(settings.ACCOUNT_MICROFRONTEND_URL, path)
-        return self.build_lms_url('verify_student/reverify')
 
     @property
     def student_dashboard_url(self):
@@ -749,47 +729,6 @@ class User(AbstractUser):
             )
             raise
         return response
-
-    def is_verified(self, site):
-        """
-        Check if a user has verified his/her identity.
-        Calls the LMS verification status API endpoint and returns the verification status information.
-        The status information is stored in cache, if the user is verified, until the verification expires.
-
-        Args:
-            site (Site): The site object from which the LMS account API endpoint is created.
-
-        Returns:
-            True if the user is verified, false otherwise.
-        """
-        try:
-            cache_key = 'verification_status_{username}'.format(username=self.username)
-            cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
-            verification_cached_response = TieredCache.get_cached_response(cache_key)
-            if verification_cached_response.is_found:
-                return verification_cached_response.value
-
-            api = site.siteconfiguration.user_api_client
-            response = api.accounts(self.username).verification_status().get()
-
-            verification = response.get('is_verified', False)
-            expiration_datetime = response.get('expiration_datetime', False)
-            if verification and expiration_datetime:
-                parsed_expiration = parse(expiration_datetime)
-                # REV-2430: we're seeing errors where the expiration_datetime is naive so we're making it
-                # timezone aware here if it's not already
-                if not is_aware(parsed_expiration):
-                    parsed_expiration = make_aware(parsed_expiration)
-                cache_timeout = int((parsed_expiration - now()).total_seconds())
-                TieredCache.set_all_tiers(cache_key, verification, cache_timeout)
-            return verification
-        except HttpNotFoundError:
-            log.debug('No verification data found for [%s]', self.username)
-            return False
-        except (ReqConnectionError, SlumberBaseException, Timeout):
-            msg = 'Failed to retrieve verification status details for [{username}]'.format(username=self.username)
-            log.warning(msg)
-            return False
 
     def deactivate_account(self, site_configuration):
         """Deactivate the user's account.
