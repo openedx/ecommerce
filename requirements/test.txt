@@ -47,9 +47,9 @@ bleach==4.1.0
     # via -r requirements/base.txt
 bok-choy==1.1.1
     # via -r requirements/test.in
-boto3==1.18.59
+boto3==1.19.10
     # via -r requirements/base.txt
-botocore==1.21.59
+botocore==1.22.10
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -320,7 +320,7 @@ factory-boy==2.12.0
     #   -r requirements/base.txt
     #   -r requirements/test.in
     #   django-oscar
-faker==9.3.1
+faker==9.8.0
     # via
     #   -r requirements/base.txt
     #   factory-boy
@@ -899,7 +899,7 @@ unicodecsv==0.14.1
     # via
     #   -r requirements/base.txt
     #   djangorestframework-csv
-uritemplate==4.0.0
+uritemplate==4.1.1
     # via
     #   -r requirements/base.txt
     #   coreapi
