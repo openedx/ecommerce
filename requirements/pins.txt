@@ -11,7 +11,7 @@
 # Tests failing in test_cybersouce.py on version 0.0.23
 cybersource-rest-client-python==0.0.21
 
-# django-oscar==2.2 has django==2.2 and django==3.2 support and also 2.2 is the LTS version
+# django-oscar==2.2 has django(2.2 and 3.2) support and also oscar=2.2 is the LTS version
 django-oscar==2.2
 
 # causing tests failures
@@ -60,3 +60,7 @@ jsonschema==3.2.0
 
 # bok-choy 1.1.1 requires <4 (can remove once we have a version without that requirement)
 selenium<4.0.0
+
+
+# greater version conflicts with pylint in upgrade job.
+wrapt==1.11.2
