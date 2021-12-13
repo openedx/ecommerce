@@ -64,3 +64,9 @@ selenium<4.0.0
 
 # greater version conflicts with pylint in upgrade job.
 wrapt==1.11.2
+
+# we are preparing for django32 support so avoiding major version bump here.
+django-compressor==2.4.1
+
+# django oscar has this pin so maintaing it
+django-phonenumber-field<5.1.0
