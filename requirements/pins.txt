@@ -11,8 +11,8 @@
 # Tests failing in test_cybersouce.py on version 0.0.23
 cybersource-rest-client-python==0.0.21
 
-# REV-2370 2.0->2.1 upgrade will be major, temporarily pinning at 2.1 to miminize the change
-django-oscar==2.1
+# django-oscar==2.2 has django(2.2 and 3.2) support and also oscar=2.2 is the LTS version
+django-oscar==2.2
 
 # causing tests failures
 httpretty==0.9.7
@@ -60,3 +60,13 @@ jsonschema==3.2.0
 
 # bok-choy 1.1.1 requires <4 (can remove once we have a version without that requirement)
 selenium<4.0.0
+
+
+# greater version conflicts with pylint in upgrade job.
+wrapt==1.11.2
+
+# we are preparing for django32 support so avoiding major version bump here.
+django-compressor==2.4.1
+
+# django oscar has this pin so maintaing it
+django-phonenumber-field<5.1.0
