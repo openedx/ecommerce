@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('order', '0024_markordersstatuscompleteconfig'),
+        ('communication', '0001_initial'),
     ]
 
     operations = [
