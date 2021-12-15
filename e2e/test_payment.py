@@ -130,7 +130,7 @@ class TestSeatPayment:
         ))
 
         # Wait till the selector is visible
-        WebDriverWait(selenium, 20).until(
+        WebDriverWait(selenium, 40).until(  # @TODO: put wait back to 20 after REV-2493 investigation
             EC.visibility_of_element_located((By.CSS_SELECTOR, page_css_selector))
         )
 
@@ -200,10 +200,10 @@ class TestSeatPayment:
             except TimeoutException as exc:
                 # We only want to continue on this particular error from add_item_to_basket.
                 if "No product is available" in exc.msg:
-                    log.warning("Failed to get a valid course run for SKU %s, continuing", verified_seat['sku'])
+                    log.warning("Failed to get a valid course run for SKU %s, continuing. ", verified_seat['sku'])
                 else:  # TODO: Remove else clause after investigation (REV-2493)
                     log.warning("Failed to add basket line for SKU %s, continuing", verified_seat['sku'])
-                    log.info("exc.msg was: %s", exc.msg)
+                    log.warning("exc.msg was: %s", exc.msg)
                 continue
 
         assert test_run_successfully, "Unable to find a valid course run to test!"
