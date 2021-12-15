@@ -78,5 +78,5 @@ SENDER_CATEGORY_TYPES = (
     (MANUAL_EMAIL, _('Manual')),
 )
 
-# Max files size for coupon attachments
-MAX_FILES_SIZE_FOR_COUPONS = 2097152
+# Max files size for coupon attachments: 250kb
+MAX_FILES_SIZE_FOR_COUPONS = 256000
