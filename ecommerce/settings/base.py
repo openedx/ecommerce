@@ -818,6 +818,9 @@ HUBSPOT_SALES_LEAD_FORM_GUID = "SET-ME-PLEASE"
 SDN_CHECK_API_URL ="https://api.trade.gov/gateway/v1/consolidated_screening_list/search"
 SDN_CHECK_API_KEY = "sdn search key here"
 
+# Need to link to the account micro-frontend
+ACCOUNT_MICROFRONTEND_URL = None
+
 # Awin advertiser id
 AWIN_ADVERTISER_ID = None
 
