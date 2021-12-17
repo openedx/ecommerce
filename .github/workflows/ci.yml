@@ -12,13 +12,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - django-env: django22
+          - django-env: django32
             testname: quality-and-jobs
             targets: PYTHON_ENV=py38 requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords
-          - django-env: django22
+          - django-env: django32
             testname: test-python
             targets: PYTHON_ENV=py38 requirements.js clean_static static validate_python
-          - django-env: django22
+          - django-env: django32
             testname: acceptance-python
             targets: PYTHON_ENV=py38 requirements.js clean_static static acceptance
 

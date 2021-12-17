@@ -235,3 +235,61 @@ def get_or_create_catalog(name, partner, stock_record_ids):
     for stock_record in stock_records:
         catalog.stock_records.add(stock_record)
     return catalog, True
+
+
+def _get_next_character(character):
+    """
+    Provides next alphabetic character
+    """
+    ascii_code = ord(character)
+    # If character is 'Z', then return 'A' and indicate that next character should also be updated
+    if ascii_code + 1 > 90:
+        return chr(65), True
+    # If the character is '0', replace it with 'A'
+    if ascii_code == 48:
+        return chr(65), False
+    return chr(ascii_code + 1), False
+
+
+def _get_path_for_next(old_path):
+    """
+    Provides path for the next child
+    """
+    path = list(old_path)
+    for i in reversed(range(len(path))):
+        updated_character, to_update_next = _get_next_character(old_path[i])
+        path[i] = updated_character
+        # Check whether next character should be updated or not
+        if not to_update_next:
+            break
+    return "".join(path)
+
+
+def create_subcategories(model, parent_category_name, categories):
+    """
+    Create children for parent category. An alternative from create_from_breadcrumbs method of django-oscar
+    as that method can't be used in data migrations. This model requests the model class as a parameter
+    so we can provide an historical version.
+    """
+    if model.__name__ != 'Category':
+        return
+    Category = model
+    parent_category = Category.objects.get(name=parent_category_name)
+    last_path = Category.objects.filter(path__contains=parent_category.path).order_by('-path')[0].path
+    # 4 digits path means this category has no children yet so set initial path
+    if len(last_path) == 4:
+        last_path = f"{last_path}0000"
+    actual_created_count = 0
+    for category in categories:
+        new_path = _get_path_for_next(last_path)
+        _, created = Category.objects.get_or_create(
+            name=category,
+            depth=2,
+            path=new_path
+        )
+        last_path = new_path
+        if created:
+            actual_created_count += 1
+
+    parent_category.numchild = parent_category.numchild + actual_created_count
+    parent_category.save()

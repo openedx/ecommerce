@@ -21,7 +21,6 @@ pylint
 pytest
 pytest-cov
 pytest-django
-pytest-django-ordering
 python-memcached==1.58      # required by collectstatic in devstack
 responses
 selenium

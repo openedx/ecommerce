@@ -4,11 +4,15 @@
 #
 #    make upgrade
 #
+asgiref==3.4.1
+    # via
+    #   -c requirements/base.txt
+    #   django
 attrs==21.2.0
     # via
     #   -c requirements/base.txt
     #   pytest
-certifi==2021.5.30
+certifi==2021.10.8
     # via
     #   -c requirements/base.txt
     #   requests
@@ -25,7 +29,7 @@ cryptography==3.4.8
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   pyjwt
-django==2.2.25
+django==3.2.9
     # via
     #   -c requirements/base.txt
     #   django-crum
@@ -53,7 +57,7 @@ idna==2.7
     #   requests
 importlib-metadata==4.8.1
     # via pytest-randomly
-more-itertools==8.10.0
+iniconfig==1.1.1
     # via pytest
 newrelic==7.0.0.166
     # via
@@ -63,12 +67,14 @@ packaging==21.0
     # via
     #   -c requirements/base.txt
     #   pytest
-pbr==5.6.0
+pbr==5.7.0
     # via
     #   -c requirements/base.txt
     #   stevedore
 pluggy==0.13.1
-    # via pytest
+    # via
+    #   -c requirements/pins.txt
+    #   pytest
 psutil==5.8.0
     # via
     #   -c requirements/base.txt
@@ -87,9 +93,8 @@ pyparsing==2.4.7
     # via
     #   -c requirements/base.txt
     #   packaging
-pytest==5.3.5
+pytest==6.2.5
     # via
-    #   -c requirements/pins.txt
     #   -r requirements/e2e.in
     #   pytest-base-url
     #   pytest-html
@@ -108,11 +113,11 @@ pytest-randomly==3.10.1
     # via -r requirements/e2e.in
 pytest-selenium==2.0.1
     # via -r requirements/e2e.in
-pytest-timeout==1.4.2
+pytest-timeout==2.0.0
     # via -r requirements/e2e.in
 pytest-variables==1.9.0
     # via pytest-selenium
-python-dotenv==0.19.0
+python-dotenv==0.19.1
     # via -r requirements/e2e.in
 pytz==2016.10
     # via
@@ -148,13 +153,13 @@ stevedore==3.4.0
     #   edx-django-utils
 tenacity==6.3.1
     # via pytest-selenium
+toml==0.10.2
+    # via pytest
 urllib3==1.26.7
     # via
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   requests
     #   selenium
-wcwidth==0.2.5
-    # via pytest
 zipp==3.6.0
     # via importlib-metadata
