@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 from typing import Optional
+from urllib.parse import urlparse
 
 import jwt
 import jwt.exceptions
@@ -155,7 +156,8 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.flex_shared_secret_key_id = configuration.get('flex_shared_secret_key_id')
         self.flex_shared_secret_key = configuration.get('flex_shared_secret_key')
         if self.site.siteconfiguration.payment_microfrontend_url:
-            self.flex_target_origin = self.site.siteconfiguration.payment_microfrontend_url.rstrip('/')
+            payment_mfe_url = self.site.siteconfiguration.payment_microfrontend_url
+            self.flex_target_origin = f"{urlparse(payment_mfe_url).scheme}://{urlparse(payment_mfe_url).hostname}"
         else:
             self.flex_target_origin = None
 
