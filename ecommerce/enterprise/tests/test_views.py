@@ -111,6 +111,7 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'contract_discount_type': 'Absolute',
             'contract_discount_value': 200,
             'prepaid_invoice_amount': 2000,
+            'sales_force_id': '006abcde0123456789',
             'usage_email_frequency': ConditionalOffer.DAILY
         }
         response = self.client.post(self.path, data, follow=False)
@@ -131,7 +132,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         expected_discount_value = 2000
         expected_discount_type = 'Absolute'
         expected_prepaid_invoice_amount = 12345
-        sales_force_id = 'salesforceid123'
+        sales_force_id = '006abcde0123456789'
         data = {
             'enterprise_customer_uuid': expected_ec_uuid,
             'enterprise_customer_catalog_uuid': expected_ec_catalog_uuid,

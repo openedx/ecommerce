@@ -3,6 +3,7 @@
 
 
 import decimal
+import re
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -14,6 +15,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.enterprise.benefits import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
 from ecommerce.enterprise.utils import convert_comma_separated_string_to_list, get_enterprise_customer
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
@@ -45,7 +47,7 @@ class EnterpriseOfferForm(forms.ModelForm):
     prepaid_invoice_amount = forms.DecimalField(
         required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Prepaid Invoice Amount')
     )
-    sales_force_id = forms.CharField(max_length=30, required=False, label=_('Salesforce Opportunity ID'))
+    sales_force_id = forms.CharField(max_length=30, required=True, label=_('Salesforce Opportunity ID'))
     emails_for_usage_alert = forms.CharField(
         required=False,
         label=_("Emails Addresses"),
@@ -148,6 +150,16 @@ class EnterpriseOfferForm(forms.ModelForm):
                 )
 
         return self.cleaned_data.get('max_global_applications')
+
+    def clean_sales_force_id(self):
+        # validate sales_force_id format
+        sales_force_id = self.cleaned_data.get('sales_force_id')
+        if not re.match(ENTERPRISE_SALES_FORCE_ID_REGEX, sales_force_id):
+            self.add_error(
+                'sales_force_id',
+                _('Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.')
+            )
+        return self.cleaned_data.get('sales_force_id')
 
     def clean_max_discount(self):
         max_discount = self.cleaned_data.get('max_discount')
