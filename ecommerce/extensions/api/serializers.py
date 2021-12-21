@@ -32,6 +32,7 @@ from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
+from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
 from ecommerce.enterprise.utils import (
     get_enterprise_customer_reply_to_email,
     get_enterprise_customer_sender_alias,
@@ -1385,7 +1386,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
         Validate sales_force_id format
         """
         sales_force_id = self.initial_data.get('sales_force_id')
-        if sales_force_id and not re.match(r'^006[a-zA-Z0-9]{15}$|^none$', sales_force_id):
+        if sales_force_id and not re.match(ENTERPRISE_SALES_FORCE_ID_REGEX, sales_force_id):
             raise ValidationError({
                 'sales_force_id': 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'
             })
