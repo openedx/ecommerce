@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Fabian Hamza <translations_2@camara.ie>, 2017
 # Innocent Masue <translations_7@camara.ie>, 2017
 # Isihaka Issa <translations_8@camara.ie>, 2017
@@ -20,7 +21,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
+"POT-Creation-Date: 2021-12-26 20:12+0000\n"
 "PO-Revision-Date: 2020-11-24 09:15+0000\n"
 "Last-Translator: Transifex Bot <>\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
@@ -58,23 +59,23 @@ msgstr "Hii sehemu inatakiwa ibaki wazi au ijazwe maneno 1-16 yenye mchanganyiko
 msgid "Email domain {%s} is invalid."
 msgstr "Miliki ya barua pepe {%s} siyo sahihi."
 
-#: ecommerce/static/js/models/coupon_model.js:101
+#: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
 msgstr "Lazima itokee baada ya tarehe ya kuanza"
 
-#: ecommerce/static/js/models/coupon_model.js:131
+#: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "                                                                                                                                                      Kiwango cha juu kwa watumiaji wenye kuponi kiwe zaidi ya 2."
 
-#: ecommerce/static/js/models/coupon_model.js:155
+#: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
 msgstr "Lazima itokee kabla ya tarehe ya kumalizia"
 
-#: ecommerce/static/js/models/coupon_model.js:177
+#: ecommerce/static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
 msgstr "Kitambulisho cha kozi sahihi kinahitajika. "
 
-#: ecommerce/static/js/models/coupon_model.js:191
+#: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
 msgstr "Programu Halali za UUID zinahitajika."
 
