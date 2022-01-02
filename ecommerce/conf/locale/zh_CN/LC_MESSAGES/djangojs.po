@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # abby li <yc.li@eliteu.cn>, 2018-2019
 # 759b81c7bb2252a11f36c89344f31007, 2016
 # hohomi <hohomi@gmail.com>, 2016
@@ -19,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
+"POT-Creation-Date: 2022-01-02 20:12+0000\n"
 "PO-Revision-Date: 2020-11-24 09:15+0000\n"
 "Last-Translator: Transifex Bot <>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
@@ -57,23 +58,23 @@ msgstr "此字段必须为空或介于1-16 个字母数字字符之间。"
 msgid "Email domain {%s} is invalid."
 msgstr "邮箱域名 {%s}无效。"
 
-#: ecommerce/static/js/models/coupon_model.js:101
+#: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
 msgstr "应在开始日期之后"
 
-#: ecommerce/static/js/models/coupon_model.js:131
+#: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "可重复使用的优惠券的最大使用量必须大于2。"
 
-#: ecommerce/static/js/models/coupon_model.js:155
+#: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
 msgstr "应在结束日期之前"
 
-#: ecommerce/static/js/models/coupon_model.js:177
+#: ecommerce/static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
 msgstr "需要一个有效的课程编号"
 
-#: ecommerce/static/js/models/coupon_model.js:191
+#: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
 msgstr "需要一个有效的专业课程编号。"
 
