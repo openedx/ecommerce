@@ -18,7 +18,7 @@ asn1crypto==1.4.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-astroid==2.9.2
+astroid==2.8.6
     # via
     #   -r requirements/test.txt
     #   pylint
@@ -325,7 +325,7 @@ factory-boy==2.12.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
-faker==11.1.0
+faker==11.3.0
     # via
     #   -r requirements/test.txt
     #   factory-boy
@@ -594,7 +594,7 @@ pyjwt[crypto]==1.7.1
     #   edx-auth-backends
     #   edx-rest-api-client
     #   social-auth-core
-pylint==2.12.2
+pylint==2.11.0
     # via -r requirements/test.txt
 pymongo==4.0.1
     # via
@@ -721,7 +721,7 @@ redis==4.1.0
     # via
     #   -r requirements/test.txt
     #   edx-ecommerce-worker
-requests==2.27.0
+requests==2.27.1
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt

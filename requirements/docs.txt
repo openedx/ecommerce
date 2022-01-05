@@ -36,7 +36,7 @@ pytz==2016.10
     # via
     #   -c requirements/pins.txt
     #   babel
-requests==2.27.0
+requests==2.27.1
     # via sphinx
 six==1.16.0
     # via edx-sphinx-theme

@@ -120,7 +120,7 @@ pytz==2016.10
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   django
-requests==2.27.0
+requests==2.27.1
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
