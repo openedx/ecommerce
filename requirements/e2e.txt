@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-attrs==21.2.0
+attrs==21.4.0
     # via
     #   -c requirements/base.txt
     #   pytest
@@ -16,7 +16,7 @@ cffi==1.15.0
     # via
     #   -c requirements/base.txt
     #   cryptography
-charset-normalizer==2.0.7
+charset-normalizer==2.0.10
     # via
     #   -c requirements/base.txt
     #   requests
@@ -25,7 +25,7 @@ cryptography==3.4.8
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   pyjwt
-django==2.2.24
+django==2.2.26
     # via
     #   -c requirements/base.txt
     #   django-crum
@@ -38,11 +38,11 @@ django-waffle==2.2.1
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-edx-django-utils==4.4.0
+edx-django-utils==4.4.1
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-edx-rest-api-client==5.4.0
+edx-rest-api-client==5.4.1
     # via
     #   -c requirements/base.txt
     #   -r requirements/e2e.in
@@ -51,19 +51,19 @@ idna==2.7
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   requests
-importlib-metadata==4.8.1
+importlib-metadata==4.10.0
     # via pytest-randomly
 iniconfig==1.1.1
     # via pytest
-newrelic==7.2.2.169
+newrelic==7.2.4.171
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-packaging==21.2
+packaging==21.3
     # via
     #   -c requirements/base.txt
     #   pytest
-pbr==5.7.0
+pbr==5.8.0
     # via
     #   -c requirements/base.txt
     #   stevedore
@@ -71,13 +71,13 @@ pluggy==0.13.1
     # via
     #   -c requirements/pins.txt
     #   pytest
-psutil==5.8.0
+psutil==5.9.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-py==1.10.0
+py==1.11.0
     # via pytest
-pycparser==2.20
+pycparser==2.21
     # via
     #   -c requirements/base.txt
     #   cffi
@@ -85,7 +85,7 @@ pyjwt[crypto]==1.7.1
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-pyparsing==2.4.7
+pyparsing==3.0.6
     # via
     #   -c requirements/base.txt
     #   packaging
@@ -105,22 +105,22 @@ pytest-html==3.1.1
     # via pytest-selenium
 pytest-metadata==1.11.0
     # via pytest-html
-pytest-randomly==3.10.1
+pytest-randomly==3.10.3
     # via -r requirements/e2e.in
 pytest-selenium==2.0.1
     # via -r requirements/e2e.in
-pytest-timeout==2.0.1
+pytest-timeout==2.0.2
     # via -r requirements/e2e.in
 pytest-variables==1.9.0
     # via pytest-selenium
-python-dotenv==0.19.1
+python-dotenv==0.19.2
     # via -r requirements/e2e.in
 pytz==2016.10
     # via
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   django
-requests==2.26.0
+requests==2.27.0
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
@@ -158,5 +158,5 @@ urllib3==1.26.7
     #   -c requirements/pins.txt
     #   requests
     #   selenium
-zipp==3.6.0
+zipp==3.7.0
     # via importlib-metadata
