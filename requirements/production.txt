@@ -212,7 +212,7 @@ edx-drf-extensions==6.6.0
     #   -c requirements/pins.txt
     #   -r requirements/base.in
     #   edx-rbac
-edx-ecommerce-worker==3.1.0
+edx-ecommerce-worker==3.1.1
     # via -r requirements/base.in
 edx-opaque-keys==2.2.2
     # via
