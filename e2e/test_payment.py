@@ -130,7 +130,7 @@ class TestSeatPayment:
         ))
 
         # Wait till the selector is visible
-        WebDriverWait(selenium, 40).until(  # @TODO: put wait back to 20 after REV-2493 investigation
+        WebDriverWait(selenium, 20).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, page_css_selector))
         )
 
