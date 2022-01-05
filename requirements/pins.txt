@@ -32,6 +32,7 @@ virtualenv==16.7.9
 # newer version seems to be causing failures
 # if tox -e py35-django22-pylint passes after
 # removing this pin, then this pin can be removed.
+# test comment
 pylint==2.4.4
 
 # greater versions failing with extract-translations step.
