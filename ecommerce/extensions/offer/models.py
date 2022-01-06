@@ -155,7 +155,7 @@ class Benefit(AbstractBenefit):
                         'User: %s, Offer: %s, Basket: %s, Message: %s',
                         basket.owner.username, offer.id, basket.id, err
                     )
-                    raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.')
+                    raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.') from err
 
                 logger.info(
                     "Discovery Service results for basket: [%s], offer: [%s], query: '%s', response: %s",
@@ -492,7 +492,7 @@ class Range(AbstractRange):
             logger.exception('[Code Redemption Failure] Unable to connect to the Discovery Service '
                              'for catalog contains endpoint. '
                              'Product: %s, Message: %s, Range: %s', product.id, exc, self.id)
-            raise Exception('Unable to connect to Discovery Service for catalog contains endpoint.')
+            raise Exception('Unable to connect to Discovery Service for catalog contains endpoint.') from exc
 
     def contains_product(self, product):
         """

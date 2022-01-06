@@ -54,10 +54,10 @@ class Command(BaseCommand):
             stock_record = StockRecord.objects.get(partner_sku=sku)
             product = stock_record.product
             partner = stock_record.partner
-        except StockRecord.DoesNotExist:
+        except StockRecord.DoesNotExist as stock_record_no_exist:
             msg = 'No StockRecord for partner_sku {} exists.'.format(sku)
             logger.exception(msg)
-            raise CommandError(msg)
+            raise CommandError(msg) from stock_record_no_exist
 
         site = partner.default_site
         if not site:

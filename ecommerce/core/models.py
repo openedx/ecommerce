@@ -234,7 +234,7 @@ class SiteConfiguration(models.Model):
                     self.site.id,
                     name
                 )
-                raise ValidationError(str(exc))
+                raise ValidationError(str(exc)) from exc
 
     def _clean_client_side_payment_processor(self):
         """

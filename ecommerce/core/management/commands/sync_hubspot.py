@@ -525,4 +525,4 @@ class Command(BaseCommand):
                         self._call_sync_errors_messages_endpoint(site_configuration)
         except Exception as ex:
             traceback.print_exc()
-            raise CommandError('Command failed with traceback %s' % str(ex))
+            raise CommandError('Command failed with traceback %s' % str(ex)) from ex

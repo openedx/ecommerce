@@ -1045,9 +1045,9 @@ class VoucherAddLogicMixin:
     def _get_voucher(self, code):
         try:
             return self.voucher_model._default_manager.get(code=code)  # pylint: disable=protected-access
-        except self.voucher_model.DoesNotExist:
+        except self.voucher_model.DoesNotExist as voucher_no_exist:
             messages.error(self.request, _("Coupon code '{code}' does not exist.").format(code=code))
-            raise VoucherException()
+            raise VoucherException() from voucher_no_exist
 
 
 class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disable=function-redefined

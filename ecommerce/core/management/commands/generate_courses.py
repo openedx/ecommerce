@@ -42,10 +42,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             courses = json.loads(options["courses_json"])["courses"]
-        except ValueError:
-            raise CommandError("Invalid JSON object")
-        except KeyError:
-            raise CommandError("JSON object is missing courses list")
+        except ValueError as value_error:
+            raise CommandError("Invalid JSON object") from value_error
+        except KeyError as key_error:
+            raise CommandError("JSON object is missing courses list") from key_error
 
         Flag.objects.update_or_create(name='enable_client_side_checkout', defaults={'everyone': True})
         for course_settings in courses:
