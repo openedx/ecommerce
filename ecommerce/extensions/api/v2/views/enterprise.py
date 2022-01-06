@@ -577,9 +577,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
             no_voucher_application,
             user_email=user_email,
             status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING], )
-            .distinct()  # pylint: disable=bad-continuation
-            .prefetch_related('offer', 'offer__vouchers', )  # pylint: disable=bad-continuation
-            .values_list('offer__vouchers__id', flat=True)]  # pylint: disable=bad-continuation
+            .distinct()
+            .prefetch_related('offer', 'offer__vouchers', )
+            .values_list('offer__vouchers__id', flat=True)]
         # We also want vouchers with VoucherApplications related to the user
         # but only if the user exists (there is a chance it does not, as code
         # assignment only requires an email, and not an account on the system)
