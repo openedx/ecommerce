@@ -873,8 +873,8 @@ class EnrollmentCodeCsvViewTests(TestCase):
         self.assertEqual(response['location'], get_lms_url('dashboard'))
 
     @ddt.data(
-        u'Plain English product title',
-        u'Unicode product títle 可以用“我不太懂艺术 但我知道我喜欢什么”做比喻'
+        'Plain English product title',
+        'Unicode product títle 可以用“我不太懂艺术 但我知道我喜欢什么”做比喻'
     )
     def test_successful_response(self, product_title):
         """ Verify a successful response is returned. """

@@ -105,7 +105,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         response = self.client.get(self.path)
         self.assertContains(
             response,
-            u"An error has occurred. We could not confirm that you are eligible for course credit."
+            "An error has occurred. We could not confirm that you are eligible for course credit."
         )
 
     def _assert_error_without_providers(self):
@@ -115,8 +115,8 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         response = self.client.get(self.path)
         self.assertContains(
             response,
-            u"An error has occurred. We could not confirm that the institution you selected offers "
-            u"this course credit."
+            "An error has occurred. We could not confirm that the institution you selected offers "
+            "this course credit."
         )
 
     def _assert_success_checkout_page(self, sku=None):

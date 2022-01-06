@@ -312,7 +312,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         # Truncate 'enterprise_customer_name' to 48 characters so that our complete name with
         # format 'Discount of type {site} provided by {enterprise_name} for {catalog_uuid}. does
         # not exceed the limit of 128 characters for Oscar's 'AbstractConditionalOffer' name.
-        offer_name = _(u'Discount of type {} provided by {} for {}.'.format(
+        offer_name = _('Discount of type {} provided by {} for {}.'.format(
             ConditionalOffer.SITE,
             enterprise_customer_name[:48],  # pylint: disable=unsubscriptable-object,
             enterprise_customer_catalog_uuid
