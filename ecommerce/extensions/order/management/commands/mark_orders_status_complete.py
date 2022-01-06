@@ -83,7 +83,7 @@ class Command(BaseCommand):
                     'Pass the correct absolute path to order numbers file as --order-numbers-file argument.'
                 )
 
-            order_numbers_file = open(order_numbers_file, 'rb')
+            order_numbers_file = open(order_numbers_file, 'rb')  # pylint: disable=consider-using-with
 
         order_numbers = order_numbers_file.readlines()
         total_orders, failed_orders, skipped_orders = self._mark_orders_status_complete_from_file(

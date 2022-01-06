@@ -1722,8 +1722,7 @@ class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: d
         try:
             order = Order.objects.get(number=order)
         except Order.DoesNotExist as order_no_exist:
-            # pylint: disable=line-too-long
-            raise serializers.ValidationError(_('Invalid order number or order {} does not exists.').format(order)) from order_no_exist
+            raise serializers.ValidationError(_('Invalid order number or order {} does not exists.').format(order)) from order_no_exist  # pylint: disable=line-too-long
         return order
 
     def create(self, validated_data):
