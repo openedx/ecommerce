@@ -201,9 +201,9 @@ class CybersourceMixin(PaymentEventsMixin):
 
         for filename in files:
             path = os.path.join(os.path.dirname(__file__), filename)
-            body = open(path, 'r').read()
-            url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource']['soap_api_url'], filename)
-            responses.add(responses.GET, url, body=body)
+            with open(path, 'r').read() as body:
+                url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource']['soap_api_url'], filename)
+                responses.add(responses.GET, url, body=body)
 
     def mock_refund_response(self, amount=Decimal(100), currency=CURRENCY, transaction_id=None, basket_id=None,
                              decision='ACCEPT'):
