@@ -123,7 +123,7 @@ class Command(BaseCommand):
             configuration_data = json.loads(
                 json.dumps(
                     json.load(
-                        open(config_file)
+                        open(config_file)  # pylint: consider-using-with
                     )
                 ).replace("{dns_name}", self.dns_name)
             )['ecommerce_configuration']

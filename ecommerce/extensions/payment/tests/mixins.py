@@ -201,7 +201,7 @@ class CybersourceMixin(PaymentEventsMixin):
 
         for filename in files:
             path = os.path.join(os.path.dirname(__file__), filename)
-            with open(path, 'r').read() as body:
+            with open(path, 'r').read() as body:  # pylint: disable=unspecified-encoding
                 url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource']['soap_api_url'], filename)
                 responses.add(responses.GET, url, body=body)
 
