@@ -17,7 +17,7 @@ class LineInlineExtended(LineInline):
     raw_id_fields = ['stockrecord', 'product', ]
 
     def get_queryset(self, request):
-        queryset = super(LineInlineExtended, self).get_queryset(request)
+        queryset = super().get_queryset(request)
         queryset = queryset.select_related('partner', 'stockrecord', 'product', )
         return queryset
 

@@ -20,13 +20,13 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
     path = reverse('programs:offers:list')
 
     def setUp(self):
-        super(ProgramOfferListViewTests, self).setUp()
+        super().setUp()
 
         httpretty.enable()
         self.mock_access_token_response()
 
     def tearDown(self):
-        super(ProgramOfferListViewTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 
@@ -75,7 +75,7 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
 
 class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
     def setUp(self):
-        super(ProgramOfferUpdateViewTests, self).setUp()
+        super().setUp()
         self.program_offer = factories.ProgramOfferFactory(partner=self.partner)
         self.path = reverse('programs:offers:edit', kwargs={'pk': self.program_offer.pk})
 
@@ -86,7 +86,7 @@ class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         )
 
     def tearDown(self):
-        super(ProgramOfferUpdateViewTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 

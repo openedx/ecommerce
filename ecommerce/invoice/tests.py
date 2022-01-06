@@ -11,7 +11,7 @@ from ecommerce.tests.testcases import TestCase
 class InvoiceTests(TestCase):
     """Test to ensure Invoice objects are created correctly"""
     def setUp(self):
-        super(InvoiceTests, self).setUp()
+        super().setUp()
         self.basket = create_basket(owner=UserFactory(), empty=True)
         self.basket.order = factories.OrderFactory()
         self.basket.save()

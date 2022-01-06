@@ -15,7 +15,7 @@ class UpdateSiteOauthSettingsCommandTests(TestCase):
     command_name = 'update_site_oauth_settings'
 
     def setUp(self):
-        super(UpdateSiteOauthSettingsCommandTests, self).setUp()
+        super().setUp()
 
         self.partner = 'fake'
         self.lms_url_root = 'http://fake.server'

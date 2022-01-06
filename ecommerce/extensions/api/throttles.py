@@ -14,4 +14,4 @@ class ServiceUserThrottle(UserRateThrottle):
         service_users = [settings.ECOMMERCE_SERVICE_WORKER_USERNAME, settings.PROSPECTUS_WORKER_USERNAME]
         if request.user.username in service_users:
             return True
-        return super(ServiceUserThrottle, self).allow_request(request, view)
+        return super().allow_request(request, view)

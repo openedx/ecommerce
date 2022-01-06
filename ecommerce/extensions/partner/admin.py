@@ -27,7 +27,7 @@ class CatalogAdmin(admin.ModelAdmin):
             context['adminform'].form.fields['partner'].help_text = _(
                 u"Click 'Save and Continue Editing' to add stock records"
             )
-        return super(CatalogAdmin, self).render_change_form(request, context, *args, **kwargs)
+        return super().render_change_form(request, context, *args, **kwargs)
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(self.readonly_fields)
@@ -45,7 +45,7 @@ class CatalogAdmin(admin.ModelAdmin):
                 # To assign it an empty queryset just filter with id=None
                 kwargs['queryset'] = StockRecord.objects.none()
 
-        return super(CatalogAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_object_updated(self, request, model):
         object_id = request.META['PATH_INFO'].strip('/').split('/')[-2]

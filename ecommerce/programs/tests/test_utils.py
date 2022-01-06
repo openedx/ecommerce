@@ -21,7 +21,7 @@ LOGGER_NAME = 'ecommerce.programs.utils'
 @ddt.ddt
 class UtilTests(ProgramTestMixin, TestCase):
     def setUp(self):
-        super(UtilTests, self).setUp()
+        super().setUp()
         self.program_uuid = uuid.uuid4()
         self.discovery_api_url = self.site.siteconfiguration.discovery_api_url
 

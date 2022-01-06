@@ -16,7 +16,7 @@ from ecommerce.tests.testcases import TestCase
 @ddt.ddt
 class UtilTests(TestCase):
     def setUp(self):
-        super(UtilTests, self).setUp()
+        super().setUp()
         self.credit_provider_id = 'HGW'
         self.credit_provider_name = 'Hogwarts'
         self.body = {'display_name': self.credit_provider_name}

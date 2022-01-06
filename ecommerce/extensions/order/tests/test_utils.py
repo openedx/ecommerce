@@ -85,7 +85,7 @@ class OrderCreatorTests(TestCase):
     order_creator = OrderCreator()
 
     def setUp(self):
-        super(OrderCreatorTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.country = Country.objects.create(printable_name='Fake', name='fake')
         self.shipping_address = ShippingAddress.objects.create(line1='Fake Address', country=self.country)
@@ -194,7 +194,7 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
     Tests for Util class UserAlreadyPlacedOrder
     """
     def setUp(self):
-        super(UserAlreadyPlacedOrderTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.order = create_order(site=self.site, user=self.user)
         self.product = self.get_order_product()

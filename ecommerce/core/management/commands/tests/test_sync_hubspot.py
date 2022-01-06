@@ -31,7 +31,7 @@ class TestSyncHubspotCommand(TestCase):
     hubspot_site_configuration = None
 
     def setUp(self):
-        super(TestSyncHubspotCommand, self).setUp()
+        super().setUp()
         self.hubspot_site_configuration = SiteConfigurationFactory.create(
             hubspot_secret_key='test_key',
         )

@@ -14,7 +14,7 @@ class UserAdminTests(TestCase):
     user_page_url = reverse('admin:core_user_changelist')
 
     def setUp(self):
-        super(UserAdminTests, self).setUp()
+        super().setUp()
         self.user = UserFactory(is_staff=True, is_superuser=True, password=self.password)
         self.client.login(username=self.user.username, password=self.password)
 

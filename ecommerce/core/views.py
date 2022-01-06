@@ -105,7 +105,7 @@ class StaffOnlyMixin:
         if not request.user.is_staff:
             raise Http404
 
-        return super(StaffOnlyMixin, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class LogoutView(EdxOAuth2LogoutView):

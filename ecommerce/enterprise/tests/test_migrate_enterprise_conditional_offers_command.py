@@ -35,7 +35,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         """
         Create test data.
         """
-        super(MigrateEnterpriseConditionalOffersTests, self).setUp()
+        super().setUp()
 
         # Set up vouchers that relate to a range with a enterprise_customer
         uuid = '123e4567-e89b-12d3-a456-426655440000'

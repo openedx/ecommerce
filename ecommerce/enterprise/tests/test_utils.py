@@ -51,7 +51,7 @@ TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 @httpretty.activate
 class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
     def setUp(self):
-        super(EnterpriseUtilsTests, self).setUp()
+        super().setUp()
         self.learner = self.create_user(is_staff=True)
         self.client.login(username=self.learner.username, password=self.password)
 

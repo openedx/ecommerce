@@ -125,8 +125,8 @@ class EnterpriseOfferForm(forms.ModelForm):
                 'contract_discount_value': contract_discount_value,
                 'prepaid_invoice_amount': prepaid_invoice_amount,
             })
-        super(EnterpriseOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
-                                                  empty_permitted, instance)
+        super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
+                         empty_permitted, instance)
 
         date_ui_class = {'class': 'add-pikaday'}
         self.fields['start_datetime'].widget.attrs.update(date_ui_class)
@@ -247,7 +247,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         return emails_for_usage_alert
 
     def clean(self):
-        cleaned_data = super(EnterpriseOfferForm, self).clean()
+        cleaned_data = super().clean()
 
         start_datetime = cleaned_data.get('start_datetime')
         end_datetime = cleaned_data.get('end_datetime')
@@ -362,4 +362,4 @@ class EnterpriseOfferForm(forms.ModelForm):
                     enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
                 )
 
-        return super(EnterpriseOfferForm, self).save(commit)
+        return super().save(commit)

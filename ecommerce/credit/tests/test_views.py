@@ -32,7 +32,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
     """Test for Checkout page"""
 
     def setUp(self):
-        super(CheckoutPageTest, self).setUp()
+        super().setUp()
 
         user = self.create_user(is_superuser=False)
         self.create_access_token(user)

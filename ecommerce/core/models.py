@@ -309,7 +309,7 @@ class SiteConfiguration(models.Model):
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         # Clear Site cache upon SiteConfiguration changed
         Site.objects.clear_cache()
-        super(SiteConfiguration, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def build_ecommerce_url(self, path=''):
         """
@@ -661,7 +661,7 @@ class User(AbstractUser):
         return None, None
 
     def get_full_name(self):
-        return self.full_name or super(User, self).get_full_name()
+        return self.full_name or super().get_full_name()
 
     def account_details(self, request):
         """ Returns the account details from LMS.
@@ -769,7 +769,7 @@ class BusinessClient(models.Model):
             log_message_and_raise_validation_error(
                 'Failed to create BusinessClient. BusinessClient name may not be empty.'
             )
-        super(BusinessClient, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class EcommerceFeatureRole(UserRole):

@@ -16,7 +16,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
     command_name = 'create_or_update_site'
 
     def setUp(self):
-        super(CreateOrUpdateSiteCommandTests, self).setUp()
+        super().setUp()
 
         self.partner = 'fake'
         self.lms_url_root = 'http://fake.server'

@@ -22,7 +22,7 @@ from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, S
 class DiscoveryMockMixin:
     """ Mocks for the Discovery service response. """
     def setUp(self):
-        super(DiscoveryMockMixin, self).setUp()
+        super().setUp()
         TieredCache.dangerous_clear_all_tiers()
 
     @staticmethod
@@ -433,7 +433,7 @@ class CouponMixin(SiteMixin):
     REDEMPTION_URL = "/coupons/offer/?code={}"
 
     def setUp(self):
-        super(CouponMixin, self).setUp()
+        super().setUp()
         self.category = factories.CategoryFactory()
 
         # Force the creation of a coupon ProductClass

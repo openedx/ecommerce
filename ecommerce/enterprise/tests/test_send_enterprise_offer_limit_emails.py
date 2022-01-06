@@ -28,7 +28,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
         """
         Create test data.
         """
-        super(SendEnterpriseOfferLimitEmailsTests, self).setUp()
+        super().setUp()
 
         EnterpriseOfferFactory(max_global_applications=10)
         EnterpriseOfferFactory(max_discount=100)

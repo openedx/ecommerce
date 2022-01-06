@@ -16,7 +16,7 @@ from ecommerce.tests.testcases import TestCase
 @ddt.ddt
 class DefaultStrategyTests(DiscoveryTestMixin, TestCase):
     def setUp(self):
-        super(DefaultStrategyTests, self).setUp()
+        super().setUp()
         self.strategy = DefaultStrategy()
         course = CourseFactory(id='a/b/c', name='Demo Course', partner=self.partner)
         self.honor_seat = course.create_or_update_seat('honor', False, 0)

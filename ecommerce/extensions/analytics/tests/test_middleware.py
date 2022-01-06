@@ -18,7 +18,7 @@ class TrackingMiddlewareTests(TestCase):
     MODEL_LOGGER_NAME = 'ecommerce.core.models'
 
     def setUp(self):
-        super(TrackingMiddlewareTests, self).setUp()
+        super().setUp()
         self.middleware = middleware.TrackingMiddleware()
         self.request_factory = RequestFactory()
         self.user = self.create_user()

@@ -49,7 +49,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
-        return super(FreeCheckoutView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
         request = self.request
@@ -105,7 +105,7 @@ class CancelCheckoutView(TemplateView):
         """
         Request needs to be csrf_exempt to handle POST back from external payment processor.
         """
-        return super(CancelCheckoutView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
@@ -115,7 +115,7 @@ class CancelCheckoutView(TemplateView):
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
-        context = super(CancelCheckoutView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update({
             'payment_support_email': self.request.site.siteconfiguration.payment_support_email,
         })
@@ -132,7 +132,7 @@ class CheckoutErrorView(TemplateView):
         """
         Request needs to be csrf_exempt to handle POST back from external payment processor.
         """
-        return super(CheckoutErrorView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
@@ -142,7 +142,7 @@ class CheckoutErrorView(TemplateView):
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
-        context = super(CheckoutErrorView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update({
             'payment_support_email': self.request.site.siteconfiguration.payment_support_email,
         })
@@ -157,11 +157,11 @@ class ReceiptResponseView(ThankYouView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
         """ Customers should only be able to view their receipts when logged in. """
-        return super(ReceiptResponseView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         try:
-            response = super(ReceiptResponseView, self).get(request, *args, **kwargs)
+            response = super().get(request, *args, **kwargs)
         except Http404:
             self.template_name = 'edx/checkout/receipt_not_found.html'
             context = {
@@ -174,7 +174,7 @@ class ReceiptResponseView(ThankYouView):
         return response
 
     def get_context_data(self, **kwargs):  # pylint: disable=arguments-differ
-        context = super(ReceiptResponseView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         order = context[self.context_object_name]
         context['order_product_ids'] = ','.join(map(str, order.lines.values_list('product_id', flat=True)))
         has_enrollment_code_product = False

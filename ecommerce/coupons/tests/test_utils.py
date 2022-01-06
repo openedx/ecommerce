@@ -30,7 +30,7 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
         """
         Setup variables for test cases.
         """
-        super(CouponUtilsTests, self).setUp()
+        super().setUp()
 
         self.user = self.create_user(email='test@tester.fake')
         self.request.user = self.user

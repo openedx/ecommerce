@@ -490,7 +490,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     has_active_bulk_enrollment_code = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
-        super(CourseSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # NOTE: All normal initializations of the serializer will include a context kwarg.
         # We use dict.get() here because Swagger does not include context when generating docs.
@@ -621,7 +621,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     products = serializers.ListField()
 
     def __init__(self, *args, **kwargs):
-        super(AtomicPublicationSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.partner = kwargs['context'].pop('partner', None)
 
     def validate_products(self, products):
@@ -865,7 +865,7 @@ class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
         return ''
 
     def get_redemptions(self, obj):
-        redemptions = super(NotAssignedCodeUsageSerializer, self).get_redemptions(obj)
+        redemptions = super().get_redemptions(obj)
         return dict(redemptions, num_assignments=self.num_assignments(code=self.get_code(obj)))
 
 
@@ -874,7 +874,7 @@ class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
     def get_redemptions(self, obj):
         usage_type = self.context.get('usage_type')
         if usage_type in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
-            return super(NotRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+            return super().get_redemptions(obj)
 
         num_assignments = self.num_assignments(code=self.get_code(obj), user_email=self.get_assigned_to(obj))
         return {'used': 0, 'total': num_assignments}
@@ -888,7 +888,7 @@ class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disabl
             return {}
 
         if usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
-            return super(PartialRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+            return super().get_redemptions(obj)
 
         num_assignments = self.num_assignments(code=self.get_code(obj), user_email=self.get_assigned_to(obj))
         num_applications = VoucherApplication.objects.filter(
@@ -1095,7 +1095,7 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         return max_uses_per_code * voucher_count
 
     def to_representation(self, coupon):  # pylint: disable=arguments-differ
-        representation = super(EnterpriseCouponOverviewListSerializer, self).to_representation(coupon)
+        representation = super().to_representation(coupon)
 
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         voucher = vouchers.first()
@@ -1400,7 +1400,7 @@ class CouponUpdateSerializer(CouponSerializer):
         """
         Validates the data.
         """
-        validated_data = super(CouponUpdateSerializer, self).validate(attrs)
+        validated_data = super().validate(attrs)
         # Validate max_uses
         max_uses = self.initial_data.get('max_uses')
         if max_uses is not None:
@@ -1428,7 +1428,7 @@ class EnterpriseCouponCreateSerializer(CouponSerializer):
         """
         Validates the data.
         """
-        validated_data = super(EnterpriseCouponCreateSerializer, self).validate(attrs)
+        validated_data = super().validate(attrs)
 
         # Validate sales_force_id
         sales_force_id = self.initial_data.get('sales_force_id')
@@ -1448,7 +1448,7 @@ class EnterpriseCouponUpdateSerializer(CouponUpdateSerializer):
         """
         Validates the data.
         """
-        validated_data = super(EnterpriseCouponUpdateSerializer, self).validate(attrs)
+        validated_data = super().validate(attrs)
 
         # Validate sales_force_id
         sales_force_id = self.initial_data.get('sales_force_id')

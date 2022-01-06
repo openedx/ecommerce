@@ -33,7 +33,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     path = reverse('checkout:free-checkout')
 
     def setUp(self):
-        super(FreeCheckoutViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.bundle_attribute_value = TEST_BUNDLE_ID
         self.client.login(username=self.user.username, password=self.password)
@@ -113,7 +113,7 @@ class CancelCheckoutViewTests(TestCase):
     path = reverse('checkout:cancel-checkout')
 
     def setUp(self):
-        super(CancelCheckoutViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -147,7 +147,7 @@ class CheckoutErrorViewTests(TestCase):
     path = reverse('checkout:error')
 
     def setUp(self):
-        super(CheckoutErrorViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -184,7 +184,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     path = reverse('checkout:receipt')
 
     def setUp(self):
-        super(ReceiptResponseViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         # Note: actual response is far more rich. Just including the bits relevant to us

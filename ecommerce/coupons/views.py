@@ -102,7 +102,7 @@ class CouponAppView(StaffOnlyMixin, TemplateView):
     template_name = 'coupons/coupon_app.html'
 
     def get_context_data(self, **kwargs):
-        context = super(CouponAppView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['admin'] = 'coupon'
         return context
 
@@ -125,7 +125,7 @@ class CouponOfferView(TemplateView):
         if not valid_voucher:
             return {'error': msg, 'hide_error_message': hide_error_message}
 
-        context_data = super(CouponOfferView, self).get_context_data(**kwargs)
+        context_data = super().get_context_data(**kwargs)
         context_data.update(get_enterprise_customer_consent_failed_context_data(self.request, voucher))
 
         if context_data and 'error' not in context_data:
@@ -141,7 +141,7 @@ class CouponOfferView(TemplateView):
     @method_decorator(login_required_for_credit)
     def get(self, request, *args, **kwargs):
         """Get method for coupon redemption page."""
-        return super(CouponOfferView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
 
 class CouponRedeemView(EdxOrderPlacementMixin, APIView):
@@ -306,7 +306,7 @@ class EnrollmentCodeCsvView(View):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
-        return super(EnrollmentCodeCsvView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, number):
         """

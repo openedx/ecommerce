@@ -29,7 +29,7 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
 
     def setUp(self):
-        super(EnterpriseOfferFormTests, self).setUp()
+        super().setUp()
         self.contract_discount_type = EnterpriseContractMetadata.PERCENTAGE
         self.contract_discount_value = 74
         self.prepaid_invoice_amount = 998990

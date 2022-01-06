@@ -39,7 +39,7 @@ class EcommerceUserAdmin(UserAdmin):
             self.message_user(request, msg, level=messages.WARNING)
             return User.objects.none()
 
-        return super(EcommerceUserAdmin, self).get_queryset(request)
+        return super().get_queryset(request)
 
 
 @admin.register(BusinessClient)

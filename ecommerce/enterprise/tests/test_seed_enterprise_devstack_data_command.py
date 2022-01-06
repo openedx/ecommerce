@@ -32,7 +32,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         """
         Set up initial data (e.g., site configuration, category) prior to running tests
         """
-        super(SeedEnterpriseDevstackDataTests, self).setUp()
+        super().setUp()
         self.site_config = SiteConfigurationFactory.create(
             oauth_settings=self.site_oauth_settings,
         )

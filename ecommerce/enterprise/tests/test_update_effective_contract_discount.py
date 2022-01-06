@@ -25,7 +25,7 @@ class UpdateEffectiveContractDiscountTests(TestCase):
         """
         Create test data.
         """
-        super(UpdateEffectiveContractDiscountTests, self).setUp()
+        super().setUp()
 
         # Set up orders with a enterprise_customer
         self.enterprise_customer_uuid = '123e4567-e89b-12d3-a456-426655440000'

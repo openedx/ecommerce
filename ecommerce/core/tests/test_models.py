@@ -48,13 +48,13 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     LOGGER_NAME = 'ecommerce.core.models'
 
     def setUp(self):
-        super(UserTests, self).setUp()
+        super().setUp()
 
         httpretty.enable()
         self.mock_access_token_response()
 
     def tearDown(self):
-        super(UserTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 
