@@ -130,7 +130,7 @@ class BasketAttributeType(models.Model):
     name = models.CharField(_("Name"), max_length=128, unique=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class BasketAttribute(models.Model):
