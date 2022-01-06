@@ -277,12 +277,12 @@ class SDNFallbackData(models.Model):
         try:
             current_metadata = SDNFallbackMetadata.objects.get(import_state='Current')
         # The 'get' relies on the manage command having been run. If it fails, tell engineer what's needed
-        except SDNFallbackMetadata.DoesNotExist:
+        except SDNFallbackMetadata.DoesNotExist as fallback_metadata_no_exist:
             logger.warning(
                 "SDNFallback: SDNFallbackMetadata is empty! Run this: "
                 "./manage.py populate_sdn_fallback_data_and_metadata"
             )
-            raise SDNFallbackDataEmptyError
+            raise SDNFallbackDataEmptyError from fallback_metadata_no_exist
         query_params = {'source': source, 'sdn_fallback_metadata': current_metadata, 'sdn_type': sdn_type}
         return SDNFallbackData.objects.filter(**query_params)
 

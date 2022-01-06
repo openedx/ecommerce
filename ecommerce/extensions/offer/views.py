@@ -49,7 +49,7 @@ class EmailConfirmationRequiredView(TemplateView):
                         course_id,
                         exc
                     )
-                    raise Http404
+                    raise Http404 from exc
             else:
                 course_run = get_object_or_404(Course, id=course_run_key)
                 course_keys.append(course_run.name)

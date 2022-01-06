@@ -554,10 +554,10 @@ class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, EdxOrderPl
 
         try:
             billing_address = self._get_billing_address(request.data.get('billingContact'))
-        except Exception:
+        except Exception as this_exception:
             logger.exception(
                 'Failed to authorize Apple Pay payment. An error occurred while parsing the billing address.')
-            raise ValidationError({'error': 'billing_address_invalid'})
+            raise ValidationError({'error': 'billing_address_invalid'}) from this_exception
 
         try:
             self.handle_payment(None, basket)

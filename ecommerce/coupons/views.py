@@ -337,8 +337,8 @@ class EnrollmentCodeCsvView(View):
         """
         try:
             order = Order.objects.get(number=number)
-        except Order.DoesNotExist:
-            raise Http404('Order not found.')
+        except Order.DoesNotExist as order_no_exist:
+            raise Http404('Order not found.') from order_no_exist
 
         if request.user != order.user and not request.user.is_staff:
             raise PermissionDenied

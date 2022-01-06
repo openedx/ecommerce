@@ -625,8 +625,9 @@ def validate_voucher_fields(
             )
         try:
             int(max_uses)
-        except ValueError:
-            raise log_message_and_raise_validation_error('Failed to create Voucher. max_uses field must be a number.')
+        except ValueError as value_error:
+            # pylint: disable=raising-bad-type, line-too-long
+            raise log_message_and_raise_validation_error('Failed to create Voucher. max_uses field must be a number.') from value_error
 
     if benefit_type == Benefit.PERCENTAGE and benefit_value == 100 and code:
         log_message_and_raise_validation_error('Failed to create Voucher. Code may not be set for enrollment coupon.')
