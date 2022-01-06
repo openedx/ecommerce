@@ -38,7 +38,7 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
     def create_course_ids_file(self, file_path, course_ids):
         """Write the course_ids list to the temp file."""
 
-        with open(file_path, 'w') as temp_file:
+        with open(file_path, 'w') as temp_file:  # pylint: disable=unspecified-encoding
             temp_file.write("\n".join(course_ids))
 
     @ddt.data("", "fake/path")

@@ -125,7 +125,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
         """Create csv with enterprise uuid and opportunity id"""
         tmp_csv_path = os.path.join(tempfile.gettempdir(), 'data.csv')
 
-        with open(tmp_csv_path, 'w') as csv_file:
+        with open(tmp_csv_path, 'w') as csv_file:  # pylint: disable=unspecified-encoding
             csv_writer = csv.DictWriter(csv_file, fieldnames=['enterprise_customer_uuid', 'opportunity_id'])
             csv_writer.writeheader()
             for enterprise_customer, opportunity_id in self.enterprise_without_opportunity_ids.items():
@@ -154,7 +154,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
         ]
 
         tmp_csv_path = os.path.join(tempfile.gettempdir(), 'multi_contracts_data.csv')
-        with open(tmp_csv_path, 'w') as csv_file:
+        with open(tmp_csv_path, 'w') as csv_file:  # pylint: disable=unspecified-encoding
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow(header_row)
 

@@ -129,8 +129,8 @@ class BasketAttributeType(models.Model):
     """
     name = models.CharField(_("Name"), max_length=128, unique=True)
 
-    def __str__(self):
-        return str(self.name)
+    def __str__(self):  # pylint: disable=invalid-str-returned
+        return self.name
 
 
 class BasketAttribute(models.Model):

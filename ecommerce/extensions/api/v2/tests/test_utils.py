@@ -97,4 +97,4 @@ class ViewUtilsTests(TestCase):
             assert '[upload_files_for_enterprise_coupons] Raised an error while uploading the files,Message' \
                    in mock_logger.exception.call_args[0][0]
             assert 'Invalid bucket name ' in str(mock_logger.exception.call_args[0][1])
-            assert not ret
+            assert ret == []  # pylint: disable=use-implicit-booleaness-not-comparison

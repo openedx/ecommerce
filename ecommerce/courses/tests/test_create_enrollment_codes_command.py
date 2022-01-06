@@ -64,7 +64,7 @@ class CreateEnrollmentCodesTests(DiscoveryTestMixin, TransactionTestCase):
         """
         Write the course_ids list to the temp file.
         """
-        with open(file_path, 'w') as temp_file:
+        with open(file_path, 'w') as temp_file:  # pylint: disable=unspecified-encoding
             temp_file.write(str("\n".join(course_ids)))
 
     def test_invalid_file_path(self):

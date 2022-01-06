@@ -102,7 +102,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             msg = 'An error occurred while attempting to issue a credit (via Stripe) for order [{}].'.format(
                 order_number)
             logger.exception(msg)
-            raise GatewayError(msg) # pylint: disable=raise-missing-from
+            raise GatewayError(msg)  # pylint: disable=raise-missing-from
 
         transaction_id = refund.id
 

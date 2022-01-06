@@ -58,7 +58,7 @@ def silence_exceptions(msg):
 
     def decorator(func):  # pylint: disable=missing-docstring
         @wraps(func)
-        def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
+        def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring, inconsistent-return-statements
             try:
                 return func(*args, **kwargs)
             except:  # pylint: disable=bare-except

@@ -114,7 +114,7 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
 
     def create_orders_file(self, orders, filename):
         """Create a file with order numbers - one per line"""
-        with open(filename, 'w') as f:
+        with open(filename, 'w') as f:  # pylint: disable=unspecified-encoding
             for response_order in orders:
                 order = Order.objects.get(number=response_order['detail'])
                 # add to order numbers file

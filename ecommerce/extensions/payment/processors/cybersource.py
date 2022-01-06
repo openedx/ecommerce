@@ -505,7 +505,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
                 }, transaction_id=None, basket=basket)
                 logger.exception('Payment failed')
                 # This will display the generic error on the frontend
-                raise GatewayError() from e
+                raise GatewayError()  # pylint: disable=raise-missing-from
             return e, e.headers['v-c-correlation-id']
 
     def normalize_processor_response(self, response) -> UnhandledCybersourceResponse:
