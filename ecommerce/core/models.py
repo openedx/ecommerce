@@ -762,7 +762,7 @@ class BusinessClient(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         if not self.name:
