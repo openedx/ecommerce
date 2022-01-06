@@ -211,24 +211,26 @@ class EnterpriseOfferForm(forms.ModelForm):
         # validate against non-decimal and negative values
         if max_user_discount is not None and (isinstance(max_user_discount, decimal.Decimal) and max_user_discount < 0):
             self.add_error('max_user_discount', _('Ensure this value is greater than or equal to 0.'))
-        elif self.instance.pk and self.instance.max_user_discount:  # validate against when decrease the existing value
+        elif self.instance.pk:  # validate against when decrease the existing value
             new_max_user_discount = max_user_discount or 0
-            # calculates the maximum user discount consumed by any user out of the user bookings limit
-            refunded_order_ids = self._get_refunded_order_ids()
-            max_discount_used_any_user = OrderDiscount.objects.filter(offer_id=self.instance.id).select_related(
-                'order').filter(order__status=ORDER.COMPLETE).exclude(
-                    order_id__in=refunded_order_ids).values('order__user_id').order_by('order__user_id').annotate(
-                        user_discount_sum=Sum('amount')).aggregate(
-                            Max('user_discount_sum'))['user_discount_sum__max'] or 0
-            if new_max_user_discount < max_discount_used_any_user:
-                self.add_error(
-                    'max_user_discount',
-                    _(
-                        'Ensure new value must be greater than or equal to consumed({consumed_discount:.2f}) value.'
-                    ).format(
-                        consumed_discount=max_discount_used_any_user
+            # we only need to do validation if new max_user_discount value is less then existing value
+            if self.instance.max_user_discount and new_max_user_discount < self.instance.max_user_discount:
+                # calculates the maximum user discount consumed by any user out of the user bookings limit
+                refunded_order_ids = self._get_refunded_order_ids()
+                max_discount_used_any_user = OrderDiscount.objects.filter(offer_id=self.instance.id).select_related(
+                    'order').filter(order__status=ORDER.COMPLETE).exclude(
+                        order_id__in=refunded_order_ids).values('order__user_id').order_by('order__user_id').annotate(
+                            user_discount_sum=Sum('amount')).aggregate(
+                                Max('user_discount_sum'))['user_discount_sum__max'] or 0
+                if new_max_user_discount < max_discount_used_any_user:
+                    self.add_error(
+                        'max_user_discount',
+                        _(
+                            'Ensure new value must be greater than or equal to consumed({consumed_discount:.2f}) value.'
+                        ).format(
+                            consumed_discount=max_discount_used_any_user
+                        )
                     )
-                )
 
         return max_user_discount
 
