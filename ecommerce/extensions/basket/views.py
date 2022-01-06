@@ -424,7 +424,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             code = request.GET.get('code', None)
             try:
                 voucher = self._get_voucher(request)
-            except Voucher.DoesNotExist as e:  # pragma: nocover
+            except Voucher.DoesNotExist:  # pragma: nocover
                 # Display an error message when an invalid code is passed as a parameter
                 invalid_code = code
 
