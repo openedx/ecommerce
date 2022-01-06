@@ -19,8 +19,8 @@ if not all([OAUTH_ACCESS_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET]):
 
 try:
     ECOMMERCE_URL_ROOT = os.environ.get('ECOMMERCE_URL_ROOT').strip('/')
-except AttributeError:
-    raise RuntimeError('A valid URL root for the E-Commerce Service is required.')
+except AttributeError as attribute_error:
+    raise RuntimeError('A valid URL root for the E-Commerce Service is required.') from attribute_error
 
 ECOMMERCE_API_URL = os.environ.get('ECOMMERCE_API_URL', ECOMMERCE_URL_ROOT + '/api/v2')
 ECOMMERCE_TEST_WEB_SECURITY = os.environ.get('ECOMMERCE_TEST_WEB_SECURITY')
@@ -37,13 +37,13 @@ except AttributeError:
 
 try:
     LMS_URL_ROOT = os.environ.get('LMS_URL_ROOT').strip('/')
-except AttributeError:
-    raise RuntimeError('A valid LMS URL root is required.')
+except AttributeError as attribute_error:
+    raise RuntimeError('A valid LMS URL root is required.') from attribute_error
 
 try:
     DISCOVERY_API_URL_ROOT = os.environ.get('DISCOVERY_API_URL_ROOT').strip('/')
-except AttributeError:
-    raise RuntimeError('Discovery API URL root is required.')
+except AttributeError as attribute_error:
+    raise RuntimeError('Discovery API URL root is required.') from attribute_error
 
 LMS_USERNAME = os.environ.get('LMS_USERNAME')
 LMS_EMAIL = os.environ.get('LMS_EMAIL')

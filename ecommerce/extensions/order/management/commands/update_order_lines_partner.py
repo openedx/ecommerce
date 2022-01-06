@@ -48,10 +48,10 @@ class Command(BaseCommand):
 
         try:
             partner = Partner.objects.get(short_code__iexact=partner_code)
-        except Partner.DoesNotExist:
+        except Partner.DoesNotExist as partner_no_exist:
             msg = 'No Partner exists for code {}.'.format(partner_code)
             logger.exception(msg)
-            raise CommandError(msg)
+            raise CommandError(msg) from partner_no_exist
 
         order_lines = OrderLine.objects.filter(partner_sku__in=skus).exclude(partner=partner)
         count = len(order_lines)

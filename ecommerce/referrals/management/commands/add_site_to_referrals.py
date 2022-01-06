@@ -28,10 +28,10 @@ class Command(BaseCommand):
 
         try:
             site = Site.objects.get(id=options['site_id'])
-        except Site.DoesNotExist:
+        except Site.DoesNotExist as site_no_exist:
             msg = 'A valid Site ID must be specified!'
             self.stderr.write(msg)
-            raise CommandError(msg)
+            raise CommandError(msg) from site_no_exist
 
         if options['commit']:
             self.stdout.write('Associating [{}] referrals with site [{}]...'.format(count, site))

@@ -19,10 +19,10 @@ def get_product(sku):
     """Retrieve the product corresponding to the provided SKU."""
     try:
         return Product.objects.get(stockrecords__partner_sku=sku)
-    except Product.DoesNotExist:
+    except Product.DoesNotExist as product_no_exist:
         raise exceptions.ProductNotFoundError(
             exceptions.PRODUCT_NOT_FOUND_DEVELOPER_MESSAGE.format(sku=sku)
-        )
+        ) from product_no_exist
 
 
 def get_order_metadata(basket):

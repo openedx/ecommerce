@@ -213,36 +213,36 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 course_seat_types = prepare_course_seat_types(course_seat_types)
             except (AttributeError, TypeError) as exception:
                 validation_message = 'Invalid course seat types data: {}'.format(str(exception))
-                raise ValidationError(validation_message)
+                raise ValidationError(validation_message) from exception
 
         try:
             category = Category.objects.get(name=category_data['name'])
-        except Category.DoesNotExist:
+        except Category.DoesNotExist as category_no_exist:
             validation_message = 'Category "{category_name}" not found.'.format(category_name=category_data['name'])
             # FIXME 404 is the wrong response code to use here.
-            raise ValidationError(validation_message, code=status.HTTP_404_NOT_FOUND)
-        except (KeyError, TypeError):
+            raise ValidationError(validation_message, code=status.HTTP_404_NOT_FOUND) from category_no_exist
+        except (KeyError, TypeError) as key_type_errors:
             validation_message = 'Invalid Coupon Category data.'
-            raise ValidationError(validation_message)
+            raise ValidationError(validation_message) from key_type_errors
 
         try:
             course_catalog = course_catalog_data['id'] if course_catalog_data else None
-        except (KeyError, TypeError):
+        except (KeyError, TypeError) as key_type_errors:
             validation_message = 'Unexpected catalog data format received for coupon.'
-            raise ValidationError(validation_message)
+            raise ValidationError(validation_message) from key_type_errors
 
         try:
             enterprise_customer = enterprise_customer_data['id'] if enterprise_customer_data else None
             enterprise_customer_name = enterprise_customer_data.get('name') if enterprise_customer_data else None
-        except (KeyError, TypeError):
+        except (KeyError, TypeError) as key_type_errors:
             validation_message = 'Unexpected EnterpriseCustomer data format received for coupon.'
-            raise ValidationError(validation_message)
+            raise ValidationError(validation_message) from key_type_errors
 
         if notify_email:
             try:
                 validate_email(notify_email)
-            except ValidationError:
-                raise ValidationError('Notification email must be a valid email address.')
+            except ValidationError as validation_error:
+                raise ValidationError('Notification email must be a valid email address.') from validation_error
 
         coupon_catalog = cls.get_coupon_catalog(stock_record_ids, partner)
 
@@ -294,9 +294,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
                     validation_message = 'Course mode not supported'
                     raise ValidationError(validation_message)
-            except AttributeError:
+            except AttributeError as attribute_error:
                 validation_message = 'Course mode not supported'
-                raise ValidationError(validation_message)
+                raise ValidationError(validation_message) from attribute_error
 
         stock_records_string = ' '.join(str(id) for id in stock_record_ids)
         coupon_catalog, __ = get_or_create_catalog(

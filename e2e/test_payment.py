@@ -64,7 +64,7 @@ class TestSeatPayment:
                         EC.element_to_be_clickable((locator_type, selector))
                     )
                 except:
-                    raise Exception('Timeout exception with locator (%s, %s).' % (locator_type, selector))
+                    raise Exception('Timeout exception with locator (%s, %s).' % (locator_type, selector))   # pylint: disable=raise-missing-from
 
                 select = Select(element)
                 select.select_by_value(value)
