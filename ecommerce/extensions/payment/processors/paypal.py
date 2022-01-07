@@ -387,7 +387,7 @@ class Paypal(BasePaymentProcessor):
             msg = 'An error occurred while attempting to issue a credit (via PayPal) for order [{}].'.format(
                 order_number)
             logger.exception(msg)
-            raise GatewayError(msg)
+            raise GatewayError(msg)  # pylint: disable=raise-missing-from
 
         if refund.success():
             transaction_id = refund.id

@@ -59,10 +59,10 @@ class Command(BaseCommand):
 
         try:
             paypal_configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner.lower()][self.PAYPAL_CONFIG_KEY.lower()]
-        except KeyError:
+        except KeyError as key_error:
             raise CommandError(
                 "Payment Processor configuration for partner `{0}` does not contain PayPal settings".format(partner)
-            )
+            ) from key_error
 
         # Initialize the PayPal REST SDK
         paypalrestsdk.configure({
@@ -73,10 +73,10 @@ class Command(BaseCommand):
 
         try:
             handler = getattr(self, 'handle_{}'.format(action))
-        except IndexError:
-            raise CommandError("no action specified.")
-        except AttributeError:
-            raise CommandError("unrecognized action: {}".format(action))
+        except IndexError as index_error:
+            raise CommandError("no action specified.") from index_error
+        except AttributeError as attribute_error:
+            raise CommandError("unrecognized action: {}".format(action)) from attribute_error
         return handler(options)
 
     def _do_create(self, profile_data):
@@ -115,14 +115,14 @@ class Command(BaseCommand):
                 log.info("Enabled profile `%s` (id=%s)", profile_name, profile_id)
             else:
                 log.info("Profile `%s` (id=%s) is already enabled", profile_name, profile_id)
-        except IntegrityError:
+        except IntegrityError as integrity_error:
             # this should never happen, unless the data in the database has gotten out of
             # sync with the profiles stored in the PayPal account that this application
             # instance has been configured to use.
             raise CommandError(
                 "Could not enable web profile because a profile with the same name exists under "
                 "a different id.  This may indicate a configuration error, or simply stale data."
-            )
+            ) from integrity_error
 
     def handle_list(self, args):  # pylint: disable=unused-argument
         """Wrapper for paypalrestsdk List operation."""
