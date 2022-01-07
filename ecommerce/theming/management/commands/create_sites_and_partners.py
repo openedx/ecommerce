@@ -124,6 +124,7 @@ class Command(BaseCommand):
                 json.dumps(
                     json.load(
                         open(config_file)  # pylint: disable=unspecified-encoding
+                    )
                 ).replace("{dns_name}", self.dns_name)
             )['ecommerce_configuration']
 
