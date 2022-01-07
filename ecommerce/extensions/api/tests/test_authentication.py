@@ -31,7 +31,7 @@ class BearerAuthenticationTests(TestCase):
     """ Tests for the BearerAuthentication class. """
 
     def setUp(self):
-        super(BearerAuthenticationTests, self).setUp()
+        super().setUp()
         self.auth = BearerAuthentication()
         self.factory = RequestFactory()
 

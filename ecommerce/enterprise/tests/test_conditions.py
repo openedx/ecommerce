@@ -45,7 +45,7 @@ LOGGER_NAME = 'ecommerce.programs.conditions'
 @ddt.ddt
 class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def setUp(self):
-        super(EnterpriseCustomerConditionTests, self).setUp()
+        super().setUp()
         self.user = UserFactory()
         self.condition = factories.EnterpriseCustomerConditionFactory()
 
@@ -655,7 +655,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
 @ddt.ddt
 class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, CouponMixin, TestCase):
     def setUp(self):
-        super(AssignableEnterpriseCustomerConditionTests, self).setUp()
+        super().setUp()
         self.condition = factories.AssignableEnterpriseCustomerConditionFactory()
 
     def create_data(self, voucher_type, max_uses, assignments):

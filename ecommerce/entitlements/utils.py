@@ -25,7 +25,7 @@ def create_parent_course_entitlement(name, UUID):
         attributes__name='UUID',
         attribute_values__value_text=UUID,
         defaults={
-            'title': 'Parent Course Entitlement for {}'.format(name),
+            'title': f'Parent Course Entitlement for {name}',
             'is_discountable': True,
         },
     )
@@ -68,7 +68,7 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
 
     course_entitlement.structure = Product.CHILD
     course_entitlement.is_discountable = True
-    course_entitlement.title = 'Course {}'.format(title)
+    course_entitlement.title = f'Course {title}'
     course_entitlement.attr.certificate_type = certificate_type
     course_entitlement.attr.UUID = UUID
     course_entitlement.attr.id_verification_required = id_verification_required

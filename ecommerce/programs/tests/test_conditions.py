@@ -23,7 +23,7 @@ LOGGER_NAME = 'ecommerce.programs.conditions'
 @ddt.ddt
 class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def setUp(self):
-        super(ProgramCourseRunSeatsConditionTests, self).setUp()
+        super().setUp()
         self.condition = factories.ProgramCourseRunSeatsConditionFactory()
         self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
         self.site.siteconfiguration.enable_partial_program = True

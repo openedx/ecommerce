@@ -29,7 +29,7 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
 
     def setUp(self):
-        super(EnterpriseOfferFormTests, self).setUp()
+        super().setUp()
         self.contract_discount_type = EnterpriseContractMetadata.PERCENTAGE
         self.contract_discount_value = 74
         self.prepaid_invoice_amount = 998990
@@ -268,9 +268,9 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         enterprise_customer_uuid = uuid.uuid4()
         data = self.generate_data(
             enterprise_customer_uuid=enterprise_customer_uuid,
-            enterprise_customer_name=u'Sp\xe1nish Enterprise',
+            enterprise_customer_name='Sp\xe1nish Enterprise',
         )
-        self.mock_specific_enterprise_customer_api(data['enterprise_customer_uuid'], name=u'Sp\xe1nish Enterprise')
+        self.mock_specific_enterprise_customer_api(data['enterprise_customer_uuid'], name='Sp\xe1nish Enterprise')
         form = EnterpriseOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()

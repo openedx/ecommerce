@@ -181,7 +181,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
     credit_seat = None
 
     def setUp(self):
-        super(CouponOfferViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -319,7 +319,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     redeem_url = reverse('coupons:redeem')
 
     def setUp(self):
-        super(CouponRedeemViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(email='test@tester.fake')
         self.client.login(username=self.user.username, password=self.password)
         self.course_mode = 'verified'
@@ -854,7 +854,7 @@ class EnrollmentCodeCsvViewTests(TestCase):
     path = 'coupons:enrollment_code_csv'
 
     def setUp(self):
-        super(EnrollmentCodeCsvViewTests, self).setUp()
+        super().setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -873,8 +873,8 @@ class EnrollmentCodeCsvViewTests(TestCase):
         self.assertEqual(response['location'], get_lms_url('dashboard'))
 
     @ddt.data(
-        u'Plain English product title',
-        u'Unicode product títle 可以用“我不太懂艺术 但我知道我喜欢什么”做比喻'
+        'Plain English product title',
+        'Unicode product títle 可以用“我不太懂艺术 但我知道我喜欢什么”做比喻'
     )
     def test_successful_response(self, product_title):
         """ Verify a successful response is returned. """

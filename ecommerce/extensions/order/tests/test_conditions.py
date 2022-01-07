@@ -20,7 +20,7 @@ class ManualEnrollmentOrderDiscountConditionTests(TestCase):
     Test the `ManualEnrollmentOrderDiscountCondition` functionality.
     """
     def setUp(self):
-        super(ManualEnrollmentOrderDiscountConditionTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(is_staff=True)
         self.learner = self.create_user(username='learner', is_staff=False)
         self.condition = ManualEnrollmentOrderDiscountConditionFactory()

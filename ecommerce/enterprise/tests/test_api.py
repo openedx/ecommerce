@@ -26,7 +26,7 @@ StockRecord = get_model('partner', 'StockRecord')
 @httpretty.activate
 class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
-        super(EnterpriseAPITests, self).setUp()
+        super().setUp()
         self.course_run = CourseFactory()
         self.learner = self.create_user(is_staff=True)
         self.client.login(username=self.learner.username, password=self.password)

@@ -38,7 +38,7 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
         """
         Setup the test data
         """
-        super(SendCodeAssignmentNudgeEmailsTests, self).setUp()
+        super().setUp()
         # Create a voucher with valid offer so we can get
         self.voucher = VoucherFactory()
         self.voucher.offers.add(EnterpriseOfferFactory(max_global_applications=98))

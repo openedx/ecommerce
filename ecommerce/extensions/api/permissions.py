@@ -26,7 +26,7 @@ class CanActForUser(permissions.IsAdminUser):
         if not username:
             return False
 
-        return super(CanActForUser, self).has_permission(request, view) or (user and user.username == username)
+        return super().has_permission(request, view) or (user and user.username == username)
 
 
 class IsOffersOrIsAuthenticatedAndStaff(permissions.BasePermission):
@@ -55,7 +55,7 @@ class IsStaffOrModelPermissionsOrAnonReadOnly(permissions.DjangoModelPermissions
     """
     def has_permission(self, request, view):
         user = request.user
-        return user.is_staff or super(IsStaffOrModelPermissionsOrAnonReadOnly, self).has_permission(request, view)
+        return user.is_staff or super().has_permission(request, view)
 
 
 class CanReplaceUsername(permissions.BasePermission):

@@ -27,7 +27,7 @@ class EnterpriseDiscountMixinTests(EnterpriseDiscountTestMixin, TestCase):
     """
 
     def setUp(self):
-        super(EnterpriseDiscountMixinTests, self).setUp()
+        super().setUp()
         course = CourseFactory(id='edX/DemoX/Demo_Course', name='Demo Course', partner=self.partner)
         user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)

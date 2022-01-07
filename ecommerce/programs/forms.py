@@ -46,15 +46,15 @@ class ProgramOfferForm(forms.ModelForm):
                 'benefit_type': instance.benefit.proxy().benefit_class_type,
                 'benefit_value': instance.benefit.value,
             })
-        super(ProgramOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
-                                               empty_permitted, instance)
+        super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
+                         empty_permitted, instance)
 
         date_ui_class = {'class': 'add-pikaday'}
         self.fields['start_datetime'].widget.attrs.update(date_ui_class)
         self.fields['end_datetime'].widget.attrs.update(date_ui_class)
 
     def clean(self):
-        cleaned_data = super(ProgramOfferForm, self).clean()
+        cleaned_data = super().clean()
 
         start_datetime = cleaned_data.get('start_datetime')
         end_datetime = cleaned_data.get('end_datetime')
@@ -87,7 +87,7 @@ class ProgramOfferForm(forms.ModelForm):
 
         client = ProgramsApiClient(site.siteconfiguration.discovery_api_client, site.domain)
         program = client.get_program(program_uuid)
-        offer_name = _(u'{current_date} Discount for the {program_title} {program_type} Program'.format(
+        offer_name = _('{current_date} Discount for the {program_title} {program_type} Program'.format(
             current_date=current_date,
             program_title=program['title'],
             program_type=program['type']
@@ -115,4 +115,4 @@ class ProgramOfferForm(forms.ModelForm):
             else:
                 self.instance.condition = create_condition(ProgramCourseRunSeatsCondition, program_uuid=program_uuid)
 
-        return super(ProgramOfferForm, self).save(commit)
+        return super().save(commit)

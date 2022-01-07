@@ -54,7 +54,7 @@ class EnterpriseServiceMockMixin:
     )
 
     def setUp(self):
-        super(EnterpriseServiceMockMixin, self).setUp()
+        super().setUp()
         self.course_run = CourseFactory()
 
     def mock_enterprise_customer_list_api_get(self):
@@ -607,7 +607,7 @@ class EnterpriseDiscountTestMixin:
     """
 
     def setUp(self):
-        super(EnterpriseDiscountTestMixin, self).setUp()
+        super().setUp()
         self.discount_offer = self._create_enterprise_offer()
 
     @staticmethod

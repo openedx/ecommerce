@@ -18,7 +18,7 @@ class DeactivateSuperUsersTest(TestCase):
     LOGGER = 'ecommerce.core.management.commands.deactivate_superusers.logger'
 
     def setUp(self):
-        super(DeactivateSuperUsersTest, self).setUp()
+        super().setUp()
         __ = SuperUserFactory()
 
     def _assert_superusers(self, expected_count):

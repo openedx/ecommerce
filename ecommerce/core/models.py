@@ -309,7 +309,7 @@ class SiteConfiguration(models.Model):
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         # Clear Site cache upon SiteConfiguration changed
         Site.objects.clear_cache()
-        super(SiteConfiguration, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def build_ecommerce_url(self, path=''):
         """
@@ -498,7 +498,7 @@ class User(AbstractUser):
     lms_user_id = models.IntegerField(
         null=True,
         blank=True,
-        help_text=_(u'LMS user id'),
+        help_text=_('LMS user id'),
     )
 
     class Meta:
@@ -517,7 +517,7 @@ class User(AbstractUser):
             edx-oauth2  person@edx.org  123
         """
         try:
-            return self.social_auth.order_by('-id').first().extra_data[u'access_token']  # pylint: disable=no-member
+            return self.social_auth.order_by('-id').first().extra_data['access_token']  # pylint: disable=no-member
         except Exception:  # pylint: disable=broad-except
             return None
 
@@ -587,11 +587,11 @@ class User(AbstractUser):
         # Could not find the lms_user_id
         if allow_missing:
             monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
-            log.info(u'Could not find lms_user_id with metric for user %s for %s. Missing lms_user_id is allowed.',
+            log.info('Could not find lms_user_id with metric for user %s for %s. Missing lms_user_id is allowed.',
                      self.id, usage, exc_info=True)
         else:
             monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
-            log.warning(u'Could not find lms_user_id with metric for user %s for %s.', self.id, usage, exc_info=True)
+            log.warning('Could not find lms_user_id with metric for user %s for %s.', self.id, usage, exc_info=True)
 
         return None
 
@@ -619,7 +619,7 @@ class User(AbstractUser):
             if lms_user_id_social_auth:
                 self.lms_user_id = lms_user_id_social_auth
                 self.save()
-                log.info(u'Saving lms_user_id from social auth with id %s for user %s. Called from %s', social_auth_id,
+                log.info('Saving lms_user_id from social auth with id %s for user %s. Called from %s', social_auth_id,
                          self.id, called_from)
             else:
                 # Could not find the LMS user id
@@ -627,14 +627,14 @@ class User(AbstractUser):
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
                     monitoring_utils.set_custom_metric(missing_metric_key + '_allowed', self.id)
 
-                    error_msg = (u'Could not find lms_user_id for user {user_id}. Missing lms_user_id is allowed. '
-                                 u'Called from {called_from}'.format(user_id=self.id, called_from=called_from))
+                    error_msg = ('Could not find lms_user_id for user {user_id}. Missing lms_user_id is allowed. '
+                                 'Called from {called_from}'.format(user_id=self.id, called_from=called_from))
                     log.info(error_msg, exc_info=True)
                 else:
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
                     monitoring_utils.set_custom_metric(missing_metric_key, self.id)
 
-                    error_msg = u'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
+                    error_msg = 'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
                         user_id=self.id, called_from=called_from)
                     log.error(error_msg, exc_info=True)
 
@@ -653,15 +653,15 @@ class User(AbstractUser):
             auth_entries = self.social_auth.order_by('-id')
             if auth_entries:
                 for auth_entry in auth_entries:
-                    lms_user_id_social_auth = auth_entry.extra_data.get(u'user_id')
+                    lms_user_id_social_auth = auth_entry.extra_data.get('user_id')
                     if lms_user_id_social_auth:
                         return lms_user_id_social_auth, auth_entry.id
         except Exception:  # pylint: disable=broad-except
-            log.warning(u'Exception retrieving lms_user_id from social_auth for user %s.', self.id, exc_info=True)
+            log.warning('Exception retrieving lms_user_id from social_auth for user %s.', self.id, exc_info=True)
         return None, None
 
     def get_full_name(self):
-        return self.full_name or super(User, self).get_full_name()
+        return self.full_name or super().get_full_name()
 
     def account_details(self, request):
         """ Returns the account details from LMS.
@@ -769,7 +769,7 @@ class BusinessClient(models.Model):
             log_message_and_raise_validation_error(
                 'Failed to create BusinessClient. BusinessClient name may not be empty.'
             )
-        super(BusinessClient, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class EcommerceFeatureRole(UserRole):

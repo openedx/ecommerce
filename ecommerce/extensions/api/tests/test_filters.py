@@ -14,7 +14,7 @@ class ProductFilterTests(DiscoveryTestMixin, TestCase):
     """ Tests for ProductFilter. """
 
     def setUp(self):
-        super(ProductFilterTests, self).setUp()
+        super().setUp()
         self.filter = ProductFilter()
 
     def test_filter_product_class(self):

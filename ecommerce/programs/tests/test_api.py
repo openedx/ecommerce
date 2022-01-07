@@ -12,14 +12,14 @@ from ecommerce.tests.testcases import TestCase
 
 class ProgramsApiClientTests(ProgramTestMixin, TestCase):
     def setUp(self):
-        super(ProgramsApiClientTests, self).setUp()
+        super().setUp()
 
         httpretty.enable()
         self.mock_access_token_response()
         self.client = ProgramsApiClient(self.site.siteconfiguration.discovery_api_client, self.site.domain)
 
     def tearDown(self):
-        super(ProgramsApiClientTests, self).tearDown()
+        super().tearDown()
         httpretty.disable()
         httpretty.reset()
 

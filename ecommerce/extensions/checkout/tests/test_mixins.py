@@ -65,7 +65,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
     """
 
     def setUp(self):
-        super(EdxOrderPlacementMixinTests, self).setUp()
+        super().setUp()
         self.user = UserFactory(lms_user_id=61710)
         self.order = self.create_order(status=ORDER.OPEN)
 

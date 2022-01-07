@@ -28,7 +28,7 @@ class Checkout(TemplateView):
     CREDIT_MODE = 'credit'
 
     def get_context_data(self, **kwargs):
-        context = super(Checkout, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         course = get_object_or_404(Course, id=kwargs.get('course_id'))
         context['course'] = course
@@ -90,7 +90,7 @@ class Checkout(TemplateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        return super(Checkout, self).get(request, args, **kwargs)
+        return super().get(request, args, **kwargs)
 
     def _check_credit_eligibility(self, user, course_key):
         """ Check that the user is eligible for credit.

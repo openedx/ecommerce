@@ -59,7 +59,7 @@ def get_catalog_course_runs(site, query, limit=None, offset=None):
     """
     api_resource_name = 'course_runs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = u'{site_domain}_{partner_code}_{resource}_{query}_{limit}_{offset}'.format(
+    cache_key = '{site_domain}_{partner_code}_{resource}_{query}_{limit}_{offset}'.format(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=api_resource_name,

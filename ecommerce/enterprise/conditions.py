@@ -336,7 +336,7 @@ class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
         Returns:
             bool
         """
-        condition_satisfied = super(AssignableEnterpriseCustomerCondition, self).is_satisfied(offer, basket)
+        condition_satisfied = super().is_satisfied(offer, basket)
         if condition_satisfied is False:
             return False
 

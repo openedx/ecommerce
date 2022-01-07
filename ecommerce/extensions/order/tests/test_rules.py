@@ -12,7 +12,7 @@ from ecommerce.tests.testcases import TestCase
 class OrderRulesTests(TestCase, JwtMixin):
 
     def setUp(self):
-        super(OrderRulesTests, self).setUp()
+        super().setUp()
         self.user = UserFactory(is_staff=True, is_superuser=False, password=self.password)
         self.client.login(username=self.user.username, password=self.password)
         self.role = EcommerceFeatureRole.objects.get(name=ORDER_MANAGER_ROLE)

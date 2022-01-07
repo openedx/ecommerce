@@ -26,7 +26,7 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
     Test the `create_refund_for_orders` command.
     """
     def setUp(self):
-        super(CreateRefundForOrdersTests, self).setUp()
+        super().setUp()
         self.url = reverse('api:v2:manual-course-enrollment-order-list')
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)

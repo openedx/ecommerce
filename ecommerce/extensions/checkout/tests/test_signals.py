@@ -36,7 +36,7 @@ LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 
 class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
     def setUp(self):
-        super(SignalTests, self).setUp()
+        super().setUp()
         self.user = self.create_user(email="example@example.com")
         self.request.user = self.user
         toggle_switch('ENABLE_NOTIFICATIONS', True)

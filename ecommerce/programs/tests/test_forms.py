@@ -95,7 +95,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         data = self.generate_data()
         self.mock_program_detail_endpoint(data['program_uuid'],
                                           self.site_configuration.discovery_api_url,
-                                          title=u'Sp\xe1nish Program')
+                                          title='Sp\xe1nish Program')
         form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()

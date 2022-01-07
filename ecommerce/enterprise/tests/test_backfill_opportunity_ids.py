@@ -22,7 +22,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
     Test the `backfill_opportunity_ids` command.
     """
     def setUp(self):
-        super(BackfillOpportunityIdsCommandTests, self).setUp()
+        super().setUp()
 
         # coupons and offers created for these enterprises are missing opportunity ids in database
         self.enterprise_without_opportunity_ids = {

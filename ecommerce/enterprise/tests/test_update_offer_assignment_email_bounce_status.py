@@ -23,7 +23,7 @@ class UpdateOfferAssignmentEmailBounceStatusTests(TestCase):
         """
         Setup the test data
         """
-        super(UpdateOfferAssignmentEmailBounceStatusTests, self).setUp()
+        super().setUp()
         for x in range(3):
             assignment = OfferAssignmentFactory(code='test-code{}'.format(x), user_email='test{}@example.com'.format(x))
             assignment.status = OFFER_ASSIGNED
