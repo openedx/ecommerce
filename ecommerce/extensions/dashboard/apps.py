@@ -13,7 +13,9 @@ class DashboardConfig(BaseDashboardConfig):
     def ready(self):
         super().ready()
         from auth_backends.urls import oauth2_urlpatterns
+
         from ecommerce.core.views import LogoutView
+
         # Note: Add ecommerce's logout override first to ensure it is registered by Django as the
         # actual logout view. Ecommerce's logout implementation supports different site configuration.
         self.AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + oauth2_urlpatterns

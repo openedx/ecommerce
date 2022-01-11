@@ -27,8 +27,8 @@ class Command(BaseCommand):
 
         try:
             site = Site.objects.get(id=options['site_id'])
-        except Site.DoesNotExist:
-            raise CommandError('A valid Site ID must be specified!')
+        except Site.DoesNotExist as site_no_exist:
+            raise CommandError('A valid Site ID must be specified!') from site_no_exist
 
         if options['commit']:
             self.stderr.write('Associating [{}] baskets with site [{}]...'.format(count, site))

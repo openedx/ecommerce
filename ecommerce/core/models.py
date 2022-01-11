@@ -234,7 +234,7 @@ class SiteConfiguration(models.Model):
                     self.site.id,
                     name
                 )
-                raise ValidationError(str(exc))
+                raise ValidationError(str(exc)) from exc
 
     def _clean_client_side_payment_processor(self):
         """
@@ -762,7 +762,7 @@ class BusinessClient(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         if not self.name:

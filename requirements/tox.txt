@@ -4,17 +4,17 @@
 #
 #    make upgrade
 #
-filelock==3.3.2
+filelock==3.4.2
     # via tox
-packaging==21.2
+packaging==21.3
     # via tox
 pluggy==0.13.1
     # via
     #   -c requirements/pins.txt
     #   tox
-py==1.10.0
+py==1.11.0
     # via tox
-pyparsing==2.4.7
+pyparsing==3.0.6
     # via packaging
 six==1.16.0
     # via tox

@@ -69,7 +69,7 @@ class Command(BaseCommand):
         """
         failed_orders = []
 
-        with open(order_numbers_file, 'r') as file_handler:
+        with open(order_numbers_file, 'r') as file_handler:  # pylint: disable=unspecified-encoding
             order_numbers = file_handler.readlines()
             total_orders = len(order_numbers)
             logger.info(u'Creating refund for %d orders.', total_orders)

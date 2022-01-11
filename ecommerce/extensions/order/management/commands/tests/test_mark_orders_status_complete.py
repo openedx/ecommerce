@@ -20,7 +20,7 @@ class MarkOrdersStatusCompleteTests(TestCase):
 
     def create_orders_file(self, order_numbers):
         """Create a file with order numbers with status `Fulfillment Error` - one per line"""
-        with open(self.filename, 'w') as f:
+        with open(self.filename, 'w') as f:  # pylint: disable=unspecified-encoding
             f.truncate(0)
             for order_number in order_numbers:
                 # add to order numbers file

@@ -424,7 +424,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             code = request.GET.get('code', None)
             try:
                 voucher = self._get_voucher(request)
-            except Voucher.DoesNotExist as e:  # pragma: nocover
+            except Voucher.DoesNotExist:  # pragma: nocover
                 # Display an error message when an invalid code is passed as a parameter
                 invalid_code = code
 
@@ -1045,9 +1045,9 @@ class VoucherAddLogicMixin:
     def _get_voucher(self, code):
         try:
             return self.voucher_model._default_manager.get(code=code)  # pylint: disable=protected-access
-        except self.voucher_model.DoesNotExist:
+        except self.voucher_model.DoesNotExist as voucher_no_exist:
             messages.error(self.request, _("Coupon code '{code}' does not exist.").format(code=code))
-            raise VoucherException()
+            raise VoucherException() from voucher_no_exist
 
 
 class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disable=function-redefined

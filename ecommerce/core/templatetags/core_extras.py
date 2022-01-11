@@ -34,8 +34,8 @@ def do_captureas(parser, token):
 
     try:
         __, args = token.contents.split(None, 1)
-    except ValueError:
-        raise template.TemplateSyntaxError("'captureas' node requires a variable name.")
+    except ValueError as value_error:
+        raise template.TemplateSyntaxError("'captureas' node requires a variable name.") from value_error
     nodelist = parser.parse(('endcaptureas',))
     parser.delete_first_token()
     return CaptureasNode(nodelist, args)
