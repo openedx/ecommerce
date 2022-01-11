@@ -28,7 +28,7 @@ markupsafe==2.0.1
     # via jinja2
 packaging==21.3
     # via sphinx
-pygments==2.11.1
+pygments==2.11.2
     # via sphinx
 pyparsing==3.0.6
     # via packaging
@@ -36,7 +36,7 @@ pytz==2016.10
     # via
     #   -c requirements/pins.txt
     #   babel
-requests==2.27.0
+requests==2.27.1
     # via sphinx
 six==1.16.0
     # via edx-sphinx-theme
@@ -58,7 +58,7 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-urllib3==1.26.7
+urllib3==1.26.8
     # via
     #   -c requirements/pins.txt
     #   requests
