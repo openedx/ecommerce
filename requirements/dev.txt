@@ -18,7 +18,7 @@ asn1crypto==1.4.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-astroid==2.9.2
+astroid==2.9.3
     # via
     #   -r requirements/test.txt
     #   pylint
@@ -56,9 +56,9 @@ bleach==4.1.0
     # via -r requirements/test.txt
 bok-choy==1.1.1
     # via -r requirements/test.txt
-boto3==1.20.28
+boto3==1.20.32
     # via -r requirements/test.txt
-botocore==1.23.28
+botocore==1.23.32
     # via
     #   -r requirements/test.txt
     #   boto3
@@ -192,7 +192,7 @@ django-compressor==3.1
     #   django-libsass
 django-config-models==2.2.2
     # via -r requirements/test.txt
-django-cors-headers==3.10.1
+django-cors-headers==3.11.0
     # via -r requirements/test.txt
 django-crispy-forms==1.13.0
     # via -r requirements/test.txt
@@ -243,14 +243,14 @@ django-treebeard==4.5.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
-django-waffle==2.2.1
+django-waffle==2.3.0
     # via
     #   -r requirements/test.txt
     #   edx-django-utils
     #   edx-drf-extensions
 django-webtest==1.9.9
     # via -r requirements/test.txt
-django-widget-tweaks==1.4.9
+django-widget-tweaks==1.4.11
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -275,13 +275,13 @@ docutils==0.17.1
     #   sphinx
 drf-extensions==0.7.1
     # via -r requirements/test.txt
-drf-jwt==1.19.1
+drf-jwt==1.19.2
     # via
     #   -r requirements/test.txt
     #   edx-drf-extensions
 edx-auth-backends==3.4.0
     # via -r requirements/test.txt
-edx-django-release-util==1.1.0
+edx-django-release-util==1.1.1
     # via -r requirements/test.txt
 edx-django-sites-extensions==3.1.0
     # via -r requirements/test.txt
@@ -325,7 +325,7 @@ factory-boy==2.12.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
-faker==11.1.0
+faker==11.3.0
     # via
     #   -r requirements/test.txt
     #   factory-boy
@@ -350,7 +350,7 @@ future==0.18.2
     #   pyjwkest
 gitdb==4.0.9
     # via gitpython
-gitpython==3.1.24
+gitpython==3.1.26
     # via transifex-client
 httpretty==0.9.7
     # via -r requirements/test.txt
@@ -492,11 +492,11 @@ packaging==21.3
     #   redis
     #   sphinx
     #   tox
-paramiko==2.9.1
+paramiko==2.9.2
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-path==16.2.0
+path==16.3.0
     # via
     #   -r requirements/test.txt
     #   edx-i18n-tools
@@ -511,7 +511,7 @@ pbr==5.8.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.40
+phonenumbers==8.12.41
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -576,7 +576,7 @@ pycryptodomex==3.12.0
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
     #   pyjwkest
-pygments==2.11.1
+pygments==2.11.2
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -600,7 +600,7 @@ pymongo==4.0.1
     # via
     #   -r requirements/test.txt
     #   edx-opaque-keys
-pynacl==1.4.0
+pynacl==1.5.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -652,7 +652,7 @@ pytest-metadata==1.11.0
     # via
     #   -r requirements/test.txt
     #   pytest-html
-pytest-randomly==3.10.3
+pytest-randomly==3.11.0
     # via -r requirements/test.txt
 pytest-selenium==2.0.1
     # via -r requirements/test.txt
@@ -721,7 +721,7 @@ redis==4.1.0
     # via
     #   -r requirements/test.txt
     #   edx-ecommerce-worker
-requests==2.27.0
+requests==2.27.1
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -757,7 +757,7 @@ requests-toolbelt==0.9.1
     # via
     #   -r requirements/test.txt
     #   zeep
-responses==0.16.0
+responses==0.17.0
     # via -r requirements/test.txt
 rest-condition==1.0.3
     # via
@@ -820,7 +820,6 @@ six==1.16.0
     #   paypalrestsdk
     #   purl
     #   pyjwkest
-    #   pynacl
     #   pyopenssl
     #   python-dateutil
     #   python-memcached
@@ -943,7 +942,6 @@ typing-extensions==4.0.1
     # via
     #   -r requirements/test.txt
     #   astroid
-    #   gitpython
     #   pylint
 unicodecsv==0.14.1
     # via
@@ -953,7 +951,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements/test.txt
     #   coreapi
-urllib3==1.26.7
+urllib3==1.26.8
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt

@@ -34,7 +34,7 @@ django-crum==0.7.9
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-django-waffle==2.2.1
+django-waffle==2.3.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
@@ -105,7 +105,7 @@ pytest-html==3.1.1
     # via pytest-selenium
 pytest-metadata==1.11.0
     # via pytest-html
-pytest-randomly==3.10.3
+pytest-randomly==3.11.0
     # via -r requirements/e2e.in
 pytest-selenium==2.0.1
     # via -r requirements/e2e.in
@@ -120,7 +120,7 @@ pytz==2016.10
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   django
-requests==2.27.0
+requests==2.27.1
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
@@ -152,7 +152,7 @@ tenacity==6.3.1
     # via pytest-selenium
 toml==0.10.2
     # via pytest
-urllib3==1.26.7
+urllib3==1.26.8
     # via
     #   -c requirements/base.txt
     #   -c requirements/pins.txt

@@ -14,7 +14,7 @@ asn1crypto==1.4.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-astroid==2.9.2
+astroid==2.9.3
     # via pylint
 attrs==21.4.0
     # via
@@ -47,9 +47,9 @@ bleach==4.1.0
     # via -r requirements/base.txt
 bok-choy==1.1.1
     # via -r requirements/test.in
-boto3==1.20.28
+boto3==1.20.32
     # via -r requirements/base.txt
-botocore==1.23.28
+botocore==1.23.32
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -189,7 +189,7 @@ django-compressor==3.1
     #   django-libsass
 django-config-models==2.2.2
     # via -r requirements/base.txt
-django-cors-headers==3.10.1
+django-cors-headers==3.11.0
     # via -r requirements/base.txt
 django-crispy-forms==1.13.0
     # via -r requirements/base.txt
@@ -241,7 +241,7 @@ django-treebeard==4.5.1
     # via
     #   -r requirements/base.txt
     #   django-oscar
-django-waffle==2.2.1
+django-waffle==2.3.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -249,7 +249,7 @@ django-waffle==2.2.1
     #   edx-drf-extensions
 django-webtest==1.9.9
     # via -r requirements/test.in
-django-widget-tweaks==1.4.9
+django-widget-tweaks==1.4.11
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -270,7 +270,7 @@ djangorestframework-datatables==0.7.0
     # via -r requirements/base.txt
 drf-extensions==0.7.1
     # via -r requirements/base.txt
-drf-jwt==1.19.1
+drf-jwt==1.19.2
     # via
     #   -r requirements/base.txt
     #   edx-drf-extensions
@@ -278,7 +278,7 @@ edx-auth-backends==3.4.0
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
-edx-django-release-util==1.1.0
+edx-django-release-util==1.1.1
     # via -r requirements/base.txt
 edx-django-sites-extensions==3.1.0
     # via -r requirements/base.txt
@@ -324,7 +324,7 @@ factory-boy==2.12.0
     #   -r requirements/base.txt
     #   -r requirements/test.in
     #   django-oscar
-faker==11.1.0
+faker==11.3.0
     # via
     #   -r requirements/base.txt
     #   factory-boy
@@ -482,11 +482,11 @@ packaging==21.3
     #   pytest
     #   redis
     #   tox
-paramiko==2.9.1
+paramiko==2.9.2
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-path==16.2.0
+path==16.3.0
     # via edx-i18n-tools
 path.py==7.2
     # via -r requirements/base.txt
@@ -500,7 +500,7 @@ pbr==5.8.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.40
+phonenumbers==8.12.41
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -566,7 +566,7 @@ pycryptodomex==3.12.0
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
     #   pyjwkest
-pygments==2.11.1
+pygments==2.11.2
     # via
     #   -r requirements/base.txt
     #   diff-cover
@@ -589,7 +589,7 @@ pymongo==4.0.1
     # via
     #   -r requirements/base.txt
     #   edx-opaque-keys
-pynacl==1.4.0
+pynacl==1.5.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
@@ -643,7 +643,7 @@ pytest-metadata==1.11.0
     # via
     #   -r requirements/e2e.txt
     #   pytest-html
-pytest-randomly==3.10.3
+pytest-randomly==3.11.0
     # via -r requirements/e2e.txt
 pytest-selenium==2.0.1
     # via -r requirements/e2e.txt
@@ -709,7 +709,7 @@ redis==4.1.0
     # via
     #   -r requirements/base.txt
     #   edx-ecommerce-worker
-requests==2.27.0
+requests==2.27.1
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -743,7 +743,7 @@ requests-toolbelt==0.9.1
     # via
     #   -r requirements/base.txt
     #   zeep
-responses==0.16.0
+responses==0.17.0
     # via -r requirements/test.in
 rest-condition==1.0.3
     # via
@@ -808,7 +808,6 @@ six==1.16.0
     #   paypalrestsdk
     #   purl
     #   pyjwkest
-    #   pynacl
     #   pyopenssl
     #   python-dateutil
     #   python-memcached
@@ -903,7 +902,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements/base.txt
     #   coreapi
-urllib3==1.26.7
+urllib3==1.26.8
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.txt
