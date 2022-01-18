@@ -154,7 +154,11 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         properties = {'emitted_at': time.time()}
         track_segment_event(request.site, request.user, 'Mobile Course Purchase View Called', properties)
         receipt = request.data
-        basket_id = receipt['basket_id']
+
+        basket_id = receipt.get('basket_id')
+        if not basket_id:
+            return JsonResponse({'error': 'Basket id is not provided'}, status=400)
+
         # todo: fix None transaction id in case of ios
         logger.info('Payment [%s] approved by payer [%s]', receipt.get('transactionId'), request.user.id)
 
