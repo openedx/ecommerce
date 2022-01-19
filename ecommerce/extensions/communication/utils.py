@@ -3,6 +3,7 @@
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from oscar.apps.communication.utils import Dispatcher
+from oscar.apps.customer.utils import *  # pylint: disable=wildcard-import, unused-wildcard-import
 
 from ecommerce.extensions.communication.models import Email
 from ecommerce.extensions.order.models import CommunicationEvent

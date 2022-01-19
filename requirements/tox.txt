@@ -9,7 +9,9 @@ filelock==3.3.0
 packaging==21.0
     # via tox
 pluggy==0.13.1
-    # via tox
+    # via
+    #   -c requirements/pins.txt
+    #   tox
 py==1.10.0
     # via tox
 pyparsing==2.4.7

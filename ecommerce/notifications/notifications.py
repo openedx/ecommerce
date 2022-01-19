@@ -8,8 +8,8 @@ from premailer import transform
 from ecommerce.extensions.analytics.utils import parse_tracking_context
 
 log = logging.getLogger(__name__)
-CommunicationEventType = get_model('customer', 'CommunicationEventType')
-Dispatcher = get_class('customer.utils', 'Dispatcher')
+CommunicationEventType = get_model('communication', 'CommunicationEventType')
+Dispatcher = get_class('communication.utils', 'Dispatcher')
 
 
 def send_notification(user, commtype_code, context, site, recipient=None):
