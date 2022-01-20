@@ -818,7 +818,7 @@ HUBSPOT_PORTAL_ID = "SET-ME-PLEASE"
 HUBSPOT_SALES_LEAD_FORM_GUID = "SET-ME-PLEASE"
 
 # To check government purchase restriction lists
-SDN_CHECK_API_URL ="https://api.trade.gov/gateway/v1/consolidated_screening_list/search"
+SDN_CHECK_API_URL = "https://data.trade.gov/consolidated_screening_list/v1/search"
 SDN_CHECK_API_KEY = "sdn search key here"
 
 # Awin advertiser id

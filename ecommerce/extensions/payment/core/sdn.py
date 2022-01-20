@@ -131,7 +131,7 @@ class SDNClient:
             'name': str(name).encode('utf-8'),
             # We are using the city as the address parameter value as indicated in the documentation:
             # http://developer.trade.gov/consolidated-screening-list.html
-            'address': str(city).encode('utf-8'),
+            'city': str(city).encode('utf-8'),
             'countries': country
         }
         params = urlencode(params_dict)
@@ -139,7 +139,7 @@ class SDNClient:
             api_url=self.api_url,
             params=params
         )
-        auth_header = {'Authorization': 'Bearer {}'.format(self.api_key)}
+        auth_header = {'subscription-key': '{}'.format(self.api_key)}
 
         try:
             response = requests.get(
