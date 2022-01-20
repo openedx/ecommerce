@@ -51,7 +51,7 @@ idna==2.7
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   requests
-importlib-metadata==4.10.0
+importlib-metadata==4.10.1
     # via pytest-randomly
 iniconfig==1.1.1
     # via pytest
@@ -109,7 +109,7 @@ pytest-randomly==3.11.0
     # via -r requirements/e2e.in
 pytest-selenium==2.0.1
     # via -r requirements/e2e.in
-pytest-timeout==2.0.2
+pytest-timeout==2.1.0
     # via -r requirements/e2e.in
 pytest-variables==1.9.0
     # via pytest-selenium

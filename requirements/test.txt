@@ -47,9 +47,9 @@ bleach==4.1.0
     # via -r requirements/base.txt
 bok-choy==1.1.1
     # via -r requirements/test.in
-boto3==1.20.32
+boto3==1.20.39
     # via -r requirements/base.txt
-botocore==1.23.32
+botocore==1.23.39
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -249,7 +249,7 @@ django-waffle==2.3.0
     #   edx-drf-extensions
 django-webtest==1.9.9
     # via -r requirements/test.in
-django-widget-tweaks==1.4.11
+django-widget-tweaks==1.4.12
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -358,7 +358,7 @@ idna==2.7
     #   -r requirements/e2e.txt
     #   cybersource-rest-client-python
     #   requests
-importlib-metadata==4.10.0
+importlib-metadata==4.10.1
     # via
     #   -r requirements/e2e.txt
     #   pytest-randomly
@@ -610,7 +610,7 @@ pypi==2.1
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-pyrsistent==0.18.0
+pyrsistent==0.18.1
     # via
     #   -r requirements/base.txt
     #   jsonschema
@@ -647,7 +647,7 @@ pytest-randomly==3.11.0
     # via -r requirements/e2e.txt
 pytest-selenium==2.0.1
     # via -r requirements/e2e.txt
-pytest-timeout==2.0.2
+pytest-timeout==2.1.0
     # via -r requirements/e2e.txt
 pytest-variables==1.9.0
     # via
@@ -705,7 +705,7 @@ rcssmin==1.1.0
     # via
     #   -r requirements/base.txt
     #   django-compressor
-redis==4.1.0
+redis==4.1.1
     # via
     #   -r requirements/base.txt
     #   edx-ecommerce-worker
