@@ -95,6 +95,10 @@ def checkSDNFallback(name, city, country):
     )
     records = records.filter(countries__contains=country)
     processed_name, processed_city = process_text(name), process_text(city)
+    # processing text with no transliteration can yield 0-length sets
+    # return because a 0-length set is a subset of every set
+    if len(processed_name) == 0 or len(processed_city) == 0:
+        return 0
     for record in records:
         record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
         if (processed_name.issubset(record_names) and processed_city.issubset(record_addresses)):
