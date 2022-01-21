@@ -39,7 +39,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info('[UPDATE_ENT_OFFER_OPPORTUNITY_ID] Started update of opportunity id.')
 
-        with open(options['data_csv']) as csv_file:
+        with open(options['data_csv']) as csv_file:  # pylint: disable=unspecified-encoding
             reader = csv.DictReader(csv_file)
             for row in reader:
                 manual_order_enterprise_offer = ConditionalOffer.objects.get(
