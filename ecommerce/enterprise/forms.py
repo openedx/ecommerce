@@ -180,15 +180,18 @@ class EnterpriseOfferForm(forms.ModelForm):
 
         return max_discount
 
-    def _get_refunded_order_ids(self):
-        # Get all refund records with status = 'COMPLETE'
-        return list(Refund.objects.filter(status=REFUND.COMPLETE).values_list('order_id', flat=True))
+    def _get_refunded_order_ids(self, offer_id):
+        # Get all refunded order ids belonging to the offer and with status = 'COMPLETE'
+        return list(Refund.objects.filter(
+            order__discounts__offer_id=offer_id,
+            status=REFUND.COMPLETE
+        ).values_list('order_id', flat=True))
 
     def clean_max_user_applications(self):
         # validate against when decreasing the existing value
         if self.instance.pk and self.instance.max_user_applications:
             new_max_user_applications = self.cleaned_data.get('max_user_applications') or 0
-            refunded_order_ids = self._get_refunded_order_ids()
+            refunded_order_ids = self._get_refunded_order_ids(self.instance.id)
             max_order_count_any_user = OrderDiscount.objects.filter(
                 offer_id=self.instance.id).select_related('order').filter(
                     order__status=ORDER.COMPLETE).exclude(order_id__in=refunded_order_ids).values(
@@ -216,7 +219,7 @@ class EnterpriseOfferForm(forms.ModelForm):
             # we only need to do validation if new max_user_discount value is less then existing value
             if self.instance.max_user_discount and new_max_user_discount < self.instance.max_user_discount:
                 # calculates the maximum user discount consumed by any user out of the user bookings limit
-                refunded_order_ids = self._get_refunded_order_ids()
+                refunded_order_ids = self._get_refunded_order_ids(self.instance.id)
                 max_discount_used_any_user = OrderDiscount.objects.filter(offer_id=self.instance.id).select_related(
                     'order').filter(order__status=ORDER.COMPLETE).exclude(
                         order_id__in=refunded_order_ids).values('order__user_id').order_by('order__user_id').annotate(

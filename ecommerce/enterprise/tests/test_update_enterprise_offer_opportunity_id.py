@@ -37,7 +37,7 @@ class UpdateEnterpriseOfferOpportunityIdCommandTests(CouponMixin, TestCase):
         """Create csv with enterprise uuid and opportunity id"""
         tmp_csv_path = os.path.join(tempfile.gettempdir(), 'data.csv')
 
-        with open(tmp_csv_path, 'w') as csv_file:
+        with open(tmp_csv_path, 'w') as csv_file:  # pylint: disable=unspecified-encoding
             csv_writer = csv.DictWriter(csv_file, fieldnames=['enterprise_uuid', 'opportunity_id'])
             csv_writer.writeheader()
             csv_writer.writerow({
