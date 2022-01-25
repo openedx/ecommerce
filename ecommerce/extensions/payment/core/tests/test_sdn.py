@@ -322,6 +322,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         self.assertEqual(output, expected_output)
 
     @ddt.data(
+        # check transliterable characters
         ('À Á Â Ã Ä Å à á â ã ä å', {'a'}),
         ('È É Ê Ë è é ê ë', {'e'}),
         ('Ì Í Î Ï ì í î ï', {'i'}),
@@ -330,14 +331,23 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('Ý ý ÿ', {'y'}),
         ('Ç ç', {'c'}),
         ('Ñ ñ', {'n'}),
-        # these cases are here to explicitly note that they are not  transliterated,
+        ('ß', {'ss'}),
+        # check characters we can't transliterate
+        # these cases are here to explicitly note that they are not transliterated,
         # not to exclude them from transliteration in the future
-        ('Ð Æ æ Ø Þ ß þ ð ø', set()),
+        ('Ð Æ æ Ø Þ þ ð ø', {'þ', 'ø', 'æ', 'ð'}),
+        ('王芳', {'王芳'}),
+        ('Πвλάτων', {'πвλάτων'}),
+        # check mix of transliterable & non-transliterable
+        ('Դանիէլ (Daniel)', {'daniel', 'դանիէլ'}),
+        ('ლომიძე (Lomidze)', {'lomidze', 'ლომიძე'}),
+        ('Иван (Ivan)', {'ivan', 'иван'}),
+        # check punctuation is excluded
         ('÷ § § ×   ¶ ¯ ¬', set()),
     )
     @ddt.unpack
     def test_process_text_unicode(self, text, expected_output):
-        """ Verify that characters with accents are transliterated correctly."""
+        """ Verify that characters with accents are transliterated correctly and non-transliterable characters are passed through."""
         output = process_text(text)
         self.assertEqual(output, expected_output)
 

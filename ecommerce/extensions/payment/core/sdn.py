@@ -95,10 +95,6 @@ def checkSDNFallback(name, city, country):
     )
     records = records.filter(countries__contains=country)
     processed_name, processed_city = process_text(name), process_text(city)
-    # processing text with no transliteration can yield 0-length sets
-    # return because a 0-length set is a subset of every set
-    if len(processed_name) == 0 or len(processed_city) == 0:
-        return 0
     for record in records:
         record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
         if (processed_name.issubset(record_names) and processed_city.issubset(record_addresses)):
@@ -192,6 +188,42 @@ class SDNClient:
         basket.owner.deactivate_account(site.siteconfiguration)
 
 
+def transliterate_text(text):
+    """
+    Transliterate unicode characters into ascii (such as accented characters into non-accented
+    characters).
+
+    This works by decomposing accented characters into the letter and the accent.
+
+    The subsequent ASCII encoding drops any accents and leaves the original letter.
+
+    Returns the original string if no transliteration is available.
+
+    Args:
+        text (str): a string to be transliterated
+
+    Returns:
+        text (str): the transliterated string
+    """
+    t11e_text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    return t11e_text if t11e_text else text
+
+
+def replace_unicode_symbols(text, replace_char):
+    """
+    Replaces characters not classified as letters or numbers in Unicode.
+
+    Args:
+        text (str): a string to be cleaned of symbols
+        replace_char (str): the string to replace symbols with
+
+    Returns:
+        An iterator for text with symbols replaced.
+    """
+    for char in text:
+        yield replace_char if not unicodedata.category(char).startswith(('L', 'N')) else char
+
+
 def process_text(text):
     """
     Lowercase, remove non-alphanumeric characters, and ignore order and word frequency.
@@ -207,13 +239,17 @@ def process_text(text):
     if len(text) == 0:
         return ''
 
-    # transliterate unicode characters into ascii
-    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
-    text = text.lower()
+    # Make lowercase
+    text = text.casefold()
 
-    # Strip non-alphanumeric characters from each word
+    # Transliterate numbers and letters
+    text = ''.join(map(transliterate_text, text))
+
+    # Replace non-letters and numbers with spaces
+    text = ''.join(replace_unicode_symbols(text, ' '))
+
     # Ignore order and word frequency
-    text = set(filter(None, set(re.split('[^a-zA-Z0-9]', text))))
+    text = set(filter(None, set(re.split(' ', text))))
 
     return text
 
