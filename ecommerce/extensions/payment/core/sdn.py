@@ -209,22 +209,6 @@ def transliterate_text(text):
     return t11e_text if t11e_text else text
 
 
-def replace_unicode_symbols(text, replace_char):
-    """
-    Replaces characters not classified as letters or numbers in Unicode.
-
-    Args:
-        text (str): a string to be cleaned of symbols
-        replace_char (str): the string to replace symbols with
-
-    Returns:
-        An iterator for text with symbols replaced.
-    """
-    for char in text:
-        # 'L' == Letters, 'N' == Numbers in Unicode categories
-        yield replace_char if not unicodedata.category(char).startswith(('L', 'N')) else char
-
-
 def process_text(text):
     """
     Lowercase, remove non-alphanumeric characters, and ignore order and word frequency.
@@ -246,11 +230,8 @@ def process_text(text):
     # Transliterate numbers and letters
     text = ''.join(map(transliterate_text, text))
 
-    # Replace non-letters and numbers with spaces
-    text = ''.join(replace_unicode_symbols(text, ' '))
-
-    # Ignore order and word frequency
-    text = set(filter(None, set(re.split(' ', text))))
+    # Ignore punctuation, order, and word frequency
+    text = set(filter(None, set(re.split(r'[\W_]+', text))))
 
     return text
 

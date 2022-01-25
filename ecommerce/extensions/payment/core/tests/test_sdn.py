@@ -343,7 +343,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('ლომიძე (Lomidze)', {'lomidze', 'ლომიძე'}),
         ('Иван (Ivan)', {'ivan', 'иван'}),
         # check punctuation is excluded
-        ('÷ § § ×   ¶ ¯ ¬', set()),
+        ('_ ÷ § § ×   ¶ ¯ ¬', set()),
     )
     @ddt.unpack
     def test_process_text_unicode(self, text, expected_output):
