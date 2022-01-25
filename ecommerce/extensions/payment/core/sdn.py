@@ -221,6 +221,7 @@ def replace_unicode_symbols(text, replace_char):
         An iterator for text with symbols replaced.
     """
     for char in text:
+        # 'L' == Letters, 'N' == Numbers in Unicode categories
         yield replace_char if not unicodedata.category(char).startswith(('L', 'N')) else char
 
 
