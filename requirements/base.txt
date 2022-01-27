@@ -28,9 +28,9 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/base.in
-boto3==1.20.32
+boto3==1.20.44
     # via -r requirements/base.in
-botocore==1.23.32
+botocore==1.23.44
     # via
     #   boto3
     #   s3transfer
@@ -63,7 +63,7 @@ coreapi==2.3.3
     #   openapi-codec
 coreschema==0.0.4
     # via coreapi
-coverage==6.2
+coverage==6.3
     # via cybersource-rest-client-python
 crypto==1.4.1
     # via cybersource-rest-client-python
@@ -125,11 +125,11 @@ django-compressor==3.1
     # via
     #   -r requirements/base.in
     #   django-libsass
-django-config-models==2.2.2
+django-config-models==2.3.0
     # via -r requirements/base.in
 django-cors-headers==3.11.0
     # via -r requirements/base.in
-django-crispy-forms==1.13.0
+django-crispy-forms==1.14.0
     # via -r requirements/base.in
 django-crum==0.7.9
     # via
@@ -170,7 +170,7 @@ django-waffle==2.3.0
     #   -r requirements/base.in
     #   edx-django-utils
     #   edx-drf-extensions
-django-widget-tweaks==1.4.11
+django-widget-tweaks==1.4.12
     # via django-oscar
 djangorestframework==3.13.1
     # via
@@ -199,7 +199,7 @@ edx-django-release-util==1.1.1
     # via -r requirements/base.in
 edx-django-sites-extensions==3.1.0
     # via -r requirements/base.in
-edx-django-utils==4.4.1
+edx-django-utils==4.4.2
     # via
     #   -r requirements/base.in
     #   django-config-models
@@ -216,9 +216,9 @@ edx-opaque-keys==2.2.2
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
-edx-rbac==1.5.1
+edx-rbac==1.6.0
     # via -r requirements/base.in
-edx-rest-api-client==5.4.1
+edx-rest-api-client==5.5.0
     # via
     #   -r requirements/base.in
     #   edx-ecommerce-worker
@@ -296,7 +296,7 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.in
-newrelic==7.2.4.171
+newrelic==7.4.0.172
     # via
     #   -r requirements/base.in
     #   edx-django-utils
@@ -348,9 +348,9 @@ pycparser==2.21
     # via
     #   cffi
     #   cybersource-rest-client-python
-pycryptodome==3.12.0
+pycryptodome==3.13.0
     # via cybersource-rest-client-python
-pycryptodomex==3.12.0
+pycryptodomex==3.13.0
     # via
     #   cybersource-rest-client-python
     #   pyjwkest
@@ -376,11 +376,11 @@ pyopenssl==21.0.0
     #   cybersource-rest-client-python
     #   ndg-httpsclient
     #   paypalrestsdk
-pyparsing==3.0.6
+pyparsing==3.0.7
     # via packaging
 pypi==2.1
     # via cybersource-rest-client-python
-pyrsistent==0.18.0
+pyrsistent==0.18.1
     # via jsonschema
 python-dateutil==2.8.2
     # via
@@ -418,7 +418,7 @@ pyyaml==6.0
     #   naked
 rcssmin==1.1.0
     # via django-compressor
-redis==4.1.0
+redis==4.1.1
     # via edx-ecommerce-worker
 requests==2.27.1
     # via
@@ -544,7 +544,7 @@ wrapt==1.13.3
     # via deprecated
 x509==0.1
     # via cybersource-rest-client-python
-xss-utils==0.3.0
+xss-utils==0.4.0
     # via -r requirements/base.in
 zeep==4.1.0
     # via -r requirements/base.in

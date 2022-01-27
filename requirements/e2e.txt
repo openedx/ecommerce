@@ -38,11 +38,11 @@ django-waffle==2.3.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-edx-django-utils==4.4.1
+edx-django-utils==4.4.2
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-edx-rest-api-client==5.4.1
+edx-rest-api-client==5.5.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/e2e.in
@@ -51,11 +51,11 @@ idna==2.7
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   requests
-importlib-metadata==4.10.0
+importlib-metadata==4.10.1
     # via pytest-randomly
 iniconfig==1.1.1
     # via pytest
-newrelic==7.2.4.171
+newrelic==7.4.0.172
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
@@ -85,7 +85,7 @@ pyjwt[crypto]==1.7.1
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-pyparsing==3.0.6
+pyparsing==3.0.7
     # via
     #   -c requirements/base.txt
     #   packaging
@@ -109,7 +109,7 @@ pytest-randomly==3.11.0
     # via -r requirements/e2e.in
 pytest-selenium==2.0.1
     # via -r requirements/e2e.in
-pytest-timeout==2.0.2
+pytest-timeout==2.1.0
     # via -r requirements/e2e.in
 pytest-variables==1.9.0
     # via pytest-selenium
