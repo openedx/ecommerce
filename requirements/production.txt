@@ -401,7 +401,7 @@ python-dateutil==2.8.2
     #   botocore
     #   edx-drf-extensions
     #   faker
-python-memcached==1.58
+python-memcached==1.59
     # via -r requirements/production.in
 python-mimeparse==1.6.0
     # via cybersource-rest-client-python
