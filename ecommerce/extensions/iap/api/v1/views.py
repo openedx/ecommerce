@@ -176,8 +176,7 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
                 try:
                     self.handle_payment(receipt, basket)
                 except PaymentError:
-                    # todo: return error from payment gateway
-                    return JsonResponse({'error': 'An error occured during payment handling.'}, status=400)
+                    return JsonResponse({'error': repr(PaymentError)}, status=400)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return JsonResponse({'error': 'An error occured during handling payment.'}, status=400)
