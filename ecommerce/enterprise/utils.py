@@ -78,6 +78,7 @@ def get_enterprise_customer(site, uuid):
     try:
         response = client.get()
     except (ReqConnectionError, SlumberHttpBaseException, Timeout):
+        log.exception("Failed to fetch enterprise customer")
         return None
 
     enterprise_customer_response = {
