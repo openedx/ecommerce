@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='BlackboardBlackboardBlackboardLearnerAssessmentDataTransmissionAuditTestingTestingTEST',
+            name='BlackboardBlackboardBlackboardLearnerAssessmentDataTransmissionAuditTestingTestingTESTABC',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('blackboard_user_email', models.CharField(max_length=255)),
