@@ -204,5 +204,12 @@ class BlackboardLearnerAssessmentDataTransmissionAuditTestingTestingTEST(models.
         db_index=True
     )
 
+    enterprise_course_enrollment_name = models.PositiveIntegerField(
+        blank=False,
+        null=False,
+        db_index=True,
+        default=1
+    )
+
 
 from oscar.apps.catalogue.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
