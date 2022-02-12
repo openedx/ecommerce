@@ -9,7 +9,7 @@ on:
 
 jobs:
   check_migrations:
-    name: check migrations
+    name: check migrations mysql8
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -75,4 +75,3 @@ jobs:
         echo "CREATE DATABASE IF NOT EXISTS ecommerce;" | sudo mysql -u root
         echo "Running the migrations."
         python manage.py migrate --settings=ecommerce.settings.test
-        echo "use mysql; SHOW VARIABLES LIKE 'version';" | sudo mysql -u root

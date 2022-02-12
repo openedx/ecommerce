@@ -827,3 +827,21 @@ class EcommerceFeatureRoleAssignment(UserRoleAssignment):
         Return uniquely identifying string representation.
         """
         return self.__str__()
+
+    class BlackboardLearnerAssessmentDataTransmissionAudit(models.Model):
+        """
+        The payload correlated to a courses subsection learner data we send to blackboard at a given point in time for an
+        enterprise course enrollment.
+        .. no_pii:
+        """
+        blackboard_user_email = models.CharField(
+            max_length=255,
+            blank=False,
+            null=False
+        )
+
+        enterprise_course_enrollment_id = models.PositiveIntegerField(
+            blank=False,
+            null=False,
+            db_index=True
+        )
