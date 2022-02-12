@@ -75,5 +75,4 @@ jobs:
         echo "CREATE DATABASE IF NOT EXISTS ecommerce;" | sudo mysql -u root
         echo "Running the migrations."
         python manage.py migrate --settings=ecommerce.settings.test
-        echo "use ecommerce; show tables;" | sudo mysql -u root
         echo "use mysql; SELECT * FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS;" | sudo mysql -u root
