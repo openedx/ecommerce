@@ -66,11 +66,11 @@ jobs:
     - name: Run Tests
       env:
         DB_ENGINE: "django.db.backends.mysql"
-        DB_HOST: "localhost"
-        DB_NAME: "root"
+        DB_NAME: "ecommerce"
+        DB_USER: root
         DB_PASSWORD:
-        DB_PORT: "3306"
-        DB_USER: "root"
+        DB_HOST: localhost
+        DB_PORT: 3306
       run: |
         echo "CREATE DATABASE IF NOT EXISTS ecommerce;" | sudo mysql -u root
         echo "Running the migrations."
