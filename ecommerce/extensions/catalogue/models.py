@@ -186,7 +186,7 @@ class ProductAttribute(AbstractProductAttribute):
     history = CreateSafeHistoricalRecords()
 
 
-class BlackboardLearnerAssessmentDataTransmissionAudittt(models.Model):
+class BlackboardLearnerAssessmentDataTransmissionAudittta(models.Model):
     """
     The payload correlated to a courses subsection learner data we send to blackboard at a given point in time for an
     enterprise course enrollment.
