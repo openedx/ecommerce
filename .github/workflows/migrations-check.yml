@@ -66,13 +66,13 @@ jobs:
     - name: Run Tests
       env:
         DB_ENGINE: "django.db.backends.mysql"
-        DB_HOST: "db"
+        DB_HOST: "localhost"
         DB_NAME: "root"
         DB_PASSWORD:
         DB_PORT: "3306"
         DB_USER: "root"
       run: |
-        echo "CREATE DATABASE IF NOT EXISTS credentials;" | sudo mysql -u root
+        echo "CREATE DATABASE IF NOT EXISTS ecommerce;" | sudo mysql -u root
         echo "Running the migrations."
         python manage.py migrate --settings=ecommerce.settings.test
         echo "use mysql; SHOW VARIABLES LIKE 'version';" | sudo mysql -u root
