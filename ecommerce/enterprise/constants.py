@@ -13,3 +13,7 @@ USE_ENTERPRISE_CATALOG = 'use_enterprise_catalog'
 # Default Sender Alias used in Enterprise Customer Code Assign,Remind and Revoke Emails.
 
 SENDER_ALIAS = 'edX Support Team'
+
+# Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006 OR be "none" (to accommodate
+# potential edge case).
+ENTERPRISE_SALES_FORCE_ID_REGEX = r'^006[a-zA-Z0-9]{15}$|^none$'

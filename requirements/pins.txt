@@ -29,11 +29,6 @@ urllib3>=1.24.2,<2.0.0
 # Was causing some tox issues locally.
 virtualenv==16.7.9
 
-# newer version seems to be causing failures
-# if tox -e py35-django22-pylint passes after
-# removing this pin, then this pin can be removed.
-pylint==2.4.4
-
 # greater versions failing with extract-translations step.
 tox==3.14.6
 pluggy<1.0.0  # pluggy==1.0.0 requires tox>3.14.6

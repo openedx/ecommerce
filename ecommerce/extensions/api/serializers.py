@@ -32,6 +32,7 @@ from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
+from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
 from ecommerce.enterprise.utils import (
     get_enterprise_customer_reply_to_email,
     get_enterprise_customer_sender_alias,
@@ -1385,7 +1386,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
         Validate sales_force_id format
         """
         sales_force_id = self.initial_data.get('sales_force_id')
-        if sales_force_id and not re.match(r'^006[a-zA-Z0-9]{15}$|^none$', sales_force_id):
+        if sales_force_id and not re.match(ENTERPRISE_SALES_FORCE_ID_REGEX, sales_force_id):
             raise ValidationError({
                 'sales_force_id': 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'
             })
@@ -1413,8 +1414,8 @@ class CouponUpdateSerializer(CouponSerializer):
                 max_uses = int(max_uses)
                 if max_uses < 1:
                     raise ValueError
-            except ValueError:
-                raise ValidationError('max_global_applications field must be a positive number.')
+            except ValueError as value_error:
+                raise ValidationError('max_global_applications field must be a positive number.') from value_error
 
         return validated_data
 
@@ -1720,8 +1721,9 @@ class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: d
         """Verify the order number and return the order object."""
         try:
             order = Order.objects.get(number=order)
-        except Order.DoesNotExist:
-            raise serializers.ValidationError(_('Invalid order number or order {} does not exists.').format(order))
+        except Order.DoesNotExist as order_no_exist:
+            # pylint: disable=line-too-long
+            raise serializers.ValidationError(_('Invalid order number or order {} does not exists.').format(order)) from order_no_exist
         return order
 
     def create(self, validated_data):
@@ -1824,10 +1826,10 @@ class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: d
                 }
             ]
             attrs['note'] = note
-        except AttributeError:
+        except AttributeError as attribute_error:
             error_message = _("Could note create new voucher for the order: {}").format(order)
             logger.exception(error_message)
-            raise serializers.ValidationError(error_message)
+            raise serializers.ValidationError(error_message) from attribute_error
         return attrs
 
 

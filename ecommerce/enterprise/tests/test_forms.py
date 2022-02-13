@@ -45,7 +45,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             'contract_discount_type': self.contract_discount_type,
             'contract_discount_value': self.contract_discount_value,
             'prepaid_invoice_amount': self.prepaid_invoice_amount,
-            'sales_force_id': 'salesforceid123',
+            'sales_force_id': '006abcde0123456789',
             'max_global_applications': 2,
             'max_discount': 300,
             'max_user_discount': 50,
@@ -438,6 +438,41 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         # which is less than the number of times this offer has already been used
         data = self.generate_data(max_global_applications=2)
         self.assert_form_errors(data, expected_errors, instance=offer)
+
+    def _test_sales_force_id(self, sales_force_id, expected_error, is_update_view):
+        """
+        Verify that `clean` for `sales_force_id` field is working as expected.
+        """
+        instance = None
+        if is_update_view:
+            instance = factories.EnterpriseOfferFactory()
+        data = self.generate_data(sales_force_id=sales_force_id)
+        if expected_error:
+            expected_errors = {'sales_force_id': [expected_error]}
+            self.assert_form_errors(data, expected_errors, instance)
+        else:
+            form = EnterpriseOfferForm(data=data, instance=instance)
+            self.assertTrue(form.is_valid())
+
+    @ddt.data(
+        # Valid Cases
+        ('006abcde0123456789', None),
+        ('006ABCDE0123456789', None),
+        ('none', None),
+        # Invalid Cases
+        (None, 'This field is required.'),
+        ('006ABCDE012345678123143', 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
+        ('006ABCDE01234', 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
+        ('007ABCDE0123456789', 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
+        ('006ABCDE0 12345678', 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
+    )
+    @ddt.unpack
+    def test_sales_force_id(self, sales_force_id, expected_error):
+        """
+        Verify that `clean` for `sales_force_id` field is working as expected.
+        """
+        self._test_sales_force_id(sales_force_id, expected_error, is_update_view=False)
+        self._test_sales_force_id(sales_force_id, expected_error, is_update_view=True)
 
     def test_max_discount_clean_with_negative_value(self):
         """

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 from typing import Optional
+from urllib.parse import urlparse
 
 import jwt
 import jwt.exceptions
@@ -155,7 +156,8 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.flex_shared_secret_key_id = configuration.get('flex_shared_secret_key_id')
         self.flex_shared_secret_key = configuration.get('flex_shared_secret_key')
         if self.site.siteconfiguration.payment_microfrontend_url:
-            self.flex_target_origin = self.site.siteconfiguration.payment_microfrontend_url.rstrip('/')
+            payment_mfe_url = self.site.siteconfiguration.payment_microfrontend_url
+            self.flex_target_origin = f"{urlparse(payment_mfe_url).scheme}://{urlparse(payment_mfe_url).hostname}"
         else:
             self.flex_target_origin = None
 
@@ -355,7 +357,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
             msg = 'An error occurred while attempting to issue a credit (via CyberSource) for order [{}].'.format(
                 order_number)
             logger.exception(msg)
-            raise GatewayError(msg)
+            raise GatewayError(msg)  # pylint: disable=raise-missing-from
 
         if response.decision == 'ACCEPT':
             return request_id
@@ -446,7 +448,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
         except:
             msg = 'An error occurred while authorizing an Apple Pay (via CyberSource) for basket [{}]'.format(basket.id)
             logger.exception(msg)
-            raise GatewayError(msg)
+            raise GatewayError(msg)  # pylint: disable=raise-missing-from
 
         request_id = response.requestID
         ppr = self.record_processor_response(serialize_object(response), transaction_id=request_id, basket=basket)
@@ -503,7 +505,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
                 }, transaction_id=None, basket=basket)
                 logger.exception('Payment failed')
                 # This will display the generic error on the frontend
-                raise GatewayError()
+                raise GatewayError()  # pylint: disable=raise-missing-from
             return e, e.headers['v-c-correlation-id']
 
     def normalize_processor_response(self, response) -> UnhandledCybersourceResponse:

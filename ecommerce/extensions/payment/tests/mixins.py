@@ -201,11 +201,10 @@ class CybersourceMixin(PaymentEventsMixin):
 
         for filename in files:
             path = os.path.join(os.path.dirname(__file__), filename)
-            body = open(path, 'r').read()
+            body = open(path, 'r').read()  # pylint: disable=unspecified-encoding,consider-using-with
             url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource']['soap_api_url'], filename)
             responses.add(responses.GET, url, body=body)
 
-    # pylint:disable=bad-continuation
     def mock_refund_response(self, amount=Decimal(100), currency=CURRENCY, transaction_id=None, basket_id=None,
                              decision='ACCEPT'):
         url = 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor'

@@ -237,7 +237,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         return self._get_receipt_response(order.number)
 
     def _create_order_for_receipt(
-            self, user, credit=False, entitlement=False, id_verification_required=False, multiple_lines=False
+            self, credit=False, entitlement=False, id_verification_required=False, multiple_lines=False
     ):
         """
         Helper function for creating an order and mocking verification status API response.
@@ -249,12 +249,6 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         Returns:
             order (Order): Order for which the Receipt is requested.
         """
-        self.mock_verification_status_api(
-            self.site,
-            user,
-            status=200,
-            is_verified=False
-        )
         return self.create_order(
             credit=credit,
             entitlement=entitlement,
@@ -309,12 +303,11 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     def test_get_receipt_for_existing_order(self, mock_learner_data):
         """ Order owner should be able to see the Receipt Page."""
         mock_learner_data.return_value = self.non_enterprise_learner_data
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         response = self._get_receipt_response(order.number)
         context_data = {
             'payment_method': None,
             'display_credit_messaging': False,
-            'verification_url': self.site.siteconfiguration.IDVerification_workflow_url(self.course.id),
         }
 
         self.assertEqual(response.status_code, 200)
@@ -325,7 +318,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     def test_awin_product_tracking_for_order(self, mock_learner_data):
         """ Receipt Page should have context for awin product tracking"""
         mock_learner_data.return_value = self.non_enterprise_learner_data
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         response = self._get_receipt_response(order.number)
         products = []
         for line in order.lines.all():
@@ -343,24 +336,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         """ Order owner should be able to see the Receipt Page."""
 
         mock_learner_data.return_value = self.non_enterprise_learner_data
-        order = self._create_order_for_receipt(self.user, entitlement=True, id_verification_required=True)
-        response = self._get_receipt_response(order.number)
-        context_data = {
-            'payment_method': None,
-            'display_credit_messaging': False,
-            'verification_url': self.site.siteconfiguration.IDVerification_workflow_url(self.course.id),
-        }
-
-        self.assertEqual(response.status_code, 200)
-        self.assertDictContainsSubset(context_data, response.context_data)
-
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
-    def test_get_receipt_for_entitlement_order_no_id_required(self, mock_learner_data):
-        """ Order owner should be able to see the Receipt Page with no ID verification in context."""
-
-        mock_learner_data.return_value = self.non_enterprise_learner_data
-        order = self._create_order_for_receipt(self.user, entitlement=True, id_verification_required=False)
+        order = self._create_order_for_receipt(entitlement=True, id_verification_required=True)
         response = self._get_receipt_response(order.number)
         context_data = {
             'payment_method': None,
@@ -376,7 +352,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         """ Staff users can preview Receipts for all Orders."""
         mock_learner_data.return_value = self.non_enterprise_learner_data
         staff_user = self.create_user(is_staff=True)
-        order = self._create_order_for_receipt(staff_user)
+        order = self._create_order_for_receipt()
         response = self._visit_receipt_page_with_another_user(order, staff_user)
         context_data = {
             'payment_method': None,
@@ -392,7 +368,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         """ Users that don't own the Order shouldn't be able to see the Receipt. """
         mock_learner_data.return_value = self.non_enterprise_learner_data
         other_user = self.create_user()
-        order = self._create_order_for_receipt(other_user)
+        order = self._create_order_for_receipt()
         response = self._visit_receipt_page_with_another_user(order, other_user)
         context_data = {'order_history_url': self.site.siteconfiguration.build_lms_url('account/settings')}
 
@@ -405,12 +381,6 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         """ Ensure that the context is updated with Order data. """
         mock_learner_data.return_value = self.non_enterprise_learner_data
         order = self.create_order(credit=True)
-        self.mock_verification_status_api(
-            self.site,
-            self.user,
-            status=200,
-            is_verified=True
-        )
         seat = order.lines.first().product
         body = {'display_name': 'Hogwarts'}
 
@@ -424,7 +394,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     @httpretty.activate
     def test_order_value_unlocalized_for_tracking(self, mock_learner_data):
         mock_learner_data.return_value = self.non_enterprise_learner_data
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         self.client.cookies.load({settings.LANGUAGE_COOKIE_NAME: 'fr'})
         response = self._get_receipt_response(order.number)
 
@@ -436,7 +406,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     @httpretty.activate
     def test_order_product_ids_available_for_tracking(self, mock_learner_data):
         mock_learner_data.return_value = self.non_enterprise_learner_data
-        order = self._create_order_for_receipt(self.user, multiple_lines=True)
+        order = self._create_order_for_receipt(multiple_lines=True)
         response = self._get_receipt_response(order.number)
 
         self.assertEqual(response.status_code, 200)
@@ -452,7 +422,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         should point to the user dashboard.
         """
         mock_learner_data.return_value = self.non_enterprise_learner_data
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         response = self._get_receipt_response(order.number)
         context_data = {
             'order_dashboard_url': self.site.siteconfiguration.build_lms_url('dashboard')
@@ -469,7 +439,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         should point to the program dashboard.
         """
         mock_learner_data.return_value = self.non_enterprise_learner_data
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         bundle_id = TEST_BUNDLE_ID
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
@@ -505,7 +475,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         is configured.
         """
         mock_learner_data.return_value = self.enterprise_learner_data_with_portal
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
@@ -541,7 +511,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         """
         mock_learner_data.side_effect = exception
         mock_learner_data.return_value = learner_data
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
@@ -563,7 +533,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         is not configured.
         """
         mock_learner_data.return_value = self.enterprise_learner_data_no_portal
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
@@ -585,7 +555,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         shows the portal is configured
         """
         mock_learner_data.return_value = self.enterprise_learner_data_with_portal
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
@@ -609,7 +579,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         shows the portal is not configured
         """
         mock_learner_data.return_value = self.enterprise_learner_data_no_portal
-        order = self._create_order_for_receipt(self.user)
+        order = self._create_order_for_receipt()
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),

@@ -59,10 +59,10 @@ class Command(BaseCommand):
 
         try:
             paypal_configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner.lower()][self.PAYPAL_CONFIG_KEY.lower()]
-        except KeyError:
+        except KeyError as key_error:
             raise CommandError(
                 "Payment Processor configuration for partner `{0}` does not contain PayPal settings".format(partner)
-            )
+            ) from key_error
 
         # Initialize the PayPal REST SDK
         paypalrestsdk.configure({
@@ -74,9 +74,9 @@ class Command(BaseCommand):
         try:
             handler = getattr(self, 'handle_{}'.format(action))
         except IndexError:
-            raise CommandError("no action specified.")
+            raise CommandError("no action specified.")  # pylint: disable=raise-missing-from
         except AttributeError:
-            raise CommandError("unrecognized action: {}".format(action))
+            raise CommandError("unrecognized action: {}".format(action))  # pylint: disable=raise-missing-from
         return handler(options)
 
     def _do_create(self, profile_data):
@@ -119,7 +119,7 @@ class Command(BaseCommand):
             # this should never happen, unless the data in the database has gotten out of
             # sync with the profiles stored in the PayPal account that this application
             # instance has been configured to use.
-            raise CommandError(
+            raise CommandError(  # pylint: disable=raise-missing-from
                 "Could not enable web profile because a profile with the same name exists under "
                 "a different id.  This may indicate a configuration error, or simply stale data."
             )

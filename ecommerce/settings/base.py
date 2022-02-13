@@ -142,6 +142,9 @@ COMPRESS_PRECOMPILERS = (
     ('text/x-scss', 'django_libsass.SassCompiler'),
 )
 
+# Note: COMPRESS_CSS_FILTERS has been replaced with COMPRESS_FILTERS in django-compressor,
+# but replacing the settings name gives an error during compression in github test-python build check
+# See info here: https://github.com/django-compressor/django-compressor/issues/985
 COMPRESS_CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
 
 COMPRESS_OFFLINE_CONTEXT = 'ecommerce.theming.compressor.offline_context'
@@ -815,11 +818,8 @@ HUBSPOT_PORTAL_ID = "SET-ME-PLEASE"
 HUBSPOT_SALES_LEAD_FORM_GUID = "SET-ME-PLEASE"
 
 # To check government purchase restriction lists
-SDN_CHECK_API_URL ="https://api.trade.gov/gateway/v1/consolidated_screening_list/search"
+SDN_CHECK_API_URL = "https://data.trade.gov/consolidated_screening_list/v1/search"
 SDN_CHECK_API_KEY = "sdn search key here"
-
-# Need to link to the account micro-frontend
-ACCOUNT_MICROFRONTEND_URL = None
 
 # Awin advertiser id
 AWIN_ADVERTISER_ID = None

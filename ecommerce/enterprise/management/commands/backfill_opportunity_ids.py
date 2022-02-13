@@ -76,7 +76,7 @@ class Command(BaseCommand):
 
     def read_csv(self, csv_path):
         data = {}
-        with open(csv_path) as csv_file:
+        with open(csv_path) as csv_file:  # pylint: disable=unspecified-encoding
             reader = csv.DictReader(csv_file)
             for row in reader:
                 data[UUID(row['enterprise_customer_uuid'])] = row['opportunity_id']
@@ -89,7 +89,7 @@ class Command(BaseCommand):
             'offers': defaultdict(list),
             'ec_uuids': defaultdict(list),
         }
-        with open(csv_path) as csv_file:
+        with open(csv_path) as csv_file:  # pylint: disable=unspecified-encoding
             reader = csv.DictReader(csv_file)
             for row in reader:
                 if row['ORDER_LINE_OFFER_TYPE'] == 'Voucher':

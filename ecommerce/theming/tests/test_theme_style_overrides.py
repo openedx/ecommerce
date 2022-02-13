@@ -71,7 +71,7 @@ class TestComprehensiveTheme(TestCase):
         self.assertEqual(result, themes_dir / "test-theme" / "static/css/base/main.css")
 
         main_css = ""
-        with open(result) as css_file:
+        with open(result) as css_file:  # pylint: disable=unspecified-encoding
             main_css += css_file.read()
 
         self.assertIn("background-color: #00fa00", main_css)

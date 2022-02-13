@@ -91,8 +91,8 @@ class RefundCreateView(generics.CreateAPIView):
 
         try:
             user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise BadRequestException('User "{}" does not exist.'.format(username))
+        except User.DoesNotExist as user_no_exist:
+            raise BadRequestException('User "{}" does not exist.'.format(username)) from user_no_exist
 
         # Ensure the user has an LMS user id
         try:
@@ -104,16 +104,16 @@ class RefundCreateView(generics.CreateAPIView):
                 user_id=user.id,
                 requested_by=requested_by)
             user.add_lms_user_id('ecommerce_missing_lms_user_id_refund', called_from)
-        except MissingLmsUserIdException:
-            raise BadRequestException('User {} does not have an LMS user id.'.format(user.id))
+        except MissingLmsUserIdException as missing_user:
+            raise BadRequestException('User {} does not have an LMS user id.'.format(user.id)) from missing_user
 
         # Try and create a refund for the passed in order
         if entitlement_uuid:
             try:
                 order = user.orders.get(number=order_number)
                 refunds = create_refunds_for_entitlement(order, entitlement_uuid)
-            except (Order.DoesNotExist, OrderLine.DoesNotExist):
-                raise BadRequestException('Order {} does not exist.'.format(order_number))
+            except (Order.DoesNotExist, OrderLine.DoesNotExist) as order_line_no_exist:
+                raise BadRequestException('Order {} does not exist.'.format(order_number)) from order_line_no_exist
         else:
             if not course_id:
                 raise BadRequestException('No course_id specified.')

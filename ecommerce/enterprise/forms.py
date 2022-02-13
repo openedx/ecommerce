@@ -3,6 +3,7 @@
 
 
 import decimal
+import re
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -14,6 +15,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.enterprise.benefits import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
 from ecommerce.enterprise.utils import convert_comma_separated_string_to_list, get_enterprise_customer
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
@@ -45,7 +47,7 @@ class EnterpriseOfferForm(forms.ModelForm):
     prepaid_invoice_amount = forms.DecimalField(
         required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Prepaid Invoice Amount')
     )
-    sales_force_id = forms.CharField(max_length=30, required=False, label=_('Salesforce Opportunity ID'))
+    sales_force_id = forms.CharField(max_length=30, required=True, label=_('Salesforce Opportunity ID'))
     emails_for_usage_alert = forms.CharField(
         required=False,
         label=_("Emails Addresses"),
@@ -149,6 +151,16 @@ class EnterpriseOfferForm(forms.ModelForm):
 
         return self.cleaned_data.get('max_global_applications')
 
+    def clean_sales_force_id(self):
+        # validate sales_force_id format
+        sales_force_id = self.cleaned_data.get('sales_force_id')
+        if not re.match(ENTERPRISE_SALES_FORCE_ID_REGEX, sales_force_id):
+            self.add_error(
+                'sales_force_id',
+                _('Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.')
+            )
+        return self.cleaned_data.get('sales_force_id')
+
     def clean_max_discount(self):
         max_discount = self.cleaned_data.get('max_discount')
         # validate against non-decimal and negative values
@@ -168,15 +180,18 @@ class EnterpriseOfferForm(forms.ModelForm):
 
         return max_discount
 
-    def _get_refunded_order_ids(self):
-        # Get all refund records with status = 'COMPLETE'
-        return list(Refund.objects.filter(status=REFUND.COMPLETE).values_list('order_id', flat=True))
+    def _get_refunded_order_ids(self, offer_id):
+        # Get all refunded order ids belonging to the offer and with status = 'COMPLETE'
+        return list(Refund.objects.filter(
+            order__discounts__offer_id=offer_id,
+            status=REFUND.COMPLETE
+        ).values_list('order_id', flat=True))
 
     def clean_max_user_applications(self):
         # validate against when decreasing the existing value
         if self.instance.pk and self.instance.max_user_applications:
             new_max_user_applications = self.cleaned_data.get('max_user_applications') or 0
-            refunded_order_ids = self._get_refunded_order_ids()
+            refunded_order_ids = self._get_refunded_order_ids(self.instance.id)
             max_order_count_any_user = OrderDiscount.objects.filter(
                 offer_id=self.instance.id).select_related('order').filter(
                     order__status=ORDER.COMPLETE).exclude(order_id__in=refunded_order_ids).values(
@@ -199,24 +214,26 @@ class EnterpriseOfferForm(forms.ModelForm):
         # validate against non-decimal and negative values
         if max_user_discount is not None and (isinstance(max_user_discount, decimal.Decimal) and max_user_discount < 0):
             self.add_error('max_user_discount', _('Ensure this value is greater than or equal to 0.'))
-        elif self.instance.pk and self.instance.max_user_discount:  # validate against when decrease the existing value
+        elif self.instance.pk:  # validate against when decrease the existing value
             new_max_user_discount = max_user_discount or 0
-            # calculates the maximum user discount consumed by any user out of the user bookings limit
-            refunded_order_ids = self._get_refunded_order_ids()
-            max_discount_used_any_user = OrderDiscount.objects.filter(offer_id=self.instance.id).select_related(
-                'order').filter(order__status=ORDER.COMPLETE).exclude(
-                    order_id__in=refunded_order_ids).values('order__user_id').order_by('order__user_id').annotate(
-                        user_discount_sum=Sum('amount')).aggregate(
-                            Max('user_discount_sum'))['user_discount_sum__max'] or 0
-            if new_max_user_discount < max_discount_used_any_user:
-                self.add_error(
-                    'max_user_discount',
-                    _(
-                        'Ensure new value must be greater than or equal to consumed({consumed_discount:.2f}) value.'
-                    ).format(
-                        consumed_discount=max_discount_used_any_user
+            # we only need to do validation if new max_user_discount value is less then existing value
+            if self.instance.max_user_discount and new_max_user_discount < self.instance.max_user_discount:
+                # calculates the maximum user discount consumed by any user out of the user bookings limit
+                refunded_order_ids = self._get_refunded_order_ids(self.instance.id)
+                max_discount_used_any_user = OrderDiscount.objects.filter(offer_id=self.instance.id).select_related(
+                    'order').filter(order__status=ORDER.COMPLETE).exclude(
+                        order_id__in=refunded_order_ids).values('order__user_id').order_by('order__user_id').annotate(
+                            user_discount_sum=Sum('amount')).aggregate(
+                                Max('user_discount_sum'))['user_discount_sum__max'] or 0
+                if new_max_user_discount < max_discount_used_any_user:
+                    self.add_error(
+                        'max_user_discount',
+                        _(
+                            'Ensure new value must be greater than or equal to consumed({consumed_discount:.2f}) value.'
+                        ).format(
+                            consumed_discount=max_discount_used_any_user
+                        )
                     )
-                )
 
         return max_user_discount
 

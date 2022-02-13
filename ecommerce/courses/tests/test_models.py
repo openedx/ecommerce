@@ -99,7 +99,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         """ Ensure the given seat has the correct attribute values. """
         self.assertEqual(seat.structure, Product.CHILD)
         # pylint: disable=protected-access
-        self.assertEqual(seat.title, course.get_course_seat_name(certificate_type, id_verification_required))
+        self.assertEqual(seat.title, course.get_course_seat_name(certificate_type))
         self.assertEqual(seat.get_product_class(), self.seat_product_class)
         self.assertEqual(getattr(seat.attr, 'certificate_type', ''), certificate_type)
         self.assertEqual(seat.attr.course_key, course.id)

@@ -233,22 +233,16 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
 
     def assert_seat_saved(self, course, expected):
         certificate_type = ''
-        id_verification_required = False
 
         for attr in expected['attribute_values']:
             name = attr['name']
             if name == 'certificate_type':
                 certificate_type = attr['value']
-            elif name == 'id_verification_required':
-                id_verification_required = attr['value']
 
         seat_title = 'Seat in {course_name}'.format(course_name=course.name)
 
         if certificate_type:
             seat_title += ' with {certificate_type} certificate'.format(certificate_type=certificate_type)
-
-        if id_verification_required:
-            seat_title += ' (and ID verification)'
 
         # If the seat does not exist, an error will be raised.
         seat = course.seat_products.get(title=seat_title)

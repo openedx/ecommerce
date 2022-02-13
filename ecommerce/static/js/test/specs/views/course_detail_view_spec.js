@@ -57,7 +57,7 @@ define([
                             url: 'http://ecommerce.local:8002/api/v2/products/8/',
                             structure: 'child',
                             product_class: 'Seat',
-                            title: 'Seat in edX Demonstration Course with verified certificate (and ID verification)',
+                            title: 'Seat in edX Demonstration Course with verified certificate',
                             price: '15.00',
                             expires: null,
                             attribute_values: [
@@ -97,7 +97,7 @@ define([
                             url: 'http://ecommerce.local:8002/api/v2/products/6/',
                             structure: 'child',
                             product_class: 'Seat',
-                            title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)',
+                            title: 'Seat in edX Demonstration Course with credit certificate',
                             price: '150.00',
                             expires: null,
                             attribute_values: [
@@ -129,7 +129,7 @@ define([
                             url: 'http://ecommerce.local:8002/api/v2/products/5/',
                             structure: 'child',
                             product_class: 'Seat',
-                            title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)',
+                            title: 'Seat in edX Demonstration Course with credit certificate',
                             price: '100.00',
                             expires: null,
                             attribute_values: [
@@ -181,7 +181,7 @@ define([
                 expect($creditSeats.length).toEqual(
                     _.where(
                         products,
-                        {title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)'}
+                        {title: 'Seat in edX Demonstration Course with credit certificate'}
                     ).length
                 );
 

@@ -98,7 +98,6 @@ class BasketLogicMixin:
         """
         Processes the basket lines and extracts information for the view's context.
         In addition determines whether:
-            * verification message should be displayed
             * voucher form should be displayed
             * switch link (for switching between seat and enrollment code products) should be displayed
         and returns that information for the basket view context to be updated with it.
@@ -111,7 +110,6 @@ class BasketLogicMixin:
             lines_data (list): List of information about the basket lines.
         """
         context_updates = {
-            'display_verification_message': False,
             'order_details_msg': None,
             'partner_sku': None,
             'switch_link_text': None,
@@ -124,11 +122,6 @@ class BasketLogicMixin:
             product = line.product
             if product.is_seat_product or product.is_course_entitlement_product:
                 line_data, _ = self._get_course_data(product)
-
-                # TODO this is only used by hosted_checkout_basket template, which may no longer be
-                # used. Consider removing both.
-                if self._is_id_verification_required(product):
-                    context_updates['display_verification_message'] = True
             elif product.is_enrollment_code_product:
                 line_data, course = self._get_course_data(product)
                 self._set_single_enrollment_code_warning_if_needed(product, course)
@@ -380,13 +373,6 @@ class BasketLogicMixin:
             message_utils.add_message_data(message_code, 'course_about_url', course_about_url)
 
     @newrelic.agent.function_trace()
-    def _is_id_verification_required(self, product):
-        return (
-            getattr(product.attr, 'id_verification_required', False) and
-            product.attr.certificate_type != 'credit'
-        )
-
-    @newrelic.agent.function_trace()
     def _get_benefit_value(self, line):
         if line.has_discount:
             applied_offer_values = list(self.request.basket.applied_offers().values())
@@ -438,7 +424,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             code = request.GET.get('code', None)
             try:
                 voucher = self._get_voucher(request)
-            except Voucher.DoesNotExist as e:  # pragma: nocover
+            except Voucher.DoesNotExist:  # pragma: nocover
                 # Display an error message when an invalid code is passed as a parameter
                 invalid_code = code
 
@@ -1059,9 +1045,9 @@ class VoucherAddLogicMixin:
     def _get_voucher(self, code):
         try:
             return self.voucher_model._default_manager.get(code=code)  # pylint: disable=protected-access
-        except self.voucher_model.DoesNotExist:
+        except self.voucher_model.DoesNotExist as voucher_no_exist:
             messages.error(self.request, _("Coupon code '{code}' does not exist.").format(code=code))
-            raise VoucherException()
+            raise VoucherException() from voucher_no_exist
 
 
 class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disable=function-redefined

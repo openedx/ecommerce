@@ -63,6 +63,22 @@ disable=
 
     duplicate-code,
 
+# New when we unpinned and jumped versions (pylint 2.4.4 -> 2.12.2)
+# C0103: invalid-name
+# C0201: consider-iterating-dictionary
+# C0206: consider-using-dict-items
+# C0209: consider-using-f-string
+# R1725: super-with-arguments
+# R1728: consider-using-generator
+# R1729: use-a-generator
+# R1734: use-list-literal
+# W0237: arguments renamed
+# W1310: format-string-without-interpolation
+# W1406: redundant-u-string-prefix
+# W1514: unspecified-encoding
+
+    C0103,C0201,C0206,C0209,R1725,R1728,R1729,R1734,W0237,W1310,W1406,W1514
+
 # We can decide if names are invalid on our own
     invalid-name,
 
