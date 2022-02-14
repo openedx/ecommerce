@@ -33,7 +33,6 @@ babel==2.9.1
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
     #   django-oscar
-    #   django-phonenumber-field
     #   sphinx
 backoff==1.10.0
     # via
@@ -221,9 +220,9 @@ django-model-utils==4.2.0
     # via
     #   -r requirements/test.txt
     #   edx-rbac
-django-oscar==2.1
+django-oscar==2.2
     # via -r requirements/test.txt
-django-phonenumber-field==3.0.1
+django-phonenumber-field==5.0.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -233,13 +232,13 @@ django-simple-history==3.0.0
     # via -r requirements/test.txt
 django-solo==2.0.0
     # via -r requirements/test.txt
-django-tables2==2.2.1
+django-tables2==2.4.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
 django-threadlocals==0.10
     # via -r requirements/test.txt
-django-treebeard==4.5.1
+django-treebeard==4.4
     # via
     #   -r requirements/test.txt
     #   django-oscar
