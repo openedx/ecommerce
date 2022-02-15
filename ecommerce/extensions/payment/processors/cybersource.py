@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 from typing import Optional
+from urllib.parse import urlparse
 
 import jwt
 import jwt.exceptions
@@ -180,7 +181,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         requestObj = GeneratePublicKeyRequest(
             encryption_type='RsaOaep256',
-            target_origin=self.flex_target_origin,
+            target_origin=urlparse(self.flex_target_origin)._replace(path='').geturl(),
         )
         requestObj = del_none(requestObj.__dict__)
         requestObj = json.dumps(requestObj)
