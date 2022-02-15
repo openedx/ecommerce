@@ -2,8 +2,8 @@
 import mock
 from django.conf import settings
 from django.test import override_settings
-from mock_django import mock_signal_receiver
 from oscar.core.loading import get_class, get_model
+from oscar.test.contextmanagers import mock_signal_receiver
 from oscar.test.factories import BasketFactory
 
 from ecommerce.courses.tests.factories import CourseFactory

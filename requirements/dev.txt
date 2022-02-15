@@ -178,7 +178,6 @@ django==2.2.26
     #   edx-i18n-tools
     #   edx-rbac
     #   jsonfield2
-    #   mock-django
     #   rest-condition
     #   xss-utils
 django-appconf==1.0.5
@@ -447,10 +446,6 @@ mccabe==0.6.1
     #   -r requirements/test.txt
     #   pylint
 mock==4.0.3
-    # via
-    #   -r requirements/test.txt
-    #   mock-django
-mock-django==0.6.10
     # via -r requirements/test.txt
 monotonic==1.6
     # via
