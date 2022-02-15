@@ -175,7 +175,6 @@ diff-cover==6.4.4
     #   edx-i18n-tools
     #   edx-rbac
     #   jsonfield2
-    #   mock-django
     #   rest-condition
     #   xss-utils
 django-appconf==1.0.5
@@ -436,10 +435,6 @@ markupsafe==2.0.1
 mccabe==0.6.1
     # via pylint
 mock==4.0.3
-    # via
-    #   -r requirements/test.in
-    #   mock-django
-mock-django==0.6.10
     # via -r requirements/test.in
 monotonic==1.6
     # via
