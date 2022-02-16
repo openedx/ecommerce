@@ -322,6 +322,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         self.assertEqual(output, expected_output)
 
     @ddt.data(
+        # check transliterable characters
         ('À Á Â Ã Ä Å à á â ã ä å', {'a'}),
         ('È É Ê Ë è é ê ë', {'e'}),
         ('Ì Í Î Ï ì í î ï', {'i'}),
@@ -330,14 +331,23 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('Ý ý ÿ', {'y'}),
         ('Ç ç', {'c'}),
         ('Ñ ñ', {'n'}),
-        # these cases are here to explicitly note that they are not  transliterated,
+        ('ß', {'ss'}),
+        # check characters we can't transliterate
+        # these cases are here to explicitly note that they are not transliterated,
         # not to exclude them from transliteration in the future
-        ('Ð Æ æ Ø Þ ß þ ð ø', set()),
-        ('÷ § § ×   ¶ ¯ ¬', set()),
+        ('Ð Æ æ Ø Þ þ ð ø', {'þ', 'ø', 'æ', 'ð'}),
+        ('王芳', {'王芳'}),
+        ('Πвλάτων', {'πвλάτων'}),
+        # check mix of transliterable & non-transliterable
+        ('Դանիէլ (Daniel)', {'daniel', 'դանիէլ'}),
+        ('ლომიძე (Lomidze)', {'lomidze', 'ლომიძე'}),
+        ('Иван (Ivan)', {'ivan', 'иван'}),
+        # check punctuation is excluded
+        ('_ ÷ § § ×   ¶ ¯ ¬', set()),
     )
     @ddt.unpack
     def test_process_text_unicode(self, text, expected_output):
-        """ Verify that characters with accents are transliterated correctly."""
+        """ Verify that characters with accents are transliterated correctly and non-transliterable characters are passed through."""
         output = process_text(text)
         self.assertEqual(output, expected_output)
 
@@ -364,12 +374,16 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('-de-Juan-Cruz-la-', 1),
         ('.dE@jUaN.....CRUZ----!??!?!la.', 1),
         ('Cruz,,,,', 1),
-        ('João', 1),
         # check capitalizaiton properties
         ('jUan dE LA CruZ', 1),
         # check frequency properties
         ('Juan de la Cruz Juan de la Cruz', 1),
         ('Juan Juan M. M. de de la la Cruz Cruz', 1),
+        # check transliteration support
+        ('João', 1),
+        ('Rogério', 0),
+        # check no false positive on non-Latin character without transliteration
+        ('教育转型', 0),
         # other examples
         ('Juanito', 0),
         ('John de la Cruz', 0),
@@ -387,7 +401,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         """
         # pylint: disable=line-too-long
         csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
-94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy João Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy João Brock 中国,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
         self.assertEqual(checkSDNFallback(name, 'North Kristinaport', 'SN'), match)
@@ -403,11 +417,15 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('Kristinaport', 1),
         ('Kristinaport,,!@#$%^&*()', 1),
         ('Krist%^&*()inaport', False),
-        ('João', 1),
         # check capitalizaiton properties
         ('KRISTINAPORT', 1),
         # check frequency properties
         ('Kristinaport Kristinaport', 1),
+        # check transliteration support
+        ('João', 1),
+        ('São Paulo', 0),
+        # check no false positive on non-Latin character without transliteration
+        ('教育转型', 0),
     )
     @ddt.unpack
     def test_check_sdn_fallback_address(self, address, match):
@@ -421,7 +439,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         """
         # pylint: disable=line-too-long
         csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
-94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport João, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport João 中国, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
         self.assertEqual(checkSDNFallback("Juan", address, 'SN'), match)

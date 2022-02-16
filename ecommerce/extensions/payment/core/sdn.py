@@ -188,6 +188,27 @@ class SDNClient:
         basket.owner.deactivate_account(site.siteconfiguration)
 
 
+def transliterate_text(text):
+    """
+    Transliterate unicode characters into ascii (such as accented characters into non-accented
+    characters).
+
+    This works by decomposing accented characters into the letter and the accent.
+
+    The subsequent ASCII encoding drops any accents and leaves the original letter.
+
+    Returns the original string if no transliteration is available.
+
+    Args:
+        text (str): a string to be transliterated
+
+    Returns:
+        text (str): the transliterated string
+    """
+    t11e_text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    return t11e_text if t11e_text else text
+
+
 def process_text(text):
     """
     Lowercase, remove non-alphanumeric characters, and ignore order and word frequency.
@@ -203,13 +224,14 @@ def process_text(text):
     if len(text) == 0:
         return ''
 
-    # transliterate unicode characters into ascii
-    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
-    text = text.lower()
+    # Make lowercase
+    text = text.casefold()
 
-    # Strip non-alphanumeric characters from each word
-    # Ignore order and word frequency
-    text = set(filter(None, set(re.split('[^a-zA-Z0-9]', text))))
+    # Transliterate numbers and letters
+    text = ''.join(map(transliterate_text, text))
+
+    # Ignore punctuation, order, and word frequency
+    text = set(filter(None, set(re.split(r'[\W_]+', text))))
 
     return text
 
