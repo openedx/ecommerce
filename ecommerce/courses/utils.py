@@ -133,7 +133,9 @@ def get_certificate_type_display_value(certificate_type):
         'honor': _('Honor'),
         'professional': _('Professional'),
         'verified': _('Verified'),
-        'executive-education': _('Executive Education')
+        'executive-education': _('Executive Education'),
+        'unpaid-executive-program': _('Executive Program(Unpaid)'),
+        'paid-executive-program': _('Executive Program(Paid)'),
     }
 
     if certificate_type not in display_values:
