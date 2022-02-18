@@ -4,10 +4,6 @@
 #
 #    make upgrade
 #
-asgiref==3.4.1
-    # via
-    #   -c requirements/base.txt
-    #   django
 attrs==21.4.0
     # via
     #   -c requirements/base.txt
@@ -29,7 +25,7 @@ cryptography==3.4.8
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   pyjwt
-django==3.2.12
+django==2.2.26
     # via
     #   -c requirements/base.txt
     #   django-crum

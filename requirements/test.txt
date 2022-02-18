@@ -10,11 +10,6 @@ amqp==2.6.1
     #   kombu
 analytics-python==1.4.0
     # via -r requirements/base.txt
-asgiref==3.4.1
-    # via
-    #   -r requirements/base.txt
-    #   -r requirements/e2e.txt
-    #   django
 asn1crypto==1.4.0
     # via
     #   -r requirements/base.txt
