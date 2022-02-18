@@ -14,10 +14,6 @@ amqp==2.6.1
     #   kombu
 analytics-python==1.4.0
     # via -r requirements/test.txt
-asgiref==3.4.1
-    # via
-    #   -r requirements/test.txt
-    #   django
 asn1crypto==1.4.0
     # via
     #   -r requirements/test.txt
@@ -154,7 +150,7 @@ deprecated==1.2.13
     #   redis
 diff-cover==6.4.4
     # via -r requirements/test.txt
-django==3.2.12
+django==2.2.26
     # via
     #   -r requirements/test.txt
     #   django-appconf

@@ -8,8 +8,6 @@ amqp==2.6.1
     # via kombu
 analytics-python==1.4.0
     # via -r requirements/base.in
-asgiref==3.4.1
-    # via django
 asn1crypto==1.4.0
     # via cybersource-rest-client-python
 attrs==21.4.0
@@ -93,7 +91,7 @@ defusedxml==0.7.1
     #   social-auth-core
 deprecated==1.2.13
     # via redis
-django==3.2.12
+django==2.2.26
     # via
     #   -r requirements/base.in
     #   django-appconf
