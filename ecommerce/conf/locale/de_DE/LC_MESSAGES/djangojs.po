@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Stefania Trabucchi <stefania.trabucchi@abstract-technology.de>, 2018
 # Akif Vohra <akifvohra@gmail.com>, 2016
 # Alexander L. <alexander.lohberg@ufo-style.de>, 2017
@@ -14,14 +15,15 @@
 # Donna Kl <donna@polarstern-education.com>, 2019
 # Ettore Atalan <atalanttore@googlemail.com>, 2016
 # mc <marc.mannsfeld@phil.hhu.de>, 2015-2016
+# Stefania Trabucchi <stefania.trabucchi@abstract-technology.de>, 2021
 # yamahapsr200 <yamahapsr200@googlemail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
-"PO-Revision-Date: 2020-11-24 09:15+0000\n"
-"Last-Translator: Transifex Bot <>\n"
+"POT-Creation-Date: 2022-02-20 20:12+0000\n"
+"PO-Revision-Date: 2021-02-10 13:20+0000\n"
+"Last-Translator: Stefania Trabucchi <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -57,23 +59,23 @@ msgstr "Dieses Feld muss leer sein oder 1-16 alphanummerische Zeichen enthalten.
 msgid "Email domain {%s} is invalid."
 msgstr "E-Mail domain {%s} ist ungültig."
 
-#: ecommerce/static/js/models/coupon_model.js:101
+#: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
 msgstr "Muss nach Startdatum liegen"
 
-#: ecommerce/static/js/models/coupon_model.js:131
+#: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "Die maximale Nutzungsanzahl für multi-use-coupons muss größer als 2 sein."
 
-#: ecommerce/static/js/models/coupon_model.js:155
+#: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
 msgstr "Muss vor Enddatum liegen"
 
-#: ecommerce/static/js/models/coupon_model.js:177
+#: ecommerce/static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
 msgstr "Eine gültige Kurs-ID wird benötigt"
 
-#: ecommerce/static/js/models/coupon_model.js:191
+#: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
 msgstr "Eine gültige Programm-UUID ist erforderlich."
 
@@ -469,7 +471,7 @@ msgstr "Kann von einem Kunden mehrfach verwendet werden"
 
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
 msgid "Create and Add More"
-msgstr ""
+msgstr "Erstellen und weitere hinzufügen"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
