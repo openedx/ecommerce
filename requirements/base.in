@@ -14,7 +14,6 @@ django_extensions
 django-filter
 django-libsass
 django-oscar
-django-rest-swagger
 django-simple-history
 django-solo
 django-threadlocals
@@ -23,6 +22,7 @@ djangorestframework
 djangorestframework-csv
 djangorestframework-datatables
 drf-extensions
+drf-yasg
 edx-auth-backends
 edx-django-release-util
 edx-django-utils
