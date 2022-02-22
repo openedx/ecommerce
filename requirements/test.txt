@@ -93,12 +93,12 @@ configparser==5.2.0
 coreapi==2.3.3
     # via
     #   -r requirements/base.txt
-    #   django-rest-swagger
-    #   openapi-codec
+    #   drf-yasg
 coreschema==0.0.4
     # via
     #   -r requirements/base.txt
     #   coreapi
+    #   drf-yasg
 coverage[toml]==6.2
     # via
     #   -r requirements/base.txt
@@ -167,6 +167,7 @@ diff-cover==6.4.4
     #   django-treebeard
     #   djangorestframework
     #   drf-jwt
+    #   drf-yasg
     #   edx-auth-backends
     #   edx-django-release-util
     #   edx-django-sites-extensions
@@ -223,8 +224,6 @@ django-phonenumber-field==5.0.0
     # via
     #   -r requirements/base.txt
     #   django-oscar
-django-rest-swagger==2.2.0
-    # via -r requirements/base.txt
 django-simple-history==3.0.0
     # via -r requirements/base.txt
 django-solo==2.0.0
@@ -255,11 +254,11 @@ djangorestframework==3.13.1
     # via
     #   -r requirements/base.txt
     #   django-config-models
-    #   django-rest-swagger
     #   djangorestframework-csv
     #   djangorestframework-datatables
     #   drf-extensions
     #   drf-jwt
+    #   drf-yasg
     #   edx-drf-extensions
     #   rest-condition
 djangorestframework-csv==2.1.1
@@ -272,6 +271,8 @@ drf-jwt==1.19.2
     # via
     #   -r requirements/base.txt
     #   edx-drf-extensions
+drf-yasg==1.20.0
+    # via -r requirements/base.txt
 edx-auth-backends==3.4.0
     # via
     #   -c requirements/pins.txt
@@ -360,6 +361,10 @@ importlib-metadata==4.10.0
     # via
     #   -r requirements/e2e.txt
     #   pytest-randomly
+inflection==0.5.1
+    # via
+    #   -r requirements/base.txt
+    #   drf-yasg
 iniconfig==1.1.1
     # via
     #   -r requirements/e2e.txt
@@ -463,16 +468,13 @@ oauthlib==3.1.1
     #   -r requirements/base.txt
     #   requests-oauthlib
     #   social-auth-core
-openapi-codec==1.3.2
-    # via
-    #   -r requirements/base.txt
-    #   django-rest-swagger
 packaging==21.3
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
     #   -r requirements/tox.txt
     #   bleach
+    #   drf-yasg
     #   pytest
     #   redis
     #   tox
@@ -751,6 +753,14 @@ rsa==4.8
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
+ruamel.yaml==0.17.21
+    # via
+    #   -r requirements/base.txt
+    #   drf-yasg
+ruamel.yaml.clib==0.2.6
+    # via
+    #   -r requirements/base.txt
+    #   ruamel.yaml
 rules==3.1
     # via -r requirements/base.txt
 s3transfer==0.5.0
@@ -773,10 +783,6 @@ shellescape==3.8.1
     #   -r requirements/base.txt
     #   crypto
     #   cybersource-rest-client-python
-simplejson==3.17.6
-    # via
-    #   -r requirements/base.txt
-    #   django-rest-swagger
 six==1.16.0
     # via
     #   -r requirements/base.txt
@@ -896,6 +902,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements/base.txt
     #   coreapi
+    #   drf-yasg
 urllib3==1.26.8
     # via
     #   -c requirements/pins.txt

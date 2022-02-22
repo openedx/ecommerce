@@ -12,7 +12,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
 from django.views.i18n import JavaScriptCatalog
-from rest_framework_swagger.views import get_swagger_view
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
@@ -52,11 +54,21 @@ WELL_KNOWN_URLS = [
         ApplePayMerchantDomainAssociationView.as_view(), name='apple_pay_domain_association'),
 ]
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Ecommerce API",
+        default_version='v2',
+        description="Ecommerce docs",
+    ),
+    public=False,
+    permission_classes=[permissions.AllowAny],
+)
+
 urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^admin/', admin.site.urls),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include((AUTH_URLS, 'rest_framework'))),
-    url(r'^api-docs/', get_swagger_view(title='Ecommerce API'), name='api_docs'),
+    url(r'^api-docs/$', schema_view.with_ui('swagger', cache_timeout=0), name='api_docs'),
     url(r'^bff/', include(('ecommerce.bff.urls', 'bff'))),
     url(r'^courses/', include(('ecommerce.courses.urls', 'courses'))),
     url(r'^credit/', include(('ecommerce.credit.urls', 'credit'))),
