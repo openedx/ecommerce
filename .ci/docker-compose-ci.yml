@@ -4,19 +4,19 @@ version: "2"
 services:
   mysql57:
     image: mysql:5.7
-    container_name: db
+    container_name: mysql57
     command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
     environment:
       MYSQL_ROOT_PASSWORD: "password"
       MYSQL_DATABASE: "ecommerce"
 
-#  mysql80:
-#    image: mysql:8.0
-#    container_name: mysql80
-#    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
-#    environment:
-#      MYSQL_ROOT_PASSWORD: "password"
-#      MYSQL_DATABASE: "ecommerce"
+  mysql80:
+    image: mysql:8.0
+    container_name: mysql80
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_DATABASE: "ecommerce"
 
   ecommerce:
     image: edxops/ecommerce:latest
@@ -32,6 +32,7 @@ services:
     command: tail -f /dev/null
     depends_on:
       - "mysql57"
+      - "mysql80"
     environment:
       CONN_MAX_AGE: 60
       DB_ENGINE: "django.db.backends.mysql"
