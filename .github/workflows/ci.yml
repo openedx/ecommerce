@@ -13,22 +13,22 @@ jobs:
       matrix:
         db-version: [ 'mysql57', 'mysql80' ]
         include:
-          - django-env: django22-mysql57
+          - django-env: django22
             testname: quality-and-jobs
             targets: PYTHON_ENV=py38 requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords
-          - django-env: django22-mysql57
+          - django-env: django22
             testname: test-python
             targets: PYTHON_ENV=py38 requirements.js clean_static static validate_python
-          - django-env: django22-mysql57
+          - django-env: django22
             testname: acceptance-python
             targets: PYTHON_ENV=py38 requirements.js clean_static static acceptance
-          - django-env: django22-mysql57
+          - django-env: django32
             testname: quality-and-jobs
             targets: PYTHON_ENV=py38 requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords
-          - django-env: django22-mysql57
+          - django-env: django32
             testname: test-python
             targets: PYTHON_ENV=py38 requirements.js clean_static static validate_python
-          - django-env: django22-mysql57
+          - django-env: django32
             testname: acceptance-python
             targets: PYTHON_ENV=py38 requirements.js clean_static static acceptance
 
@@ -50,7 +50,7 @@ jobs:
           docker exec -t -e CI=1 ecommerce_testing bash -c "
             cd /edx/app/ecommerce/ecommerce/ &&
             PATH=\$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin
-            DJANGO_ENV=${{ matrix.django-env }} make ${{ matrix.targets }}
+            DJANGO_ENV=${{ matrix.django-env }} make ${{ matrix.targets }} DB_HOST=mysql57
           "
       - name: Run coverage
         if: matrix.testname == 'test-python'
