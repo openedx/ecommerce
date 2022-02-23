@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        db-version: [ 'mysql57', 'mysql80' ]
+#        db-version: [ 'mysql57', 'mysql80' ]
         include:
           - django-env: django22
             testname: quality-and-jobs
