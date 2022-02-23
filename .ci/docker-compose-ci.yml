@@ -2,13 +2,22 @@
 version: "2"
 
 services:
-  db:
+  mysql57:
     image: mysql:5.7
     container_name: db
     command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
     environment:
       MYSQL_ROOT_PASSWORD: "password"
       MYSQL_DATABASE: "ecommerce"
+
+#  mysql80:
+#    image: mysql:8.0
+#    container_name: mysql80
+#    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
+#    environment:
+#      MYSQL_ROOT_PASSWORD: "password"
+#      MYSQL_DATABASE: "ecommerce"
+
   ecommerce:
     image: edxops/ecommerce:latest
     container_name: ecommerce_testing
@@ -22,11 +31,10 @@ services:
     # We have not yet standardized on an init replacement which could be used instead.
     command: tail -f /dev/null
     depends_on:
-      - db
+      - "mysql57"
     environment:
       CONN_MAX_AGE: 60
       DB_ENGINE: "django.db.backends.mysql"
-      DB_HOST: "db"
       DB_NAME: "ecommerce"
       DB_PASSWORD: "password"
       DB_PORT: "3306"
