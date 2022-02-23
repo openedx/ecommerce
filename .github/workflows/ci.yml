@@ -50,7 +50,7 @@ jobs:
           docker exec -t -e CI=1 ecommerce_testing bash -c "
             cd /edx/app/ecommerce/ecommerce/ &&
             PATH=\$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin
-            DJANGO_ENV=${{ matrix.django-env }} make ${{ matrix.targets }} DB_HOST=mysql57
+            DJANGO_ENV=${{ matrix.django-env }} make ${{ matrix.targets }}
           "
       - name: Run coverage
         if: matrix.testname == 'test-python'
