@@ -483,6 +483,8 @@ shellescape==3.8.1
     # via
     #   crypto
     #   cybersource-rest-client-python
+simplejson==3.17.6
+    # via -r requirements/base.in
 six==1.16.0
     # via
     #   analytics-python
