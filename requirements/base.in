@@ -48,6 +48,7 @@ python3-openid>=3
 pytz
 requests
 rules
+simplejson
 social-auth-app-django
 sorl-thumbnail
 stripe==1.70.0
