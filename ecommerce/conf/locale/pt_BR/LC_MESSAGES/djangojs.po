@@ -7,11 +7,13 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Angela Amaro <angelasimei@gmail.com>, 2016
 # César Augusto Lemos <teco171bp@hotmail.com>, 2015
 # Cleomir Waiczyk <w.cleomir@gmail.com>, 2015
+# Gabriel José, 2021
 # G <glaucogm@ufpr.br>, 2018
-# Matheus Weber <weberlorenzoni@gmail.com>, 2015
+# Matheus Weber, 2015
 # Monica Farias <monifar.tp@gmail.com>, 2015-2016
 # Paulo Romano <pauloromanocarvalho@gmail.com>, 2017
 # Renato Monteiro da Silva <renato_city@yahoo.com.br>, 2019
@@ -21,9 +23,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
-"PO-Revision-Date: 2020-11-24 09:15+0000\n"
-"Last-Translator: Transifex Bot <>\n"
+"POT-Creation-Date: 2022-02-27 20:12+0000\n"
+"PO-Revision-Date: 2021-09-21 03:17+0000\n"
+"Last-Translator: Gabriel José\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/open-edx/edx-platform/language/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -59,23 +61,23 @@ msgstr ""
 msgid "Email domain {%s} is invalid."
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:101
+#: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:131
+#: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:155
+#: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:177
+#: ecommerce/static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:191
+#: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
 msgstr ""
 
