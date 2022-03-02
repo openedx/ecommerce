@@ -4,7 +4,6 @@ on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
 
 jobs:
   build:
@@ -21,6 +20,9 @@ jobs:
           - django-env: django32
             testname: acceptance-python
             targets: PYTHON_ENV=py38 requirements.js clean_static static acceptance
+          - django-env: django40
+            testname: test-python
+            targets: PYTHON_ENV=py38 requirements.js clean_static static validate_python
 
     steps:
       - uses: actions/checkout@v2
@@ -41,17 +43,17 @@ jobs:
             DJANGO_ENV=${{ matrix.django-env }} make ${{ matrix.targets }}
           "
       - name: Run coverage
-        if: matrix.testname == 'test-python'
+        if: matrix.testname == 'test-python' && matrix.django-env == 'django-32'
         run: |
           docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.ci/run_coverage.sh
       - name: Setup Python
-        if: matrix.testname == 'test-python'
+        if: matrix.testname == 'test-python' && matrix.django-env == 'django-32'
         uses: actions/setup-python@v2
         with:
           python-version: "3.8"
           architecture: x64
       - name: Report coverage
-        if: matrix.testname == 'test-python'
+        if: matrix.testname == 'test-python' && matrix.django-env == 'django-32'
         run: |
           pip install codecov
           codecov
@@ -63,7 +65,6 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: "3.8"
-          architecture: x64
       - name: Install Dependencies
         run: pip install -r requirements/docs.txt -r requirements/tox.txt
       - name: Build the docs
