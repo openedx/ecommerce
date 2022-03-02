@@ -3,7 +3,7 @@
 import json
 import logging
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_model
 
