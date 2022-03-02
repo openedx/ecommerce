@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-asgiref==3.4.1
+asgiref==3.5.0
     # via
     #   -c requirements/base.txt
     #   django
@@ -20,14 +20,13 @@ cffi==1.15.0
     # via
     #   -c requirements/base.txt
     #   cryptography
-charset-normalizer==2.0.10
+charset-normalizer==2.0.12
     # via
     #   -c requirements/base.txt
     #   requests
-cryptography==3.4.8
+cryptography==36.0.1
     # via
     #   -c requirements/base.txt
-    #   -c requirements/pins.txt
     #   pyjwt
 django==3.2.12
     # via
@@ -42,11 +41,11 @@ django-waffle==2.3.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-edx-django-utils==4.4.1
+edx-django-utils==4.5.0
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-edx-rest-api-client==5.4.1
+edx-rest-api-client==5.5.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/e2e.in
@@ -55,11 +54,11 @@ idna==2.7
     #   -c requirements/base.txt
     #   -c requirements/pins.txt
     #   requests
-importlib-metadata==4.10.0
+importlib-metadata==4.11.2
     # via pytest-randomly
 iniconfig==1.1.1
     # via pytest
-newrelic==7.2.4.171
+newrelic==7.6.0.173
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
@@ -67,7 +66,7 @@ packaging==21.3
     # via
     #   -c requirements/base.txt
     #   pytest
-pbr==5.8.0
+pbr==5.8.1
     # via
     #   -c requirements/base.txt
     #   stevedore
@@ -89,11 +88,11 @@ pyjwt[crypto]==1.7.1
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-pyparsing==3.0.6
+pyparsing==3.0.7
     # via
     #   -c requirements/base.txt
     #   packaging
-pytest==6.2.5
+pytest==7.0.1
     # via
     #   -r requirements/e2e.in
     #   pytest-base-url
@@ -113,7 +112,7 @@ pytest-randomly==3.11.0
     # via -r requirements/e2e.in
 pytest-selenium==2.0.1
     # via -r requirements/e2e.in
-pytest-timeout==2.0.2
+pytest-timeout==2.1.0
     # via -r requirements/e2e.in
 pytest-variables==1.9.0
     # via pytest-selenium
@@ -154,7 +153,7 @@ stevedore==3.5.0
     #   edx-django-utils
 tenacity==6.3.1
     # via pytest-selenium
-toml==0.10.2
+tomli==2.0.1
     # via pytest
 urllib3==1.26.8
     # via
@@ -163,4 +162,6 @@ urllib3==1.26.8
     #   requests
     #   selenium
 zipp==3.7.0
-    # via importlib-metadata
+    # via
+    #   -c requirements/base.txt
+    #   importlib-metadata
