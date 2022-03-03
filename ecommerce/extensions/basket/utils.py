@@ -11,7 +11,7 @@ import waffle
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
 

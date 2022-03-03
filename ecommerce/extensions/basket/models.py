@@ -1,7 +1,7 @@
 
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 from oscar.apps.basket.abstract_models import AbstractBasket
 from oscar.core.loading import get_class
