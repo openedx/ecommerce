@@ -5,7 +5,7 @@ from django.core.validators import validate_email
 from django.db import models
 from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.apps.catalogue.abstract_models import (
     AbstractCategory,
     AbstractOption,
@@ -187,3 +187,4 @@ class ProductAttribute(AbstractProductAttribute):
 
 
 from oscar.apps.catalogue.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
+from django.utils.translation import gettext_lazy as _

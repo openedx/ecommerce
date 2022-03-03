@@ -1,7 +1,7 @@
-from django.conf.urls import url
 from django.utils.translation import gettext_lazy as _
 from oscar.core.application import OscarDashboardConfig
 from oscar.core.loading import get_class
+from django.urls import path, re_path
 
 
 class RefundsDashboardConfig(OscarDashboardConfig):
@@ -27,7 +27,7 @@ class RefundsDashboardConfig(OscarDashboardConfig):
 
     def get_urls(self):
         urls = [
-            url(r'^$', self.refund_list_view.as_view(), name='refunds-list'),
-            url(r'^(?P<pk>[\d]+)/$', self.refund_detail_view.as_view(), name='refunds-detail'),
+            path('', self.refund_list_view.as_view(), name='refunds-list'),
+            re_path(r'^(?P<pk>[\d]+)/$', self.refund_detail_view.as_view(), name='refunds-detail'),
         ]
         return self.post_process_urls(urls)

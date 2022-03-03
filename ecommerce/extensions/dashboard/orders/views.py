@@ -3,7 +3,7 @@
 from django.contrib import messages
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.apps.dashboard.orders.views import OrderDetailView as CoreOrderDetailView
 from oscar.apps.dashboard.orders.views import OrderListView as CoreOrderListView
 from oscar.core.loading import get_model
