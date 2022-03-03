@@ -32,9 +32,9 @@ class CheckoutConfig(apps.CheckoutConfig):
             # Shipping/user address views
             path('shipping-address/', self.shipping_address_view.as_view(), name='shipping-address'),
             path('user-address/edit/<int:pk>/', self.user_address_update_view.as_view(),
-                name='user-address-update'),
+                 name='user-address-update'),
             path('user-address/delete/<int:pk>/', self.user_address_delete_view.as_view(),
-                name='user-address-delete'),
+                 name='user-address-delete'),
 
             # Shipping method views
             path('shipping-method/', self.shipping_method_view.as_view(), name='shipping-method'),
@@ -45,6 +45,6 @@ class CheckoutConfig(apps.CheckoutConfig):
 
             # Preview
             path('preview/', self.payment_details_view.as_view(preview=True),
-                name='preview'),
+                 name='preview'),
         ]
         return self.post_process_urls(urls)

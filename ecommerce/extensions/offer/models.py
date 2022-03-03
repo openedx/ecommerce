@@ -883,4 +883,3 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
-from django.utils.translation import gettext_lazy as _
