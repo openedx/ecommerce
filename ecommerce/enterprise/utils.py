@@ -13,7 +13,7 @@ from urllib.parse import parse_qsl, urlencode, urlparse
 import crum
 from django.conf import settings
 from django.urls import reverse
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
