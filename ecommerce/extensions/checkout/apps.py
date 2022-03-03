@@ -1,8 +1,8 @@
 
 
+from django.urls import path
 from oscar.apps.checkout import apps
 from oscar.core.loading import get_class
-from django.urls import path
 
 
 class CheckoutConfig(apps.CheckoutConfig):

@@ -1,6 +1,7 @@
 
 
 from django.urls import re_path
+
 from ecommerce.core.constants import COURSE_ID_PATTERN
 from ecommerce.extensions.offer.views import EmailConfirmationRequiredView
 
