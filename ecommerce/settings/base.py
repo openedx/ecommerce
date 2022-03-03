@@ -8,7 +8,7 @@ from logging.handlers import SysLogHandler
 from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from ecommerce.core.constants import (
     ENTERPRISE_COUPON_ADMIN_ROLE,

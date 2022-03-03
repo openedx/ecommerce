@@ -1,9 +1,9 @@
 
 
-from django.conf.urls import url
+from django.urls import path
 
 from ecommerce.management import views
 
 urlpatterns = [
-    url(r'^$', views.ManagementView.as_view(), name='index'),
+    path('', views.ManagementView.as_view(), name='index'),
 ]
