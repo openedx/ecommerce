@@ -223,18 +223,35 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
         enterprise_customer_uuid = None
         for discount in order.discounts.all():
             if discount.voucher:
+                logger.info("Getting enterprise_customer_uuid from discount voucher for order [%s]", order.number)
                 enterprise_customer_uuid = get_enterprise_customer_uuid_from_voucher(discount.voucher)
+                logger.info(
+                    "enterprise_customer_uuid on discount voucher for order [%s] is [%s]",
+                    order.number, enterprise_customer_uuid
+                )
 
             if enterprise_customer_uuid is not None:
+                logger.info(
+                    "Adding linked_enterprise_customer to data with enterprise_customer_uuid [%s] for order [%s]",
+                    enterprise_customer_uuid, order.number
+                )
                 data['linked_enterprise_customer'] = str(enterprise_customer_uuid)
                 break
         # If an EnterpriseCustomer UUID is associated with the coupon, create an EnterpriseCustomerUser
         # on the Enterprise service if one doesn't already exist.
         if enterprise_customer_uuid is not None:
+            logger.info(
+                "Getting or creating enterprise_customer_user for site [%s], enterprise customer [%s], and username [%s], for order [%s]",
+                order.site, enterprise_customer_uuid, order.user.username, order.number
+            )
             get_or_create_enterprise_customer_user(
                 order.site,
                 enterprise_customer_uuid,
                 order.user.username
+            )
+            logger.info(
+                "Finished get_or_create enterpruise customer user for order [%s]",
+                order.number
             )
 
     def supports_line(self, line):
@@ -297,7 +314,7 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
             try:
                 provider = line.product.attr.credit_provider
             except AttributeError:
-                logger.debug("Seat [%d] has no credit_provider attribute. Defaulted to None.", line.product.id)
+                logger.error("Seat [%d] has no credit_provider attribute. Defaulted to None.", line.product.id)
                 provider = None
 
             data = {
@@ -329,7 +346,9 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
                     }
                 )
             try:
+                logger.info("Adding enterprise data to enrollment api post for order [%s]", order.number)
                 self._add_enterprise_data_to_enrollment_api_post(data, order)
+                logger.info("Updating orderline with enterprise discount metadata for order [%s]", order.number)
                 self.update_orderline_with_enterprise_discount_metadata(order, line)
 
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
