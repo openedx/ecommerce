@@ -353,7 +353,9 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
 
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
+                logger.info("Posting to enrollment api for order [%s]", order.number)
                 response = self._post_to_enrollment_api(data, user=order.user, usage='fulfill enrollment')
+                logger.info("Finished posting to enrollment api for order [%s]", order.number)
 
                 if response.status_code == status.HTTP_200_OK:
                     line.set_status(LINE.COMPLETE)
