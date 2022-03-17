@@ -273,7 +273,7 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
         """
         return [line for line in lines if self.supports_line(line)]
 
-    def fulfill_product(self, order, lines, email_opt_in=False):
+    def fulfill_product(self, order, lines, email_opt_in=False):  # pylint: disable=too-many-statements
         """ Fulfills the purchase of a 'seat' by enrolling the associated student.
 
         Uses the order and the lines to determine which courses to enroll a student in, and with certain
