@@ -487,6 +487,11 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         prepaid_invoice_amount = request_data.get('prepaid_invoice_amount')
         if discount_value is not None or prepaid_invoice_amount is not None:
             discount_type = request_data.get('contract_discount_type')
+            logger.info(
+                "Calling attach_or_update_contract_metadata_on_coupon "
+                "from api/v2/views/coupons.py for coupon [%s]",
+                coupon.id
+            )
             attach_or_update_contract_metadata_on_coupon(
                 coupon,
                 discount_type=discount_type,

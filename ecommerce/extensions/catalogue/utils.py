@@ -152,6 +152,10 @@ def attach_or_update_contract_metadata_on_coupon(coupon, **update_kwargs):
         coupon.attr.enterprise_contract_metadata = contract_metadata
 
     for key, value in update_kwargs.items():
+        logger.info(
+            'Setting attribute [%s] to [%s] on contract_metadata for coupon [%s]',
+            key, value, coupon.id
+        )
         setattr(contract_metadata, key, value)
 
     contract_metadata.clean()
