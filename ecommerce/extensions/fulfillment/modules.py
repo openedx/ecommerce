@@ -241,7 +241,8 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
         # on the Enterprise service if one doesn't already exist.
         if enterprise_customer_uuid is not None:
             logger.info(
-                "Getting or creating enterprise_customer_user for site [%s], enterprise customer [%s], and username [%s], for order [%s]",
+                "Getting or creating enterprise_customer_user "
+                "for site [%s], enterprise customer [%s], and username [%s], for order [%s]",
                 order.site, enterprise_customer_uuid, order.user.username, order.number
             )
             get_or_create_enterprise_customer_user(

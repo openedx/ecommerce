@@ -124,8 +124,10 @@ class EnterpriseDiscountMixin:
             return
 
         logger.info(
-            'Calculating effective discount percentage for order [%s]. discount_type: [%s], discount_value: [%s], amount_paid: [%s]',
-            order.number, contract_metadata.discount_type, contract_metadata.discount_value, contract_metadata.amount_paid
+            'Calculating effective discount percentage '
+            'for order [%s]. discount_type: [%s], discount_value: [%s], amount_paid: [%s]',
+            order.number, contract_metadata.discount_type,
+            contract_metadata.discount_value, contract_metadata.amount_paid
         )
         effective_discount_percentage = self._calculate_effective_discount_percentage(contract_metadata)
         logger.info(
