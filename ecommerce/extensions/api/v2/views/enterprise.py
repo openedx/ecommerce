@@ -288,6 +288,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
             cleaned_voucher_data['enterprise_customer'],
             cleaned_voucher_data['sales_force_id']
         )
+        logger.info(
+            "Calling attach_or_update_contract_metadata_on_coupon "
+            "from api/v2/views/enterprise.py for coupon [%s]",
+            coupon_product.id
+        )
         attach_or_update_contract_metadata_on_coupon(
             coupon_product,
             discount_type=cleaned_voucher_data['contract_discount_type'],
