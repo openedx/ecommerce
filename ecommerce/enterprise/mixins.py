@@ -129,13 +129,26 @@ class EnterpriseDiscountMixin:
             order.number, contract_metadata.discount_type,
             contract_metadata.discount_value, contract_metadata.amount_paid
         )
-        effective_discount_percentage = self._calculate_effective_discount_percentage(contract_metadata)
+        if not contract_metadata.discount_value and not contract_metadata.amount_paid:
+            logging.warning(
+                "No discount value or amount paid set on contract_metadata. "
+                "Avoiding 0/0 division for effective_discount_percentage. "
+                "Using 0 for effective discount for order [%s].",
+                order.number
+            )
+            effective_discount_percentage = Decimal('0')
+        else:
+            effective_discount_percentage = self._calculate_effective_discount_percentage(contract_metadata)
         logger.info(
             'Done calculating effective discount percentage for order [%s]. The result was [%s]',
             order.number, effective_discount_percentage
         )
 
-        logger.info('Calculating effective contract discount price for order [%s]', order.number)
+        logger.info(
+            'Calculating effective contract discount price for order [%s] '
+            'where line.unit_price_excl_tax=[%s] and effective_discount_percentage=[%s]',
+            order.number, line.unit_price_excl_tax, effective_discount_percentage
+        )
         effective_contract_discounted_price = self._get_enterprise_customer_cost_for_line(
             line.unit_price_excl_tax,
             effective_discount_percentage

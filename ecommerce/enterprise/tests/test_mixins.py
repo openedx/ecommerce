@@ -127,6 +127,17 @@ class EnterpriseDiscountMixinTests(EnterpriseDiscountTestMixin, TestCase):
             'expected_effective_contract_discount_percentage': Decimal('0.5'),
             'expected_effective_contract_discounted_price': Decimal('50.0000'),
         },
+        # Test with 0s for amount_paid and discount_value
+        {
+            'amount_paid': Decimal('0'),
+            'discount_value': Decimal('0'),
+            'discount_type': EnterpriseContractMetadata.FIXED,
+            'is_manual_order': False,
+            'create_order_discount_callback': 'create_order_offer_discount',
+            # FYI the line.unit_price_excl_tax = 100.00
+            'expected_effective_contract_discount_percentage': Decimal('0'),
+            'expected_effective_contract_discounted_price': Decimal('100'),
+        },
         # Test with manual order's discount.
         {
             'amount_paid': Decimal('100'),
