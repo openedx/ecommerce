@@ -1,16 +1,16 @@
 [main]
 host = https://www.transifex.com
 
-[edx-platform.ecommerce]
+[o:open-edx:p:edx-platform:r:ecommerce]
 file_filter = conf/locale/<lang>/LC_MESSAGES/django.po
 source_file = conf/locale/en/LC_MESSAGES/django.po
 source_lang = en_US
-type = PO
-lang_map = en_US:en
+type        = PO
+lang_map    = en_US:en
 
-[edx-platform.ecommerce-js]
+[o:open-edx:p:edx-platform:r:ecommerce-js]
 file_filter = conf/locale/<lang>/LC_MESSAGES/djangojs.po
 source_file = conf/locale/en/LC_MESSAGES/djangojs.po
 source_lang = en_US
-type = PO
-lang_map = en_US:en
+type        = PO
+lang_map    = en_US:en
