@@ -177,6 +177,20 @@ def retrieve_voucher_usage(obj):
     return retrieve_voucher(obj).usage
 
 
+def retrieve_enterprise_customer_catalog(coupon):
+    """
+    Helper method to retrieve the Enterprise Customer Catalog UUID
+    attached to a given coupon.
+    """
+    offer_range = retrieve_range(coupon)
+    offer_condition = retrieve_condition(coupon)
+    if offer_range and offer_range.enterprise_customer_catalog:
+        return offer_range.enterprise_customer_catalog
+    if offer_condition.enterprise_customer_catalog_uuid:
+        return offer_condition.enterprise_customer_catalog_uuid
+    return None
+
+
 def _flatten(attrs):
     """Transform a list of attribute names and values into a dictionary keyed on the names."""
     return {attr['name']: attr['value'] for attr in attrs}
@@ -1113,6 +1127,7 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
             'num_unassigned': self._get_num_unassigned(vouchers),
             'errors': self._get_errors(coupon),
             'available': is_coupon_available(coupon),
+            'enterprise_catalog_uuid': retrieve_enterprise_customer_catalog(coupon),
         }
 
         return dict(representation, **data)
@@ -1300,14 +1315,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
 
     def get_enterprise_customer_catalog(self, obj):
         """ Get the Enterprise Customer Catalog UUID attached to a coupon. """
-        offer_range = retrieve_range(obj)
-        offer_condition = retrieve_condition(obj)
-        if offer_range and offer_range.enterprise_customer_catalog:
-            return offer_range.enterprise_customer_catalog
-        if offer_condition.enterprise_customer_catalog_uuid:
-            return offer_condition.enterprise_customer_catalog_uuid
-
-        return None
+        return retrieve_enterprise_customer_catalog(obj)
 
     def get_inactive(self, obj):
         """ Get inactive attribute for Coupon Product"""
