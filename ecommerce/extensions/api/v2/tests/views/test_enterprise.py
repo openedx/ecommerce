@@ -446,6 +446,7 @@ class EnterpriseCouponViewSetRbacTests(
             'title': coupon.title,
             'usage_limitation': 'Single use',
             'available': is_coupon_available(coupon),
+            'enterprise_catalog_uuid': self.data['enterprise_customer_catalog'],
         }
 
     def get_coupon_voucher_start_date(self, coupon):
