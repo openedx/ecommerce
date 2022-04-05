@@ -136,6 +136,8 @@ def get_certificate_type_display_value(certificate_type):
         'executive-education': _('Executive Education'),
         'paid-executive-education': _('Paid Executive Education'),
         'unpaid-executive-education': _('Unpaid Executive Education'),
+        'paid-bootcamp': _('Paid Bootcamp'),
+        'unpaid-bootcamp': _('Unpaid Bootcamp'),
     }
 
     if certificate_type not in display_values:
