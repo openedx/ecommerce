@@ -187,6 +187,7 @@ class EnrollmentFulfillmentModuleTests(
             'course_details': {
                 'course_id': self.course_id,
             },
+            'create_consent_record': True,
             'enrollment_attributes': [
                 {
                     'namespace': 'order',
@@ -468,6 +469,7 @@ class EnrollmentFulfillmentModuleTests(
             'course_details': {
                 'course_id': self.course_id,
             },
+            'create_consent_record': True,
             'enrollment_attributes': [
                 {
                     'namespace': 'order',

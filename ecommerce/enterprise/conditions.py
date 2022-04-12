@@ -178,7 +178,11 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             course_ids.append(course.id)
 
         courses_in_basket = ','.join(course_ids)
-        user_enterprise = get_enterprise_id_for_user(basket.site, basket.owner)
+
+        user_enterprise = getattr(
+            basket, 'enterprise_customer_uuid', None
+        ) or get_enterprise_id_for_user(basket.site, basket.owner)
+
         if user_enterprise and enterprise_in_condition != user_enterprise:
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
             if offer.offer_type == ConditionalOffer.VOUCHER:

@@ -20,7 +20,7 @@ from ecommerce.extensions.refund.status import REFUND_LINE
 logger = logging.getLogger(__name__)
 
 
-def fulfill_order(order, lines, email_opt_in=False):
+def fulfill_order(order, lines, email_opt_in=False, **kwargs):
     """ Fulfills line items in an Order
 
     Attempts to fulfill the products in the Order. Checks the mapping of fulfillment modules to product types, and
@@ -59,7 +59,7 @@ def fulfill_order(order, lines, email_opt_in=False):
             supported_lines = module.get_supported_lines(line_items)
             if supported_lines:
                 line_items = list(set(line_items) - set(supported_lines))
-                module.fulfill_product(order, supported_lines, email_opt_in=email_opt_in)
+                module.fulfill_product(order, supported_lines, email_opt_in=email_opt_in, **kwargs)
 
         # Check to see if any line items in the order have not been accounted for by a FulfillmentModule
         # Any product does not line up with a module, we have to mark a fulfillment error.

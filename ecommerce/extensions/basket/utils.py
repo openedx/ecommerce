@@ -516,7 +516,7 @@ def apply_offers_on_basket(request, basket):
 
 
 @newrelic.agent.function_trace()
-def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
+def apply_voucher_on_basket_and_check_discount(voucher, request, basket, applicator_cls=Applicator):
     """
     Applies voucher on a product.
 
@@ -533,7 +533,7 @@ def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
     basket.vouchers.add(voucher)
     voucher_addition.send(sender=None, basket=basket, voucher=voucher)
 
-    Applicator().apply(basket, request.user, request)
+    applicator_cls().apply(basket, request.user, request)
 
     # Recalculate discounts to see if the voucher gives any
     discounts_after = basket.offer_applications

@@ -22,6 +22,8 @@ from ecommerce.core.views import LogoutView
 from ecommerce.extensions.payment.views.apple_pay import ApplePayMerchantDomainAssociationView
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
+from edx_django_utils.plugins import get_plugin_url_patterns  # isort:skip
+
 
 def handler403(_, exception):  # pylint: disable=unused-argument
     """Redirect unauthorized users to the LMS student dashboard.
@@ -116,3 +118,5 @@ if settings.DEBUG:  # pragma: no cover
         urlpatterns += [
             url(r'^__debug__/', include(debug_toolbar.urls))
         ]
+
+urlpatterns.extend(get_plugin_url_patterns('ecommerce.djangoapp'))

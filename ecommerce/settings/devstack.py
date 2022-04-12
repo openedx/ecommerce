@@ -2,6 +2,7 @@
 
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
+from edx_django_utils.plugins import add_plugins
 
 from ecommerce.settings.production import *
 
@@ -42,6 +43,8 @@ JWT_AUTH.update({
         'y5ZLcTUomo4rZLjghVpq6KZxfS6I1Vz79ZsMVUWEdXOYePCKKsrQG20ogQEkmTf9FT_SouC6jPcHLXw"}]}'
     ),
 })
+
+add_plugins(__name__, 'ecommerce.djangoapp', 'devstack')
 
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:1991',

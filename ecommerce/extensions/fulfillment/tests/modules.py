@@ -11,7 +11,7 @@ class MockFulfillmentModule(BaseFulfillmentModule):
     def get_supported_lines(self, lines):
         """Returns a list of lines this mock module supposedly supports."""
 
-    def fulfill_product(self, order, lines, email_opt_in=False):
+    def fulfill_product(self, order, lines, email_opt_in=False, **kwargs):
         """Fulfill product. Mark all lines success."""
 
     def revoke_line(self, line):
@@ -28,7 +28,7 @@ class FakeFulfillmentModule(MockFulfillmentModule):
         """Returns a list of lines this Fake module supposedly supports."""
         return lines
 
-    def fulfill_product(self, order, lines, email_opt_in=False):
+    def fulfill_product(self, order, lines, email_opt_in=False, **kwargs):
         """Fulfill product. Mark all lines success."""
         for line in lines:
             line.set_status(LINE.COMPLETE)

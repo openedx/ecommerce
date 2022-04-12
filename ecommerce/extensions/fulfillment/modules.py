@@ -92,7 +92,7 @@ class BaseFulfillmentModule(metaclass=abc.ABCMeta):  # pragma: no cover
         raise NotImplementedError("Line support method not implemented!")
 
     @abc.abstractmethod
-    def fulfill_product(self, order, lines, email_opt_in=False):
+    def fulfill_product(self, order, lines, email_opt_in=False, **kwargs):
         """ Fulfills the specified lines in the order.
 
         Iterates over the given lines and fulfills the associated products. Will report success if the product can
@@ -148,7 +148,7 @@ class DonationsFromCheckoutTestFulfillmentModule(BaseFulfillmentModule):
         """
         return [line for line in lines if self.supports_line(line)]
 
-    def fulfill_product(self, order, lines, email_opt_in=False):
+    def fulfill_product(self, order, lines, email_opt_in=False, **kwargs):
         """ Fulfills the specified lines in the order.
         Marks the line status as complete. Does not change anything else.
 
@@ -189,8 +189,12 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
             messages if the LMS user id cannot be found.
     """
 
-    def _post_to_enrollment_api(self, data, user, usage):
-        enrollment_api_url = get_lms_enrollment_api_url()
+    def _post_to_enrollment_api(self, data, user, usage, site=None):
+        if site:
+            enrollment_api_url = site.siteconfiguration.build_lms_url('/api/enrollment/v1/enrollment')
+        else:
+            enrollment_api_url = get_lms_enrollment_api_url()
+
         timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
         headers = {
             'Content-Type': 'application/json',
@@ -273,7 +277,7 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
         """
         return [line for line in lines if self.supports_line(line)]
 
-    def fulfill_product(self, order, lines, email_opt_in=False):  # pylint: disable=too-many-statements
+    def fulfill_product(self, order, lines, email_opt_in=False, **kwargs):  # pylint: disable=too-many-statements
         """ Fulfills the purchase of a 'seat' by enrolling the associated student.
 
         Uses the order and the lines to determine which courses to enroll a student in, and with certain
@@ -325,6 +329,7 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
                 'course_details': {
                     'course_id': course_key
                 },
+                'create_consent_record': kwargs.get('create_consent_record', True),
                 'enrollment_attributes': [
                     {
                         'namespace': 'order',
@@ -338,6 +343,7 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
                     }
                 ]
             }
+
             if provider:
                 data['enrollment_attributes'].append(
                     {
@@ -355,7 +361,11 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
                 logger.info("Posting to enrollment api for order [%s]", order.number)
-                response = self._post_to_enrollment_api(data, user=order.user, usage='fulfill enrollment')
+                response = self._post_to_enrollment_api(
+                    data, user=order.user,
+                    usage='fulfill enrollment',
+                    site=order.site
+                )
                 logger.info("Finished posting to enrollment api for order [%s]", order.number)
 
                 if response.status_code == status.HTTP_200_OK:
@@ -470,7 +480,7 @@ class CouponFulfillmentModule(BaseFulfillmentModule):
         """
         return [line for line in lines if self.supports_line(line)]
 
-    def fulfill_product(self, order, lines, email_opt_in=False):
+    def fulfill_product(self, order, lines, email_opt_in=False, **kwargs):
         """ Fulfills the purchase of an 'coupon' products.
 
         Args:
@@ -526,7 +536,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         """
         return [line for line in lines if self.supports_line(line)]
 
-    def fulfill_product(self, order, lines, email_opt_in=False):
+    def fulfill_product(self, order, lines, email_opt_in=False, **kwargs):
         """ Fulfills the purchase of an Enrollment code product.
         For each line creates number of vouchers equal to that line's quantity. Creates a new OrderLineVouchers
         object to tie the order with the created voucher and adds the vouchers to the coupon's total vouchers.
@@ -792,7 +802,7 @@ class CourseEntitlementFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmen
                 )
                 break
 
-    def fulfill_product(self, order, lines, email_opt_in=False):
+    def fulfill_product(self, order, lines, email_opt_in=False, **kwargs):
         """ Fulfills the purchase of a 'Course Entitlement'.
         Uses the order and the lines to determine which courses to grant an entitlement for, and with certain
         certificate types. May result in an error if the Entitlement API cannot be reached, or if there is
