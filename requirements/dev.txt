@@ -154,7 +154,7 @@ deprecated==1.2.13
     #   redis
 diff-cover==6.4.4
     # via -r requirements/test.txt
-django==3.2.12
+django==3.2.13
     # via
     #   -r requirements/test.txt
     #   django-appconf
