@@ -23,11 +23,10 @@ from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
+from requests.exceptions import RequestException, Timeout
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import absolute_redirect, get_lms_course_about_url, get_lms_url
@@ -281,7 +280,7 @@ class BasketLogicMixin:
             # template overrides can make use of them.
             course_data['course_start'] = self._deserialize_date(course.get('start'))
             course_data['course_end'] = self._deserialize_date(course.get('end'))
-        except (ReqConnectionError, SlumberBaseException, Timeout):
+        except (ReqConnectionError, RequestException, Timeout):
             logger.exception(
                 'Failed to retrieve data from Discovery Service for course [%s].',
                 course_data['course_key'],

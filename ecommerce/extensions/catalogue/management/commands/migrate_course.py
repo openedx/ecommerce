@@ -1,6 +1,7 @@
 
 
 import logging
+from urllib.parse import urljoin
 
 import requests
 import waffle
@@ -10,7 +11,6 @@ from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from django.db import transaction
 from django.db.models import Q
-from edx_rest_api_client.client import EdxRestApiClient
 
 from ecommerce.courses.models import Course
 
@@ -45,9 +45,10 @@ class MigratedCourse:
 
     def _query_commerce_api(self):
         """Get course name and verification deadline from the Commerce API."""
-        commerce_api_client = self.site_configuration.commerce_api_client
+        api_client = self.site_configuration.oauth_api_client
+        commerce_url = urljoin(f"{self.site_configuration.commerce_api_url}/", f"courses/{self.course.id}/")
 
-        data = commerce_api_client.courses(self.course.id).get()
+        data = api_client.get(commerce_url).json()
         logger.debug(data)
         course_name = data.get('name')
 
@@ -63,11 +64,11 @@ class MigratedCourse:
 
     def _query_course_structure_api(self):
         """Get course name from the Course Structure API."""
-        api_client = EdxRestApiClient(
-            self.site_configuration.build_lms_url('/api/course_structure/v0/'),
-            jwt=self.site_configuration.access_token
+        api_client = self.site_configuration.oauth_api_client
+        api_url = urljoin(
+            self.site_configuration.build_lms_url('api/course_structure/v0/'), f'courses/{self.course.id}/'
         )
-        data = api_client.courses(self.course.id).get()
+        data = api_client.get(api_url).json()
         logger.debug(data)
 
         course_name = data.get('name')
@@ -84,7 +85,7 @@ class MigratedCourse:
 
     def _query_enrollment_api(self, headers):
         """Get modes and pricing from Enrollment API."""
-        url = self._build_lms_url('api/enrollment/v1/course/{}?include_expired=1'.format(self.course.id))
+        url = self._build_lms_url('api/enrollment/v1/course/{}/?include_expired=1'.format(self.course.id))
         response = requests.get(url, headers=headers)
 
         if response.status_code != 200:

@@ -8,8 +8,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import get_language, to_locale
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
-from slumber.exceptions import SlumberHttpBaseException
+from requests.exceptions import HTTPError, Timeout
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +23,12 @@ def get_credit_provider_details(credit_provider_id, site_configuration):
     Returns: dict
     """
     try:
-        return site_configuration.credit_api_client.providers(credit_provider_id).get()
-    except (ReqConnectionError, SlumberHttpBaseException, Timeout):
+        client = site_configuration.oauth_api_client
+        providers_url = parse.urljoin(f"{site_configuration.credit_api_url}/", f"providers/{credit_provider_id}/")
+        response = client.get(providers_url)
+        response.raise_for_status()
+        return response.json()
+    except (ReqConnectionError, HTTPError, Timeout):
         logger.exception('Failed to retrieve credit provider details for provider [%s].', credit_provider_id)
         return None
 

@@ -2,10 +2,11 @@
 
 import json
 import logging
+from urllib.parse import urljoin
 
 from django.utils.translation import ugettext_lazy as _
-from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_model
+from requests.exceptions import HTTPError
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SEAT_TYPES
 from ecommerce.courses.utils import mode_for_product
@@ -71,18 +72,14 @@ class LMSPublisher:
                     'course_key': course_id,
                     'enabled': True
                 }
-                credit_api_client = site.siteconfiguration.credit_api_client
-                credit_api_client.courses(course_id).put(data)
+                client = site.siteconfiguration.oauth_api_client
+                courses_url = urljoin(f"{site.siteconfiguration.credit_api_url}/", f"courses/{course_id}/")
+                response = client.put(courses_url, json=data)
+                response.raise_for_status()
                 logger.info('Successfully published CreditCourse for [%s] to LMS.', course_id)
-            except SlumberHttpBaseException as e:
-                # Note that %r is used to log the repr() of the response content, which may sometimes
-                # contain non-ASCII Unicode. We don't know (or want to guess) the encoding, so using %r will log the
-                # raw bytes of the message, freeing us from the possibility of encoding errors.
+            except HTTPError as e:
                 logger.exception(
-                    'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was [%s].',
-                    course_id,
-                    e.response.status_code,
-                    e.content.decode('utf-8')
+                    'Failed to publish CreditCourse for [%s] to LMS. Error was %s.', course_id, e
                 )
                 return error_message
             except:  # pylint: disable=bare-except
@@ -97,18 +94,17 @@ class LMSPublisher:
                 'modes': modes,
             }
 
-            commerce_api_client = site.siteconfiguration.commerce_api_client
-            commerce_api_client.courses(course_id).put(data=data)
+            api_client = site.siteconfiguration.oauth_api_client
+            commerce_url = urljoin(f"{site.siteconfiguration.commerce_api_url}/", f"courses/{course_id}/")
+            response = api_client.put(commerce_url, json=data)
+            response.raise_for_status()
             logger.info('Successfully published commerce data for [%s].', course_id)
             return None
-        except SlumberHttpBaseException as e:  # pylint: disable=bare-except
+        except HTTPError as e:  # pylint: disable=bare-except
             logger.exception(
-                'Failed to publish commerce data for [%s] to LMS. Status was [%d]. Body was [%s].',
-                course_id,
-                e.response.status_code,
-                e.content.decode('utf-8')
+                'Failed to publish commerce data for [%s] to LMS. Error was %s.', course_id, e
             )
-            return self._parse_error(e.content.decode('utf-8'), error_message)
+            return self._parse_error(e.response.content, error_message)
         except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to publish commerce data for [%s] to LMS.', course_id)
             return error_message

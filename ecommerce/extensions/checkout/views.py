@@ -15,8 +15,7 @@ from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
-from slumber.exceptions import SlumberHttpBaseException
+from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.core.url_utils import (
     get_lms_courseware_url,
@@ -256,7 +255,7 @@ class ReceiptResponseView(ThankYouView):
         try:
             # If enterprise feature is enabled return all the enterprise_customer associated with user.
             learner_data = fetch_enterprise_learner_data(request.site, request.user)
-        except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        except (ReqConnectionError, KeyError, HTTPError, Timeout) as exc:
             log.info('[enterprise learner message] Exception while retrieving enterprise learner data for '
                      'User: %s, Exception: %s', request.user, exc)
             return None

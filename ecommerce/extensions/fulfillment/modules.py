@@ -9,13 +9,12 @@ import abc
 import datetime
 import json
 import logging
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urljoin
 
 import requests
 import waffle
 from django.conf import settings
 from django.urls import reverse
-from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError  # pylint: disable=ungrouped-imports
 from requests.exceptions import Timeout
@@ -835,13 +834,13 @@ class CourseEntitlementFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmen
                 self.update_orderline_with_enterprise_discount_metadata(order, line)
                 entitlement_option = Option.objects.get(code='course_entitlement')
 
-                entitlement_api_client = EdxRestApiClient(
-                    get_lms_entitlement_api_url(),
-                    jwt=order.site.siteconfiguration.access_token
-                )
+                api_client = line.order.site.siteconfiguration.oauth_api_client
+                entitlement_url = urljoin(get_lms_entitlement_api_url(), 'entitlements/')
 
                 # POST to the Entitlement API.
-                response = entitlement_api_client.entitlements.post(data)
+                response = api_client.post(entitlement_url, json=data)
+                response.raise_for_status()
+                response = response.json()
                 line.attributes.create(option=entitlement_option, value=response['uuid'])
                 line.set_status(LINE.COMPLETE)
 
@@ -878,13 +877,14 @@ class CourseEntitlementFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmen
             entitlement_option = Option.objects.get(code='course_entitlement')
             course_entitlement_uuid = line.attributes.get(option=entitlement_option).value
 
-            entitlement_api_client = EdxRestApiClient(
-                get_lms_entitlement_api_url(),
-                jwt=line.order.site.siteconfiguration.access_token
+            api_client = line.order.site.siteconfiguration.oauth_api_client
+            entitlement_url = urljoin(
+                get_lms_entitlement_api_url(), f"entitlements/{course_entitlement_uuid}/"
             )
 
             # DELETE to the Entitlement API.
-            entitlement_api_client.entitlements(course_entitlement_uuid).delete()
+            resp = api_client.delete(entitlement_url)
+            resp.raise_for_status()
 
             audit_log(
                 'line_revoked',

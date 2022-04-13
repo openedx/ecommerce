@@ -6,8 +6,7 @@ from django.views.generic import TemplateView
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
-from slumber.exceptions import SlumberHttpBaseException
+from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_detail
@@ -41,7 +40,7 @@ class EmailConfirmationRequiredView(TemplateView):
                 try:
                     course = get_course_detail(self.request.site, course_id)
                     course_keys.append(course.get('title'))
-                except (ReqConnectionError, SlumberHttpBaseException, Timeout) as exc:
+                except (ReqConnectionError, HTTPError, Timeout) as exc:
                     logger.exception(
                         '[Account activation failure] User tried to excess the course from discovery and failed.'
                         'User: %s, course: %s, Message: %s',

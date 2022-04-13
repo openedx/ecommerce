@@ -7,20 +7,17 @@ import hashlib
 import hmac
 import logging
 from collections import OrderedDict
-from functools import reduce  # pylint: disable=redefined-builtin
-from urllib.parse import parse_qsl, urlencode, urlparse
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse
 
 import crum
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 from edx_django_utils.cache import TieredCache
-from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
-from slumber.exceptions import SlumberHttpBaseException
+from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
@@ -45,16 +42,6 @@ CUSTOMER_CATALOGS_DEFAULT_RESPONSE = {
 }
 
 
-def get_enterprise_api_client(site):
-    """
-    Constructs a REST client for to communicate with the Open edX Enterprise Service
-    """
-    return EdxRestApiClient(
-        site.siteconfiguration.enterprise_api_url,
-        jwt=site.siteconfiguration.access_token
-    )
-
-
 def get_enterprise_customer(site, uuid):
     """
     Return a single enterprise customer
@@ -71,13 +58,17 @@ def get_enterprise_customer(site, uuid):
     if cached_response.is_found:
         return cached_response.value
 
-    client = get_enterprise_api_client(site)
-    path = [resource, str(uuid)]
-    client = reduce(getattr, path, client)
+    api_client = site.siteconfiguration.oauth_api_client
+    enterprise_api_url = urljoin(
+        f"{site.siteconfiguration.enterprise_api_url}/",
+        f"{resource}/{str(uuid)}/"
+    )
 
     try:
-        response = client.get()
-    except (ReqConnectionError, SlumberHttpBaseException, Timeout):
+        response = api_client.get(enterprise_api_url)
+        response.raise_for_status()
+        response = response.json()
+    except (ReqConnectionError, HTTPError, Timeout):
         log.exception("Failed to fetch enterprise customer")
         return None
 
@@ -102,10 +93,14 @@ def get_enterprise_customer(site, uuid):
 
 
 def get_enterprise_customers(request):
-    client = get_enterprise_api_client(request.site)
-    enterprise_customer_client = getattr(client, 'enterprise-customer')
-    response = enterprise_customer_client.basic_list.get(**request.GET)
-    return response
+    api_client = request.site.siteconfiguration.oauth_api_client
+    enterprise_customer_api_url = urljoin(
+        f"{request.site.siteconfiguration.enterprise_api_url}/", "enterprise-customer/basic_list/"
+    )
+    response = api_client.get(enterprise_customer_api_url, params=request.GET)
+    response.raise_for_status()
+
+    return response.json()
 
 
 def update_paginated_response(endpoint_request_url, data):
@@ -198,13 +193,19 @@ def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_cust
     if cached_response.is_found:
         return cached_response.value
 
-    client = get_enterprise_api_client(site)
-    endpoint = getattr(client, resource)
+    api_client = site.siteconfiguration.oauth_api_client
+    enterprise_api_url = urljoin(
+        f"{site.siteconfiguration.enterprise_api_url}/", f"{resource}/"
+    )
 
     try:
-        response = endpoint.get(enterprise_customer=enterprise_customer_uuid, page=page)
+        response = api_client.get(
+            enterprise_api_url, params={"enterprise_customer": enterprise_customer_uuid, "page": page}
+        )
+        response.raise_for_status()
+        response = response.json()
         response = update_paginated_response(endpoint_request_url, response)
-    except (ReqConnectionError, SlumberHttpBaseException, Timeout) as exc:
+    except (ReqConnectionError, HTTPError, Timeout) as exc:
         logging.exception(
             'Unable to retrieve catalogs for enterprise customer! customer: %s, Exception: %s',
             enterprise_customer_uuid,
@@ -277,17 +278,22 @@ def get_or_create_enterprise_customer_user(site, enterprise_customer_uuid, usern
         'username': username,
         'active': active,
     }
-    api_resource_name = 'enterprise-learner'
-    api = site.siteconfiguration.enterprise_api_client
-    endpoint = getattr(api, api_resource_name)
+    api_client = site.siteconfiguration.oauth_api_client
+    enterprise_api_url = urljoin(
+        f"{site.siteconfiguration.enterprise_api_url}/",
+        "enterprise-learner/"
+    )
 
-    get_response = endpoint.get(**data)
+    response = api_client.get(enterprise_api_url, params=data)
+    response.raise_for_status()
+    get_response = response.json()
     if get_response.get('count') == 1:
         result = get_response['results'][0]
         return result
 
-    response = endpoint.post(data)
-    return response
+    response = api_client.post(enterprise_api_url, json=data)
+    response.raise_for_status()
+    return response.json()
 
 
 def get_enterprise_course_enrollment(site, enterprise_customer_user, course_id):
@@ -304,14 +310,19 @@ def get_enterprise_course_enrollment(site, enterprise_customer_user, course_id):
         dict: The single enterprise course enrollment linked to the username and course ID, if it exists
         NoneType: Return None if no matching enterprise course enrollment was found
     """
-    api = site.siteconfiguration.enterprise_api_client
-    api_resource = 'enterprise-course-enrollment'
-    endpoint = getattr(api, api_resource)
-    response = endpoint.get(
-        enterprise_customer_user=int(enterprise_customer_user),
-        course_id=str(course_id),
+    api_client = site.siteconfiguration.oauth_api_client
+    enterprise_api_url = urljoin(
+        f"{site.siteconfiguration.enterprise_api_url}/", "enterprise-course-enrollment/"
     )
-    results = response.get('results')
+    response = api_client.get(
+        enterprise_api_url,
+        params={
+            "enterprise_customer_user": int(enterprise_customer_user),
+            "course_id": str(course_id),
+        }
+    )
+    response.raise_for_status()
+    results = response.json().get('results')
 
     return results[0] if results else None
 
@@ -332,13 +343,16 @@ def enterprise_customer_user_needs_consent(site, enterprise_customer_uuid, cours
             that the EnterpriseCustomer specified by the enterprise_customer_uuid
             argument provides for the course specified by the course_id argument.
     """
-    consent_client = site.siteconfiguration.consent_api_client
-    endpoint = consent_client.data_sharing_consent
-    return endpoint.get(
-        username=username,
-        enterprise_customer_uuid=enterprise_customer_uuid,
-        course_id=course_id
-    )['consent_required']
+    api_client = site.siteconfiguration.oauth_api_client
+    consent_url = urljoin(f"{site.siteconfiguration.consent_api_url}/", "data_sharing_consent/")
+    params = {
+        "username": username,
+        "enterprise_customer_uuid": enterprise_customer_uuid,
+        "course_id": course_id
+    }
+    response = api_client.get(consent_url, params=params)
+    response.raise_for_status()
+    return response.json()['consent_required']
 
 
 def get_enterprise_customer_uuid_from_voucher(voucher):
@@ -543,21 +557,28 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_reque
     if cached_response.is_found:
         return cached_response.value
 
-    client = get_enterprise_api_client(site)
-    path = [resource, str(enterprise_catalog)]
-    client = reduce(getattr, path, client)
-
-    response = client.get(
-        limit=limit,
-        page=page,
+    api_client = site.siteconfiguration.oauth_api_client
+    enterprise_api_url = urljoin(
+        f"{site.siteconfiguration.enterprise_api_url}/",
+        f"{resource}/{str(enterprise_catalog)}/"
     )
 
+    response = api_client.get(
+        enterprise_api_url,
+        params={
+            "limit": limit,
+            "page": page,
+        }
+    )
+    response.raise_for_status()
+    result = response.json()
+
     if endpoint_request_url:
-        response = update_paginated_response(endpoint_request_url, response)
+        result = update_paginated_response(endpoint_request_url, result)
 
-    TieredCache.set_all_tiers(cache_key, response, settings.CATALOG_RESULTS_CACHE_TIMEOUT)
+    TieredCache.set_all_tiers(cache_key, result, settings.CATALOG_RESULTS_CACHE_TIMEOUT)
 
-    return response
+    return result
 
 
 def get_enterprise_id_for_current_request_user_from_jwt():

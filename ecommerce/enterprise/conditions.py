@@ -10,8 +10,7 @@ from django.db.models import Sum
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
-from slumber.exceptions import SlumberHttpBaseException
+from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.courses.utils import get_course_info_from_catalog
 from ecommerce.enterprise.api import catalog_contains_course_runs, get_enterprise_id_for_user
@@ -140,7 +139,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             if line.product.is_course_entitlement_product:
                 try:
                     response = get_course_info_from_catalog(basket.site, line.product)
-                except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+                except (ReqConnectionError, KeyError, HTTPError, Timeout) as exc:
                     logger.exception(
                         '[Code Redemption Failure] Unable to apply enterprise offer because basket '
                         'contains a course entitlement product but we failed to get course info from  '
@@ -230,7 +229,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 basket.site, course_ids, enterprise_in_condition,
                 enterprise_customer_catalog_uuid=enterprise_catalog
             )
-        except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        except (ReqConnectionError, KeyError, HTTPError, Timeout) as exc:
             logger.exception('[Code Redemption Failure] Unable to apply enterprise offer because '
                              'we failed to check if course_runs exist in the catalog. '
                              'User: %s, Offer: %s, Message: %s, Enterprise: %s, Catalog: %s, Courses: %s',
