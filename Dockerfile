@@ -96,6 +96,8 @@ ARG ECOMMERCE_CFG_OVERRIDE
 RUN echo "$ECOMMERCE_CFG_OVERRIDE"
 ENV ECOMMERCE_CFG="${ECOMMERCE_CFG_OVERRIDE:-$ECOMMERCE_CFG}"
 RUN echo "$ECOMMERCE_CFG"
+ENV DJANGO_SETTINGS_MODULE="ecommerce.settings.docker-production"
+RUN pip install edx-arch-experiments
 
 
 ##################################################
@@ -104,5 +106,7 @@ RUN echo "$ECOMMERCE_CFG"
 #
 # Useful for testing config changes before going to production
 FROM app as docker-experimental
+ENV DJANGO_SETTINGS_MODULE="ecommerce.settings.docker-production"
+RUN pip install edx-arch-experiments
 USER root
 RUN ln -s "$(pwd)/ecommerce/settings/docker-experimental.yml" "$ECOMMERCE_CFG"
