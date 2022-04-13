@@ -5,7 +5,6 @@ import itertools
 import json
 
 import ddt
-import httpretty
 import mock
 import responses
 from CyberSource.rest import ApiException, RESTResponse
@@ -52,7 +51,6 @@ class LoginMixin:
 
 
 @ddt.ddt
-@httpretty.activate
 class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
     path = reverse('cybersource:authorize')
     CYBERSOURCE_VIEW_LOGGER_NAME = 'ecommerce.extensions.payment.views.cybersource'
@@ -135,6 +133,11 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         self.addCleanup(sdn_patcher.stop)
 
         self.mock_access_token_response()
+        responses.start()
+
+    def tearDown(self):
+        super().tearDown()
+        responses.reset()
 
     def _create_valid_basket(self):
         """ Creates a Basket ready for checkout. """
@@ -498,7 +501,7 @@ class ApplePayStartSessionViewTests(LoginMixin, TestCase):
 
         expected_domain_name = self.payment_microfrontend_domain if expected_mfe else 'testserver.fake'
         self.assertEqual(
-            json.loads(responses.calls[0].request.body.decode('utf-8'))['domainName'],
+            json.loads(responses.calls[-1].request.body.decode('utf-8'))['domainName'],
             expected_domain_name,
         )
 

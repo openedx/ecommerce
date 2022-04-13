@@ -359,8 +359,6 @@ gitdb==4.0.9
     # via gitpython
 gitpython==3.1.26
     # via transifex-client
-httpretty==0.9.7
-    # via -r requirements/test.txt
 idna==2.7
     # via
     #   -r requirements/docs.txt
@@ -824,7 +822,6 @@ six==1.16.0
     #   edx-rbac
     #   edx-sphinx-theme
     #   fixtures
-    #   httpretty
     #   isodate
     #   jsonschema
     #   libsass

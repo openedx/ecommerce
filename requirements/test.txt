@@ -356,10 +356,6 @@ future==0.18.2
     # via
     #   -r requirements/base.txt
     #   pyjwkest
-httpretty==0.9.7
-    # via
-    #   -c requirements/pins.txt
-    #   -r requirements/test.in
 idna==2.7
     # via
     #   -c requirements/pins.txt

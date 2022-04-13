@@ -3,8 +3,8 @@
 import json
 
 import ddt
-import httpretty
 import mock
+import responses
 from django.core.management import CommandError, call_command
 
 from ecommerce.courses.models import Course
@@ -149,7 +149,7 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         call_command("generate_courses", arg)
         mock_logger.warning.assert_any_call("Enrollment json is missing %s", enrollment_setting)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
     @ddt.data("audit", "honor", "verified", "professional_education", "credit")
     def test_create_seat(self, seat_type, mock_logger):

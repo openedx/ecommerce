@@ -3,7 +3,6 @@
 import uuid
 
 import ddt
-import httpretty
 from django.conf import settings
 from django.http.response import HttpResponse
 from django.test import RequestFactory
@@ -16,7 +15,6 @@ from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
-@httpretty.activate
 class EnterpriseDecoratorsTests(EnterpriseServiceMockMixin, TestCase):
 
     @staticmethod

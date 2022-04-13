@@ -1,9 +1,8 @@
 
 
-import json
 from decimal import Decimal
 
-import httpretty
+import responses
 
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.tests.factories import CourseFactory
@@ -71,13 +70,13 @@ class ProgramTestMixin(DiscoveryTestMixin):
                 ],
             }
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{base}/programs/{uuid}/'.format(
+        responses.add(
+            method=responses.GET,
+            url='{base}/programs/{uuid}/'.format(
                 base=discovery_api_url.strip('/'),
                 uuid=program_uuid
             ),
-            body=json.dumps(data),
+            json=data,
             content_type='application/json'
         )
         return data
@@ -92,10 +91,11 @@ class ProgramTestMixin(DiscoveryTestMixin):
             api_url = get_lms_enrollment_api_url()
         else:
             api_url = get_lms_entitlement_api_url() + 'entitlements/'
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{}?user={}'.format(api_url, username),
-            body=json.dumps([] if owned_products is None else owned_products),
+
+        responses.add(
+            method=responses.GET,
+            url='{}?user={}'.format(api_url, username),
+            json=[] if owned_products is None else owned_products,
             status=response_code,
             content_type='application/json'
         )

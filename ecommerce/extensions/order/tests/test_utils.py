@@ -2,13 +2,12 @@
 
 
 import datetime
-import json
 import logging
 
 import ddt
-import httpretty
 import mock
 import pytz
+import responses
 from django.test.client import RequestFactory
 from edx_django_utils.cache import TieredCache
 from oscar.core.loading import get_class, get_model
@@ -221,7 +220,7 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
         self.assertTrue(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user, product=self.product,
                                                                          site=self.site))
 
-    @httpretty.activate
+    @responses.activate
     def test_already_have_not_refunded_entitlement_order(self):
         """
         Test the case that user has a non refunded order for the course entitlement
@@ -237,14 +236,22 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
             "mode": "verified",
             "order_number": "EDX-100014"
         }
-        httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
-                               'entitlements/' + self.course_entitlement_uuid + '/',
-                               status=200, body=json.dumps(body), content_type='application/json')
-        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user,
-                                                                          product=self.course_entitlement,
-                                                                          site=self.site))
+        responses.add(
+            responses.GET, get_lms_entitlement_api_url() +
+            'entitlements/' + self.course_entitlement_uuid + '/',
+            status=200,
+            json=body,
+            content_type='application/json'
+        )
+        self.assertFalse(
+            UserAlreadyPlacedOrder.user_already_placed_order(
+                user=self.user,
+                product=self.course_entitlement,
+                site=self.site
+            )
+        )
 
-    @httpretty.activate
+    @responses.activate
     def test_already_expired_entitlement_order(self):
         """
         Test the case that user has a non refunded order for the course entitlement
@@ -260,26 +267,41 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
             "mode": "verified",
             "order_number": "EDX-100014"
         }
-        httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
-                               'entitlements/' + self.course_entitlement_uuid + '/',
-                               status=200, body=json.dumps(body), content_type='application/json')
-        self.assertTrue(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user,
-                                                                         product=self.course_entitlement,
-                                                                         site=self.site))
+        responses.add(
+            responses.GET,
+            get_lms_entitlement_api_url() + 'entitlements/' + self.course_entitlement_uuid + '/',
+            status=200,
+            json=body,
+            content_type='application/json'
+        )
+        self.assertTrue(
+            UserAlreadyPlacedOrder.user_already_placed_order(
+                user=self.user,
+                product=self.course_entitlement,
+                site=self.site
+            )
+        )
 
-    @httpretty.activate
+    @responses.activate
     def test_refunded_entitlement_order_connection_timeout(self):
         """
         Test the case that we get an error trying to get the entitlement from LMS
         """
-        httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
-                               'entitlements/' + self.course_entitlement_uuid + '/',
-                               status=200, body={}, content_type='application/json',
-                               side_effect=Timeout)
+        responses.add(
+            responses.GET,
+            get_lms_entitlement_api_url() + 'entitlements/' + self.course_entitlement_uuid + '/',
+            status=200,
+            body=Timeout(),
+            content_type='application/json',
+        )
 
-        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user,
-                                                                          product=self.course_entitlement,
-                                                                          site=self.site))
+        self.assertFalse(
+            UserAlreadyPlacedOrder.user_already_placed_order(
+                user=self.user,
+                product=self.course_entitlement,
+                site=self.site
+            )
+        )
 
     def test_no_previous_order(self):
         """
@@ -317,7 +339,7 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
         refund_line.save()
         self.assertEqual(UserAlreadyPlacedOrder.is_order_line_refunded(refund_line.order_line), is_refunded)
 
-    @httpretty.activate
+    @responses.activate
     def test_is_entitlement_expired_cached(self):
         """
         Test that entitlement's expired status gets cached
@@ -330,9 +352,13 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
         self.mock_access_token_response()
 
         self.course_entitlement.expires = EXPIRED_DATE
-        httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
-                               'entitlements/' + self.course_entitlement_uuid + '/',
-                               status=200, body=json.dumps({}), content_type='application/json')
+        responses.add(
+            responses.GET,
+            get_lms_entitlement_api_url() + 'entitlements/' + self.course_entitlement_uuid + '/',
+            status=200,
+            json={},
+            content_type='application/json'
+        )
 
         with mock.patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
             mocked_set_all_tiers.assert_not_called()

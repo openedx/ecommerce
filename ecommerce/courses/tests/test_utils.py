@@ -1,7 +1,7 @@
 
 
 import ddt
-import httpretty
+import responses
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from opaque_keys.edx.keys import CourseKey
@@ -21,7 +21,6 @@ from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 
-@httpretty.activate
 @ddt.ddt
 class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     @ddt.unpack
@@ -47,6 +46,7 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     @ddt.data(
         True, False
     )
+    @responses.activate
     def test_get_course_run_info_from_catalog(self, course_run):
         """ Check to see if course info gets cached """
         self.mock_access_token_response()
@@ -85,6 +85,7 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         course_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertEqual(course_cached_response.value, response)
 
+    @responses.activate
     def test_get_course_info_from_catalog_cached(self):
         """
         Verify that get_course_info_from_catalog is cached
@@ -125,18 +126,13 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 
 
 @ddt.ddt
-@httpretty.activate
 class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
-
-    def tearDown(self):
-        # Reset HTTPretty state (clean up registered urls and request history)
-        httpretty.reset()
 
     def _assert_num_requests(self, count):
         """
         DRY helper for verifying request counts.
         """
-        self.assertEqual(len(httpretty.httpretty.latest_requests), count)
+        self.assertEqual(len(responses.calls), count)
 
     def _assert_get_course_catalogs(self, catalog_name_list):
         """
@@ -160,6 +156,7 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         course_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertEqual(course_cached_response.value, response)
 
+    @responses.activate
     def test_get_course_catalogs_for_single_catalog_with_id(self):
         """
         Verify that method "get_course_catalogs" returns proper response for a
@@ -190,6 +187,7 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         ['Catalog 1'],
         ['Catalog 1', 'Catalog 2'],
     )
+    @responses.activate
     def test_get_course_catalogs_for_single_page_api_response(self, catalog_name_list):
         """
         Verify that method "get_course_catalogs" returns proper response for
@@ -209,6 +207,7 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         get_course_catalogs(self.request.site)
         self._assert_num_requests(2)
 
+    @responses.activate
     def test_get_course_catalogs_for_paginated_api_response(self):
         """
         Verify that method "get_course_catalogs" returns all catalogs for
@@ -225,6 +224,7 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         # Verify the API was hit for each catalog page
         self._assert_num_requests(len(catalog_name_list) + 1)
 
+    @responses.activate
     def test_get_course_catalogs_for_failure(self):
         """
         Verify that method "get_course_catalogs" raises exception in case

@@ -4,7 +4,7 @@ from decimal import Decimal
 from urllib import parse
 
 import ddt
-import httpretty
+import responses
 from django.conf import settings
 from django.urls import reverse
 from mock import patch
@@ -66,7 +66,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         with self.assertRaises(BasketNotFreeError):
             self.client.get(self.path)
 
-    @httpretty.activate
+    @responses.activate
     def test_enterprise_offer_program_redirect(self):
         """ Verify redirect to the program dashboard page. """
         self.prepare_basket(10, bundle=True)
@@ -78,7 +78,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         expected_url = get_lms_program_dashboard_url(self.bundle_attribute_value)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
-    @httpretty.activate
+    @responses.activate
     def test_enterprise_offer_course_redirect(self):
         """ Verify redirect to the courseware info page. """
         self.prepare_basket(10)
@@ -90,7 +90,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         expected_url = get_lms_courseware_url(self.course_run.id)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
-    @httpretty.activate
+    @responses.activate
     def test_successful_redirect(self):
         """ Verify redirect to the receipt page. """
         self.prepare_basket(0)
@@ -117,7 +117,7 @@ class CancelCheckoutViewTests(TestCase):
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
-    @httpretty.activate
+    @responses.activate
     def test_get_returns_payment_support_email_in_context(self):
         """
         Verify that after receiving a GET response, the view returns a payment support email in its context.
@@ -128,7 +128,7 @@ class CancelCheckoutViewTests(TestCase):
             response.context['payment_support_email'], self.request.site.siteconfiguration.payment_support_email
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_post_returns_payment_support_email_in_context(self):
         """
         Verify that after receiving a POST response, the view returns a payment support email in its context.
@@ -151,7 +151,7 @@ class CheckoutErrorViewTests(TestCase):
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
-    @httpretty.activate
+    @responses.activate
     def test_get_returns_payment_support_email_in_context(self):
         """
         Verify that after receiving a GET response, the view returns a payment support email in its context.
@@ -162,7 +162,7 @@ class CheckoutErrorViewTests(TestCase):
             response.context['payment_support_email'], self.request.site.siteconfiguration.payment_support_email
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_post_returns_payment_support_email_in_context(self):
         """
         Verify that after receiving a POST response, the view returns a payment support email in its context.
@@ -299,7 +299,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(payment_method, '{} {}'.format(source.card_type, source.label))
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_get_receipt_for_existing_order(self, mock_learner_data):
         """ Order owner should be able to see the Receipt Page."""
         mock_learner_data.return_value = self.non_enterprise_learner_data
@@ -314,7 +314,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertDictContainsSubset(context_data, response.context_data)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_awin_product_tracking_for_order(self, mock_learner_data):
         """ Receipt Page should have context for awin product tracking"""
         mock_learner_data.return_value = self.non_enterprise_learner_data
@@ -331,7 +331,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.context_data['product_tracking'], "".join(products))
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_get_receipt_for_existing_entitlement_order(self, mock_learner_data):
         """ Order owner should be able to see the Receipt Page."""
 
@@ -347,7 +347,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertDictContainsSubset(context_data, response.context_data)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_get_receipt_for_existing_order_as_staff_user(self, mock_learner_data):
         """ Staff users can preview Receipts for all Orders."""
         mock_learner_data.return_value = self.non_enterprise_learner_data
@@ -363,7 +363,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertDictContainsSubset(context_data, response.context_data)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_get_receipt_for_existing_order_user_not_owner(self, mock_learner_data):
         """ Users that don't own the Order shouldn't be able to see the Receipt. """
         mock_learner_data.return_value = self.non_enterprise_learner_data
@@ -376,7 +376,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertDictContainsSubset(context_data, response.context_data)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_order_data_for_credit_seat(self, mock_learner_data):
         """ Ensure that the context is updated with Order data. """
         mock_learner_data.return_value = self.non_enterprise_learner_data
@@ -391,7 +391,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertTrue(response.context_data['display_credit_messaging'])
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_order_value_unlocalized_for_tracking(self, mock_learner_data):
         mock_learner_data.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt()
@@ -403,7 +403,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertContains(response, order_value_string)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_order_product_ids_available_for_tracking(self, mock_learner_data):
         mock_learner_data.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(multiple_lines=True)
@@ -415,7 +415,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertContains(response, expected_order_product_ids_string)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_dashboard_link_for_course_purchase(self, mock_learner_data):
         """
         The dashboard link at the bottom of the receipt for a course purchase
@@ -432,7 +432,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertDictContainsSubset(context_data, response.context_data)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_dashboard_link_for_bundle_purchase(self, mock_learner_data):
         """
         The dashboard link at the bottom of the receipt for a bundle purchase
@@ -458,7 +458,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertDictContainsSubset(context_data, response.context_data)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_order_without_basket(self, mock_learner_data):
         mock_learner_data.return_value = self.non_enterprise_learner_data
         order = self.create_order()
@@ -467,7 +467,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_enterprise_learner_dashboard_link_in_messages(self, mock_learner_data):
         """
         The receipt page should include a message with a link to the enterprise
@@ -497,7 +497,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(expected_message, actual_message)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     @ddt.data(
         ({'results': []}, None),
         (None, [KeyError])
@@ -525,7 +525,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(len(response_messages), 0)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_no_enterprise_learner_dashboard_link_in_messages(self, mock_learner_data):
         """
         The receipt page should NOT include a message with a link to the enterprise
@@ -547,7 +547,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(len(response_messages), 0)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_order_dashboard_url_points_to_enterprise_learner_portal(self, mock_learner_data):
         """
         The "Go to dashboard" link at the bottom of the receipt page should
@@ -571,7 +571,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    @httpretty.activate
+    @responses.activate
     def test_go_to_dashboard_points_to_lms_dashboard(self, mock_learner_data):
         """
         The "Go to dashboard" link at the bottom of the receipt page should

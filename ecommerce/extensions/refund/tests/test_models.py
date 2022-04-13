@@ -1,6 +1,6 @@
 import ddt
-import httpretty
 import mock
+import responses
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
@@ -143,15 +143,15 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
             if refund_created:
                 self.assert_refund_creation_logged(logger, refund, order)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule.revoke_line')
     def test_zero_dollar_refund(self, mock_revoke_line):
         """
         Given an order and order lines which total $0 and are not refunded, Refund.create_with_lines
         should create and approve a Refund with corresponding RefundLines.
         """
-        httpretty.register_uri(
-            httpretty.POST,
+        responses.add(
+            responses.POST,
             get_lms_enrollment_api_url(),
             status=200,
             body='{}',

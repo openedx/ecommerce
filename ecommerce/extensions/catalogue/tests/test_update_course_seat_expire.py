@@ -2,15 +2,14 @@
 
 
 import datetime
-import json
 import logging
 
 import ddt
-import httpretty
 import mock
+import responses
 from django.core.management import CommandError, call_command
 from pytz import UTC
-from slumber.exceptions import HttpClientError
+from requests.exceptions import HTTPError
 from testfixtures import LogCapture
 
 from ecommerce.core.url_utils import get_lms_url
@@ -54,19 +53,17 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
 
     def mock_courses_api(self, status, body=None):
         """ Mock Courses API with specific status and body. """
-        self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Course API calls.')
-
         body = body or {}
-        url = get_lms_url('/api/courses/v1/courses/?page_size=1')
-        httpretty.register_uri(
-            httpretty.GET,
+        url = get_lms_url('/api/courses/v1/courses?page_size=50&page=1')
+        responses.add(
+            responses.GET,
             url,
             status=status,
-            body=json.dumps(body),
+            json=body,
             content_type=JSON
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_update_course_with_commit(self):
         """ Verify all course seats are updated successfully, when commit option is provided. """
         seats_expected_to_update = self.course.seat_products.filter(
@@ -105,7 +102,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
         verified_seat = Product.objects.get(id=self.verified_seat.id)
         self.assertEqual(verified_seat.expires, self.verified_expire_date)
 
-    @httpretty.activate
+    @responses.activate
     def test_update_course_without_commit(self):
         """ Verify all course seats are not updated with commit option is not provided. """
         seats_expected_to_update = self.course.seat_products.filter(
@@ -135,7 +132,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
         verified_seat = Product.objects.get(id=self.verified_seat.id)
         self.assertEqual(verified_seat.expires, self.verified_expire_date)
 
-    @httpretty.activate
+    @responses.activate
     def test_update_course_with_no_data(self):
         """ Verify all course seats are updated successfully, when commit option is provided"""
         self.course_info['results'] = []
@@ -154,7 +151,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
                 call_command('update_course_seat_expire')
                 lc.check(*expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_update_course_with_missing_enrolment(self):
         """
         Verify that management command logs `enrollment missing` log for all courses
@@ -180,7 +177,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
             call_command('update_course_seat_expire')
             lc.check(*expected)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch(
         'ecommerce.extensions.catalogue.management.commands.update_course_seat_expire.Command.max_tries',
         new_callable=mock.PropertyMock,
@@ -209,7 +206,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
                 'Retrying [1]'
             ),
         ]
-        with self.assertRaises(HttpClientError):
+        with self.assertRaises(HTTPError):
             with LogCapture(LOGGER_NAME) as lc:
                 call_command('update_course_seat_expire')
                 lc.check(*expected)

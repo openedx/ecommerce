@@ -2,7 +2,7 @@
 
 from uuid import uuid4
 
-import httpretty
+import responses
 from django.test import RequestFactory
 from oscar.core.loading import get_model
 
@@ -61,7 +61,7 @@ class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.content.splitlines()), 7)
 
-    @httpretty.activate
+    @responses.activate
     def test_get_csv_report_for_specific_coupon(self):
         """
         Test the get method.

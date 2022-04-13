@@ -5,9 +5,9 @@ from datetime import datetime
 from decimal import Decimal
 
 import ddt
-import httpretty
 import mock
 import pytz
+import responses
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import RequestFactory, override_settings
@@ -61,7 +61,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assertEqual(content['count'], 0)
         self.assertEqual(content['results'], [])
 
-    @httpretty.activate
+    @responses.activate
     def test_oauth2_authentication(self):
         """Verify clients can authenticate with OAuth 2.0."""
         auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
@@ -372,7 +372,6 @@ class OrderDetailViewTests(OrderDetailViewTestMixin, TestCase):
 
 
 @ddt.ddt
-@httpretty.activate
 class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
     """
     Test the `ManualCourseEnrollmentOrderViewSet` functionality.
@@ -406,6 +405,12 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                 'course_uuid': self.course_uuid
             }
         )
+        responses.start()
+
+    def tearDown(self):
+        super().tearDown()
+        responses.stop()
+        responses.reset()
 
     def build_jwt_header(self, user):
         """

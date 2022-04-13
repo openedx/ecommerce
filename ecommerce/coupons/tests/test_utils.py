@@ -3,7 +3,7 @@
 from datetime import datetime
 
 import ddt
-import httpretty
+import responses
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
@@ -23,7 +23,6 @@ from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
-@httpretty.activate
 class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
 
     def setUp(self):
@@ -35,6 +34,12 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
         self.user = self.create_user(email='test@tester.fake')
         self.request.user = self.user
         self.request.GET = {}
+        responses.start()
+
+    def tearDown(self):
+        super().tearDown()
+        responses.stop()
+        responses.reset()
 
     @ddt.data(
         (['verIfiEd', 'profeSSional'], 'verified,professional'),

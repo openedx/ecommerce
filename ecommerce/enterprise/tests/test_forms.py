@@ -4,7 +4,7 @@
 import uuid
 
 import ddt
-import httpretty
+import responses
 from oscar.core.loading import get_model
 from oscar.test.factories import OrderDiscountFactory, OrderFactory
 
@@ -229,7 +229,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             {'prepaid_invoice_amount': ['This field is required when contract discount type is absolute.']},
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_save_create(self):
         """
         A new ConditionalOffer, Benefit, Condition, and
@@ -262,7 +262,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['max_user_discount'],
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_save_create_special_char_title(self):
         """ When the Enterprise's name is international, new objects should still be created."""
         enterprise_customer_uuid = uuid.uuid4()
@@ -294,7 +294,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['max_user_discount'],
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_save_edit(self):
         """ Previously-created ConditionalOffer, Benefit, and Condition instances should be updated. """
         offer = factories.EnterpriseOfferFactory()
@@ -336,7 +336,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['max_user_discount'],
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_save_without_commit(self):
         """ No data should be persisted to the database if the commit kwarg is set to False. """
         data = self.generate_data()
@@ -348,7 +348,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assertFalse(hasattr(instance, 'benefit'))
         self.assertFalse(hasattr(instance, 'condition'))
 
-    @httpretty.activate
+    @responses.activate
     def test_save_offer_name(self):
         """ If a request object is sent, the offer name should include the enterprise name. """
         data = self.generate_data()
@@ -502,7 +502,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         data = self.generate_data(max_discount=300)
         self.assert_form_errors(data, expected_errors, instance=offer)
 
-    @httpretty.activate
+    @responses.activate
     def test_offer_form_with_increased_values(self):
         """
         Verify that an existing enterprise offer can be updated with increased values.
@@ -604,7 +604,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         data = self.generate_data(max_user_applications=50, max_user_discount=300)
         self.assert_form_errors(data, expected_errors, instance=offer)
 
-    @httpretty.activate
+    @responses.activate
     def test_max_user_discount_clean_with_refunded_enrollments(self):
         """
         Verify that `clean` for `max_user_discount` and `max_user_applications` does not raise error when total consumed
@@ -631,7 +631,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(offer.max_user_applications, data['max_user_applications'])
         self.assertEqual(offer.max_user_discount, data['max_user_discount'])
 
-    @httpretty.activate
+    @responses.activate
     def test_offer_form_with_per_user_increased_limits(self):
         """
         Verify that an existing enterprise offer can be updated with per user increased limits.
