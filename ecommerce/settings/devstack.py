@@ -2,6 +2,7 @@
 
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
+from edx_django_utils.plugins import add_plugins
 
 from ecommerce.settings.production import *
 
@@ -19,6 +20,8 @@ PROTOCOL = 'http'
 LOGGING['handlers']['local'] = {
     'class': 'logging.NullHandler',
 }
+
+add_plugins(__name__, 'ecommerce.djangoapp', 'devstack')
 
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 SESSION_COOKIE_SECURE = False
@@ -108,3 +111,5 @@ REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = REST_FRAMEWORK['DEFAULT_RENDERER_CL
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
     # noinspection PyUnresolvedReferences
     from .private import *  # pylint: disable=import-error
+
+KAFKA_CONSUMERS_ENABLED = False

@@ -9,6 +9,7 @@ from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
 from django.utils.translation import ugettext_lazy as _
+from edx_django_utils.plugins import get_plugin_apps
 
 from ecommerce.core.constants import (
     ENTERPRISE_COUPON_ADMIN_ROLE,
@@ -333,6 +334,10 @@ LOCAL_APPS = [
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + OSCAR_APPS
 # END APP CONFIGURATION
+
+# Plugins
+INSTALLED_APPS.extend(get_plugin_apps('ecommerce.djangoapp'))
+# End plugins
 
 
 # LOGGING CONFIGURATION

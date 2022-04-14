@@ -23,6 +23,7 @@ djangorestframework-csv
 djangorestframework-datatables
 drf-extensions
 drf-yasg
+ecommerce-plugin-events>=0.1.2
 edx-auth-backends
 edx-django-release-util
 edx-django-utils
