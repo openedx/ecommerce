@@ -6,6 +6,7 @@ from decimal import Decimal
 
 import dateutil
 import django_filters
+import waffle
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -30,6 +31,7 @@ from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.filters import OrderFilter
 from ecommerce.extensions.api.permissions import IsStaffOrOwner
 from ecommerce.extensions.api.throttles import ServiceUserThrottle
+from ecommerce.extensions.api.v2.constants import ENABLE_HOIST_ORDER_HISTORY
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_MANUAL_ORDER
@@ -85,6 +87,12 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Get email_opt_in from the query parameters if it exists, defaulting to false
         email_opt_in = request.query_params.get('email_opt_in', False) == 'True'
+
+        logger.info(
+            'Waffle flag ENABLE_HOIST_ORDER_HISTORY is [%s], order [%s]',
+            waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY),
+            order.number
+        )
 
         logger.info('Attempting fulfillment of order [%s]...', order.number)
         with transaction.atomic():
