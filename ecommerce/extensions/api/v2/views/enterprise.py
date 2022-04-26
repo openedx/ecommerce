@@ -669,18 +669,19 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return redemptions_and_assignments
 
     @action(detail=False, url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
-    @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
+    @permission_required('enterprise.can_view_coupon_overview', fn=lambda request, enterprise_id: enterprise_id)
     def overview(self, request, enterprise_id):  # pylint: disable=unused-argument
         """
         Overview of Enterprise coupons.
         Returns the following data:
             - Coupon ID
-            - Coupon name.
-            - Max number of codes available (Maximum coupon usage).
-            - Number of codes.
-            - Redemption count.
-            - Valid from.
-            - Valid end.
+            - Coupon name
+            - Enterprise catalog UUID
+            - Max number of codes available (Maximum coupon usage)
+            - Number of codes
+            - Redemption count
+            - Valid from
+            - Valid end
         """
         enterprise_coupons = self.get_queryset()
         coupon_id = self.request.query_params.get('coupon_id', None)
