@@ -23,6 +23,20 @@ jobs:
             targets: PYTHON_ENV=py38 requirements.js clean_static static acceptance
 
     steps:
+      - name: Install system Packages
+        run: |
+          sudo apt update
+          sudo apt install make libssl-dev libghc-zlib-dev libcurl4-gnutls-dev libexpat1-dev gettext unzip
+          cd /usr/src/
+          sudo wget https://github.com/git/git/archive/v2.23.0.tar.gz -O git.tar.gz
+          sudo tar -xf git.tar.gz
+          cd git-*
+          sudo make prefix=/usr/local all
+          sudo make prefix=/usr/local install
+          git config --global --add safe.directory '*'
+          git config --global --add safe.directory /edx/app/ecommerce/ecommerce
+          git --version
+
       - uses: actions/checkout@v2
       - name: Start container
         run: |
@@ -30,13 +44,15 @@ jobs:
       - name: Install dependencies
         run: |
           docker exec -t ecommerce_testing bash -c "
-            cd /edx/app/ecommerce/ecommerce/ &&
+            cd /edx/app/ecommerce/ecommerce/ && git config --global --add safe.directory '*' &&
+            git config --global --add safe.directory /edx/app/ecommerce/ecommerce &&
             python3 -m pip install tox
           "
       - name: Run tests
         run: |
           docker exec -t -e CI=1 ecommerce_testing bash -c "
-            cd /edx/app/ecommerce/ecommerce/ &&
+            cd /edx/app/ecommerce/ecommerce/ && git config --global --add safe.directory '*' &&
+            git config --global --add safe.directory /edx/app/ecommerce/ecommerce &&
             PATH=\$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin
             DJANGO_ENV=${{ matrix.django-env }} make ${{ matrix.targets }}
           "
