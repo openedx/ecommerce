@@ -135,7 +135,7 @@ update_translations: pull_translations fake_translations
 
 # extract_translations should be called before this command can detect changes
 detect_changed_source_translations: requirements.tox
-    tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-detect_changed_translations
+	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-detect_changed_translations
 
 check_translations_up_to_date: fake_translations detect_changed_source_translations
 
