@@ -7,12 +7,13 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
-"PO-Revision-Date: 2020-11-24 09:15+0000\n"
+"POT-Creation-Date: 2022-05-01 20:12+0000\n"
+"PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Transifex Bot <>\n"
 "Language-Team: Mongolian (Mongolia) (http://www.transifex.com/open-edx/edx-platform/language/mn_MN/)\n"
 "MIME-Version: 1.0\n"
@@ -49,23 +50,23 @@ msgstr ""
 msgid "Email domain {%s} is invalid."
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:101
+#: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:131
+#: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:155
+#: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:177
+#: ecommerce/static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:191
+#: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
 msgstr ""
 
