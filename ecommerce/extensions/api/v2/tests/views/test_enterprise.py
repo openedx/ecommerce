@@ -28,6 +28,7 @@ from ecommerce.core.constants import (
     ALL_ACCESS_CONTEXT,
     ENTERPRISE_COUPON_ADMIN_ROLE,
     SYSTEM_ENTERPRISE_ADMIN_ROLE,
+    SYSTEM_ENTERPRISE_LEARNER_ROLE,
     SYSTEM_ENTERPRISE_OPERATOR_ROLE
 )
 from ecommerce.core.models import EcommerceFeatureRole, EcommerceFeatureRoleAssignment
@@ -37,7 +38,7 @@ from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
-from ecommerce.enterprise.rules import request_user_has_explicit_access, request_user_has_implicit_access
+from ecommerce.enterprise.rules import request_user_has_explicit_access_admin, request_user_has_implicit_access_admin
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
@@ -1426,8 +1427,8 @@ class EnterpriseCouponViewSetRbacTests(
         rules.remove_perm('enterprise.can_view_coupon')
         rules.add_perm(
             'enterprise.can_view_coupon',
-            request_user_has_explicit_access |
-            request_user_has_implicit_access
+            request_user_has_explicit_access_admin |
+            request_user_has_implicit_access_admin
         )
 
         response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
@@ -1521,6 +1522,23 @@ class EnterpriseCouponViewSetRbacTests(
             reverse(
                 'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_coupon_overview_learner_access(self):
+        """
+        Test that enterprise learners has access to overview of enterprise coupons.
+        """
+        enterprise_customer_uuid = self.data['enterprise_customer']['id']
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_LEARNER_ROLE, context=enterprise_customer_uuid
+        )
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-overview',
+                kwargs={'enterprise_id': enterprise_customer_uuid}
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
