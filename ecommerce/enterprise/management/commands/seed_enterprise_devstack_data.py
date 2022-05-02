@@ -148,7 +148,8 @@ class Command(BaseCommand):
             "invoice_discount_value": 100,
             "start_datetime": str(now() - datetime.timedelta(days=10)),
             "end_datetime": str(now() + datetime.timedelta(days=10)),
-            "benefit_value": 100
+            "benefit_value": 100,
+            "sales_force_id": '006aaaaaaaaaaaaaaa',
         }
         url = '{}/enterprise/coupons/'.format(ecommerce_api_url)
         response = requests.post(url, json=request_obj, headers=self.headers)
