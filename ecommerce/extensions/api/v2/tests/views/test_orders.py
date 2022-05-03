@@ -15,12 +15,14 @@ from django.urls import reverse
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
+from waffle.testutils import override_flag
 
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
+from ecommerce.extensions.api.v2.constants import ENABLE_HOIST_ORDER_HISTORY
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
@@ -99,6 +101,19 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assertEqual(content['count'], 2)
         self.assertEqual(content['results'][0]['number'], str(order_2.number))
         self.assertEqual(content['results'][1]['number'], str(order.number))
+
+    @ddt.data(True, False)
+    def test_enable_hoist_order_history(self, enable_hoist_order_history_flag):
+        """ Verify that orders contain the Order History flag value """
+        with override_flag(ENABLE_HOIST_ORDER_HISTORY, active=enable_hoist_order_history_flag):
+            order = create_order(site=self.site, user=self.user)
+            site = SiteConfigurationFactory().site
+            create_order(site=site, user=self.user)
+            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+            self.assertEqual(response.status_code, 200)
+            content = json.loads(response.content.decode('utf-8'))
+
+            self.assertEqual(content['results'][0]['enable_hoist_order_history'], enable_hoist_order_history_flag)
 
     def test_with_other_users_orders(self):
         """ The view should only return orders for the authenticated users. """
