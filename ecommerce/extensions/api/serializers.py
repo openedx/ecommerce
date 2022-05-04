@@ -394,10 +394,8 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_enable_hoist_order_history(self, obj):
         try:
             request=self.context.get('request')
-            if waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY):
-                obj.enable_hoist_order_history = True
-            else:
-                obj.enable_hoist_order_history = False
+            order_history_enabled = waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
+            obj.enable_hoist_order_history = order_history_enabled
             return obj.enable_hoist_order_history
         except AttributeError:
             None
