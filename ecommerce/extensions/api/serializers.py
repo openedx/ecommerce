@@ -397,8 +397,8 @@ class OrderSerializer(serializers.ModelSerializer):
             order_history_enabled = waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
             obj.enable_hoist_order_history = order_history_enabled
             return obj.enable_hoist_order_history
-        except AttributeError:
-            None
+        except (AttributeError, ValueError) as error:
+            logger.exception('An error occurred while attempting to set ENABLE_HOIST_ORDER_HISTORY flag, error: [%s]', error)
 
     class Meta:
         model = Order
