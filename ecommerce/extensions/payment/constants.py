@@ -58,18 +58,6 @@ CYBERSOURCE_CARD_TYPE_MAP = {
 
 CLIENT_SIDE_CHECKOUT_FLAG_NAME = 'enable_client_side_checkout'
 
-# .. toggle_name: disable_microfrontend_for_basket_page
-# .. toggle_type: waffle_flag
-# .. toggle_default: False
-# .. toggle_description: Allows viewing the old basket page even when using a new micro-frontend based basket page
-# .. toggle_category: micro-frontend
-# .. toggle_use_cases: open_edx
-# .. toggle_creation_date: 2019-10-03
-# .. toggle_expiration_date: 2020-12-31
-# .. toggle_tickets: DEPR-42
-# .. toggle_status: supported
-DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME = 'disable_microfrontend_for_basket_page'
-
 # Paypal only supports 4 languages, which are prioritized by country.
 # https://developer.paypal.com/docs/classic/api/locale_codes/
 PAYPAL_LOCALES = {

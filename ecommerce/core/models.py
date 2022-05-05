@@ -189,15 +189,9 @@ class SiteConfiguration(models.Model):
         max_length=255,
         blank=True
     )
-    enable_microfrontend_for_basket_page = models.BooleanField(
-        verbose_name=_('Enable Microfrontend for Basket Page'),
-        help_text=_('Use the microfrontend implementation of the basket page instead of the server-side template'),
-        blank=True,
-        default=False
-    )
     payment_microfrontend_url = models.URLField(
         verbose_name=_('Payment Microfrontend URL'),
-        help_text=_('URL for the Payment Microfrontend (used if Enable Microfrontend for Basket Page is set)'),
+        help_text=_('URL for the Payment Microfrontend'),
         null=True,
         blank=True
     )
@@ -381,9 +375,7 @@ class SiteConfiguration(models.Model):
 
     @property
     def payment_domain_name(self):
-        if self.enable_microfrontend_for_basket_page:
-            return urlsplit(self.payment_microfrontend_url).netloc
-        return self.site.domain
+        return urlsplit(self.payment_microfrontend_url).netloc
 
     @property
     def oauth_api_client(self):

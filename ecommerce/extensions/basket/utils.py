@@ -15,7 +15,6 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.basket.constants import (
@@ -26,7 +25,6 @@ from ecommerce.extensions.basket.constants import (
 )
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
-from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.payment.utils import embargo_check
 from ecommerce.programs.utils import get_program
 from ecommerce.referrals.models import Referral
@@ -41,8 +39,6 @@ BUNDLE = 'bundle_identifier'
 ORGANIZATION_ATTRIBUTE_TYPE = 'organization'
 ENTERPRISE_CATALOG_ATTRIBUTE_TYPE = 'enterprise_catalog_uuid'
 StockRecord = get_model('partner', 'StockRecord')
-OrderLine = get_model('order', 'Line')
-Refund = get_model('refund', 'Refund')
 Voucher = get_model('voucher', 'Voucher')
 
 logger = logging.getLogger(__name__)
@@ -73,29 +69,8 @@ def add_stripe_flag_to_url(url, request):
     )
 
 
-def get_payment_microfrontend_or_basket_url(request):
-    url = get_payment_microfrontend_url_if_configured(request)
-    if not url:
-        url = absolute_url(request, 'basket:summary')
-    return url
-
-
-def get_payment_microfrontend_url_if_configured(request):
-    if _use_payment_microfrontend(request):
-        return request.site.siteconfiguration.payment_microfrontend_url
-
-    return None
-
-
-def _use_payment_microfrontend(request):
-    """
-    Return whether the current request should use the payment MFE.
-    """
-    return (
-        request.site.siteconfiguration.enable_microfrontend_for_basket_page and
-        request.site.siteconfiguration.payment_microfrontend_url and
-        not waffle.flag_is_active(request, DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME)
-    )
+def get_payment_microfrontend(request):
+    return request.site.siteconfiguration.payment_microfrontend_url
 
 
 @newrelic.agent.function_trace()
@@ -108,14 +83,6 @@ def add_utm_params_to_url(url, params):
     # (course-keys do not have url encoding)
     utm_params = unquote(utm_params)
     url = url + '?' + utm_params if utm_params else url
-    return url
-
-
-@newrelic.agent.function_trace()
-def add_invalid_code_message_to_url(url, code):
-    if code:
-        message = 'error_message=Code {code} is invalid.'.format(code=str(code))
-        url += '&' + message if '?' in url else '?' + message
     return url
 
 

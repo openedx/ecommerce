@@ -2,7 +2,6 @@
 
 
 import logging
-import time
 import urllib
 from collections import OrderedDict
 from datetime import datetime
@@ -11,15 +10,11 @@ from decimal import Decimal
 import dateutil.parser
 import newrelic.agent
 import waffle
-from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.utils.html import escape
 from django.utils.translation import ugettext as _
-from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.signals import voucher_removal
-from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -41,24 +36,16 @@ from ecommerce.enterprise.utils import (
     parse_consent_params
 )
 from ecommerce.extensions.analytics.utils import (
-    prepare_analytics_data,
     track_braze_event,
     track_segment_event,
     translate_basket_line_for_segment
 )
 from ecommerce.extensions.basket import message_utils
-from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
-from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
+from ecommerce.extensions.basket.exceptions import RedirectException, VoucherException
 from ecommerce.extensions.basket.utils import (
-    add_invalid_code_message_to_url,
-    add_stripe_flag_to_url,
-    add_utm_params_to_url,
     apply_offers_on_basket,
     apply_voucher_on_basket_and_check_discount,
     get_basket_switch_data,
-    get_payment_microfrontend_or_basket_url,
-    get_payment_microfrontend_url_if_configured,
-    prepare_basket,
     validate_voucher
 )
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
@@ -69,23 +56,13 @@ from ecommerce.extensions.offer.utils import (
     get_quantized_benefit_value,
     get_redirect_to_email_confirmation_if_required
 )
-from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
-from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.programs.utils import get_program
 
-Basket = get_model('basket', 'basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
-BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
-Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
-Product = get_model('catalogue', 'Product')
-StockRecord = get_model('partner', 'StockRecord')
-Voucher = get_model('voucher', 'Voucher')
-Selector = get_class('partner.strategy', 'Selector')
 
 
 class BasketLogicMixin:
@@ -402,214 +379,6 @@ class BasketLogicMixin:
             return dateutil.parser.parse(date_string)
         except (AttributeError, ValueError, TypeError):
             return None
-
-
-class BasketAddItemsView(BasketLogicMixin, APIView):
-    """
-    View that adds multiple products to a user's basket.
-    An additional coupon code can be supplied so the offer is applied to the basket.
-    """
-    permission_classes = (LoginRedirectIfUnauthenticated,)
-
-    def get(self, request):
-        # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
-        properties = {'emitted_at': time.time()}
-        track_segment_event(request.site, request.user, 'Basket Add Items View Called', properties)
-
-        try:
-            skus = self._get_skus(request)
-            products = self._get_products(request, skus)
-            voucher = None
-            invalid_code = None
-            code = request.GET.get('code', None)
-            try:
-                voucher = self._get_voucher(request)
-            except Voucher.DoesNotExist:  # pragma: nocover
-                # Display an error message when an invalid code is passed as a parameter
-                invalid_code = code
-
-            logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
-
-            available_products = self._get_available_products(request, products)
-
-            try:
-                basket = prepare_basket(request, available_products, voucher)
-            except AlreadyPlacedOrderException:
-                return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
-
-            self._set_email_preference_on_basket(request, basket)
-
-            # Used basket object from request to allow enterprise offers
-            # being applied on basket via BasketMiddleware
-            self.verify_enterprise_needs(request.basket)
-            if code and not request.basket.vouchers.exists():
-                if not (len(available_products) == 1 and available_products[0].is_enrollment_code_product):
-                    # Display an error message when an invalid code is passed as a parameter
-                    invalid_code = code
-            return self._redirect_response_to_basket_or_payment(request, invalid_code)
-
-        except BadRequestException as e:
-            return HttpResponseBadRequest(str(e))
-        except RedirectException as e:
-            return e.response
-
-    def _get_skus(self, request):
-        skus = [escape(sku) for sku in request.GET.getlist('sku')]
-        if not skus:
-            raise BadRequestException(_('No SKUs provided.'))
-        return skus
-
-    def _get_products(self, request, skus):
-        partner = get_partner_for_site(request)
-        products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
-        if not products:
-            raise BadRequestException(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
-        return products
-
-    def _get_voucher(self, request):
-        code = request.GET.get('code', None)
-        return Voucher.objects.get(code=code) if code else None
-
-    def _get_available_products(self, request, products):
-        unavailable_product_ids = []
-        for product in products:
-            purchase_info = request.strategy.fetch_for_product(product)
-            if not purchase_info.availability.is_available_to_buy:
-                logger.warning('Product [%s] is not available to buy.', product.title)
-                unavailable_product_ids.append(product.id)
-
-        available_products = products.exclude(id__in=unavailable_product_ids)
-        if not available_products:
-            raise BadRequestException(_('No product is available to buy.'))
-        return available_products
-
-    def _set_email_preference_on_basket(self, request, basket):
-        """
-        Associate the user's email opt in preferences with the basket in
-        order to opt them in later as part of fulfillment
-        """
-        BasketAttribute.objects.update_or_create(
-            basket=basket,
-            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
-            defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
-        )
-
-    def _redirect_response_to_basket_or_payment(self, request, invalid_code=None):
-        redirect_url = get_payment_microfrontend_or_basket_url(request)
-        redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
-        redirect_url = add_invalid_code_message_to_url(redirect_url, invalid_code)
-        redirect_url = add_stripe_flag_to_url(redirect_url, request)
-
-        return HttpResponseRedirect(redirect_url, status=303)
-
-
-class BasketSummaryView(BasketLogicMixin, BasketView):
-    @newrelic.agent.function_trace()
-    def get_context_data(self, **kwargs):
-        context = super(BasketSummaryView, self).get_context_data(**kwargs)
-        return self._add_to_context_data(context)
-
-    @newrelic.agent.function_trace()
-    def get(self, request, *args, **kwargs):
-        basket = request.basket
-
-        try:
-            self.fire_segment_events(request, basket)
-            self.verify_enterprise_needs(basket)
-            self._redirect_to_payment_microfrontend_if_configured(request)
-        except RedirectException as e:
-            return e.response
-
-        return super(BasketSummaryView, self).get(request, *args, **kwargs)
-
-    def _redirect_to_payment_microfrontend_if_configured(self, request):
-        microfrontend_url = get_payment_microfrontend_url_if_configured(request)
-        if microfrontend_url:
-            # For now, the enterprise consent form validation is communicated via
-            # a URL parameter, which must be forwarded via this redirect.
-            consent_failed_param_to_forward = request.GET.get(CONSENT_FAILED_PARAM)
-            if consent_failed_param_to_forward:
-                microfrontend_url = '{}?{}={}'.format(
-                    microfrontend_url,
-                    CONSENT_FAILED_PARAM,
-                    consent_failed_param_to_forward,
-                )
-            redirect_response = HttpResponseRedirect(microfrontend_url)
-            raise RedirectException(response=redirect_response)
-
-    @newrelic.agent.function_trace()
-    def _add_to_context_data(self, context):
-        formset = context.get('formset', [])
-        lines = context.get('line_list', [])
-        site_configuration = self.request.site.siteconfiguration
-
-        context_updates, lines_data = self.process_basket_lines(lines)
-        context.update(context_updates)
-        context.update(self.process_totals(context))
-
-        context.update({
-            'analytics_data': prepare_analytics_data(
-                self.request.user,
-                site_configuration.segment_key,
-            ),
-            'enable_client_side_checkout': False,
-            'sdn_check': site_configuration.enable_sdn_check
-        })
-
-        payment_processors = site_configuration.get_payment_processors()
-        if (
-                site_configuration.client_side_payment_processor and
-                waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME)
-        ):
-            payment_processors_data = self._get_payment_processors_data(payment_processors)
-            context.update(payment_processors_data)
-
-        context.update({
-            'formset_lines_data': list(zip(formset, lines_data)),
-            'homepage_url': get_lms_url(''),
-            'min_seat_quantity': 1,
-            'max_seat_quantity': 100,
-            'payment_processors': payment_processors,
-            'lms_url_root': site_configuration.lms_url_root,
-        })
-        return context
-
-    @newrelic.agent.function_trace()
-    def _get_payment_processors_data(self, payment_processors):
-        """Retrieve information about payment processors for the client side checkout basket.
-
-        Args:
-            payment_processors (list): List of all available payment processors.
-        Returns:
-            A dictionary containing information about the payment processor(s) with which the
-            basket view context needs to be updated with.
-        """
-        site_configuration = self.request.site.siteconfiguration
-        payment_processor_class = site_configuration.get_client_side_payment_processor_class(self.request)
-
-        if payment_processor_class:
-            payment_processor = payment_processor_class(self.request.site)
-            current_year = datetime.today().year
-
-            return {
-                'client_side_payment_processor': payment_processor,
-                'enable_client_side_checkout': True,
-                'months': list(range(1, 13)),
-                'payment_form': PaymentForm(
-                    user=self.request.user,
-                    request=self.request,
-                    initial={'basket': self.request.basket},
-                    label_suffix=''
-                ),
-                'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
-                # Assumption is that the credit card duration is 15 years
-                'years': list(range(current_year, current_year + 16)),
-            }
-        else:
-            msg = 'Unable to load client-side payment processor [{processor}] for ' \
-                  'site configuration [{sc}]'.format(processor=site_configuration.client_side_payment_processor,
-                                                     sc=site_configuration.id)
-            raise SiteConfigurationError(msg)
 
 
 class CaptureContextApiLogicMixin:  # pragma: no cover
@@ -1056,26 +825,6 @@ class VoucherAddLogicMixin:
         except self.voucher_model.DoesNotExist as voucher_no_exist:
             messages.error(self.request, _("Coupon code '{code}' does not exist.").format(code=code))
             raise VoucherException() from voucher_no_exist
-
-
-class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disable=function-redefined
-    """
-    Deprecated: Adds a voucher to the basket.
-
-    Ensure any changes made here are also made to VoucherAddApiView.
-    """
-    def form_valid(self, form):
-        code = form.cleaned_data['code']
-
-        try:
-            self.verify_and_apply_voucher(code)
-        except RedirectException as e:
-            return e.response
-        except VoucherException:
-            # errors are passed via messages object
-            pass
-
-        return redirect_to_referrer(self.request, 'basket:summary')
 
 
 class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):
