@@ -40,6 +40,7 @@ from ecommerce.enterprise.utils import (
 )
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.v2.constants import (
+    ENABLE_HOIST_ORDER_HISTORY,
     REFUND_ORDER_EMAIL_CLOSING,
     REFUND_ORDER_EMAIL_GREETING,
     REFUND_ORDER_EMAIL_SUBJECT
@@ -380,6 +381,7 @@ class OrderSerializer(serializers.ModelSerializer):
     payment_processor = serializers.SerializerMethodField()
     user = UserSerializer()
     vouchers = serializers.SerializerMethodField()
+    enable_hoist_order_history = serializers.SerializerMethodField()
 
     def get_vouchers(self, obj):
         try:
@@ -403,6 +405,15 @@ class OrderSerializer(serializers.ModelSerializer):
         except IndexError:
             return '0'
 
+    def get_enable_hoist_order_history(self, obj):
+        try:
+            request=self.context.get('request')
+            order_history_enabled = waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
+            obj.enable_hoist_order_history = order_history_enabled
+            return obj.enable_hoist_order_history
+        except (AttributeError, ValueError) as error:
+            logger.exception('An error occurred while attempting to set ENABLE_HOIST_ORDER_HISTORY flag, error: [%s]', error)
+
     class Meta:
         model = Order
         fields = (
@@ -410,6 +421,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'currency',
             'date_placed',
             'discount',
+            'enable_hoist_order_history',
             'lines',
             'number',
             'payment_processor',
