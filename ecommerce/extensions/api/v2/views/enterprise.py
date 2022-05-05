@@ -639,15 +639,31 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'code': voucher.code,
                 'voucher_id': voucher.id,
             }
+
+            applications = None
+            # If we have a User, it means we're searching via user_email
+            # which means we should return applications related only to that user
             if user is not None:
-                for application in voucher.applications.all():
-                    if application.user.id == user.id:
-                        line = application.order.lines.first()
-                        redemption_data = dict(coupon_data)
-                        redemption_data['course_title'] = line.product.course.name
-                        redemption_data['course_key'] = line.product.course.id
-                        redemption_data['redeemed_date'] = application.date_created
-                        redemptions_and_assignments.append(redemption_data)
+                applications = voucher.applications.filter(user__id=user.id)
+            # If we don't have a user_email it means we're searching by code
+            # and we want to return all applications across all users
+            elif not user_email:
+                applications = voucher.applications.all()
+
+            # applications should be None when we are searching via user_email of
+            # a user that we do not have a user object for yet. If there is no
+            # user object, then there will not be an application of a voucher,
+            # just an assignment, so do nothing here in this block.
+            if applications is not None:
+
+                for application in applications:
+                    line = application.order.lines.first()
+                    redemption_data = dict(coupon_data)
+                    redemption_data['course_title'] = line.product.course.name
+                    redemption_data['course_key'] = line.product.course.id
+                    redemption_data['redeemed_date'] = application.date_created
+                    redemption_data['user_email'] = application.user.email if application.user else None
+                    redemptions_and_assignments.append(redemption_data)
 
             offer = voucher and voucher.enterprise_offer
             all_offer_assignments = offer.offerassignment_set.all()
