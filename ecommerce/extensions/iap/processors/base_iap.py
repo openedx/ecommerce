@@ -106,7 +106,7 @@ class BaseIAP(BasePaymentProcessor):
 
         transaction_id = response.get('transactionId')
         if not transaction_id:
-            transaction_id = validation_response.get('receipt', [{}]).get('in_app', [{}])[0].get('transaction_id')
+            transaction_id = validation_response.get('receipt', {}).get('in_app', [{}])[0].get('transaction_id')
         self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket)
         logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
 
