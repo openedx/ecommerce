@@ -1303,6 +1303,81 @@ class EnterpriseCouponViewSetRbacTests(
         assert results[0]['code'] == voucher1.code
         assert results[0]['course_key'] is None
 
+
+    @httpretty.activate
+    def test_search_results_regression_for_voucher_code(self):
+        """
+        Test regression for code search not returning all the expected results.
+        """
+        # Create coupons
+        coupon1 = self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='AAAAA',
+        )
+        coupon2 = self.create_coupon(
+            max_uses=5,
+            voucher_type=Voucher.MULTI_USE,
+            benefit_type=Benefit.FIXED,
+            benefit_value=13.37,
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            enterprise_customer_catalog='bbbbbbbb-2c44-487b-9b6a-24eee973f9a4',
+            code='BBBBB',
+        )
+
+        # Assign codes using the assignment endpoint
+        self.assign_user_to_code(coupon2.id, [{'email': self.user.email}], ['BBBBB'])
+        self.assign_user_to_code(coupon2.id, [{'email': self.user.email}], ['BBBBB'])
+        self.assign_user_to_code(coupon2.id, [{'email': 'someotheruser@fake.com'}], ['BBBBB'])
+
+        # Redeem a voucher without using the assignment endpoint
+        voucher2 = coupon2.coupon_vouchers.first().vouchers.first()
+        self.use_voucher(voucher2, self.user)
+
+        mock_users = [
+            {'lms_user_id': self.user.lms_user_id, 'username': self.user.username, 'email': self.user.email}
+        ]
+        self.mock_bulk_lms_users_using_emails(self.request, mock_users)
+        self.mock_access_token_response()
+
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-search',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            ),
+            data={'voucher_code': voucher2.code}
+        )
+        results = response.json()['results']
+
+        # We should have found 3 assignments and 1 redemption
+        redemptions = [
+            result for result in results
+            if result['redeemed_date'] is not None and result['code'] == 'BBBBB'
+        ]
+        assert len(redemptions) == 1
+        assert redemptions[0]['user_email'] == self.user.email
+
+        assignments = [
+            result for result in results
+            if result['redeemed_date'] is None and result['code'] == 'BBBBB'
+        ]
+        assert len(assignments) == 3
+
+        test_user_assignments = [
+            assignment for assignment in assignments
+            if assignment['user_email'] == self.user.email and assignment['code'] == 'BBBBB'
+        ]
+        assert len(test_user_assignments) == 2
+
+        someotheruser_assignments = [
+            assignment for assignment in assignments
+            if assignment['user_email'] == 'someotheruser@fake.com' and assignment['code'] == 'BBBBB'
+        ]
+        assert len(someotheruser_assignments) == 1
+
     @httpretty.activate
     def test_permission_search_200(self):
         """
