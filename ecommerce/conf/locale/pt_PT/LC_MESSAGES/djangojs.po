@@ -7,9 +7,11 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Cátia Lopes <catia.lopes@bridgelk.com>, 2018-2019
-# Manuela Silva <manuelarodsilva@gmail.com>, 2018
-# Manuela Silva <manuelarodsilva@gmail.com>, 2016
+# Filipa Macieira <filipa.macieira@fccn.pt>, 2021
+# Manuela Silva <mmsrs@sky.com>, 2018
+# Manuela Silva <mmsrs@sky.com>, 2016
 # MS, 2016,2018
 # Rui Ribeiro <info@nau.edu.pt>, 2020
 # Vera Gonçalves <vera.maria.dg@gmail.com>, 2016
@@ -17,9 +19,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
-"PO-Revision-Date: 2020-11-24 09:15+0000\n"
-"Last-Translator: Transifex Bot <>\n"
+"POT-Creation-Date: 2022-05-08 20:12+0000\n"
+"PO-Revision-Date: 2015-06-18 02:02+0000\n"
+"Last-Translator: Filipa Macieira <filipa.macieira@fccn.pt>, 2021\n"
 "Language-Team: Portuguese (Portugal) (http://www.transifex.com/open-edx/edx-platform/language/pt_PT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,520 +32,520 @@ msgstr ""
 #: ecommerce/static/js/models/coupon_model.js:33
 #: ecommerce/static/js/models/enterprise_coupon_model.js:15
 msgid "This field is required."
-msgstr ""
+msgstr "Este campo é obrigatório."
 
 #: ecommerce/static/js/models/coupon_model.js:34
 #: ecommerce/static/js/models/enterprise_coupon_model.js:16
 msgid "This value must be a number."
-msgstr ""
+msgstr "Este valor deve ser um número."
 
 #: ecommerce/static/js/models/coupon_model.js:35
 #: ecommerce/static/js/models/enterprise_coupon_model.js:17
 msgid "This value must be a date."
-msgstr ""
+msgstr "Este valor deve ser uma data."
 
 #: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
-msgstr ""
+msgstr "Deve ser selecionado pelo menos um item."
 
 #: ecommerce/static/js/models/coupon_model.js:72
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
-msgstr ""
+msgstr "Este campo deve estar em branco ou conter 1-16 caracteres alfanuméricos."
 
 #: ecommerce/static/js/models/coupon_model.js:81
 #, javascript-format
 msgid "Email domain {%s} is invalid."
-msgstr ""
+msgstr "Domínio de email {%s} é inválido."
 
-#: ecommerce/static/js/models/coupon_model.js:101
+#: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
-msgstr ""
+msgstr "Deve ocorrer depois da data inicial"
 
-#: ecommerce/static/js/models/coupon_model.js:131
+#: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
-msgstr ""
+msgstr "Os cupões multi-uso devem ter um máximo de utilizações superior a 2."
 
-#: ecommerce/static/js/models/coupon_model.js:155
+#: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
-msgstr ""
+msgstr "Deve ocorrer antes da data final"
 
-#: ecommerce/static/js/models/coupon_model.js:177
+#: ecommerce/static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
-msgstr ""
+msgstr "É obrigatória uma identificação válida para o curso"
 
-#: ecommerce/static/js/models/coupon_model.js:191
+#: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
-msgstr ""
+msgstr "É necessário um UUID de programa válido."
 
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
-msgstr ""
+msgstr "Deve selecionar um tipo de curso."
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
-msgstr ""
+msgstr "Escolha se deve ser criado um lugar de honra."
 
 #: ecommerce/static/js/models/course_model.js:77
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "O prazo de verificação deve ocorrer APÓS o prazo de atualização."
 
 #: ecommerce/static/js/models/course_model.js:86
 msgid "Product validation failed."
-msgstr ""
+msgstr "Falha na validação do produto."
 
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "ID do Curso"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Nome do Curso"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:77
 msgid "Course Type"
-msgstr ""
+msgstr "Tipo de Curso"
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Prazo Limite para Validação"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
-msgstr ""
+msgstr "Inclua Lugar de Honra"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:28
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "Todos os lugares no curso devem ter um preço."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
-msgstr ""
+msgstr "Os lugares validados devem ter um prazo de atualização."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
-msgstr ""
+msgstr "O prazo de atualização deve ocorrer ANTES do prazo de validação."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 msgid "Verified"
-msgstr ""
+msgstr "Validado"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:77
 msgid "Credit"
-msgstr ""
+msgstr "Crédito"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Profissional"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr "Honra"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Exame"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Certificado Validado"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Certificado Profissional"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
-msgstr ""
+msgstr "Certificado de Honra"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "Nenhum Certificado"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "Todos os lugares de crédito devem ter um fornecedor de crédito."
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:30
 msgid "Please select a valid credit provider."
-msgstr ""
+msgstr "Por favor, selecione um fornecedor de crédito válido."
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:39
 msgid "All credit seats must designate a number of credit hours."
-msgstr ""
+msgstr "Todos os lugares de crédito devem designar um número de horas de crédito."
 
 #: ecommerce/static/js/models/enterprise_coupon_model.js:18
 msgid "This value must be a valid email."
-msgstr ""
+msgstr "Este valor deve ser um e-mail válido."
 
 #: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
-msgstr ""
+msgstr "Ocorreu um problema na finalização de compra. Por favor, contacte o suporte."
 
 #: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
-msgstr ""
+msgstr "Este campo é obrigatório"
 
 #: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid card number"
-msgstr ""
+msgstr "Número de cartão inválido"
 
 #: ecommerce/static/js/pages/basket_page.js:147
 msgid "Unsupported card type"
-msgstr ""
+msgstr "Tipo de cartão não suportado"
 
 #: ecommerce/static/js/pages/basket_page.js:149
 msgid "Invalid security number"
-msgstr ""
+msgstr "Número de segurança inválido"
 
 #: ecommerce/static/js/pages/basket_page.js:154
 msgid "Invalid month"
-msgstr ""
+msgstr "Mês inválido"
 
 #: ecommerce/static/js/pages/basket_page.js:156
 msgid "Invalid year"
-msgstr ""
+msgstr "Ano inválido"
 
 #: ecommerce/static/js/pages/basket_page.js:158
 msgid "Card expired"
-msgstr ""
+msgstr "Cartão expirado"
 
 #: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
-msgstr ""
+msgstr "<Choose state/province>"
 
 #: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
-msgstr ""
+msgstr "Distrito/Concelho (obrigatório)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 #: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
 msgid "Create New Coupon"
-msgstr ""
+msgstr "Criar novo cupão"
 
 #: ecommerce/static/js/pages/coupon_detail_page.js:13
 #: ecommerce/static/js/pages/enterprise_coupon_detail_page.js:13
 msgid "View Coupon"
-msgstr ""
+msgstr "Ver cupão"
 
 #: ecommerce/static/js/pages/coupon_edit_page.js:13
 #: ecommerce/static/js/pages/enterprise_coupon_edit_page.js:13
 msgid "Edit Coupon"
-msgstr ""
+msgstr "Editar cupão"
 
 #: ecommerce/static/js/pages/coupon_list_page.js:10
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Códigos de Cupão"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
-msgstr ""
+msgstr "Criar Novo Curso"
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Ver Curso"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
-msgstr ""
+msgstr "Editar curso"
 
 #: ecommerce/static/js/pages/course_list_page.js:10
 msgid "Courses"
-msgstr ""
+msgstr "Cursos"
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
-msgstr ""
+msgstr "Códigos de Cupões de Empresa"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
-msgstr ""
+msgstr "Amortizar"
 
 #: ecommerce/static/js/pages/receipt_page.js:21
 msgid ""
 "Caution! Using the back button on this page may cause you to be charged "
 "again."
-msgstr ""
+msgstr "Cuidado! Ao usar o botão voltar nesta página pode fazer com que seja cobrado novamente."
 
 #. Translators: Do not translate "Apple Pay".
 #: ecommerce/static/js/payment_processors/cybersource.js:225
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "O Apple Pay não está disponível neste momento. Por favor, tente outro método de pagamento."
 
 #: ecommerce/static/js/payment_processors/cybersource.js:255
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
-msgstr ""
+msgstr "Ocorreu um erro ao processar o pagamento. NÃO foi cobrado. Por favor, tente novamente, ou selecione outro método de pagamento."
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
 "been charged. Please check your payment details, and try again."
-msgstr ""
+msgstr "Ocorreu um erro ao tentar processar o pagamento. Não foi cobrado. Verifique por favor os detalhes do pagamento, e tente outra vez."
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
 msgid "An error occurred while processing your payment. Please try again."
-msgstr ""
+msgstr "Ocorreu um erro ao processar o pagamento. Por favor, tente novamente."
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
-msgstr ""
+msgstr "Vírgula à direita não permitida."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:108
 #: ecommerce/static/js/views/coupon_form_view.js:62
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
-msgstr ""
+msgstr "Pode ser usado uma vez por cada cliente"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
-msgstr ""
+msgstr "Pode ser usado multiplas vezes por vários clientes"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
-msgstr ""
+msgstr "Pode ser usado uma vez por multíplos clientes"
 
 #: ecommerce/static/js/views/coupon_form_view.js:51
 msgid "Enrollment Code"
-msgstr ""
+msgstr "Código de Inscrição"
 
 #: ecommerce/static/js/views/coupon_form_view.js:55
 msgid "Discount Code"
-msgstr ""
+msgstr "Código do desconto"
 
 #: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
-msgstr ""
+msgstr "Guardar Alterações"
 
 #: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
-msgstr ""
+msgstr "Criar cupão"
 
 #: ecommerce/static/js/views/coupon_list_view.js:35
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
 msgid "Created"
-msgstr ""
+msgstr "Criado"
 
 #: ecommerce/static/js/views/coupon_list_view.js:49
 msgid "Custom Code"
-msgstr ""
+msgstr "Código personalizado"
 
 #: ecommerce/static/js/views/coupon_list_view.js:55
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:44
 msgid "Client"
-msgstr ""
+msgstr "Cliente"
 
 #: ecommerce/static/js/views/coupon_list_view.js:61
 msgid "Category"
-msgstr ""
+msgstr "Categoria"
 
 #: ecommerce/static/js/views/coupon_list_view.js:67
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
 msgid "Coupon Report"
-msgstr ""
+msgstr "Relatório de Cupão"
 
 #: ecommerce/static/js/views/coupon_list_view.js:80
 #: ecommerce/static/js/views/course_list_view.js:25
 msgid "Search..."
-msgstr ""
+msgstr "Pesquisar..."
 
 #: ecommerce/static/js/views/coupon_list_view.js:107
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Next"
-msgstr ""
+msgstr "Próximo"
 
 #: ecommerce/static/js/views/coupon_list_view.js:108
 #: ecommerce/static/js/views/course_list_view.js:53
 msgid "Previous"
-msgstr ""
+msgstr "Anterior"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: ecommerce/static/js/views/coupon_list_view.js:112
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
-msgstr ""
+msgstr "Exibindo _START_ para _END_ de _TOTAL_ cupões"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/coupon_list_view.js:115
 msgid "(filtered from _MAX_ total coupons)"
-msgstr ""
+msgstr "(filtrado a partir de _ MAX _ cupões no total)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/coupon_list_view.js:118
 msgid "Display _MENU_ coupons"
-msgstr ""
+msgstr "Mostrar _MENU_ cupões"
 
 #: ecommerce/static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
-msgstr ""
+msgstr "Grátis (exame)"
 
 #: ecommerce/static/js/views/course_form_view.js:56
 msgid "Free audit track. No certificate."
-msgstr ""
+msgstr "Modo de exame gratuito. Sem certificado."
 
 #: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified and Audit"
-msgstr ""
+msgstr "Verificado e Auditado"
 
 #: ecommerce/static/js/views/course_form_view.js:61
 #: ecommerce/static/js/views/course_form_view.js:67
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate."
-msgstr ""
+msgstr "Percurso com verificação inicial, certificado pago e certificado verificado."
 
 #: ecommerce/static/js/views/course_form_view.js:62
 msgid "Also includes the free audit track."
-msgstr ""
+msgstr "Também inclui o percurso com acompanhamento gratuito."
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid "Verified Only"
-msgstr ""
+msgstr "Apenas verificado"
 
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Professional Education"
-msgstr ""
+msgstr "Educação Profissional"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "Modo com certificado pago, com verificação inicial e Certificado de Educação Profissional"
 
 #: ecommerce/static/js/views/course_form_view.js:78
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "Modo com certificado pago, com verificação inicial e Certificado Validado, e opção para comprar crédito"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: ecommerce/static/js/views/course_list_view.js:57
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "A mostrar _START_ a _END_ de _TOTAL_ cursos"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:60
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(filtrado de _MAX_ total de cursos)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:63
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "Mostrar _MENU_ cursos"
 
 #: ecommerce/static/js/views/course_list_view.js:69
 msgid "Course"
-msgstr ""
+msgstr "Curso"
 
 #: ecommerce/static/js/views/course_list_view.js:86
 msgid "Last Edited"
-msgstr ""
+msgstr "Último Editado"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
-msgstr ""
+msgstr "Título do lugar"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:78
 msgid "Seat type"
-msgstr ""
+msgstr "Tipo de lugar"
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
-msgstr ""
+msgstr "Pode ser usado várias vezes por um cliente"
 
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
 msgid "Create and Add More"
-msgstr ""
+msgstr "Criar e Adicionar Mais"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "Estado"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
-msgstr ""
+msgstr "Cliente Empresarial"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:56
 msgid "Enterprise Customer Catalog"
-msgstr ""
+msgstr "Catálogo de Cliente Empresarial"
 
 #: ecommerce/static/js/views/form_view.js:71
 msgid "A course with the specified ID already exists."
-msgstr ""
+msgstr "Um curso com esta ID já existe."
 
 #: ecommerce/static/js/views/form_view.js:81
 #: ecommerce/static/js/views/form_view.js:174
 msgid "Error!"
-msgstr ""
+msgstr "Erro!"
 
 #: ecommerce/static/js/views/form_view.js:127
 msgid "Saving..."
-msgstr ""
+msgstr "A guardar..."
 
 #: ecommerce/static/js/views/form_view.js:136
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "Por favor, preencha todos os campos obrigatórios."
 
 #: ecommerce/static/js/views/form_view.js:161
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "Ocorreu um erro enquanto guardava os dados."
 
 #: ecommerce/static/js/views/offer_view.js:198
 msgid "Ellipsis"
-msgstr ""
+msgstr "Reticências"
 
 #: ecommerce/static/js/views/offer_view.js:205
 msgid "Load the records for page "
-msgstr ""
+msgstr "Carregar os registos para a página "
 
 #: ecommerce/static/js/views/offer_view.js:212
 msgid "Load the records for the next page"
-msgstr ""
+msgstr "Carregar os registos para a próxima página"
 
 #: ecommerce/static/js/views/offer_view.js:220
 msgid "Load the records for the previous page"
-msgstr ""
+msgstr "Carregar os registos para a página anterior"
 
 #: ecommerce/static/js/views/provider_selection_view.js:33
 msgid "Select"
-msgstr ""
+msgstr "Selecionar"
 
 #: ecommerce/static/js/views/provider_selection_view.js:34
 msgid "Selected"
-msgstr ""
+msgstr "Selecionado"
 
 #: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:21
 msgid "Order %(order_number)s has been fulfilled."
-msgstr ""
+msgstr "O Registo de Contas %(order_number)s foi concretizado."
 
 #: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:27
 msgid "Failed to fulfill order %(order_number)s: %(error)s"
-msgstr ""
+msgstr "Falha no cumprimento da ordem %(order_number)s: %(error)s"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:24
 msgid "Refund #%(refund_id)s has been processed."
-msgstr ""
+msgstr "O reembolso #%(refund_id)s foi processado."
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Erro"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""
 "Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
 "contact the E-Commerce Development Team."
-msgstr ""
+msgstr "Falha ao processar o reembolso #%(refund_id)s: %(error)s. Por favor, tente novamente, ou entre em contacto com a Equipa de Desenvolvimento E-Commerce."
