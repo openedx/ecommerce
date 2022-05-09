@@ -44,6 +44,7 @@ def request_user_has_explicit_access_admin(user, context):
         context=context
     )
 
+
 @rules.predicate
 def request_user_has_implicit_access_learner(user, context):  # pylint: disable=unused-argument
     """
@@ -73,6 +74,7 @@ def request_user_has_explicit_access_learner(user, context):
         EcommerceFeatureRoleAssignment,
         context=context
     )
+
 
 has_admin_access = request_user_has_implicit_access_admin | request_user_has_explicit_access_admin
 has_learner_access = request_user_has_implicit_access_learner | request_user_has_explicit_access_learner

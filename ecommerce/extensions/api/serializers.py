@@ -407,12 +407,15 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_enable_hoist_order_history(self, obj):
         try:
-            request=self.context.get('request')
+            request = self.context.get('request')
             order_history_enabled = waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
             obj.enable_hoist_order_history = order_history_enabled
-            return obj.enable_hoist_order_history
         except (AttributeError, ValueError) as error:
-            logger.exception('An error occurred while attempting to set ENABLE_HOIST_ORDER_HISTORY flag, error: [%s]', error)
+            logger.exception(
+                'An error occurred while attempting to set ENABLE_HOIST_ORDER_HISTORY flag, error: [%s]',
+                error
+            )
+        return obj.enable_hoist_order_history
 
     class Meta:
         model = Order
