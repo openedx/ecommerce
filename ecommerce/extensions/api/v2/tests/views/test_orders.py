@@ -106,7 +106,6 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     def test_enable_hoist_order_history(self, enable_hoist_order_history_flag):
         """ Verify that orders contain the Order History flag value """
         with override_flag(ENABLE_HOIST_ORDER_HISTORY, active=enable_hoist_order_history_flag):
-            order = create_order(site=self.site, user=self.user)
             site = SiteConfigurationFactory().site
             create_order(site=site, user=self.user)
             response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
