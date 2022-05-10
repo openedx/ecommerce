@@ -1303,6 +1303,7 @@ class EnterpriseCouponViewSetRbacTests(
         assert results[0]['code'] == voucher1.code
         assert results[0]['course_key'] is None
 
+    @httpretty.activate
     def test_search_results_regression_for_voucher_code(self):
         """
         Test regression for code search not returning all the expected results.
