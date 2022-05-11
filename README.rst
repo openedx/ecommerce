@@ -14,6 +14,7 @@ edX E-Commerce Service  |CI|_ |Codecov|_
 .. _Codecov: http://codecov.io/github/edx/ecommerce?branch=master
 
 This repository contains the edX E-Commerce Service, which relies heavily on `django-oscar <https://django-oscar.readthedocs.org/en/latest/>`_, as well as all frontend and backend code used to manage edX's product catalog and handle orders for those products.
+TEST
 
 Documentation
 -------------
