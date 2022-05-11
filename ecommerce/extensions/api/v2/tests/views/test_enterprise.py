@@ -1379,62 +1379,6 @@ class EnterpriseCouponViewSetRbacTests(
         assert len(someotheruser_assignments) == 1
 
     @httpretty.activate
-    def test_search_results_regression_for_voucher_code_no_blank_line(self):
-        """
-        If you have a code where all applications are used, there should
-        not be an extra blank result returned
-        """
-        # Create coupons
-        coupon2 = self.create_coupon(
-            voucher_type=Voucher.SINGLE_USE,
-            benefit_type=Benefit.FIXED,
-            benefit_value=13.37,
-            enterprise_customer=self.data['enterprise_customer']['id'],
-            enterprise_customer_catalog='bbbbbbbb-2c44-487b-9b6a-24eee973f9a4',
-            code='BBBBB',
-            quantity=1,
-        )
-
-        # Assign codes using the assignment endpoint
-        self.assign_user_to_code(coupon2.id, [{'email': self.user.email}], ['BBBBB'])
-
-        # Redeem a voucher without using the assignment endpoint
-        voucher2 = coupon2.coupon_vouchers.first().vouchers.first()
-        self.use_voucher(voucher2, self.user)
-
-        mock_users = [
-            {'lms_user_id': self.user.lms_user_id, 'username': self.user.username, 'email': self.user.email}
-        ]
-        self.mock_bulk_lms_users_using_emails(self.request, mock_users)
-        self.mock_access_token_response()
-
-        response = self.get_response(
-            'GET',
-            reverse(
-                'api:v2:enterprise-coupons-search',
-                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
-            ),
-            data={'voucher_code': voucher2.code}
-        )
-        results = response.json()['results']
-        assert len(results) == 1
-
-        # We should have found 1 redemption, and not have gotten
-        # the assignment back cause all the codes are redeemed
-        redemptions = [
-            result for result in results
-            if result['redeemed_date'] is not None and result['code'] == 'BBBBB'
-        ]
-        assert len(redemptions) == 1
-        assert redemptions[0]['user_email'] == self.user.email
-
-        assignments = [
-            result for result in results
-            if result['redeemed_date'] is None and result['code'] == 'BBBBB'
-        ]
-        assert len(assignments) == 0
-
-    @httpretty.activate
     def test_permission_search_200(self):
         """
         Test that we get implicit access via role assignment
