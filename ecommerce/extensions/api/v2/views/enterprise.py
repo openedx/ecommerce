@@ -681,9 +681,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
             # the number of redemptions is equal to offer assignments
             # that must mean all assignments were redeemed, so don't
             # include offer_assignments in our response
-            if not user_email and \
-                    voucher.slots_available_for_assignment == 0 and \
-                    len(redemptions_and_assignments) == len(offer_assignments):
+            if (
+                not user_email and
+                voucher.slots_available_for_assignment == 0 and
+                len(redemptions_and_assignments) == len(offer_assignments)
+            ):
                 continue
 
             # For the case when an unassigned voucher code is searched

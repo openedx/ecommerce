@@ -1378,7 +1378,6 @@ class EnterpriseCouponViewSetRbacTests(
         ]
         assert len(someotheruser_assignments) == 1
 
-
     @httpretty.activate
     def test_search_results_regression_for_voucher_code_no_blank_line(self):
         """
@@ -1387,7 +1386,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         # Create coupons
         coupon2 = self.create_coupon(
-            #max_uses=5,
             voucher_type=Voucher.SINGLE_USE,
             benefit_type=Benefit.FIXED,
             benefit_value=13.37,
