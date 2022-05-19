@@ -7,6 +7,9 @@ from simple_history.models import HistoricalRecords
 
 
 class StockRecord(AbstractStockRecord):
+    android_sku = models.CharField(max_length=50, unique=True, null=True)
+    ios_sku = models.CharField(max_length=50, unique=True, null=True)
+
     history = HistoricalRecords()
 
 
