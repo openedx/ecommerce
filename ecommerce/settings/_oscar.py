@@ -42,7 +42,6 @@ OSCAR_APPS = [
     # To prevent issues with Oscar’s dynamic model loading, overrides of dashboard applications should
     # follow overrides of core applications
     'oscar.apps.dashboard.reports',
-    'oscar.apps.dashboard.catalogue',
     'oscar.apps.dashboard.partners',
     'oscar.apps.dashboard.pages',
     'oscar.apps.dashboard.ranges',
@@ -52,6 +51,7 @@ OSCAR_APPS = [
     'oscar.apps.dashboard.shipping',
 
     'ecommerce.extensions.dashboard',
+    'ecommerce.extensions.dashboard.catalogue',
     'ecommerce.extensions.dashboard.offers',
     'ecommerce.extensions.dashboard.refunds',
     'ecommerce.extensions.dashboard.orders',
