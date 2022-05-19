@@ -191,6 +191,8 @@
                                         <tr>
                                             <th>{% trans "Partner" as tmsg %}{{ tmsg | force_escape }}</th>
                                             <th>{% trans "SKU" as tmsg %}{{ tmsg | force_escape }}</th>
+                                            <th>{% trans "Android SKU" as tmsg %}{{ tmsg | force_escape }}</th>
+                                            <th>{% trans "IOS SKU" as tmsg %}{{ tmsg | force_escape }}</th>
                                             {% if product_class.track_stock %}
                                                 <th>{% trans "Num in stock" as tmsg %}{{ tmsg | force_escape }}</th>
                                                 <th>{% trans "Num allocated" as tmsg %}{{ tmsg | force_escape }}</th>
@@ -217,6 +219,8 @@
                                             <tr>
                                                 <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner nolabel=True %}</td>
                                                 <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner_sku nolabel=True %}</td>
+                                                <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.android_sku nolabel=True %}</td>
+                                                <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.ios_sku nolabel=True %}</td>
                                                 {% if product_class.track_stock %}
                                                     <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.num_in_stock nolabel=True %}</td>
                                                     <td>{{ stockrecord_form.instance.num_allocated|default:"-" }}</td>
