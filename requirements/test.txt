@@ -385,10 +385,8 @@ google-api-core==1.30.0
     # via
     #   -r requirements/base.txt
     #   google-api-python-client
-google-api-python-client==2.11.0
-    # via
-    #   -r requirements/base.txt
-    #   inapppy
+google-api-python-client==2.31.0
+    # via -r requirements/base.in
 google-auth-httplib2==0.1.0
     # via
     #   -r requirements/base.txt
@@ -403,12 +401,8 @@ googleapis-common-protos==1.53.0
     # via
     #   -r requirements/base.txt
     #   google-api-core
-httplib2==0.19.1
-    # via
-    #   -r requirements/base.txt
-    #   google-api-python-client
-    #   google-auth-httplib2
-    #   oauth2client
+httplib2==0.20.2
+    # via -r requirements/base.in
 httpretty==0.9.7
     # via
     #   -c requirements/pins.txt

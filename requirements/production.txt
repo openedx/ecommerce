@@ -275,8 +275,8 @@ getsmarter-api-clients==0.4.0
     #   pyjwkest
 google-api-core==1.30.0
     # via google-api-python-client
-google-api-python-client==2.11.0
-    # via inapppy
+google-api-python-client==2.31.0
+    # via -r requirements/base.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
 google-auth==1.32.1
@@ -288,11 +288,8 @@ googleapis-common-protos==1.53.0
     # via google-api-core
 gunicorn==19.7.1
     # via -r requirements/production.in
-httplib2==0.19.1
-    # via
-    #   google-api-python-client
-    #   google-auth-httplib2
-    #   oauth2client
+httplib2==0.20.2
+    # via -r requirements/base.in
 idna==2.7
     # via
     #   -c requirements/constraints.txt
@@ -611,7 +608,7 @@ testtools==2.5.0
     #   python-subunit
 traceback2==1.4.0
     # via cybersource-rest-client-python
-typing-extensions==3.10.0.0
+typing-extensions==4.0.1
     # via aiohttp
 typing==3.7.4.3
     # via cybersource-rest-client-python
