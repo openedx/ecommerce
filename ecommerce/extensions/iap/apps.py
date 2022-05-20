@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class IapConfig(AppConfig):
-    name = 'iap'
+    name = 'ecommerce.extensions.iap'
