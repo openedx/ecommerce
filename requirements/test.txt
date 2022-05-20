@@ -996,10 +996,6 @@ traceback2==1.4.0
     #   cybersource-rest-client-python
     #   testtools
     #   unittest2
-typing-extensions==3.10.0.0
-    # via
-    #   -r requirements/base.txt
-    #   aiohttp
 typing==3.7.4.3
     # via
     #   -r requirements/base.txt
