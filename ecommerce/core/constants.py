@@ -54,7 +54,7 @@ ALL_ACCESS_CONTEXT = '*'
 # .. toggle_default: False
 # .. toggle_description: Toggle for allowing a missing LMS user id without raising an exception
 # .. toggle_use_cases: open_edx
-# .. toggle_warnings: Other systems and micro frontends may assume that all users have an LMS user id
+# .. toggle_warning: Other systems and micro frontends may assume that all users have an LMS user id
 # .. toggle_tickets: REVMI-156
 # .. toggle_status: supported
 ALLOW_MISSING_LMS_USER_ID = 'allow_missing_lms_user_id'
