@@ -4,6 +4,7 @@ import logging
 
 import waffle
 from django.dispatch import receiver
+from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.courses.utils import mode_for_product
@@ -41,6 +42,17 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'revenue': float(order.total_excl_tax),
         'currency': order.currency,
         'discount': float(order.total_discount_incl_tax),
+        'orderDate': order.date_placed,
+        'billingAddress': {
+            'firstName': order.billing_address.first_name if order.billing_address else "",
+            'lastName': order.billing_address.last_name if order.billing_address else "",
+            'address1': order.billing_address.line1 if order.billing_address else "",
+            'address2': order.billing_address.line2 if order.billing_address else "",
+            'city': order.billing_address.line3 if order.billing_address else "",
+            'state': order.billing_address.state if order.billing_address else "",
+            'postCode': order.billing_address.postcode if order.billing_address else "",
+            'countryId': order.billing_address.country_id if order.billing_address else "",
+        },
         'products': [
             {
                 # For backwards-compatibility with older events the `sku` field is (ab)used to
@@ -56,13 +68,18 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
                 # TODO: DENG-797: remove the the `title` once we are no longer forwarding
                 # these events to Hubspot.
                 'title': line.product.title,
+                'partner': CourseKey.from_string(line.product.course.id).org if line.product.course else '',
             } for line in order.lines.all()
         ],
     }
     if order.user:
         properties['email'] = order.user.email
 
+    subtotal = 0.0
+
     for line in order.lines.all():
+        subtotal += float(line.line_price_excl_tax)
+
         if line.product.is_enrollment_code_product:
             # Send analytics events to track bulk enrollment code purchases.
             track_segment_event(order.site, order.user, 'Bulk Enrollment Codes Order Completed', properties)
@@ -70,6 +87,8 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
         if line.product.is_coupon_product:
             return
+
+    properties['subtotal'] = subtotal
 
     voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
     coupon = voucher.voucher_code if voucher else None

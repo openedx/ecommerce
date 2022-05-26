@@ -5,6 +5,7 @@ import json
 import httpretty
 import mock
 from django.core import mail
+from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from testfixtures import LogCapture
@@ -230,6 +231,9 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             'currency': order.currency,
             'coupon': coupon,
             'discount': float(order.total_discount_incl_tax),
+            'orderDate': order.date_placed,
+            'billingAddress': {'firstName': '', 'lastName': '', 'address1': '', 'address2': '', 'city': '', 'state': '',
+                               'postCode': '', 'countryId': ''},
             'products': [
                 {
                     'id': line.partner_sku,
@@ -239,6 +243,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                     'quantity': line.quantity,
                     'category': line.product.get_product_class().name,
                     'title': line.product.title,
+                    'partner': CourseKey.from_string(line.product.course.id).org if line.product.course else '',
                 } for line in order.lines.all()
             ],
         }
@@ -260,6 +265,13 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 'name': program['title']
             }
             properties['products'].append(bundle_product)
+
+        subtotal = 0.0
+
+        for line in order.lines.all():
+            subtotal += float(line.line_price_excl_tax)
+
+        properties['subtotal'] = subtotal
 
         return properties
 
