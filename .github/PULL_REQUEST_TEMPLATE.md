@@ -12,6 +12,10 @@ Use this template as a guide. Omit sections that don't apply. You may link to in
 
 ## Anyone internally merging to this repository is expected to [release and monitor their changes](https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories); if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
 
+## Required Testing
+[ ] Before deploying this change, complete a purchase in the stage environment. 
+(^ We can remove that manual check once REV-2624 is done and the corresponding e2e test runs again)
+
 ## Description
 
 Describe what this pull request changes, and why these changes were made. How will these changes affect other people, installations of edx, etc.?
