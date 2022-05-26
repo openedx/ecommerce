@@ -196,13 +196,11 @@ class Refund(StatusMixin, TimeStampedModel):
     def _issue_credit_for_enterprise_offer(self):
         """
         Credits the enterprise offers used for the order, if applicable.
-        """
 
-        """
         This is an edge case that we won't deal with for now. This happens when there were multiple lines in
         an order but not all lines were refunded. We have no good way to determine how much of the discount was
-        applied to each line. We also don't know if partial refunds count as 1 application & order. Note that there has not been
-        an order with partial refund that uses enterprise offers currently.
+        applied to each line. We also don't know if partial refunds count as 1 application & order.
+        Note that there has not been an order with partial refund that uses enterprise offers currently.
         """
         if self.lines.count() != self.order.lines.count():
             logger.error(
@@ -235,7 +233,7 @@ class Refund(StatusMixin, TimeStampedModel):
                     )
 
                     offer.save()
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logger.exception("[Enterprise Offer Refund] Failed to credit enterprise offer for refund %d.", self.id)
 
     def _revoke_lines(self):

@@ -12,7 +12,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from e2e.api import DiscoveryApi, EcommerceApi, EnrollmentApi
 from e2e.config import LMS_USERNAME
-from e2e.constants import ADDRESS_FR, ADDRESS_US
+# from e2e.constants import ADDRESS_FR, ADDRESS_US
 from e2e.helpers import EcommerceHelpers, LmsHelpers
 
 log = logging.getLogger(__name__)
