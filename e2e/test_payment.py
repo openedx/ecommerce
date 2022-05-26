@@ -208,15 +208,16 @@ class TestSeatPayment:
 
         assert test_run_successfully, "Unable to find a valid course run to test!"
 
-    def test_verified_seat_payment_with_credit_card_payment_page(self, selenium):
-        """
-        Using the payment microfrontend page, validates users can add a verified seat to the cart and
-        checkout with a credit card.
+    #  @FIXME: Commenting out test, pending necessary updates in REV-2624 for it to work again
+    # def test_verified_seat_payment_with_credit_card_payment_page(self, selenium):
+    #     """
+    #     Using the payment microfrontend page, validates users can add a verified seat to the cart and
+    #     checkout with a credit card.
 
-        This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
-        - Note: Waffle switch warning copied from original basket page test without being verified.
-        """
-        self.verified_seat_payment_with_credit_card(
-            selenium,
-            addresses=(ADDRESS_US, ADDRESS_FR,)
-        )
+    #     This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
+    #     - Note: Waffle switch warning copied from original basket page test without being verified.
+    #     """
+    #     self.verified_seat_payment_with_credit_card(
+    #         selenium,
+    #         addresses=(ADDRESS_US, ADDRESS_FR,)
+    #     )
