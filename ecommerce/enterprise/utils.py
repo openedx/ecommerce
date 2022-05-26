@@ -722,3 +722,15 @@ def get_enterprise_customer_reply_to_email(site, enterprise_customer_uuid):
             exc
         )
     return reply_to
+
+
+def calculate_remaining_offer_balance(conditional_offer):
+    """
+    Calculate remaining balance on conditional_offer.
+
+    Returns None if max_discount not set on object.
+    """
+    # max_discount will be None if not set in UI when created
+    if conditional_offer.max_discount:
+        return conditional_offer.max_discount - conditional_offer.total_discount
+    return None

@@ -84,10 +84,18 @@ rules.add_perm(
     has_learner_access
 )
 rules.add_perm(
+    'enterprise.can_view_enterprise_learner_offer',
+    has_learner_access
+)
+rules.add_perm(
     'enterprise.can_view_coupon',
     has_admin_access
 )
 rules.add_perm(
     'enterprise.can_assign_coupon',
+    has_admin_access
+)
+rules.add_perm(
+    'enterprise.can_view_enterprise_admin_offer',
     has_admin_access
 )

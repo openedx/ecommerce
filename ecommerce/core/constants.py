@@ -38,6 +38,8 @@ DEFAULT_CATALOG_PAGE_SIZE = 100
 
 ENTERPRISE_COUPON_ADMIN_ROLE = 'enterprise_coupon_admin'
 ENTERPRISE_COUPON_LEARNER_ROLE = 'enterprise_coupon_learner'
+ENTERPRISE_OFFER_ADMIN_ROLE = 'enterprise_offer_admin'
+ENTERPRISE_OFFER_LEARNER_ROLE = 'enterprise_offer_learner'
 ORDER_MANAGER_ROLE = 'order_manager'
 
 SYSTEM_ENTERPRISE_ADMIN_ROLE = 'enterprise_admin'
