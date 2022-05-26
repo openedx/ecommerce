@@ -4,6 +4,7 @@ import mock
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
+from oscar.test.factories import OrderDiscountFactory, PartnerFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
@@ -13,6 +14,7 @@ from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test.factories import EnterpriseOfferFactory
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
@@ -20,6 +22,7 @@ PaymentEventType = get_model('order', 'PaymentEventType')
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
 Source = get_model('payment', 'Source')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 REFUND_MODEL_LOGGER_NAME = 'ecommerce.extensions.refund.models'
@@ -248,6 +251,81 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         refund.refresh_from_db()
         self.assertTrue(refund.approve())
         self.assertEqual(refund.status, REFUND.COMPLETE)
+
+    def test_issue_credit_for_enterprise_offer(self):
+        """
+        Test that enterprise offers are credited for the discounted amount.
+        """
+        order = self.create_order(user=UserFactory())
+
+        offer = EnterpriseOfferFactory(
+            partner=PartnerFactory(),
+            max_discount=150
+        )
+
+        discount = OrderDiscountFactory(
+            order=order,
+            offer_id=offer.id,
+            frequency=1,
+            amount=150
+        )
+
+        offer.record_usage({
+            'freq': discount.frequency,
+            'discount': discount.amount
+        })
+        offer.refresh_from_db()
+        assert offer.status == ConditionalOffer.CONSUMED
+        assert offer.total_discount == 150
+
+        refund = RefundFactory(order=order, user=UserFactory())
+
+        with mock.patch.object(models, 'revoke_fulfillment_for_refund') as mock_revoke:
+            mock_revoke.return_value = True
+            self.assertTrue(refund.approve())
+
+        offer.refresh_from_db()
+
+        assert offer.status == ConditionalOffer.OPEN
+        assert offer.total_discount == 0
+
+    def test_issue_credit_for_enterprise_offer_no_partial_credit(self):
+        """
+        Test that credit is not issued if not all of the lines in an order are refunded.
+        """
+        order = self.create_order(user=UserFactory(), multiple_lines=True)
+
+        offer = EnterpriseOfferFactory(
+            partner=PartnerFactory(),
+            max_discount=150
+        )
+
+        discount = OrderDiscountFactory(
+            order=order,
+            offer_id=offer.id,
+            frequency=1,
+            amount=150
+        )
+
+        offer.record_usage({
+            'freq': discount.frequency,
+            'discount': discount.amount
+        })
+        offer.refresh_from_db()
+        assert offer.status == ConditionalOffer.CONSUMED
+        assert offer.total_discount == 150
+
+        refund = RefundFactory(order=order, user=UserFactory())
+        refund.lines.first().delete()
+
+        with mock.patch.object(models, 'revoke_fulfillment_for_refund') as mock_revoke:
+            mock_revoke.return_value = True
+            self.assertTrue(refund.approve())
+
+        offer.refresh_from_db()
+
+        assert offer.status == ConditionalOffer.CONSUMED
+        assert offer.total_discount == 150
 
     def test_approve_payment_error(self):
         """
