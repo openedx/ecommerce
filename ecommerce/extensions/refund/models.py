@@ -202,21 +202,23 @@ class Refund(StatusMixin, TimeStampedModel):
         applied to each line. We also don't know if partial refunds count as 1 application & order.
         Note that there has not been an order with partial refund that uses enterprise offers currently.
         """
-        if self.lines.count() != self.order.lines.count():
-            logger.error(
-                "[Enterprise Offer Refund] Refund %d has %d lines, but order %d has %d lines,"
-                "enterprise offer cannot be automatically credited.",
-                self.id,
-                self.lines.count(),
-                self.order.id,
-                self.order.lines.count()
-            )
-            return
-
         try:
             for discount in self.order.discounts.all():
                 offer = discount.offer
+
                 if offer.offer_type == ConditionalOffer.SITE and offer.condition.enterprise_customer_uuid:
+
+                    if self.lines.count() != self.order.lines.count():
+                        logger.error(
+                            "[Enterprise Offer Refund] Refund %d has %d lines, but order %d has %d lines,"
+                            "enterprise offer cannot be automatically credited.",
+                            self.id,
+                            self.lines.count(),
+                            self.order.id,
+                            self.order.lines.count()
+                        )
+                        return
+
                     amount_discounted = discount.amount
                     frequency = discount.frequency
 
