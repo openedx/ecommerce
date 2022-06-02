@@ -1,7 +1,7 @@
 
 
-import httpretty
 import mock
+import responses
 from django.conf import settings
 from django.template import Context, Template
 from oscar.core.loading import get_model
@@ -16,7 +16,6 @@ Benefit = get_model('offer', 'Benefit')
 TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 
 
-@httpretty.activate
 class EnterpriseTemplateTagsTests(EnterpriseServiceMockMixin, CouponMixin, TestCase):
     def setUp(self):
         super(EnterpriseTemplateTagsTests, self).setUp()
@@ -24,6 +23,7 @@ class EnterpriseTemplateTagsTests(EnterpriseServiceMockMixin, CouponMixin, TestC
         # Enable enterprise functionality
         toggle_switch(settings.ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH, True)
 
+    @responses.activate
     def test_enterprise_customer_for_voucher(self):
         """
         Verify that enterprise_customer_for_voucher assignment tag returns correct

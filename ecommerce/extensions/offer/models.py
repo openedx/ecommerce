@@ -1,6 +1,7 @@
 import datetime
 import logging
 import re
+from urllib.parse import urljoin
 
 import boto3
 from botocore.exceptions import ClientError
@@ -25,9 +26,8 @@ from oscar.apps.offer.abstract_models import (
 )
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
+from requests.exceptions import RequestException, Timeout
 from simple_history.models import HistoricalRecords
-from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
@@ -141,14 +141,24 @@ class Benefit(AbstractBenefit):
 
             if course_run_ids or course_uuids:
                 # Hit Discovery Service to determine if remaining courses and runs are in the range.
+                api_client = site.siteconfiguration.oauth_api_client
+                discovery_api_url = urljoin(
+                    f"{site.siteconfiguration.discovery_api_url}/",
+                    "catalog/query_contains/"
+                )
                 try:
-                    response = site.siteconfiguration.discovery_api_client.catalog.query_contains.get(
-                        course_run_ids=','.join([metadata['id'] for metadata in course_run_ids]),
-                        course_uuids=','.join([metadata['id'] for metadata in course_uuids]),
-                        query=query,
-                        partner=partner_code
+                    response = api_client.get(
+                        discovery_api_url,
+                        params={
+                            "course_run_ids": ','.join([metadata['id'] for metadata in course_run_ids]),
+                            "course_uuids": ','.join([metadata['id'] for metadata in course_uuids]),
+                            "query": query,
+                            "partner": partner_code
+                        }
                     )
-                except Exception as err:  # pylint: disable=bare-except
+                    response.raise_for_status()
+                    response = response.json()
+                except (ReqConnectionError, RequestException, Timeout) as err:  # pylint: disable=bare-except
                     logger.exception(
                         '[Code Redemption Failure] Unable to apply benefit because we failed to query the '
                         'Discovery Service for catalog data. '
@@ -481,16 +491,24 @@ class Range(AbstractRange):
         if cached_response.is_found:
             return cached_response.value
 
-        discovery_api_client = request.site.siteconfiguration.discovery_api_client
+        api_client = request.site.siteconfiguration.oauth_api_client
+        discovery_api_url = urljoin(
+            f"{request.site.siteconfiguration.discovery_api_url}/",
+            f"catalogs/{self.course_catalog}/contains/"
+        )
         try:
-            # GET: /api/v1/catalogs/{catalog_id}/contains?course_run_id={course_run_ids}
-            response = discovery_api_client.catalogs(self.course_catalog).contains.get(
-                course_run_id=product.course_id
+            response = api_client.get(
+                discovery_api_url,
+                params={
+                    "course_run_id": product.course_id
+                }
             )
+            response.raise_for_status()
+            response = response.json()
 
             TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             return response
-        except (ReqConnectionError, SlumberBaseException, Timeout) as exc:
+        except (ReqConnectionError, RequestException, Timeout) as exc:
             logger.exception('[Code Redemption Failure] Unable to connect to the Discovery Service '
                              'for catalog contains endpoint. '
                              'Product: %s, Message: %s, Range: %s', product.id, exc, self.id)

@@ -1310,8 +1310,10 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
 
     def get_enterprise_catalog_content_metadata_url(self, obj):
         uuid = self.get_enterprise_customer_catalog(obj)
-        return urljoin(settings.ENTERPRISE_CATALOG_API_URL,
-                       'enterprise-catalogs/' + str(uuid) + '/get_content_metadata') if uuid else ''
+        return urljoin(
+            f"{settings.ENTERPRISE_CATALOG_API_URL}/",
+            f"enterprise-catalogs/{str(uuid)}/get_content_metadata"
+        ) if uuid else ''
 
     def get_enterprise_customer(self, obj):
         """ Get the Enterprise Customer attached to a coupon. """

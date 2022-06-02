@@ -2,11 +2,11 @@
 
 import logging
 import time
+from urllib.parse import urljoin
 
 import dateutil
+import requests
 from django.core.management import BaseCommand, CommandError
-from edx_rest_api_client.client import EdxRestApiClient
-from slumber.exceptions import HttpClientError
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
@@ -88,7 +88,9 @@ class Command(BaseCommand):
             return courses_enrollment, api_response['pagination'].get('next', None)
 
         querystring = {'page_size': 50}
-        api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
+
+        api_url = urljoin(get_lms_url('api/courses/v1/'), 'courses')
+
         course_enrollments = {}
 
         page = 0
@@ -98,9 +100,10 @@ class Command(BaseCommand):
             page += 1
             querystring['page'] = page
             try:
-                response = api.courses().get(**querystring)
+                response = requests.get(api_url, params=querystring)
+                response.raise_for_status()
                 throttling_attempts = 0
-            except HttpClientError as exc:
+            except requests.exceptions.HTTPError as exc:
                 # this is a known limitation; If we get HTTP429, we need to pause execution for a few seconds
                 # before re-requesting the data. raise any other errors
                 if exc.response.status_code == 429 and throttling_attempts < self.max_tries:
@@ -114,6 +117,6 @@ class Command(BaseCommand):
                     logger.info('Retrying [%d]...', throttling_attempts)
                     continue
                 raise
-            enrollment_info, next_page = _parse_response(response)
+            enrollment_info, next_page = _parse_response(response.json())
             course_enrollments.update(enrollment_info)
         return course_enrollments

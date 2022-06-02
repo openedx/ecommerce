@@ -13,14 +13,14 @@ from django.db.models import Q
 from django.utils.decorators import method_decorator
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 from oscar.core.loading import get_class, get_model
-from requests.exceptions import ConnectionError, Timeout  # pylint: disable=redefined-builtin
+from requests.exceptions import ConnectionError  # pylint: disable=redefined-builtin
+from requests.exceptions import HTTPError, RequestException, Timeout
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import DjangoModelPermissions, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from slumber.exceptions import HttpServerError, SlumberBaseException
 
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_run_detail
@@ -281,7 +281,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         # check if an order already exists with the requested data
         try:
             order_line = self.existing_purchased_line(seat_product, learner_user, request_site)
-        except (SlumberBaseException, ConnectionError, Timeout, HttpServerError, AttributeError) as ex:
+        except (RequestException, ConnectionError, Timeout, HTTPError, AttributeError) as ex:
             logger.exception(
                 "Could not access existing purchased line. User: %s, Site: %s, course_run_key: %s, message: %s",
                 learner_user,

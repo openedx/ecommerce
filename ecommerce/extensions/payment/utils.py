@@ -1,5 +1,6 @@
 import logging
 import re
+from urllib.parse import urljoin
 
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
@@ -124,7 +125,9 @@ def embargo_check(user, site, products):
         }
 
         try:
-            response = site.siteconfiguration.embargo_api_client.course_access.get(**params)
+            api_client = site.siteconfiguration.oauth_api_client
+            api_url = urljoin(f"{site.siteconfiguration.embargo_api_url}/", "course_access/")
+            response = api_client.get(api_url, params=params).json()
             return response.get('access', True)
         except:  # pylint: disable=bare-except
             # We are going to allow purchase if the API is un-reachable.

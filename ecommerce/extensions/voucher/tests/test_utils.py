@@ -4,7 +4,7 @@
 import uuid
 
 import ddt
-import httpretty
+import responses
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import override_settings
@@ -59,7 +59,6 @@ VOUCHER_CODE_LENGTH = 1
 
 
 @ddt.ddt
-@httpretty.activate
 class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
@@ -122,6 +121,11 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             'start_datetime': datetime.datetime.now() - datetime.timedelta(days=1),
             'voucher_type': Voucher.SINGLE_USE
         }
+        responses.start()
+
+    def tearDown(self):
+        super().tearDown()
+        responses.reset()
 
     def create_benefits(self):
         """

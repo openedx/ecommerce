@@ -27,6 +27,10 @@ SESSION_COOKIE_SECURE = False
 COMPRESS_OFFLINE = False
 COMPRESS_ENABLED = False
 
+BACKEND_SERVICE_EDX_OAUTH2_KEY = "ecommerce-backend-service-key"
+BACKEND_SERVICE_EDX_OAUTH2_SECRET = "ecommerce-backend-service-secret"
+BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://edx.devstack.lms:18000/oauth2"
+
 JWT_AUTH.update({
     'JWT_ISSUER': 'http://localhost:18000/oauth2',
     'JWT_ISSUERS': [{
@@ -56,7 +60,7 @@ CORS_ALLOW_HEADERS = corsheaders_default_headers + (
 )
 CORS_ALLOW_CREDENTIALS = True
 
-ENTERPRISE_CATALOG_API_URL = urljoin(ENTERPRISE_CATALOG_SERVICE_URL, 'api/v1/')
+ENTERPRISE_CATALOG_API_URL = urljoin(f"{ENTERPRISE_CATALOG_SERVICE_URL}/", 'api/v1/')
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {

@@ -152,9 +152,9 @@ COMPREHENSIVE_THEME_DIRS = [
 
 DEFAULT_SITE_THEME = "test-theme"
 
-ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')
+ENTERPRISE_API_URL = urljoin(f"{ENTERPRISE_SERVICE_URL}/", 'api/v1/')
 
-ENTERPRISE_CATALOG_API_URL = urljoin(ENTERPRISE_CATALOG_SERVICE_URL, 'api/v1/')
+ENTERPRISE_CATALOG_API_URL = urljoin(f"{ENTERPRISE_CATALOG_SERVICE_URL}/", 'api/v1/')
 
 # Don't bother sending fake events to Segment. Doing so creates unnecessary threads.
 SEND_SEGMENT_EVENTS = False

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-import json
 from urllib.parse import urljoin
 
-import httpretty
 import mock
+import responses
 from django.test import RequestFactory
 
 from ecommerce.extensions.api.authentication import BearerAuthentication
@@ -24,7 +23,7 @@ class AccessTokenMixin:
             'given_name': 'Jane',
         }
         url = '{}/user_info/'.format(self.site.siteconfiguration.oauth2_provider_url)
-        httpretty.register_uri(httpretty.GET, url, body=json.dumps(data), content_type=self.JSON, status=status)
+        responses.add(responses.GET, url, json=data, content_type=self.JSON, status=status)
 
 
 class BearerAuthenticationTests(TestCase):
@@ -47,5 +46,5 @@ class BearerAuthenticationTests(TestCase):
         request = self.create_request()
         with mock.patch('ecommerce.extensions.order.utils.get_current_request', mock.Mock(return_value=request)):
             actual = self.auth.get_user_info_url()
-            expected = urljoin(self.site.siteconfiguration.lms_url_root, '/oauth2/user_info/')
+            expected = urljoin(f"{self.site.siteconfiguration.lms_url_root}/", "oauth2/user_info/")
             self.assertEqual(actual, expected)

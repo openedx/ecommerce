@@ -8,8 +8,8 @@ from collections import namedtuple
 from decimal import Decimal
 
 import ddt
-import httpretty
 import mock
+import responses
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
@@ -299,7 +299,7 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 401)
 
-    @httpretty.activate
+    @responses.activate
     def test_oauth2_authentication(self):
         """Verify clients can authenticate with OAuth 2.0."""
         auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
@@ -436,7 +436,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_site_offer(self):
         """ Verify successful basket calculation with a site offer """
 
@@ -459,7 +459,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_program_offer_unrelated_bundle_id(self):
         """
         Test that if bundle id is present and skus do not belong to this bundle,
@@ -483,7 +483,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_program_offer_with_bundle_id(self):
         """
         Test that if a program offer is present and bundle id is provided,
@@ -503,7 +503,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_program_offer_with_no_bundle_id(self):
         """
         Test that if a program offer is present and bundle id is not provided,
@@ -563,19 +563,19 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_by_staff_user_no_username(self):
         """Verify a staff user passing no username gets a response"""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_by_staff_user_own_username(self):
         """Verify a staff user passing their own username gets a response about themself"""
         response = self.client.get(self.url + '&username={username}'.format(username=self.user.username))
         self.assertEqual(response.status_code, 200)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_missing_lms_user_id(self):
         """Verify a staff user passing a username for a user with a missing LMS user id fails"""
         user_without_id = self.create_user(lms_user_id=None)
@@ -583,14 +583,14 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 400)
 
     @override_switch(ALLOW_MISSING_LMS_USER_ID, active=True)
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_missing_lms_user_id_allow_missing(self):
         """Verify a staff user passing a username for a user with a missing LMS user id succeeds if the switch is on"""
         user_without_id = self.create_user(lms_user_id=None)
         response = self.client.get(self.url + '&username={username}'.format(username=user_without_id.username))
         self.assertEqual(response.status_code, 200)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     def test_basket_calculate_by_staff_user_other_username(self, mock_get_lms_resource_for_user):
         """Verify a staff user passing a valid username gets a response about the other user"""
@@ -610,7 +610,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     def test_basket_calculate_by_staff_user_other_username_non_atomic(
@@ -637,7 +637,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     def test_basket_calculate_by_staff_user_other_username_non_atomic_exception(
@@ -684,7 +684,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
 
         return products, url
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     def test_basket_calculate_anonymous_skip_lms(self, mock_get_lms_resource_for_user):
         """Verify a call for an anonymous user skips calls to LMS for entitlements and enrollments"""
@@ -704,7 +704,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_does_not_call_tracking_events(self):
         """
         Verify successful basket calculation does NOT track any events
@@ -797,7 +797,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertTrue(mock_calculate_basket_atomic.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     def test_no_query_params_log(self, mock_logger):
         """
@@ -812,7 +812,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_logger.called)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket_atomic')
     def test_conflicting_user_anonymous_params(self, mock_calculate_basket):
         """
@@ -828,7 +828,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(mock_calculate_basket.called)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket_atomic')
     def test_basket_calculate_with_anonymous_caching_disabled(self, mock_calculate_basket_atomic):
         """Verify a request made by a staff user is not cached"""
@@ -847,7 +847,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertTrue(mock_calculate_basket_atomic.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
     def test_basket_calculate_by_staff_user_invalid_username(self, mock_get_lms_resource_for_user, mock_logger):
@@ -884,7 +884,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
             self.assertTrue(mock_logger.called)
             self.assertEqual(response.data, expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_username_by_nonstaff_user_own_username(self):
         """Verify a non-staff user passing their own username gets a valid response"""
         nonstaffuser = self.create_user(is_staff=False)
@@ -893,7 +893,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.url + '&username={username}'.format(username=nonstaffuser.username))
         self.assertEqual(response.status_code, 200)
 
-    @httpretty.activate
+    @responses.activate
     def test_basket_calculate_by_nonstaff_user_other_username(self):
         """Verify a non-staff user passing a different username is forbidden"""
         nonstaffuser = self.create_user(is_staff=False)

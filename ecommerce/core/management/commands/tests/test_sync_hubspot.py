@@ -10,8 +10,9 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from factory.django import get_model
 from mock import patch
-from slumber.exceptions import HttpClientError
+from requests.exceptions import HTTPError
 
+from ecommerce.core.management.commands.sync_hubspot import EXPECTED_METHODS
 from ecommerce.core.management.commands.sync_hubspot import Command as sync_command
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
@@ -132,7 +133,7 @@ class TestSyncHubspotCommand(TestCase):
         with patch.object(sync_command, '_install_hubspot_ecommerce_bridge', return_value=True), \
                 patch.object(sync_command, '_define_hubspot_ecommerce_settings', return_value=True):
             # if _upsert_hubspot_objects raises an exception
-            mocked_hubspot.side_effect = HttpClientError
+            mocked_hubspot.side_effect = HTTPError
             output = self._get_command_output(is_stderr=True)
             self.assertIn('An error occurred while upserting', output)
 
@@ -145,7 +146,7 @@ class TestSyncHubspotCommand(TestCase):
             output = self._get_command_output()
             self.assertIn('Successfully installed hubspot ecommerce bridge', output)
             # if _install_hubspot_ecommerce_bridge raises an exception
-            mocked_hubspot.side_effect = HttpClientError
+            mocked_hubspot.side_effect = HTTPError
             output = self._get_command_output(is_stderr=True)
             self.assertIn('An error occurred while installing hubspot ecommerce bridge', output)
 
@@ -158,7 +159,7 @@ class TestSyncHubspotCommand(TestCase):
             output = self._get_command_output()
             self.assertIn('Successfully defined the hubspot ecommerce settings', output)
             # if _define_hubspot_ecommerce_settings raises an exception
-            mocked_hubspot.side_effect = HttpClientError
+            mocked_hubspot.side_effect = HTTPError
             output = self._get_command_output(is_stderr=True)
             self.assertIn('An error occurred while defining hubspot ecommerce settings', output)
 
@@ -183,7 +184,7 @@ class TestSyncHubspotCommand(TestCase):
                 output
             )
             # if _call_sync_errors_messages_endpoint raises an exception
-            mocked_hubspot.side_effect = HttpClientError
+            mocked_hubspot.side_effect = HTTPError
             output = self._get_command_output(is_stderr=True)
             self.assertIn(
                 'An error occurred while getting the error syncing message',
@@ -201,7 +202,7 @@ class TestSyncHubspotCommand(TestCase):
         6. Upsert(LINE ITEM)
         7. Sync-error
         """
-        with patch('ecommerce.core.management.commands.sync_hubspot.EdxRestApiClient') as mock_client:
+        with patch('ecommerce.core.management.commands.sync_hubspot.requests.request') as mock_client:
             output = self._get_command_output()
             self.assertEqual(mock_client.call_count, 7)
             self.assertIn('Successfully installed hubspot ecommerce bridge', output)
@@ -215,7 +216,21 @@ class TestSyncHubspotCommand(TestCase):
         with patch.object(sync_command, '_install_hubspot_ecommerce_bridge', return_value=True), \
                 patch.object(sync_command, '_define_hubspot_ecommerce_settings', return_value=True), \
                 patch.object(sync_command, '_get_unsynced_carts') as mocked_get_unsynced_carts:
-            mocked_get_unsynced_carts.side_effect = HttpClientError
+            mocked_get_unsynced_carts.side_effect = HTTPError
             with self.assertRaises(CommandError):
                 output = self._get_command_output(is_stderr=True)
                 self.assertIn('Command failed with ', output)
+
+    def test_hubspot_endpoint_unsupported_method(self):
+        """
+        Test validation error appears when trying to use unsupported method.
+        """
+        unsupported_method = "DELETE"
+        self.assertNotIn(unsupported_method, EXPECTED_METHODS)
+        command = sync_command()
+        with self.assertRaises(ValueError):
+            command._hubspot_endpoint(  # pylint: disable=W0212
+                hubspot_object="fake_obj",
+                api_url="fake_url",
+                method=unsupported_method
+            )

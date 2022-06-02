@@ -3,7 +3,7 @@
 import json
 
 import ddt
-import httpretty
+import responses
 from django.conf import settings
 from django.urls import reverse
 from edx_django_utils.cache import TieredCache
@@ -64,7 +64,6 @@ class CourseAppViewTests(TestCase):
 
         /api/credit/v1/providers
         """
-        self.assertTrue(httpretty.is_enabled())
 
         providers = [
             {
@@ -79,18 +78,15 @@ class CourseAppViewTests(TestCase):
         providers.sort(key=lambda provider: provider['display_name'])
         provider_json = json.dumps(providers)
         url = get_lms_url('/api/credit/v1/providers/')
-        httpretty.register_uri(httpretty.GET, url, body=provider_json, content_type='application/json')
+        responses.add(responses.GET, url, body=provider_json, content_type='application/json')
 
         return providers, provider_json
 
     def mock_credit_api_error(self):
         """ Mock an error response when calling the Credit API providers endpoint. """
 
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
-            return 500, headers, 'Failure!'
-
         url = get_lms_url('/api/credit/v1/providers/')
-        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+        responses.add(responses.GET, url, body='Failure!', content_type='application/json', status=500)
 
     def test_login_required(self):
         """ Users are required to login before accessing the view. """
@@ -106,7 +102,7 @@ class CourseAppViewTests(TestCase):
         self.assertIsNotNone(user.access_token)
         self.client.login(username=user.username, password=self.password)
 
-    @httpretty.activate
+    @responses.activate
     def test_staff_user_required(self):
         """ Verify the view is only accessible to staff users. """
         self.mock_access_token_response()
@@ -121,7 +117,7 @@ class CourseAppViewTests(TestCase):
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
 
-    @httpretty.activate
+    @responses.activate
     def test_credit_providers_in_context(self):
         """ Verify the context data includes a list of credit providers. """
         self._create_and_login_staff_user()
@@ -137,7 +133,7 @@ class CourseAppViewTests(TestCase):
             json.loads(provider_json),
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_credit_providers_in_context_cached(self):
         """ Verify the cached context data includes a list of credit providers. """
         self._create_and_login_staff_user()
@@ -163,7 +159,7 @@ class CourseAppViewTests(TestCase):
             )
             self.assertEqual(mocked_set_all_tiers.call_count, 2)
 
-    @httpretty.activate
+    @responses.activate
     def test_credit_api_failure(self):
         """ Verify the view logs an error if it fails to retrieve credit providers. """
         # Setup staff user with an OAuth 2 access token
@@ -178,7 +174,7 @@ class CourseAppViewTests(TestCase):
             expected = 'Failed to retrieve credit providers!'
             logger.check((LOGGER_NAME, 'ERROR', expected))
 
-    @httpretty.activate
+    @responses.activate
     def test_missing_access_token(self):
         """ Verify the view logs a warning if the user has no access token. """
         user = self.create_user(is_staff=True)

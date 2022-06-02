@@ -7,7 +7,7 @@ import re
 import uuid
 from calendar import timegm
 
-import httpretty
+import responses
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
@@ -81,9 +81,6 @@ class CurrentSiteDjangoStrategyTests(TestCase):
 
     def mock_access_token_jwt_response(self, user, status=200):
         """ Mock the response from the OAuth provider's access token endpoint. """
-        assert httpretty.is_enabled(), 'httpretty must be enabled to mock the access token response.'
-
-        # Use a regex to account for the optional trailing slash
         url = '{root}/access_token/?'.format(root=self.site.siteconfiguration.oauth2_provider_url)
         url = re.compile(url)
 
@@ -93,11 +90,11 @@ class CurrentSiteDjangoStrategyTests(TestCase):
             'expires_in': 3600,
         }
         body = json.dumps(data)
-        httpretty.register_uri(httpretty.POST, url, body=body, content_type=CONTENT_TYPE, status=status)
+        responses.add(responses.POST, url, body=body, content_type=CONTENT_TYPE, status=status)
 
         return token
 
-    @httpretty.activate
+    @responses.activate
     def test_authentication(self):
         """ Returning users should be able to re-authenticate to the same acccount, rather than get a new account with
         a UUID. This validates the fix made by https://github.com/python-social-auth/social-core/pull/74.

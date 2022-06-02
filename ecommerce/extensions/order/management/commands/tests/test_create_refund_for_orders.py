@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import json
 
-import httpretty
+import responses
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError, call_command
 from django.urls import reverse
@@ -20,7 +20,6 @@ Refund = get_model('refund', 'Refund')
 User = get_user_model()
 
 
-@httpretty.activate
 class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
     """
     Test the `create_refund_for_orders` command.
@@ -50,6 +49,7 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
                 'course_uuid': '620a5ce5-6ff4-4b2b-bea1-a273c6920ae5'
             }
         )
+        responses.start()
 
     def build_jwt_header(self, user):
         """

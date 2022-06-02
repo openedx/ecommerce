@@ -3,7 +3,7 @@
 import uuid
 
 import ddt
-import httpretty
+import responses
 from django.conf import settings
 from django.http.response import HttpResponse
 from django.test import RequestFactory
@@ -48,13 +48,13 @@ TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 
 
 @ddt.ddt
-@httpretty.activate
 class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
     def setUp(self):
         super(EnterpriseUtilsTests, self).setUp()
         self.learner = self.create_user(is_staff=True)
         self.client.login(username=self.learner.username, password=self.password)
 
+    @responses.activate
     def test_get_enterprise_customers(self):
         """
         Verify that "get_enterprise_customers" returns an appropriate response from the
@@ -66,6 +66,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(response[0]['name'], "Enterprise Customer 1")
         self.assertEqual(response[1]['name'], "Enterprise Customer 2")
 
+    @responses.activate
     def test_get_enterprise_customer(self):
         """
         Verify that "get_enterprise_customer" returns an appropriate response from the
@@ -103,6 +104,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         )
     )
     @ddt.unpack
+    @responses.activate
     def test_post_enterprise_customer_user(self, mock_helpers, expected_return):
         """
         Verify that "get_enterprise_customer" returns an appropriate response from the
@@ -120,7 +122,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
 
         self.assertDictContainsSubset(expected_return, response)
 
-    @httpretty.activate
+    @responses.activate
     def test_ecu_needs_consent(self):
         opts = {
             'ec_uuid': 'fake-uuid',
@@ -195,6 +197,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
 
         self.assertNotIn(settings.ENTERPRISE_CUSTOMER_COOKIE_NAME, result.cookies)
 
+    @responses.activate
     def test_get_enterprise_catalog(self):
         """
         Verify that "get_enterprise_catalog" returns an appropriate response from the
@@ -263,6 +266,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         mock_get_jwt_uuid.return_value = 'my-uuid'
         assert get_enterprise_id_for_user('some-site', self.learner) == 'my-uuid'
 
+    @responses.activate
     def test_get_enterprise_customer_catalogs(self):
         """
         Verify that "get_enterprise_customer_catalogs" works as expected with and without caching.
@@ -284,6 +288,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
             self.assertEqual(response, cached_response)
             self.assertEqual(mocked_set_all_tiers.call_count, 2)
 
+    @responses.activate
     def test_get_enterprise_customer_catalogs_with_exception(self):
         """
         Verify that "get_enterprise_customer_catalogs" return default response on exception.
@@ -343,6 +348,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(expected_response, updated_response)
 
     @ddt.data(0, 100)
+    @responses.activate
     def test_get_enterprise_customer_from_enterprise_offer(self, discount_value):
         """
         Verify that "get_enterprise_customer_from_enterprise_offer" returns `None` if expected conditions are not met.

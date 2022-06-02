@@ -8,8 +8,8 @@ from decimal import Decimal
 from urllib.parse import urlencode
 
 import ddt
-import httpretty
 import mock
+import responses
 from django.conf import settings
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
@@ -148,10 +148,10 @@ class EnrollmentFulfillmentModuleTests(
         supported_lines = EnrollmentFulfillmentModule().get_supported_lines(list(self.order.lines.all()))
         self.assertEqual(1, len(supported_lines))
 
-    @httpretty.activate
+    @responses.activate
     def test_enrollment_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill enrollments."""
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=200, json={}, content_type=JSON)
         # Attempt to enroll.
         with LogCapture(LOGGER_NAME) as logger:
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
@@ -176,8 +176,8 @@ class EnrollmentFulfillmentModuleTests(
 
         self.assertEqual(LINE.COMPLETE, line.status)
 
-        last_request = httpretty.last_request()
-        actual_body = json.loads(last_request.body.decode('utf-8'))
+        last_request = responses.calls[-1].request
+        actual_body = json.loads(last_request.body)
         actual_headers = last_request.headers
 
         expected_body = {
@@ -209,21 +209,21 @@ class EnrollmentFulfillmentModuleTests(
         self.assertDictContainsSubset(expected_headers, actual_headers)
         self.assertEqual(expected_body, actual_body)
 
-    @httpretty.activate
+    @responses.activate
     def test_enrollment_module_fulfill_order_with_discount_no_voucher(self):
         """
         Test that components of the Fulfillment Module which trigger on the presence of a voucher do
         not cause failures in cases where a discount does not have a voucher included
         (such as with a Conditional Offer)
         """
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
         self.order.discounts.create()
         __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
 
-    @httpretty.activate
+    @responses.activate
     def test_enrollment_module_fulfill_order_enterprise_discount_calculation(self):
         """
         Verify an orderline is updated with calculated enterprise discount data
@@ -231,7 +231,7 @@ class EnrollmentFulfillmentModuleTests(
         customer and that enterprise offer has `enterprise_contract_metadata`
         associated with it.
         """
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
 
         self.create_order_offer_discount(
@@ -263,7 +263,7 @@ class EnrollmentFulfillmentModuleTests(
         self.assertIsInstance(lines[0].effective_contract_discount_percentage, Decimal)
         self.assertIsInstance(lines[0].effective_contract_discounted_price, Decimal)
 
-    @httpretty.activate
+    @responses.activate
     def test_enrollment_module_fulfill_order_no_enterprise_discount_calculation(self):
         """
         Verify an orderline is NOT updated with calculated enterprise discount data
@@ -271,7 +271,7 @@ class EnrollmentFulfillmentModuleTests(
         customer and that enterprise offer has NO `enterprise_contract_metadata`
         associated with it.
         """
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
 
         # Creating order discount without EnterpriseContractMetadata object.
@@ -318,20 +318,20 @@ class EnrollmentFulfillmentModuleTests(
         EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         self.assertEqual(LINE.FULFILLMENT_TIMEOUT_ERROR, self.order.lines.all()[0].status)
 
-    @httpretty.activate
+    @responses.activate
     @ddt.data(None, '{"message": "Oops!"}')
     def test_enrollment_module_server_error(self, body):
         """Test that lines receive a server-side error status if a server-side error occurs during fulfillment."""
         # NOTE: We are testing for cases where the response does and does NOT have data. The module should be able
         # to handle both cases.
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=500, body=body, content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=500, body=body, content_type=JSON)
         EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         self.assertEqual(LINE.FULFILLMENT_SERVER_ERROR, self.order.lines.all()[0].status)
 
-    @httpretty.activate
+    @responses.activate
     def test_revoke_product(self):
         """ The method should call the Enrollment API to un-enroll the student, and return True. """
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=200, json={}, content_type=JSON)
         line = self.order.lines.first()
 
         with LogCapture(LOGGER_NAME) as logger:
@@ -353,8 +353,8 @@ class EnrollmentFulfillmentModuleTests(
                 )
             )
 
-        last_request = httpretty.last_request()
-        actual_body = json.loads(last_request.body.decode('utf-8'))
+        last_request = responses.calls[-1].request
+        actual_body = json.loads(last_request.body)
         actual_headers = last_request.headers
 
         expected_body = {
@@ -374,7 +374,7 @@ class EnrollmentFulfillmentModuleTests(
         self.assertDictContainsSubset(expected_headers, actual_headers)
         self.assertEqual(expected_body, actual_body)
 
-    @httpretty.activate
+    @responses.activate
     def test_revoke_product_expected_error(self):
         """
         If the Enrollment API responds with an expected error, the method should log that revocation was
@@ -382,7 +382,7 @@ class EnrollmentFulfillmentModuleTests(
         """
         message = 'Enrollment mode mismatch: active mode=x, requested mode=y. Won\'t deactivate.'
         body = '{{"message": "{}"}}'.format(message)
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=400, body=body, content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=400, body=body, content_type=JSON)
 
         line = self.order.lines.first()
         logger_name = 'ecommerce.extensions.fulfillment.modules'
@@ -393,12 +393,12 @@ class EnrollmentFulfillmentModuleTests(
                 (logger_name, 'INFO', 'Skipping revocation for line [%d]: %s' % (line.id, message))
             )
 
-    @httpretty.activate
+    @responses.activate
     def test_revoke_product_unexpected_error(self):
         """ If the Enrollment API responds with a non-200 status, the method should log an error and return False. """
         message = 'Meh.'
         body = '{{"message": "{}"}}'.format(message)
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=500, body=body, content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=500, body=body, content_type=JSON)
 
         line = self.order.lines.first()
         logger_name = 'ecommerce.extensions.fulfillment.modules'
@@ -409,7 +409,7 @@ class EnrollmentFulfillmentModuleTests(
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [%d]: %s' % (line.id, message))
             )
 
-    @httpretty.activate
+    @responses.activate
     def test_revoke_product_unknown_exception(self):
         """
         If an exception is raised while contacting the Enrollment API, the method should log an error and return False.
@@ -418,7 +418,7 @@ class EnrollmentFulfillmentModuleTests(
         def request_callback(_method, _uri, _headers):
             raise Timeout
 
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), body=request_callback)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), body=request_callback)
         line = self.order.lines.first()
         logger_name = 'ecommerce.extensions.fulfillment.modules'
 
@@ -429,12 +429,12 @@ class EnrollmentFulfillmentModuleTests(
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [{}].'.format(line.id))
             )
 
-    @httpretty.activate
+    @responses.activate
     def test_credit_enrollment_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill enrollments."""
         # Create the credit certificate type and order for the credit certificate type.
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=200, json={}, content_type=JSON)
 
         # Attempt to enroll.
         with LogCapture(LOGGER_NAME) as logger:
@@ -460,7 +460,7 @@ class EnrollmentFulfillmentModuleTests(
 
         self.assertEqual(LINE.COMPLETE, line.status)
 
-        actual = json.loads(httpretty.last_request().body.decode('utf-8'))
+        actual = json.loads(responses.calls[-1].request.body)
         expected = {
             'user': self.order.user.username,
             'is_active': True,
@@ -524,12 +524,12 @@ class EnrollmentFulfillmentModuleTests(
         self.prepare_basket_with_voucher()
         self.assertEqual(self.order.basket.total_excl_tax, 0.00)
 
-    @httpretty.activate
+    @responses.activate
     def test_voucher_usage_with_program(self):
         """
         Test that using a voucher with a program basket results in a fulfilled order.
         """
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        responses.add(responses.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
         program_uuid = uuid.uuid4()
         self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
@@ -764,15 +764,15 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         purchased_by_organization = EnrollmentCodeFulfillmentModule().determine_if_enterprise_purchase(self.order)
         self.assertEqual(False, purchased_by_organization)
 
-    @httpretty.activate
+    @responses.activate
     def test_send_to_hubspot_happy_path(self):
         """ Test for constructing and sending the HubSpot request. Verifies expected logs are appearing. """
         order = self.create_order_with_billing_address()
 
         self.set_hubspot_settings()
         hubspot_url = self.format_hubspot_request_url()
-        httpretty.register_uri(
-            httpretty.POST,
+        responses.add(
+            responses.POST,
             hubspot_url,
             content_type='application/x-www-form-urlencoded',
             status=204
@@ -836,7 +836,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                 )
             )
 
-    @httpretty.activate
+    @responses.activate
     @override_switch(HUBSPOT_FORMS_INTEGRATION_ENABLE, active=True)
     def test_fulfill_product_hubspot_waffle_switch_enabled(self):
         """ Test that verifies if the HubSpot feature is enabled and the order contains the right information we
@@ -847,8 +847,8 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
 
         self.set_hubspot_settings()
         hubspot_url = self.format_hubspot_request_url()
-        httpretty.register_uri(
-            httpretty.POST,
+        responses.add(
+            responses.POST,
             hubspot_url,
             content_type='application/x-www-form-urlencoded',
             status=204
@@ -953,7 +953,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscount
         supported_lines = CourseEntitlementFulfillmentModule().get_supported_lines(lines)
         self.assertListEqual(supported_lines, list(lines))
 
-    @httpretty.activate
+    @responses.activate
     @ddt.unpack
     @ddt.data(
         # Test with voucher order discount
@@ -986,10 +986,10 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscount
     ):
         """ Test to ensure we can properly fulfill course entitlements with order's voucher discount """
         self.mock_access_token_response()
-        httpretty.register_uri(
-            httpretty.POST,
+        responses.add(
+            responses.POST,
             get_lms_entitlement_api_url() + 'entitlements/',
-            status=200, body=json.dumps(self.return_data),
+            status=200, json=self.return_data,
             content_type='application/json'
         )
         getattr(self, create_order_discount_callback)(
@@ -1038,16 +1038,24 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscount
                     expected_effective_contract_discounted_price
                 )
 
-    @httpretty.activate
+    @responses.activate
     def test_entitlement_module_revoke(self):
         """ Test to revoke a Course Entitlement. """
         self.mock_access_token_response()
-        httpretty.register_uri(httpretty.POST, get_lms_entitlement_api_url() +
-                               'entitlements/', status=200, body=json.dumps(self.return_data),
-                               content_type='application/json')
+        responses.add(
+            responses.POST,
+            get_lms_entitlement_api_url() + 'entitlements/',
+            status=200,
+            json=self.return_data,
+            content_type='application/json'
+        )
 
-        httpretty.register_uri(httpretty.DELETE, get_lms_entitlement_api_url() +
-                               'entitlements/111-222-333/', status=200, body={}, content_type='application/json')
+        responses.add(
+            responses.DELETE,
+            get_lms_entitlement_api_url() + 'entitlements/111-222-333/',
+            status=200,
+            content_type='application/json'
+        )
 
         line = self.order.lines.first()
 
@@ -1073,25 +1081,35 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscount
                 )
             )
 
-    @httpretty.activate
+    @responses.activate
     def test_entitlement_module_revoke_error(self):
         """ Test to handle an error when revoking a Course Entitlement. """
         self.mock_access_token_response()
 
-        httpretty.register_uri(httpretty.DELETE, get_lms_entitlement_api_url() +
-                               'entitlements/111-222-333/', status=500, body={}, content_type='application/json')
+        responses.add(
+            responses.DELETE,
+            get_lms_entitlement_api_url() + 'entitlements/111-222-333/',
+            status=500,
+            body={},
+            content_type='application/json'
+        )
 
         line = self.order.lines.first()
 
         self.assertFalse(CourseEntitlementFulfillmentModule().revoke_line(line))
 
-    @httpretty.activate
+    @responses.activate
     def test_entitlement_module_fulfill_unknown_error(self):
         """Test Course Entitlement Fulfillment with exception when posting to LMS."""
 
         self.mock_access_token_response()
-        httpretty.register_uri(httpretty.POST, get_lms_entitlement_api_url() +
-                               'entitlements/', status=408, body={}, content_type='application/json')
+        responses.add(
+            responses.POST,
+            get_lms_entitlement_api_url() + 'entitlements/',
+            status=408,
+            body={},
+            content_type='application/json'
+        )
         logger_name = 'ecommerce.extensions.fulfillment.modules'
 
         line = self.order.lines.first()
@@ -1114,7 +1132,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscount
         logger_name = 'ecommerce.extensions.fulfillment.modules'
 
         line = self.order.lines.first()
-        with mock.patch('edx_rest_api_client.client.EdxRestApiClient',
+        with mock.patch('edx_rest_api_client.client.OAuthAPIClient',
                         side_effect=ReqConnectionError):
             with LogCapture(logger_name) as logger:
                 CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))

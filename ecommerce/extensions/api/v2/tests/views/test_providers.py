@@ -1,9 +1,7 @@
 
 
-import json
-
 import ddt
-import httpretty
+import responses
 from django.urls import reverse
 from rest_framework import status
 
@@ -36,14 +34,14 @@ class ProvidersViewSetTest(TestCase):
             lms_url=self.site.siteconfiguration.build_lms_url('api/credit/v1/providers/'),
             provider=self.provider
         )
-        httpretty.register_uri(
-            httpretty.GET,
+        responses.add(
+            responses.GET,
             provider_url,
-            body=json.dumps(data if data else self.data),
+            json=data if data else self.data,
             content_type='application/json'
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_getting_provider(self):
         """Verify endpoint returns correct provider data."""
         self.mock_access_token_response()
@@ -54,7 +52,7 @@ class ProvidersViewSetTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.json(), ProviderSerializer(self.data).data)
 
-    @httpretty.activate
+    @responses.activate
     def test_getting_provider_with_many_true(self):
         """Verify endpoint returns correct provider data with many True."""
         data = [self.data, self.data]

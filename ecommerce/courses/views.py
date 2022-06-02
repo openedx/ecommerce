@@ -4,14 +4,14 @@ import json
 import logging
 import os
 from io import StringIO
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView, View
 from edx_django_utils.cache import TieredCache
-from requests import Timeout
-from slumber.exceptions import SlumberBaseException
+from requests.exceptions import RequestException, Timeout
 
 from ecommerce.core.views import StaffOnlyMixin
 
@@ -46,13 +46,16 @@ class CourseAppView(StaffOnlyMixin, TemplateView):
             return credit_providers_cache_response.value
 
         try:
-            credit_api = self.request.site.siteconfiguration.credit_api_client
-            credit_providers = credit_api.providers.get()
+            client = self.request.site.siteconfiguration.oauth_api_client
+            credit_url = urljoin(f"{self.request.site.siteconfiguration.credit_api_url}/", "providers/")
+            resp = client.get(credit_url)
+            resp.raise_for_status()
+            credit_providers = resp.json()
             credit_providers.sort(key=lambda provider: provider['display_name'])
 
             # Update the cache
             TieredCache.set_all_tiers(key, credit_providers, settings.CREDIT_PROVIDER_CACHE_TIMEOUT)
-        except (SlumberBaseException, Timeout):
+        except (RequestException, Timeout):
             logger.exception('Failed to retrieve credit providers!')
             credit_providers = []
         return credit_providers

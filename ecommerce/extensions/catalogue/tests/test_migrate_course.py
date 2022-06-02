@@ -2,14 +2,13 @@
 
 
 import datetime
-import json
 import logging
 from decimal import Decimal
 from urllib.parse import urlparse
 
-import httpretty
 import mock
 import pytz
+import responses
 from django.core.management import call_command
 from django.test import override_settings
 from oscar.core.loading import get_model
@@ -52,29 +51,27 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
 
     @property
     def commerce_api_url(self):
-        return self.site_configuration.build_lms_url('/api/commerce/v1/courses/{}/'.format(self.course_id))
+        return self.site_configuration.build_lms_url('api/commerce/v1/courses/{}/'.format(self.course_id))
 
     @property
     def course_structure_url(self):
-        return self.site_configuration.build_lms_url('/api/course_structure/v0/courses/{}/'.format(self.course_id))
+        return self.site_configuration.build_lms_url('api/course_structure/v0/courses/{}/'.format(self.course_id))
 
     @property
     def enrollment_api_url(self):
-        return self.site_configuration.build_lms_url('/api/enrollment/v1/course/{}'.format(self.course_id))
+        return self.site_configuration.build_lms_url('api/enrollment/v1/course/{}/'.format(self.course_id))
 
     def _mock_lms_apis(self):
-        self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock LMS API calls.')
-
         # Mock Commerce API
         body = {
             'name': self.course_name,
             'verification_deadline': EXPIRES_STRING,
         }
-        httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
+        responses.add(responses.GET, self.commerce_api_url, json=body, content_type=JSON)
 
         # Mock Course Structure API
         body = {'name': self.course_name}
-        httpretty.register_uri(httpretty.GET, self.course_structure_url, body=json.dumps(body), content_type=JSON)
+        responses.add(responses.GET, self.course_structure_url, json=body, content_type=JSON)
 
         # Mock Enrollment API
         body = {
@@ -82,7 +79,7 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
             'course_modes': [{'slug': mode, 'min_price': price, 'expiration_datetime': EXPIRES_STRING} for
                              mode, price in self.prices.items()]
         }
-        httpretty.register_uri(httpretty.GET, self.enrollment_api_url, body=json.dumps(body), content_type=JSON)
+        responses.add(responses.GET, self.enrollment_api_url, json=body, content_type=JSON)
 
     def assert_stock_record_valid(self, stock_record, seat, price):
         """ Verify the given StockRecord is configured correctly. """
@@ -130,13 +127,13 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
         super(MigratedCourseTests, self).setUp()
         toggle_switch('publish_course_modes_to_lms', True)
-        httpretty.enable()
+        responses.start()
         self.mock_access_token_response()
 
     def tearDown(self):
         super(MigratedCourseTests, self).tearDown()
-        httpretty.disable()
-        httpretty.reset()
+        responses.stop()
+        responses.reset()
 
     def _migrate_course_from_lms(self):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
@@ -173,10 +170,10 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             'name': None,
             'verification_deadline': EXPIRES_STRING,
         }
-        httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
+        responses.add(responses.GET, self.commerce_api_url, json=body, content_type=JSON)
 
         # Mock the Course Structure API
-        httpretty.register_uri(httpretty.GET, self.course_structure_url, body='{}', content_type=JSON)
+        responses.add(responses.GET, self.course_structure_url, body='{}', content_type=JSON)
 
         # Try migrating the course, which should fail.
         try:
@@ -187,8 +184,8 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
                              'Aborting migration. No name is available for {}.'.format(self.course_id))
 
         # Verify the Course Structure API was called.
-        last_request = httpretty.last_request()
-        self.assertEqual(last_request.path, urlparse(self.course_structure_url).path)
+        last_request = responses.calls[-1].request
+        self.assertEqual(last_request.path_url, urlparse(self.course_structure_url).path)
 
     def test_fall_back_to_course_structure(self):
         """
@@ -197,11 +194,11 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         self._mock_lms_apis()
 
         body = {'detail': 'Not found'}
-        httpretty.register_uri(
-            httpretty.GET,
+        responses.replace(
+            responses.GET,
             self.commerce_api_url,
             status=404,
-            body=json.dumps(body),
+            json=body,
             content_type=JSON
         )
 
@@ -228,7 +225,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             'name': '  {}  '.format(self.course_name),
             'verification_deadline': EXPIRES_STRING,
         }
-        httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
+        responses.add(responses.GET, self.commerce_api_url, json=body, content_type=JSON)
 
         migrated_course = MigratedCourse(self.course_id, self.site.domain)
         migrated_course.load_from_lms()
@@ -247,7 +244,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         super(CommandTests, self).setUp()
         toggle_switch('publish_course_modes_to_lms', True)
 
-    @httpretty.activate
+    @responses.activate
     def test_handle(self):
         """ Verify the management command retrieves data, but does not save it to the database. """
         initial_product_count = Product.objects.count()
@@ -268,7 +265,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         self.assertEqual(StockRecord.objects.count(), initial_stock_record_count,
                          'No new StockRecords should have been saved.')
 
-    @httpretty.activate
+    @responses.activate
     def test_handle_with_commit(self):
         """ Verify the management command retrieves data, and saves it to the database. """
         self.mock_access_token_response()
@@ -288,7 +285,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
 
         self.assert_course_migrated()
 
-    @httpretty.activate
+    @responses.activate
     def test_handle_with_no_site(self):
         """ Verify the management command does not run if no site domain is provided. """
         self._mock_lms_apis()
@@ -309,7 +306,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
                 # Verify that the migrated course was published back to the LMS
                 self.assertFalse(mock_publish.called)
 
-    @httpretty.activate
+    @responses.activate
     def test_handle_with_commit_false(self):
         """ Verify the management command does not save data to the database if commit is false"""
         self._mock_lms_apis()
@@ -325,7 +322,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
             # Verify that the migrated course was published back to the LMS
             self.assertFalse(mock_publish.called)
 
-    @httpretty.activate
+    @responses.activate
     def test_handle_with_false_switch(self):
         """ Verify the management command does not save data to the database if commit is false"""
         self._mock_lms_apis()

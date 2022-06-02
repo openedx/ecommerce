@@ -1,9 +1,7 @@
 
 
-import json
-
-import httpretty
 import mock
+import responses
 from django.contrib.messages import constants as MSG
 from django.urls import reverse
 from requests import Timeout
@@ -27,15 +25,16 @@ class UserDetailViewTests(DashboardViewTestMixin, TestCase):
         self.data = [{'course_id': 'a/b/c'}]
 
     def mock_enrollment_api(self, status=200):
-        self.assertTrue(httpretty.is_enabled())
-        httpretty.register_uri(httpretty.GET, get_lms_enrollment_api_url(), status=status,
-                               body=json.dumps(self.data),
-                               content_type='application/json')
+        responses.add(
+            responses.GET, get_lms_enrollment_api_url(), status=status,
+            json=self.data,
+            content_type='application/json'
+        )
 
     def load_view(self):
         return self.client.get(reverse('dashboard:user-detail', args=[self.user.id]))
 
-    @httpretty.activate
+    @responses.activate
     def test_enrollments(self):
         """ Verify the view retrieves data from the Enrollment API. """
         self.mock_enrollment_api()
@@ -56,7 +55,7 @@ class UserDetailViewTests(DashboardViewTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('enrollments', response.context)
 
-    @httpretty.activate
+    @responses.activate
     def test_enrollments_bad_response(self):
         """Verify a message is logged, and a separate message displayed to the user,
         if the API does not return HTTTP 200."""

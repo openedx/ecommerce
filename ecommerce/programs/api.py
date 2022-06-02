@@ -1,6 +1,7 @@
 
 
 import logging
+from urllib.parse import urljoin
 
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
@@ -15,10 +16,11 @@ class ProgramsApiClient:
     reduce load on the API and increase performance of consuming services.
     """
 
-    def __init__(self, client, site_domain):
+    def __init__(self, site_config):
         self.cache_ttl = settings.PROGRAM_CACHE_TIMEOUT
-        self.client = client
-        self.site_domain = site_domain
+        self.client = site_config.oauth_api_client
+        self.api_url = site_config.discovery_api_url
+        self.site_domain = site_config.site.domain
 
     def get_program(self, uuid):
         """
@@ -39,8 +41,11 @@ class ProgramsApiClient:
             logger.debug('Program [%s] was found in the cache.', program_uuid)
             return program_cached_response.value
 
-        logging.info('Retrieving details of of program [%s]...', program_uuid)
-        program = self.client.programs(program_uuid).get()
+        logging.info('Retrieving details of program [%s]...', program_uuid)
+        api_url = urljoin(f"{self.api_url}/", f"programs/{program_uuid}/")
+        resp = self.client.get(api_url)
+        resp.raise_for_status()
+        program = resp.json()
 
         TieredCache.set_all_tiers(cache_key, program, self.cache_ttl)
         logging.info('Program [%s] was successfully retrieved and cached.', program_uuid)

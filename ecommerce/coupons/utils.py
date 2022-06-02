@@ -3,12 +3,12 @@
 
 import hashlib
 import logging
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.utils import timezone
 from edx_django_utils.cache import TieredCache
 from oscar.core.loading import get_model
-from slumber.exceptions import HttpNotFoundError
 
 from ecommerce.core.utils import get_cache_key
 
@@ -52,10 +52,7 @@ def get_catalog_course_runs(site, query, limit=None, offset=None):
             Catalog API
 
     Raises:
-        ConnectionError: requests exception "ConnectionError"
-        SlumberBaseException: slumber exception "SlumberBaseException"
-        Timeout: requests exception "Timeout"
-
+        HTTPError: requests HTTPError.
     """
     api_resource_name = 'course_runs'
     partner_code = site.siteconfiguration.partner.short_code
@@ -73,17 +70,23 @@ def get_catalog_course_runs(site, query, limit=None, offset=None):
     if cached_response.is_found:
         return cached_response.value
 
-    api = site.siteconfiguration.discovery_api_client
-    endpoint = getattr(api, api_resource_name)
-
-    response = endpoint().get(
-        partner=partner_code,
-        q=query,
-        limit=limit,
-        offset=offset
+    api_client = site.siteconfiguration.oauth_api_client
+    api_url = urljoin(f"{site.siteconfiguration.discovery_api_url}/", f"{api_resource_name}/")
+    response = api_client.get(
+        api_url,
+        params={
+            "partner": partner_code,
+            "q": query,
+            "limit": limit,
+            "offset": offset
+        }
     )
-    TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
-    return response
+    response.raise_for_status()
+
+    results = response.json()
+
+    TieredCache.set_all_tiers(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
+    return results
 
 
 def prepare_course_seat_types(course_seat_types):
@@ -124,13 +127,7 @@ def fetch_course_catalog(site, catalog_id):
         (dict): A dictionary containing key/value pairs corresponding to catalog attribute/values.
 
     Raises:
-        ConnectionError: requests exception "ConnectionError", raised if if ecommerce is unable to connect
-            to enterprise api server.
-        SlumberBaseException: base slumber exception "SlumberBaseException", raised if API response contains
-            http error status like 4xx, 5xx etc.
-        Timeout: requests exception "Timeout", raised if enterprise API is taking too long for returning
-            a response. This exception is raised for both connection timeout and read timeout.
-
+        HTTPError: requests exception "HTTPError".
     """
     api_resource = 'catalogs'
 
@@ -144,17 +141,19 @@ def fetch_course_catalog(site, catalog_id):
     if cached_response.is_found:
         return cached_response.value
 
-    api = site.siteconfiguration.discovery_api_client
-    endpoint = getattr(api, api_resource)
+    api_client = site.siteconfiguration.oauth_api_client
+    api_url = urljoin(f"{site.siteconfiguration.discovery_api_url}/", f"{api_resource}/{catalog_id}/")
 
-    try:
-        response = endpoint(catalog_id).get()
-    except HttpNotFoundError:
+    response = api_client.get(api_url)
+    if response.status_code == 404:
         logger.exception("Catalog '%s' not found.", catalog_id)
-        raise
 
-    TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
-    return response
+    response.raise_for_status()
+
+    result = response.json()
+
+    TieredCache.set_all_tiers(cache_key, result, settings.COURSES_API_CACHE_TIMEOUT)
+    return result
 
 
 def is_voucher_applied(basket, voucher):

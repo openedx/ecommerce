@@ -3,11 +3,10 @@
 import uuid
 
 import ddt
-import httpretty
 import mock
+import responses
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
-from slumber.exceptions import HttpNotFoundError, SlumberBaseException
+from requests.exceptions import HTTPError, Timeout
 from testfixtures import LogCapture
 
 from ecommerce.programs.api import ProgramsApiClient
@@ -25,7 +24,7 @@ class UtilTests(ProgramTestMixin, TestCase):
         self.program_uuid = uuid.uuid4()
         self.discovery_api_url = self.site.siteconfiguration.discovery_api_url
 
-    @httpretty.activate
+    @responses.activate
     def test_get_program(self):
         """
         The method should return data from the Discovery Service API.
@@ -35,11 +34,11 @@ class UtilTests(ProgramTestMixin, TestCase):
         self.assertEqual(get_program(self.program_uuid, self.site.siteconfiguration), data)
 
         # The program data should be cached
-        httpretty.disable()
+        responses.reset()
         self.assertEqual(get_program(self.program_uuid, self.site.siteconfiguration), data)
 
-    @httpretty.activate
-    @ddt.data(ReqConnectionError, SlumberBaseException, Timeout)
+    @responses.activate
+    @ddt.data(ReqConnectionError, HTTPError, Timeout)
     def test_get_program_failure(self, exc):  # pylint: disable=unused-argument
         """
         The method should log errors in retrieving program data
@@ -50,17 +49,4 @@ class UtilTests(ProgramTestMixin, TestCase):
                 response = get_program(self.program_uuid, self.site.siteconfiguration)
                 self.assertIsNone(response)
                 msg = 'Failed to retrieve program details for {}'.format(self.program_uuid)
-                logger.check((LOGGER_NAME, 'DEBUG', msg))
-
-    @httpretty.activate
-    def test_get_program_not_found(self):  # pylint: disable=unused-argument
-        """
-        The method should log not found errors for program data
-        """
-        self.mock_program_detail_endpoint(self.program_uuid, self.discovery_api_url, empty=True)
-        with mock.patch.object(ProgramsApiClient, 'get_program', side_effect=HttpNotFoundError):
-            with LogCapture(LOGGER_NAME) as logger:
-                response = get_program(self.program_uuid, self.site.siteconfiguration)
-                self.assertIsNone(response)
-                msg = 'No program data found for {}'.format(self.program_uuid)
                 logger.check((LOGGER_NAME, 'DEBUG', msg))

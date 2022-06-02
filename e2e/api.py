@@ -1,6 +1,6 @@
+from urllib.parse import urljoin
 
-
-from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_api_client.client import OAuthAPIClient
 
 from e2e.config import (
     DISCOVERY_API_URL_ROOT,
@@ -18,19 +18,20 @@ class BaseApi:
 
     def __init__(self):
         assert self.api_url_root
-        access_token, __ = self.get_access_token()
-        self._client = EdxRestApiClient(self.api_url_root, jwt=access_token, append_slash=self.append_slash)
+        self._client = OAuthAPIClient(OAUTH_ACCESS_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
 
-    @staticmethod
-    def get_access_token():
-        """ Returns an access token and expiration date from the OAuth provider.
-
-        Returns:
-            (str, datetime)
+    def get_api_url(self, path):
         """
-        return EdxRestApiClient.get_oauth_access_token(
-            OAUTH_ACCESS_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, token_type='jwt'
-        )
+        Construct the full API URL using the api_url_root and path.
+
+        Args:
+            path (str): API endpoint path.
+        """
+        path = path.strip('/')
+        if self.append_slash:
+            path += '/'
+
+        return urljoin(f"{self.api_url_root}/", path)  # type: ignore
 
 
 class DiscoveryApi(BaseApi):
@@ -48,9 +49,15 @@ class DiscoveryApi(BaseApi):
         Returns:
             list(dict)
         """
-        results = self._client.search.course_runs.facets.get(
-            selected_query_facets='availability_current', selected_facets='seat_types_exact:{}'.format(seat_type))
-        return results['objects']['results']
+        response = self._client.get(
+            self.get_api_url("search/course_runs/facets/"),
+            params={
+                "selected_query_facets": "availability_current",
+                "selected_facets": f"seat_types_exact:{seat_type}"
+            }
+        )
+        response.raise_for_status()
+        return response.json()['objects']['results']
 
     def get_course_run(self, course_run):
         """ Returns the details for a given course run.
@@ -61,7 +68,11 @@ class DiscoveryApi(BaseApi):
         Returns:
             dict
         """
-        return self._client.course_runs(course_run).get()
+        response = self._client.get(
+            self.get_api_url(f"course_runs/{course_run}/"),
+        )
+        response.raise_for_status()
+        return response.json()
 
 
 class EcommerceApi(BaseApi):
@@ -77,10 +88,20 @@ class EcommerceApi(BaseApi):
         Returns:
             str[]: List of refund IDs.
         """
-        return self._client.refunds.post({'username': username, 'course_id': course_run_id})
+        response = self._client.post(
+            self.get_api_url("refunds/"),
+            json={'username': username, 'course_id': course_run_id}
+        )
+        response.raise_for_status()
+        return response.json()
 
     def process_refund(self, refund_id, action):
-        return self._client.refunds(refund_id).process.put({'action': action})
+        response = self._client.put(
+            self.get_api_url(f"refunds/{refund_id}/process/"),
+            json={'action': action}
+        )
+        response.raise_for_status()
+        return response.json()
 
 
 class EnrollmentApi(BaseApi):
@@ -94,4 +115,8 @@ class EnrollmentApi(BaseApi):
             username (str)
             course_run_id (str)
         """
-        return self._client.enrollment('{},{}'.format(username, course_run_id)).get()
+        response = self._client.get(
+            self.get_api_url(f"enrollment/{username},{course_run_id}")
+        )
+        response.raise_for_status()
+        return response.json()

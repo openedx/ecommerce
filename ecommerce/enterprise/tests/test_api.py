@@ -1,13 +1,13 @@
 
 
 import ddt
-import httpretty
+import responses
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
-from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout as ReqConnectionError
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.utils import get_cache_key
@@ -23,7 +23,6 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 @ddt.ddt
-@httpretty.activate
 class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(EnterpriseAPITests, self).setUp()
@@ -40,15 +39,11 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
 
         self.basket = BasketFactory(site=self.site, owner=self.learner, strategy=self.request.strategy)
 
-    def tearDown(self):
-        # Reset HTTPretty state (clean up registered urls and request history)
-        httpretty.reset()
-
     def _assert_num_requests(self, count):
         """
         DRY helper for verifying request counts.
         """
-        self.assertEqual(len(httpretty.httpretty.latest_requests), count)
+        self.assertEqual(len(responses.calls), count)
 
     def _assert_fetch_enterprise_learner_data(self):
         """
@@ -85,6 +80,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
 
         self.assertEqual(expected, actual)
 
+    @responses.activate
     def test_fetch_enterprise_learner_data(self):
         """
         Verify that method "fetch_enterprise_learner_data" returns a proper
@@ -113,6 +109,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         (False, 'fake-uuid'),
     )
     @ddt.unpack
+    @responses.activate
     def test_catalog_contains_course_runs(self, expected, enterprise_customer_catalog_uuid):
         """
         Verify that method `catalog_contains_course_runs` returns the appropriate response.
@@ -126,6 +123,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
 
         self._assert_contains_course_runs(expected, [self.course_run.id], 'fake-uuid', enterprise_customer_catalog_uuid)
 
+    @responses.activate
     def test_catalog_contains_course_runs_cache_hit(self):
         """
         Verify `catalog_contains_course_runs` returns a cached response
@@ -146,6 +144,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
             self._assert_contains_course_runs(True, [self.course_run.id], 'fake-uuid', None)
             self.assertEqual(mocked_set_all_tiers.call_count, 2)
 
+    @responses.activate
     def test_catalog_contains_course_runs_with_api_exception(self):
         """
         Verify that method `catalog_contains_course_runs` returns the appropriate response

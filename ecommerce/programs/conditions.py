@@ -8,8 +8,7 @@ from edx_django_utils.cache import TieredCache
 from oscar.apps.offer import utils as oscar_utils
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
-from slumber.exceptions import HttpNotFoundError, SlumberBaseException
+from requests.exceptions import HTTPError, RequestException, Timeout
 
 from ecommerce.core.utils import deprecated_traverse_pagination, get_cache_key
 from ecommerce.extensions.offer.decorators import check_condition_applicability
@@ -46,7 +45,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                         program_skus.add(entitlement['sku'])
         return program_skus
 
-    def _get_lms_resource_for_user(self, basket, resource_name, endpoint):
+    def _get_lms_resource_for_user(self, basket, resource_name, client, endpoint):
         cache_key = get_cache_key(
             site_domain=basket.site.domain,
             resource=resource_name,
@@ -58,17 +57,19 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
 
         user = basket.owner.username
         try:
-            data_list = endpoint.get(user=user) or []
+            response = client.get(endpoint, params={"user": user})
+            response.raise_for_status()
+            data_list = response.json() or []
             TieredCache.set_all_tiers(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
-        except (ReqConnectionError, SlumberBaseException, Timeout) as exc:
+        except (ReqConnectionError, RequestException, Timeout) as exc:
             logger.error('Failed to retrieve %s : %s', resource_name, str(exc))
             data_list = []
         return data_list
 
-    def _get_lms_resource(self, basket, resource_name, endpoint):
+    def _get_lms_resource(self, basket, resource_name, client, endpoint):
         if not basket.owner:
             return []
-        return self._get_lms_resource_for_user(basket, resource_name, endpoint)
+        return self._get_lms_resource_for_user(basket, resource_name, client, endpoint)
 
     def _get_user_ownership_data(self, basket, retrieve_entitlements=False):
         """
@@ -79,15 +80,19 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
 
         site_configuration = basket.site.siteconfiguration
         if site_configuration.enable_partial_program:
+            client = site_configuration.oauth_api_client
             enrollments = self._get_lms_resource(
-                basket, 'enrollments', site_configuration.enrollment_api_client.enrollment)
+                basket, 'enrollments', client, site_configuration.enrollments_api_url
+            )
+            entitlements_api_url = site_configuration.entitlements_api_url
             if retrieve_entitlements:
                 response = self._get_lms_resource(
-                    basket, 'entitlements', site_configuration.entitlement_api_client.entitlements
+                    basket, 'entitlements', client, entitlements_api_url
                 )
                 if isinstance(response, dict):
                     entitlements = deprecated_traverse_pagination(
-                        response, site_configuration.entitlement_api_client.entitlements)
+                        response, client, entitlements_api_url
+                    )
                 else:
                     entitlements = response
         return enrollments, entitlements
@@ -116,7 +121,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
         basket_skus = {line.stockrecord.partner_sku for line in basket.all_lines()}
         try:
             program = get_program(self.program_uuid, basket.site.siteconfiguration)
-        except (HttpNotFoundError, SlumberBaseException, Timeout):
+        except (HTTPError, RequestException, Timeout):
             return False
 
         if program and program['status'] == 'active':

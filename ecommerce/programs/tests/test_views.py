@@ -2,7 +2,7 @@
 
 import uuid
 
-import httpretty
+import responses
 from django.urls import reverse
 from oscar.core.loading import get_model
 
@@ -22,13 +22,12 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
     def setUp(self):
         super(ProgramOfferListViewTests, self).setUp()
 
-        httpretty.enable()
+        responses.start()
         self.mock_access_token_response()
 
     def tearDown(self):
         super(ProgramOfferListViewTests, self).tearDown()
-        httpretty.disable()
-        httpretty.reset()
+        responses.reset()
 
     def test_get(self):
         """ The context should contain a list of program offers. """
@@ -45,7 +44,7 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         self.assertEqual(list(response.context['object_list']), program_offers)
 
         # The page should load even if the Programs API is inaccessible
-        httpretty.disable()
+        responses.reset()
         response = self.assert_get_response_status(200)
         self.assertEqual(list(response.context['object_list']), program_offers)
 
@@ -79,16 +78,15 @@ class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         self.program_offer = factories.ProgramOfferFactory(partner=self.partner)
         self.path = reverse('programs:offers:edit', kwargs={'pk': self.program_offer.pk})
 
-        # NOTE: We activate httpretty here so that we don't have to decorate every test method.
-        httpretty.enable()
+        # NOTE: We activate responses here so that we don't have to decorate every test method.
+        responses.start()
         self.mock_program_detail_endpoint(
             self.program_offer.condition.program_uuid, self.site_configuration.discovery_api_url
         )
 
     def tearDown(self):
         super(ProgramOfferUpdateViewTests, self).tearDown()
-        httpretty.disable()
-        httpretty.reset()
+        responses.reset()
 
     def test_get(self):
         """ The context should contain the program offer. """
@@ -96,7 +94,7 @@ class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         self.assertEqual(response.context['object'], self.program_offer)
 
         # The page should load even if the Programs API is inaccessible
-        httpretty.disable()
+        responses.reset()
         response = self.assert_get_response_status(200)
         self.assertEqual(response.context['object'], self.program_offer)
 
@@ -111,7 +109,7 @@ class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         self.assertRedirects(response, self.path)
 
 
-@httpretty.activate
+@responses.activate
 class ProgramOfferCreateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
     path = reverse('programs:offers:new')
 

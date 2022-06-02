@@ -4,7 +4,7 @@ import logging
 
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
+from requests.exceptions import RequestException, Timeout
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -12,7 +12,6 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework_extensions.mixins import NestedViewSetMixin
-from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import get_catalog_course_runs
@@ -91,7 +90,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
                 'seats': seats
             }
             return Response(data=data)
-        except (ReqConnectionError, SlumberBaseException, Timeout):
+        except (ReqConnectionError, RequestException, Timeout):
             logger.error('Unable to connect to Catalog API.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

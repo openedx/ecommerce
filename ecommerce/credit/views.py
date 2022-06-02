@@ -1,6 +1,8 @@
 
 
+import json
 import logging
+from urllib.parse import urljoin
 
 from dateutil.parser import parse
 from django.contrib.auth.decorators import login_required
@@ -9,7 +11,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
 from oscar.core.loading import get_model
-from slumber.exceptions import SlumberHttpBaseException
+from requests.exceptions import HTTPError
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
@@ -103,15 +105,18 @@ class Checkout(TemplateView):
             Eligibility deadline date or None if user is not eligible.
         """
         try:
-            credit_api_client = self.request.site.siteconfiguration.credit_api_client
-            eligibilities = credit_api_client.eligibility.get(username=user.username, course_key=course_key)
+            client = self.request.site.siteconfiguration.oauth_api_client
+            credit_url = urljoin(f"{self.request.site.siteconfiguration.credit_api_url}/", "eligibility/")
+            response = client.get(credit_url, params={"username": user.username, "course_key": course_key})
+            response.raise_for_status()
+            eligibilities = response.json()
             if not eligibilities:
                 return None
 
             # currently we have only one eligibility for all providers
             return parse(eligibilities[0].get('deadline'))
 
-        except SlumberHttpBaseException:
+        except HTTPError:
             logging.exception(
                 'Credit API request failed to get eligibility for user [%s] for course [%s].',
                 user.username,
@@ -177,8 +182,11 @@ class Checkout(TemplateView):
         provider_ids = ",".join([seat.attr.credit_provider for seat in credit_seats if seat.attr.credit_provider])
 
         try:
-            credit_api_client = self.request.site.siteconfiguration.credit_api_client
-            return credit_api_client.providers.get(provider_ids=provider_ids)
-        except SlumberHttpBaseException:
+            client = self.request.site.siteconfiguration.oauth_api_client
+            credit_url = urljoin(f"{self.request.site.siteconfiguration.credit_api_url}/", "providers/")
+            resp = client.get(credit_url, params={"provider_ids": json.dumps(provider_ids)})
+            resp.raise_for_status()
+            return resp.json()
+        except HTTPError:
             logger.exception('An error occurred while retrieving credit provider details.')
             return None

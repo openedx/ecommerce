@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
+from urllib.parse import urljoin
 
-import httpretty
+import responses
 
 from ecommerce.extensions.payment.utils import clean_field_value, middle_truncate
 from ecommerce.tests.testcases import TestCase
@@ -32,7 +33,7 @@ class UtilsTests(TestCase):
 class EmbargoCheckTests(TestCase):
     """ Tests for the Embargo check function. """
 
-    @httpretty.activate
+    @responses.activate
     def setUp(self):
         super(EmbargoCheckTests, self).setUp()
         self.mock_access_token_response()
@@ -45,19 +46,21 @@ class EmbargoCheckTests(TestCase):
     def mock_embargo_response(self, response, status_code=200):
         """ Mock the embargo check API endpoint response. """
 
-        httpretty.register_uri(
-            httpretty.GET,
+        responses.add(
+            responses.GET,
             self.site_configuration.build_lms_url('/api/embargo/v1/course_access/'),
             status=status_code,
             body=response,
             content_type='application/json'
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_embargo_check_match(self):
         """ Verify the embargo check returns False. """
         embargo_response = {'access': False}
         self.mock_access_token_response()
         self.mock_embargo_response(json.dumps(embargo_response))
-        response = self.site.siteconfiguration.embargo_api_client.course_access.get(**self.params)
+        client = self.site.siteconfiguration.oauth_api_client
+        api_url = urljoin(f"{self.site.siteconfiguration.embargo_api_url}/", "course_access/")
+        response = client.get(api_url, params=self.params).json()
         self.assertEqual(response, embargo_response)

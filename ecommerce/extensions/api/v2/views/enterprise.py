@@ -12,14 +12,13 @@ from edx_rbac.decorators import permission_required
 from edx_rbac.mixins import PermissionRequiredMixin
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
+from requests.exceptions import HTTPError, Timeout
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import is_coupon_available
@@ -129,7 +128,7 @@ class EnterpriseCustomerCatalogsViewSet(ViewSet):
                 page=request.GET.get('page', '1'),
                 endpoint_request_url=endpoint_request_url
             )
-        except (ReqConnectionError, SlumberHttpBaseException, Timeout) as exc:
+        except (ReqConnectionError, HTTPError, Timeout) as exc:
             logger.exception(
                 'Unable to retrieve catalog for enterprise customer! customer: %s, Exception: %s',
                 kwargs.get('enterprise_catalog_uuid'),

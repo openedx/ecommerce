@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-import httpretty
+import responses
 from django.urls import reverse
 from oscar.core.loading import get_class
 from oscar.test.factories import BasketFactory, RangeFactory
@@ -20,7 +20,7 @@ Applicator = get_class('offer.applicator', 'Applicator')
 class ProgramOfferTests(LmsApiMockMixin, ProgramTestMixin, TestCase):
     """ Verification for program offer application. """
 
-    @httpretty.activate
+    @responses.activate
     def test_offer(self):
         # Our offer is for 100%, so all lines should end up with a price of 0.
         offer = factories.ProgramOfferFactory(
