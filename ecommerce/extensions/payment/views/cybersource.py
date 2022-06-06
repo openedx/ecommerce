@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from typing import Optional
 
 import requests
+import waffle
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
@@ -459,10 +460,11 @@ class CybersourceAuthorizeAPIView(
         return JsonResponse({}, status=400)
 
     def redirect_to_receipt_page(self):
+        use_new_receipt_page = waffle.flag_is_active(self.request, 'use_new_receipt_page')
         receipt_page_url = get_receipt_page_url(
             self.request.site.siteconfiguration,
             order_number=self.order_number,
-            disable_back_button=True,
+            disable_back_button=True, use_new_page=use_new_receipt_page
         )
         return JsonResponse({
             'receipt_page_url': receipt_page_url,

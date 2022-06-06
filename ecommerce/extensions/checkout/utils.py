@@ -33,7 +33,8 @@ def get_credit_provider_details(credit_provider_id, site_configuration):
         return None
 
 
-def get_receipt_page_url(site_configuration, order_number=None, override_url=None, disable_back_button=False):
+def get_receipt_page_url(site_configuration, order_number=None, override_url=None, disable_back_button=False,
+                         use_new_page=False):
     """ Returns the receipt page URL.
 
     Args:
@@ -55,7 +56,12 @@ def get_receipt_page_url(site_configuration, order_number=None, override_url=Non
         url_params['order_number'] = order_number
     if disable_back_button:
         url_params['disable_back_button'] = int(disable_back_button)
-    base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
+    ORDER_DISPLAY_ROOT = 'http://localhost:1996'
+    if use_new_page:
+        url_suffix = '/orders'  # will replace this with receipt page when available
+        base_url = ORDER_DISPLAY_ROOT + url_suffix
+    else:
+        base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
     params = parse.urlencode(url_params)
 
     return '{base_url}{params}'.format(

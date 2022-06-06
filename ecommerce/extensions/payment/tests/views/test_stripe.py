@@ -1,6 +1,7 @@
 
 
 import stripe
+import waffle
 from django.conf import settings
 from django.urls import reverse
 from mock import mock
@@ -39,11 +40,13 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         self.client.login(username=self.user.username, password=self.password)
 
     def assert_successful_order_response(self, response, order_number):
+        use_new_receipt_page = waffle.flag_is_active(self.request, 'use_new_receipt_page')
         assert response.status_code == 201
         receipt_url = get_receipt_page_url(
             self.site_configuration,
             order_number,
             disable_back_button=True,
+            use_new_page=use_new_receipt_page
         )
         assert response.json() == {'url': receipt_url}
 

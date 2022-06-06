@@ -117,7 +117,7 @@ def send_course_purchase_email(sender, order=None, request=None, **kwargs):  # p
             recipient = request.POST.get('req_bill_to_email', order.user.email) if request else order.user.email
             receipt_page_url = get_receipt_page_url(
                 order_number=order.number,
-                site_configuration=order.site.siteconfiguration
+                site_configuration=order.site.siteconfiguration,
             )
             credit_provider_id = getattr(product.attr, 'credit_provider', None)
             if credit_provider_id:
