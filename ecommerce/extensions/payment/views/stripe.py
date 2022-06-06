@@ -2,6 +2,7 @@
 
 import logging
 
+import waffle
 from django.http import JsonResponse
 from oscar.core.loading import get_class, get_model
 
@@ -65,9 +66,10 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
 
         self.handle_post_order(order)
 
+        use_new_receipt_page = waffle.flag_is_active(self.request, 'use_new_receipt_page')
         receipt_url = get_receipt_page_url(
             site_configuration=self.request.site.siteconfiguration,
             order_number=order_number,
-            disable_back_button=True,
+            disable_back_button=True, use_new_page=use_new_receipt_page
         )
         return JsonResponse({'url': receipt_url}, status=201)

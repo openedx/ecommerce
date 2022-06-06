@@ -119,7 +119,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 platform_name=self.site.name,
                 receipt_url=get_receipt_page_url(
                     order_number=order.number,
-                    site_configuration=order.site.siteconfiguration
+                    site_configuration=order.site.siteconfiguration,
                 )
             )
         )

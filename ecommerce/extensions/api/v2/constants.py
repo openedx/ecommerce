@@ -15,3 +15,13 @@ REFUND_ORDER_EMAIL_CLOSING = 'We hope you find a course that meets your learning
 # .. toggle_tickets: REV-2576
 # .. toggle_status: supported
 ENABLE_HOIST_ORDER_HISTORY = 'enable_hoist_order_history'
+
+# .. toggle_name: use_new_receipt_page
+# .. toggle_type: waffle_flag
+# .. toggle_default: False
+# .. toggle_description: Determines whether to send user to new receipt page (vs old)          .
+# .. toggle_use_cases: open_edx
+# .. toggle_creation_date: 2022-06-02
+# .. toggle_tickets: REV-2687
+# .. toggle_status: supported
+USE_NEW_RECEIPT_PAGE = 'use_new_receipt_page'

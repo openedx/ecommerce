@@ -10,6 +10,7 @@ import ddt
 import mock
 import paypalrestsdk
 import responses
+import waffle
 from django.conf import settings
 from django.test import RequestFactory
 from django.urls import reverse
@@ -84,7 +85,8 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
 
     def _get_receipt_url(self):
         """DRY helper for getting receipt page URL."""
-        return get_receipt_page_url(site_configuration=self.site.siteconfiguration)
+        use_new_receipt_page = waffle.flag_is_active(self.request, 'use_new_receipt_page')
+        return get_receipt_page_url(site_configuration=self.site.siteconfiguration, use_new_page=use_new_receipt_page)
 
     def _assert_transaction_parameters_retry(self, api_responses, response_success, failure_log_message):
         self.processor.retry_attempts = 2
