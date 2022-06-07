@@ -68,3 +68,7 @@ jobs:
         run: pip install -r requirements/docs.txt -r requirements/tox.txt
       - name: Build the docs
         run: make docs
+
+  secrets: 
+    ACTIONS_RUNNER_DEBUG: True
+    ACTIONS_STEP_DEBUG: True

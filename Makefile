@@ -135,6 +135,7 @@ update_translations: pull_translations fake_translations
 
 # extract_translations should be called before this command can detect changes
 detect_changed_source_translations: requirements.tox
+	ls -l /operation/workspace
 	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-detect_changed_translations
 
 # @FIXME: skip detect_changed_source_translations until git diff works again (REV-2737)
