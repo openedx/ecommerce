@@ -138,7 +138,7 @@ detect_changed_source_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-detect_changed_translations
 
 # @FIXME: skip detect_changed_source_translations until git diff works again (REV-2737)
-check_translations_up_to_date: fake_translations # detect_changed_source_translations
+check_translations_up_to_date: fake_translations detect_changed_source_translations
 
 # Validate translations
 validate_translations: requirements.tox

@@ -23,7 +23,7 @@ jobs:
             targets: PYTHON_ENV=py38 requirements.js clean_static static acceptance
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.0.2
       - name: Start container
         run: |
           docker-compose -f ./.ci/docker-compose-ci.yml up -d
@@ -59,7 +59,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.0.2
       - uses: actions/setup-python@v2
         with:
           python-version: "3.8"
