@@ -344,7 +344,7 @@ def enterprise_customer_user_needs_consent(site, enterprise_customer_uuid, cours
             argument provides for the course specified by the course_id argument.
     """
     api_client = site.siteconfiguration.oauth_api_client
-    consent_url = urljoin(f"{site.siteconfiguration.consent_api_url}/", "data_sharing_consent/")
+    consent_url = urljoin(f"{site.siteconfiguration.consent_api_url}/", "data_sharing_consent")
     params = {
         "username": username,
         "enterprise_customer_uuid": enterprise_customer_uuid,
