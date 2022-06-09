@@ -7,7 +7,7 @@ import responses
 from requests import ConnectionError as ReqConnectionError
 from requests import Timeout
 
-from ecommerce.extensions.checkout.utils import get_credit_provider_details
+from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.tests.testcases import TestCase
 
 
@@ -18,6 +18,7 @@ class UtilTests(TestCase):
         self.credit_provider_id = 'HGW'
         self.credit_provider_name = 'Hogwarts'
         self.body = {'display_name': self.credit_provider_name}
+        self.order_number = 'EDX-100001'
 
     def get_credit_provider_details_url(self, credit_provider_id):
         """
@@ -71,3 +72,21 @@ class UtilTests(TestCase):
                     self.site.siteconfiguration
                 )
             )
+
+    @ddt.data(True, False, None)
+    def test_get_receipt_page_url(self, value):
+        """ Verify the function returns the appropriate url when waffle flag is True, False, missing"""
+
+        ECOMMERCE_URL = 'http://testserver.fake/checkout/receipt/?order_number=EDX-100001&disable_back_button=1'
+        FA_ECOMMERCE_URL = 'http://localhost:1996/orders?order_number=EDX-100001&disable_back_button=1'
+        receipt_url = get_receipt_page_url(
+            order_number=self.order_number,
+            site_configuration=self.site_configuration,
+            disable_back_button=True,
+            use_new_page=value
+        )
+
+        if value:
+            self.assertEqual(receipt_url, FA_ECOMMERCE_URL)
+        else:
+            self.assertEqual(receipt_url, ECOMMERCE_URL)
