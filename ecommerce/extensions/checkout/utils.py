@@ -56,10 +56,9 @@ def get_receipt_page_url(site_configuration, order_number=None, override_url=Non
         url_params['order_number'] = order_number
     if disable_back_button:
         url_params['disable_back_button'] = int(disable_back_button)
-    ORDER_DISPLAY_ROOT = 'http://localhost:1996'
-    if use_new_page:
-        url_suffix = '/orders'  # will replace this with receipt page when available
-        base_url = ORDER_DISPLAY_ROOT + url_suffix
+    if use_new_page and settings.ECOMMERCE_MICROFRONTEND_URL:
+        url_suffix = '/receipt/'
+        base_url = settings.ECOMMERCE_MICROFRONTEND_URL + url_suffix
     else:
         base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
     params = parse.urlencode(url_params)

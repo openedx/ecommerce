@@ -825,6 +825,8 @@ BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://127.0.0.1:8000/oauth2"
 EXTRA_APPS = []
 API_ROOT = None
 
+ECOMMERCE_MICROFRONTEND_URL = os.environ.get('ECOMMERCE_MICROFRONTEND_URL')
+
 # Needed to link to the payment micro-frontend
 PAYMENT_MICROFRONTEND_URL = None
 

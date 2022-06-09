@@ -5,7 +5,6 @@ from urllib import parse
 
 import ddt
 import responses
-import waffle
 from django.conf import settings
 from django.urls import reverse
 from mock import patch
@@ -99,7 +98,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
 
-        use_new_receipt_page = waffle.flag_is_active(self.request, 'use_new_receipt_page')
+        use_new_receipt_page = False
         order = Order.objects.first()
         expected_url = get_receipt_page_url(
             order_number=order.number,

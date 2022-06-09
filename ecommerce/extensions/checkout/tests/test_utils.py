@@ -4,10 +4,13 @@ import ddt
 import mock
 import requests
 import responses
+from django.conf import settings
+from django.test import override_settings
+from django.urls import reverse
 from requests import ConnectionError as ReqConnectionError
 from requests import Timeout
 
-from ecommerce.extensions.checkout.utils import get_credit_provider_details
+from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.tests.testcases import TestCase
 
 
@@ -18,6 +21,7 @@ class UtilTests(TestCase):
         self.credit_provider_id = 'HGW'
         self.credit_provider_name = 'Hogwarts'
         self.body = {'display_name': self.credit_provider_name}
+        self.order_number = 'EDX-100001'
 
     def get_credit_provider_details_url(self, credit_provider_id):
         """
@@ -71,3 +75,23 @@ class UtilTests(TestCase):
                     self.site.siteconfiguration
                 )
             )
+
+    @ddt.data(True, False, None)
+    def test_get_receipt_page_url(self, use_new_page):
+        """ Verify the function returns the appropriate url when waffle flag is True, False, missing"""
+
+        with override_settings(ECOMMERCE_MICROFRONTEND_URL='http://test.MFE.domain'):
+            ECOMMERCE_BASE_URL = self.site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
+            params = '?order_number=EDX-100001&disable_back_button=1'
+
+            receipt_url = get_receipt_page_url(
+                order_number=self.order_number,
+                site_configuration=self.site_configuration,
+                disable_back_button=True,
+                use_new_page=use_new_page
+            )
+
+            if use_new_page:
+                self.assertEqual(receipt_url, settings.ECOMMERCE_MICROFRONTEND_URL + '/receipt/' + params)
+            else:
+                self.assertEqual(receipt_url, ECOMMERCE_BASE_URL + params)
