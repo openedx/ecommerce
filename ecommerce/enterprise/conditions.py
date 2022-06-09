@@ -135,8 +135,14 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
 
         # This variable will hold both course keys and course run identifiers.
         course_ids = []
+
         for line in basket.all_lines():
             if line.product.is_course_entitlement_product:
+
+                # Enterprise offers cannot be used to purchase programs
+                if offer.offer_type == ConditionalOffer.SITE:
+                    return False
+
                 try:
                     response = get_course_info_from_catalog(basket.site, line.product)
                 except (ReqConnectionError, KeyError, HTTPError, Timeout) as exc:
