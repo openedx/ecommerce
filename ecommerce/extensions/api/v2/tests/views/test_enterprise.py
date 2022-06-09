@@ -3925,7 +3925,15 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
         )
         response = self.client.get(path)
         assert response.status_code == status.HTTP_200_OK
-        assert 'remaining_balance' in response.json()
+
+        keys = [
+            'remaining_balance',
+            'enterprise_customer_catalog_uuid',
+            'usage_type',
+            'discount_value',
+        ]
+        for key in keys:
+            assert key in response.json()
 
     def test_learner_view_permission_search_403_wrong_permission(self):
         """

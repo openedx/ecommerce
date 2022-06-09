@@ -991,6 +991,9 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation['max_discount'] = instance.max_discount
         representation['start_datetime'] = instance.start_datetime
         representation['end_datetime'] = instance.end_datetime
+        representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
+        representation['usage_type'] = get_benefit_type(instance.benefit)
+        representation['discount_value'] = instance.benefit.value
 
         return representation
 
