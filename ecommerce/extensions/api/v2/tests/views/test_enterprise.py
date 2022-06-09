@@ -3928,7 +3928,7 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
 
         keys = [
             'remaining_balance',
-            'enterprise_customer_catalog_uuid',
+            'enterprise_catalog_uuid',
             'usage_type',
             'discount_value',
         ]
