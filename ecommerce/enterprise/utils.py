@@ -433,6 +433,7 @@ def get_enterprise_course_consent_url(
         'defer_creation': True,
         'next': callback_url,
         'failure_url': failure_url,
+        'source': 'ecommerce-coupon-redeem',
     }
 
     # Insert any extra params from the original request:
@@ -652,6 +653,7 @@ def construct_enterprise_course_consent_url(request,
         'enterprise_customer_uuid': enterprise_customer_uuid,
         'next': absolute_url(request, 'checkout:free-checkout'),
         'failure_url': failure_url,
+        'source': 'ecommerce-free-checkout',
     }
 
     # Insert any extra forwarded params from the original request:
