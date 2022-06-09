@@ -34,6 +34,7 @@ from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
 from ecommerce.enterprise.utils import (
+    calculate_remaining_offer_balance,
     get_enterprise_customer_reply_to_email,
     get_enterprise_customer_sender_alias,
     get_enterprise_customer_uuid_from_voucher
@@ -81,6 +82,7 @@ Catalog = get_model('catalogue', 'Catalog')
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 TemplateFileAttachment = get_model('offer', 'TemplateFileAttachment')
@@ -972,6 +974,50 @@ class CouponListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
+
+
+class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
+    """
+    Serializer for EnterpriseOffer learner endpoint.
+
+    Uses serializers.BaseSerializer to keep this lightweight.
+    """
+
+    def to_representation(self, instance):
+        representation = OrderedDict()
+
+        representation['id'] = instance.id
+        representation['remaining_balance'] = calculate_remaining_offer_balance(instance)
+        representation['max_discount'] = instance.max_discount
+        representation['start_datetime'] = instance.start_datetime
+        representation['end_datetime'] = instance.end_datetime
+
+        return representation
+
+
+class EnterpriseAdminOfferApiSerializer(serializers.ModelSerializer):  # pylint: disable=abstract-method
+    """
+    Serializer for EnterpriseOffer admin endpoint.
+
+    Uses serializers.ModelSerializer to get __all__ fields serialized easily.
+    Opted not to use inheritance from EnterpriseLearnerOfferApiSerializer
+    due to complexity around overriding serializer's Meta class.
+    """
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        representation['usage_type'] = get_benefit_type(instance.benefit)
+        representation['discount_value'] = instance.benefit.value
+        representation['enterprise_customer_uuid'] = instance.condition.enterprise_customer_uuid
+        representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
+        representation['remaining_balance'] = calculate_remaining_offer_balance(instance)
+
+        return representation
+
+    class Meta:
+        model = ConditionalOffer
+        fields = '__all__'
 
 
 class OfferAssignmentSummarySerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method

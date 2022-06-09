@@ -135,7 +135,16 @@ router.register(
     enterprise_views.OfferAssignmentEmailTemplatesViewSet,
     basename='enterprise-offer-assignment-email-template',
 )
-
+router.register(
+    r'enterprise/(?P<enterprise_customer>{})/enterprise-admin-offers'.format(UUID_REGEX_PATTERN),
+    enterprise_views.EnterpriseAdminOfferApiViewSet,
+    basename='enterprise-admin-offers-api',
+)
+router.register(
+    r'enterprise/(?P<enterprise_customer>{})/enterprise-learner-offers'.format(UUID_REGEX_PATTERN),
+    enterprise_views.EnterpriseLearnerOfferApiViewSet,
+    basename='enterprise-learner-offers-api',
+)
 router.register(r'courses', course_views.CourseViewSet, basename='course') \
     .register(r'products', product_views.ProductViewSet,
               basename='course-product', parents_query_lookups=['course_id'])

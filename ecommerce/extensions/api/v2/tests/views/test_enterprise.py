@@ -45,6 +45,8 @@ from ecommerce.enterprise.rules import (  # pylint: disable=unused-import
 )
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
+from ecommerce.extensions.offer.applicator import Applicator
 from ecommerce.extensions.offer.constants import (
     ASSIGN,
     DAY3,
@@ -63,7 +65,9 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_REDEEMED
 )
 from ecommerce.extensions.offer.models import delete_files_from_s3
+from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
+from ecommerce.extensions.test import factories as extended_factories
 from ecommerce.extensions.test.factories import (
     CodeAssignmentNudgeEmailsFactory,
     CodeAssignmentNudgeEmailTemplatesFactory
@@ -3757,6 +3761,205 @@ class EnterpriseCouponViewSetRbacTests(
                     [{'name': 'def.png', 'size': 456, 'contents': '1,2,3', 'type': 'image/png'}])
         # verify that records have been created with 'revoke' email type equal to the bulk count
         assert OfferAssignmentEmailSentRecord.objects.filter(email_type=REVOKE).count() == offer_assignments.count()
+
+
+class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase):
+
+    def setUp(self):
+        super(EnterpriseOfferApiViewTests, self).setUp()
+
+        self.user = self.create_user(is_staff=True, email='test@example.com')
+        self.learner = self.create_user(is_staff=False)
+        self.client.login(username=self.user.username, password=self.password)
+
+        self.mock_access_token_response()
+
+    def test_admin_view_list(self):
+        """
+        Verify endpoint returns correct number of enterprise offers.
+        """
+
+        # These should be ignored since their associated Condition objects do NOT have an Enterprise Customer UUID.
+        extended_factories.ConditionalOfferFactory.create_batch(3)
+        # Here are some offers for some other enterprise
+        condition = extended_factories.EnterpriseCustomerConditionFactory(
+            enterprise_customer_uuid=uuid4()
+        )
+        extended_factories.EnterpriseOfferFactory.create_batch(
+            2,
+            partner=self.partner,
+            condition=condition,
+        )
+        # Here are the 4 offers for our enterprise
+        enterprise_customer_uuid = str(uuid4())
+        condition = extended_factories.EnterpriseCustomerConditionFactory(
+            enterprise_customer_uuid=enterprise_customer_uuid
+        )
+        extended_factories.EnterpriseOfferFactory.create_batch(
+            4,
+            partner=self.partner,
+            condition=condition,
+        )
+
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid}
+        )
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=enterprise_customer_uuid
+        )
+        response_json = self.client.get(path).json()
+        assert len(response_json['results']) == 4
+        assert response_json['results'][0]['enterprise_customer_uuid'] == enterprise_customer_uuid
+
+    @mock.patch('ecommerce.enterprise.conditions.EnterpriseCustomerCondition.is_satisfied')
+    def test_enterprise_offer_remaining_balance(self, mock_condition_satisfied):
+        """
+        Verify that fields on conditional offer are accurate in API response if
+        and an enterprise offer has been applied to purchase a course.
+        """
+        mock_condition_satisfied.return_value = True
+
+        # Make courses and use the offer to purchase them
+        course1 = CourseFactory(name='course1', partner=self.partner)
+        product1 = course1.create_or_update_seat('verified', False, 13.37)
+        course2 = CourseFactory(name='course1', partner=self.partner)
+        product2 = course2.create_or_update_seat('verified', False, 5)
+
+        benefit = extended_factories.EnterprisePercentageDiscountBenefitFactory(value=100)
+        enterprise_customer_uuid = str(uuid4())
+        condition = extended_factories.EnterpriseCustomerConditionFactory(
+            enterprise_customer_uuid=enterprise_customer_uuid
+        )
+        offer = extended_factories.EnterpriseOfferFactory(
+            condition=condition,
+            benefit=benefit,
+            max_discount=20,
+            max_basket_applications=2,
+            partner=self.partner,
+        )
+
+        basket = factories.BasketFactory(site=self.site, owner=self.learner)
+        basket.add_product(product1)
+        basket.add_product(product2)
+        basket.strategy = DefaultStrategy()
+        Applicator().apply_offers(basket, [offer])
+
+        order = factories.create_order(basket=basket, user=self.learner)
+
+        # This is the bit that records all the usage and whatnot so that the
+        # conditionaloffer actuall has its total_discount value updated
+        EnrollmentFulfillmentModule().fulfill_product(order, list(order.lines.all()))
+
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid}
+        )
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=enterprise_customer_uuid
+        )
+        response_json = self.client.get(path).json()
+
+        assert len(response_json['results']) == 1
+        enterprise_offer_data = response_json['results'][0]
+        assert enterprise_offer_data['enterprise_customer_uuid'] == enterprise_customer_uuid
+        assert enterprise_offer_data['remaining_balance'] == 1.63
+
+    def test_admin_view_permission_search_403_wrong_permission(self):
+        """
+        Test that view 403s if role is wrong
+        """
+        enterprise_customer_uuid = str(uuid4())
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_LEARNER_ROLE, context=enterprise_customer_uuid
+        )
+        EcommerceFeatureRoleAssignment.objects.all().delete()
+
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid}
+        )
+        response = self.client.get(path)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_admin_view_permission_search_403_wrong_uuid_in_jwt(self):
+        """
+        Test that view 403s if uuid doesn't match
+        """
+        enterprise_customer_uuid = str(uuid4())
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context='some-other-uuid'
+        )
+        EcommerceFeatureRoleAssignment.objects.all().delete()
+
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid}
+        )
+        response = self.client.get(path)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_learner_view_permission_200(self):
+        """
+        Test that view 200s when role/uuid are both right
+        """
+
+        enterprise_customer_uuid = str(uuid4())
+        condition = extended_factories.EnterpriseCustomerConditionFactory(
+            enterprise_customer_uuid=enterprise_customer_uuid
+        )
+        enterprise_offer = extended_factories.EnterpriseOfferFactory.create(
+            partner=self.partner,
+            condition=condition,
+        )
+
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_LEARNER_ROLE, context=enterprise_customer_uuid
+        )
+        path = reverse(
+            'api:v2:enterprise-learner-offers-api-detail',
+            kwargs={
+                'enterprise_customer': enterprise_customer_uuid,
+                'pk': enterprise_offer.id,
+            }
+        )
+        response = self.client.get(path)
+        assert response.status_code == status.HTTP_200_OK
+        assert 'remaining_balance' in response.json()
+
+    def test_learner_view_permission_search_403_wrong_permission(self):
+        """
+        Test that view 403s if role is wrong
+        """
+        enterprise_customer_uuid = str(uuid4())
+        self.set_jwt_cookie(
+            system_wide_role=None, context=enterprise_customer_uuid
+        )
+        EcommerceFeatureRoleAssignment.objects.all().delete()
+
+        path = reverse(
+            'api:v2:enterprise-learner-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid}
+        )
+        response = self.client.get(path)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_learner_view_permission_search_403_wrong_uuid_in_jwt(self):
+        """
+        Test that view 403s if uuid doesn't match
+        """
+        enterprise_customer_uuid = str(uuid4())
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_LEARNER_ROLE, context='some-other-uuid'
+        )
+        EcommerceFeatureRoleAssignment.objects.all().delete()
+
+        path = reverse(
+            'api:v2:enterprise-learner-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid}
+        )
+        response = self.client.get(path)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 class OfferAssignmentSummaryViewSetTests(

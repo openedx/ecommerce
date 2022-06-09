@@ -18,7 +18,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, ViewSet
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import is_coupon_available
@@ -33,11 +33,13 @@ from ecommerce.extensions.api.serializers import (
     CouponCodeRemindSerializer,
     CouponCodeRevokeSerializer,
     CouponSerializer,
+    EnterpriseAdminOfferApiSerializer,
     EnterpriseCouponCreateSerializer,
     EnterpriseCouponListSerializer,
     EnterpriseCouponOverviewListSerializer,
     EnterpriseCouponSearchSerializer,
     EnterpriseCouponUpdateSerializer,
+    EnterpriseLearnerOfferApiSerializer,
     NotAssignedCodeUsageSerializer,
     NotRedeemedCodeUsageSerializer,
     OfferAssignmentEmailTemplatesSerializer,
@@ -83,6 +85,7 @@ logger = logging.getLogger(__name__)
 CouponVouchers = get_model('voucher', 'CouponVouchers')
 Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 TemplateFileAttachment = get_model('offer', 'TemplateFileAttachment')
@@ -1015,6 +1018,33 @@ class EnterpriseCouponViewSet(CouponViewSet):
                         delete_file_from_s3_with_key(file['name'])
                 return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BaseOfferApiViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
+    model = ConditionalOffer
+    permission_classes = (IsAuthenticated,)
+
+    def get_permission_object(self):
+        return self.kwargs.get('enterprise_customer')
+
+    def get_queryset(self):
+        return ConditionalOffer.objects.filter(
+            partner=self.request.site.siteconfiguration.partner,
+            condition__enterprise_customer_uuid=self.kwargs.get('enterprise_customer'),
+            offer_type=ConditionalOffer.SITE
+        ).select_related('condition', 'benefit')
+
+
+class EnterpriseLearnerOfferApiViewSet(BaseOfferApiViewSet):
+
+    serializer_class = EnterpriseLearnerOfferApiSerializer
+    permission_required = 'enterprise.can_view_enterprise_learner_offer'
+
+
+class EnterpriseAdminOfferApiViewSet(BaseOfferApiViewSet):
+
+    serializer_class = EnterpriseAdminOfferApiSerializer
+    permission_required = 'enterprise.can_view_enterprise_admin_offer'
 
 
 class OfferAssignmentEmailTemplatesViewSet(PermissionRequiredMixin, ModelViewSet):
