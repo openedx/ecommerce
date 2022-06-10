@@ -58,10 +58,8 @@
               {% else %}
                   {% blocktrans trimmed asvar tmsg %}
                       Your order is complete. If you need a receipt, you can print this page.
-                      You will also receive a confirmation message with this information at
-                      {link_start}{email}{link_end}.
                   {% endblocktrans %}
-                {% interpolate_html tmsg email=order.user.email|safe link_end="</a>"|safe link_start=link_start|safe %}
+                {% interpolate_html tmsg %}
               {% endif %}
             </div>
 
