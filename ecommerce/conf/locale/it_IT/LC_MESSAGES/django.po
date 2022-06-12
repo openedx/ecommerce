@@ -8,6 +8,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Claude Almansi <claude.almansi@gmail.com>, 2015
 # Domenico Casanica <domenico.casanica@sistinf.it>, 2021
 # Giorgio Attorresi <attorresi.giorgio@gmail.com>, 2015
@@ -17,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-08 20:12+0000\n"
+"POT-Creation-Date: 2022-06-12 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: Domenico Casanica <domenico.casanica@sistinf.it>, 2021\n"
 "Language-Team: Italian (Italy) (http://www.transifex.com/open-edx/edx-platform/language/it_IT/)\n"
@@ -25,7 +26,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: it_IT\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #: ecommerce/core/admin.py:25
 msgid "Personal info"
@@ -49,236 +50,236 @@ msgid ""
 " Be careful when re-activating this switch!"
 msgstr "L'amministrazione degli utenti è stata disabilitata a causa del carico sul database. Questa funzionalità può essere ripristinata attivando l'opzione Waffle {switch_name}. Prestare attenzione quando di riattiva questa opzione."
 
-#: ecommerce/core/models.py:43
+#: ecommerce/core/models.py:40
 msgid "LMS base url for custom site/microsite"
 msgstr "URL di base LMS del sito/microsito personalizzato"
 
-#: ecommerce/core/models.py:44
+#: ecommerce/core/models.py:41
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
 msgstr "URL root dell'LMS di questo sito (ad es. https://courses.stage.edx.org)"
 
-#: ecommerce/core/models.py:49
+#: ecommerce/core/models.py:46
 msgid "Path to custom site theme"
 msgstr "Percorso del tema personalizzato del sito"
 
-#: ecommerce/core/models.py:56
+#: ecommerce/core/models.py:53
 msgid "Payment processors"
 msgstr "Responsabili pagamenti"
 
-#: ecommerce/core/models.py:57
+#: ecommerce/core/models.py:54
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
 msgstr "Elenco di nomi di responsabili separati da virgole: 'cybersource,paypal'"
 
-#: ecommerce/core/models.py:63
+#: ecommerce/core/models.py:60
 msgid "Client-side payment processor"
 msgstr "Processore di pagamento del cliente"
 
-#: ecommerce/core/models.py:64
+#: ecommerce/core/models.py:61
 msgid "Processor that will be used for client-side payments"
 msgstr "Responsabile utilizzato per i pagamenti del cliente"
 
-#: ecommerce/core/models.py:70
+#: ecommerce/core/models.py:67
 msgid "OAuth settings"
 msgstr "Impostazioni OAuth"
 
-#: ecommerce/core/models.py:71
+#: ecommerce/core/models.py:68
 msgid "JSON string containing OAuth backend settings."
 msgstr "Stringa JSON contenente le impostazioni del backend OAuth."
 
-#: ecommerce/core/models.py:77
+#: ecommerce/core/models.py:74
 msgid "Segment key"
 msgstr "Chiave segmento"
 
-#: ecommerce/core/models.py:78
+#: ecommerce/core/models.py:75
 msgid "Segment write/API key."
 msgstr "Chiave scrittura/API del segmento."
 
-#: ecommerce/core/models.py:84
+#: ecommerce/core/models.py:81
 msgid "From email"
 msgstr "Mittente email"
 
-#: ecommerce/core/models.py:85
+#: ecommerce/core/models.py:82
 msgid "Address from which emails are sent."
 msgstr "L'indirizzo da cui le email vengono inviate."
 
-#: ecommerce/core/models.py:91
+#: ecommerce/core/models.py:88
 msgid "Enable enrollment codes"
 msgstr "Abilita codici di iscrizione"
 
-#: ecommerce/core/models.py:92
+#: ecommerce/core/models.py:89
 msgid "Enable the creation of enrollment codes."
 msgstr "Abilita la creazione dei codici di iscrizione."
 
-#: ecommerce/core/models.py:97
+#: ecommerce/core/models.py:94
 msgid "Payment support email"
 msgstr "Email del supporto per i pagamenti"
 
-#: ecommerce/core/models.py:98
+#: ecommerce/core/models.py:95
 msgid "Contact email for payment support issues."
 msgstr "Email da contattare per questioni di supporto per i pagamenti."
 
-#: ecommerce/core/models.py:104
+#: ecommerce/core/models.py:101
 msgid "Payment support url"
 msgstr "URL supporto per i pagamenti"
 
-#: ecommerce/core/models.py:105
+#: ecommerce/core/models.py:102
 msgid "URL for payment support issues."
 msgstr "URL per questioni di supporto per i pagamenti."
 
-#: ecommerce/core/models.py:110
+#: ecommerce/core/models.py:107
 msgid "UTM Cookie Name"
 msgstr "Nome cookie UTM"
 
-#: ecommerce/core/models.py:111
+#: ecommerce/core/models.py:108
 msgid "Name of cookie storing UTM data."
 msgstr "Nome del cookie che archivia i dati UTM."
 
-#: ecommerce/core/models.py:117
+#: ecommerce/core/models.py:114
 msgid "Affiliate Cookie Name"
 msgstr "Nome cookie Affiliata"
 
-#: ecommerce/core/models.py:118
+#: ecommerce/core/models.py:115
 msgid "Name of cookie storing affiliate data."
 msgstr "Nome del cookie che archivia i dati dell'affiliata."
 
-#: ecommerce/core/models.py:124
+#: ecommerce/core/models.py:121
 msgid "Send refund email notification"
 msgstr "Invia notifica del rimborso tramite email"
 
-#: ecommerce/core/models.py:129
+#: ecommerce/core/models.py:126
 msgid "Enable SDN check"
 msgstr "Abilita controllo SDN"
 
-#: ecommerce/core/models.py:130
+#: ecommerce/core/models.py:127
 msgid "Enable SDN check at checkout."
 msgstr "Abilita controllo SDN al momento del checkout"
 
-#: ecommerce/core/models.py:134
+#: ecommerce/core/models.py:131
 msgid "[Deprecated] US Treasury SDN API URL"
 msgstr "[Obsoleto] URL API SDN Tesoro degli Stati Uniti"
 
-#: ecommerce/core/models.py:139
+#: ecommerce/core/models.py:136
 msgid "[Deprecated] US Treasury SDN API key"
 msgstr "[Obsoleto] Chiave API SDN Tesoro degli Stati Uniti"
 
-#: ecommerce/core/models.py:144
+#: ecommerce/core/models.py:141
 msgid "SDN lists"
 msgstr "Elenchi SDN"
 
-#: ecommerce/core/models.py:145
+#: ecommerce/core/models.py:142
 msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr "Elenco di OFAC del Dipartimento del Tesoro separati da virgola da confrontare."
 
-#: ecommerce/core/models.py:150
+#: ecommerce/core/models.py:147
 msgid "Require Account Activation"
 msgstr "Richiedi attivazione account"
 
-#: ecommerce/core/models.py:151
+#: ecommerce/core/models.py:148
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
 msgstr "Richiede agli utenti di attivare il proprio account prima di consentirgli di riscattare un coupon."
 
-#: ecommerce/core/models.py:155
+#: ecommerce/core/models.py:152
 msgid "Optimizely snippet source URL"
 msgstr "URL di origine del frammento ottimizzato "
 
-#: ecommerce/core/models.py:156
+#: ecommerce/core/models.py:153
 msgid "This script will be loaded on every page."
 msgstr "Questo script verrà caricato in ogni pagina. "
 
-#: ecommerce/core/models.py:161
+#: ecommerce/core/models.py:158
 msgid "Base Cookie Domain"
 msgstr "Dominio Cookie di base"
 
-#: ecommerce/core/models.py:162
+#: ecommerce/core/models.py:159
 msgid "Base cookie domain used to share cookies across services."
 msgstr "Dominio di base dei cookie utilizzato per condividere i cookie tra i servizi."
 
-#: ecommerce/core/models.py:168
+#: ecommerce/core/models.py:165
 msgid "Enable embargo check"
 msgstr "Abilita controllo dell'embargo"
 
-#: ecommerce/core/models.py:169
+#: ecommerce/core/models.py:166
 msgid "Enable embargo check at checkout."
 msgstr "Abilita controllo dell'embargo al momento del checkout"
 
-#: ecommerce/core/models.py:173
+#: ecommerce/core/models.py:170
 msgid "Discovery API URL"
 msgstr "URL API Discovery"
 
 #. Translators: Do not translate "Apple Pay"
-#: ecommerce/core/models.py:179
+#: ecommerce/core/models.py:176
 msgid "Enable Apple Pay"
 msgstr "Abilita Apple Pay"
 
-#: ecommerce/core/models.py:183
+#: ecommerce/core/models.py:180
 msgid "Enable Partial Program Offer"
 msgstr "Abilita offerte per il programma parziale"
 
-#: ecommerce/core/models.py:184
+#: ecommerce/core/models.py:181
 msgid ""
 "Enable the application of program offers to remaining unenrolled or "
 "unverified courses"
 msgstr "Consente l'applicazione delle offerte per il programma ai corsi senza iscritti o non verificati "
 
-#: ecommerce/core/models.py:189
+#: ecommerce/core/models.py:186
 msgid "Hubspot Portal Secret Key"
 msgstr "Chiave segreta portale Hubspot"
 
-#: ecommerce/core/models.py:190
+#: ecommerce/core/models.py:187
 msgid "Secret key for Hubspot portal authentication"
 msgstr "Chiave segreta per l'autenticazione al portale Hubspot"
 
-#: ecommerce/core/models.py:195
+#: ecommerce/core/models.py:192
 msgid "Enable Microfrontend for Basket Page"
 msgstr "Abilita Microfrontend per la pagina del Carrello"
 
-#: ecommerce/core/models.py:196
+#: ecommerce/core/models.py:193
 msgid ""
 "Use the microfrontend implementation of the basket page instead of the "
 "server-side template"
 msgstr "Utilizza l'implementazione microfrontend della pagina del carrello invece del template del server "
 
-#: ecommerce/core/models.py:201
+#: ecommerce/core/models.py:198
 msgid "Payment Microfrontend URL"
 msgstr "URL microfrontend del pagamento"
 
-#: ecommerce/core/models.py:202
+#: ecommerce/core/models.py:199
 msgid ""
 "URL for the Payment Microfrontend (used if Enable Microfrontend for Basket "
 "Page is set)"
 msgstr "URL del Microfrontend del Pagamento (utilizzato se è impostato il Microfrontend per la pagina del carrello)"
 
-#: ecommerce/core/models.py:494
+#: ecommerce/core/models.py:438
 msgid "last name"
 msgstr "cognome"
 
-#: ecommerce/core/models.py:497
+#: ecommerce/core/models.py:441
 msgid "first name"
 msgstr ""
 
-#: ecommerce/core/models.py:498
+#: ecommerce/core/models.py:442
 msgid "Full Name"
 msgstr "Nome e Cognome"
 
-#: ecommerce/core/models.py:504
+#: ecommerce/core/models.py:448
 msgid "LMS user id"
 msgstr "ID utente LMS"
 
-#: ecommerce/core/models.py:757 ecommerce/extensions/basket/models.py:130
+#: ecommerce/core/models.py:702 ecommerce/extensions/basket/models.py:130
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:54
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
 msgstr "Nome"
 
-#: ecommerce/core/models.py:759 ecommerce/extensions/offer/models.py:543
+#: ecommerce/core/models.py:704 ecommerce/extensions/offer/models.py:561
 msgid "EnterpriseCustomer UUID"
 msgstr "UUID del Cliente Enterprise"
 
-#: ecommerce/core/models.py:760 ecommerce/extensions/offer/models.py:421
-#: ecommerce/extensions/offer/models.py:637
-#: ecommerce/extensions/offer/models.py:703
+#: ecommerce/core/models.py:705 ecommerce/extensions/offer/models.py:431
+#: ecommerce/extensions/offer/models.py:655
+#: ecommerce/extensions/offer/models.py:721
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr "UUID di un EnterpriseCustomer del servizio Enterprise."
 
@@ -367,7 +368,7 @@ msgid "This coupon code is not valid for this course. Try a different course."
 msgstr "Questo codice coupon non è valido per questo corso. Provare con un corso diverso."
 
 #: ecommerce/courses/models.py:32 ecommerce/extensions/basket/models.py:20
-#: ecommerce/extensions/offer/models.py:225
+#: ecommerce/extensions/offer/models.py:235
 #: ecommerce/extensions/payment/models.py:68
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
@@ -379,58 +380,58 @@ msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "Ultimo termine per sottoporre la verifica di questo prodotto."
 
-#: ecommerce/courses/publishers.py:61
+#: ecommerce/courses/publishers.py:62
 #, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr "La pubblicazione dei dati commerciali di {course_id} in LMS non è riuscita."
 
-#: ecommerce/courses/utils.py:131
+#: ecommerce/courses/utils.py:139
 msgid "Audit"
 msgstr "Revisione"
 
-#: ecommerce/courses/utils.py:132
+#: ecommerce/courses/utils.py:140
 msgid "Credit"
 msgstr "Credito"
 
-#: ecommerce/courses/utils.py:133
+#: ecommerce/courses/utils.py:141
 msgid "Honor"
 msgstr "Onore"
 
-#: ecommerce/courses/utils.py:134
+#: ecommerce/courses/utils.py:142
 msgid "Professional"
 msgstr "Professionale"
 
-#: ecommerce/courses/utils.py:135
+#: ecommerce/courses/utils.py:143
 msgid "Verified"
 msgstr "Verificato"
 
-#: ecommerce/courses/utils.py:136
+#: ecommerce/courses/utils.py:144
 msgid "Executive Education"
 msgstr "Executive Education"
 
-#: ecommerce/courses/utils.py:137
+#: ecommerce/courses/utils.py:145
 msgid "Paid Executive Education"
 msgstr ""
 
-#: ecommerce/courses/utils.py:138
+#: ecommerce/courses/utils.py:146
 msgid "Unpaid Executive Education"
 msgstr ""
 
-#: ecommerce/courses/utils.py:139
+#: ecommerce/courses/utils.py:147
 msgid "Paid Bootcamp"
 msgstr ""
 
-#: ecommerce/courses/utils.py:140
+#: ecommerce/courses/utils.py:148
 msgid "Unpaid Bootcamp"
 msgstr ""
 
-#: ecommerce/credit/views.py:39
+#: ecommerce/credit/views.py:41
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
 " credit. Try the transaction again."
 msgstr "Si è verificato un errore. Non è possibile confermare che l'utente è eleggibile per il credito del corso. Provare nuovamente la transazione."
 
-#: ecommerce/credit/views.py:60
+#: ecommerce/credit/views.py:62
 #, python-brace-format
 msgid ""
 "Credit is not currently available for \"{course_name}\". If you are "
@@ -439,7 +440,7 @@ msgid ""
 "Support Team."
 msgstr "Credito non attualmente disponibile per \"{course_name}\". Se si è attualmente iscritti al corso, riprovare dopo che tutte le valutazioni sono state completate. Se si necessita di ulteriore assistenza, contattare il Team di Supporto di {site_name}. "
 
-#: ecommerce/credit/views.py:74
+#: ecommerce/credit/views.py:76
 msgid ""
 "An error has occurred. We could not confirm that the institution you "
 "selected offers this course credit. Try the transaction again."
@@ -467,7 +468,7 @@ msgstr "Percentuale"
 msgid "Absolute"
 msgstr "Assoluto"
 
-#: ecommerce/enterprise/conditions.py:208
+#: ecommerce/enterprise/conditions.py:213
 #, python-brace-format
 msgid ""
 "This coupon has been made available through {new_enterprise}. To redeem this"
@@ -475,7 +476,7 @@ msgid ""
 "{new_enterprise} as your enterprise and try again."
 msgstr "Questo coupon è stato reso disponibile tramite {new_enterprise}. Per riscattare questo coupon, è necessario innanzitutto disconnetterti. Quando si accede di nuovo, selezionare {new_enterprise} come azienda e riprovare. "
 
-#: ecommerce/enterprise/conditions.py:362
+#: ecommerce/enterprise/conditions.py:367
 msgid ""
 "This code is not valid with your email. Please login with the correct email "
 "assigned to the code or contact your Learning Manager for additional "
@@ -735,31 +736,31 @@ msgid ""
 "              "
 msgstr "\n                Strumento di amministrazione offerta Enterprise %(platform_name)s "
 
-#: ecommerce/enterprise/utils.py:238
+#: ecommerce/enterprise/utils.py:239
 #, python-brace-format
 msgid "SKU {sku} does not exist."
 msgstr "SKU {sku} non esiste."
 
-#: ecommerce/enterprise/utils.py:247
+#: ecommerce/enterprise/utils.py:248
 #, python-brace-format
 msgid "There is no Enterprise Customer associated with SKU {sku}."
 msgstr "Non è presente alcun cliente Enterprise associato con SKU {sku}."
 
-#: ecommerce/enterprise/utils.py:255
+#: ecommerce/enterprise/utils.py:256
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise}."
 msgstr "In caso di dubbi sulla condivisione dei propri dati, rivolgersi al proprio amministratore in {enterprise}. "
 
-#: ecommerce/enterprise/utils.py:258
+#: ecommerce/enterprise/utils.py:259
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise} at {contact_info}."
 msgstr "In caso di dubbi sulla condivisione dei propri dati, rivolgersi al proprio amministratore in {enterprise} al {contact_info}. "
 
-#: ecommerce/enterprise/utils.py:264
+#: ecommerce/enterprise/utils.py:265
 #, python-brace-format
 msgid "Enrollment in {course_name} was not complete."
 msgstr "Iscrizione a {course_name} non completata."
@@ -795,41 +796,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr "Non sono state richiamate sufficienti informazioni sull'utente per eseguire il calcolo. "
 
-#: ecommerce/extensions/api/serializers.py:250
+#: ecommerce/extensions/api/serializers.py:252
 msgid "EXPIRED"
 msgstr "SCADUTO"
 
-#: ecommerce/extensions/api/serializers.py:252
+#: ecommerce/extensions/api/serializers.py:254
 msgid "INACTIVE"
 msgstr "INATTIVO"
 
-#: ecommerce/extensions/api/serializers.py:253
+#: ecommerce/extensions/api/serializers.py:255
 msgid "ACTIVE"
 msgstr "ATTIVO"
 
-#: ecommerce/extensions/api/serializers.py:554
+#: ecommerce/extensions/api/serializers.py:559
 msgid "Products must have a certificate type."
 msgstr "I prodotti devono avere un tipo di certificato. "
 
-#: ecommerce/extensions/api/serializers.py:557
-#: ecommerce/extensions/api/serializers.py:597
+#: ecommerce/extensions/api/serializers.py:562
+#: ecommerce/extensions/api/serializers.py:602
 msgid "Products must have a price."
 msgstr "I prodotti devono avere un prezzo."
 
-#: ecommerce/extensions/api/serializers.py:564
+#: ecommerce/extensions/api/serializers.py:569
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "È necessario fornire un UUID del corso per creare le titolarità al corso. "
 
-#: ecommerce/extensions/api/serializers.py:593
+#: ecommerce/extensions/api/serializers.py:598
 msgid "Products must indicate whether ID verification is required."
 msgstr "I prodotti devono indicare se la verifica dell'ID è necessaria."
 
-#: ecommerce/extensions/api/serializers.py:664
+#: ecommerce/extensions/api/serializers.py:669
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "La classe di prodotto [{product_class}] richiesta non è valida."
 
-#: ecommerce/extensions/api/serializers.py:696
+#: ecommerce/extensions/api/serializers.py:701
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -837,39 +838,39 @@ msgid ""
 " been saved."
 msgstr "Il corso [{course_id}] non è stato pubblicato su LMS perché lo switch [publish_course_modes_to_lms] è disabilitato. I dati non sono stati salvati per evitare SKU non visibili. "
 
-#: ecommerce/extensions/api/serializers.py:1280
+#: ecommerce/extensions/api/serializers.py:1332
 msgid "Enrollment code"
 msgstr "Codice iscrizione"
 
-#: ecommerce/extensions/api/serializers.py:1281
+#: ecommerce/extensions/api/serializers.py:1333
 msgid "Discount code"
 msgstr "Codice sconto"
 
-#: ecommerce/extensions/api/serializers.py:1746
+#: ecommerce/extensions/api/serializers.py:1800
 msgid "Invalid order number or order {} does not exists."
 msgstr "Numero d'ordine non valido oppure l'ordine {} non esiste. "
 
-#: ecommerce/extensions/api/serializers.py:1801
+#: ecommerce/extensions/api/serializers.py:1855
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr "Errore di assegnazione del nuovo voucher coupon. Errore: {}"
 
-#: ecommerce/extensions/api/serializers.py:1819
+#: ecommerce/extensions/api/serializers.py:1873
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr "L'ordine {} non può essere rimborsato poiché il coupon '{}' non può essere rimborsato. "
 
-#: ecommerce/extensions/api/serializers.py:1850
+#: ecommerce/extensions/api/serializers.py:1904
 msgid "Could note create new voucher for the order: {}"
 msgstr "Impossibile creare nuovo voucher per l'ordine: {}"
 
 #: ecommerce/extensions/api/v2/views/baskets.py:445
-#: ecommerce/extensions/basket/views.py:459
+#: ecommerce/extensions/basket/views.py:458
 msgid "No SKUs provided."
 msgstr "Nessuno SKU fornito."
 
 #: ecommerce/extensions/api/v2/views/baskets.py:456
-#: ecommerce/extensions/basket/views.py:466
+#: ecommerce/extensions/basket/views.py:465
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr "Non esistono prodotti con (gli) SKU [{skus}]."
@@ -957,34 +958,34 @@ msgstr "Codice coupon '{code}' aggiunto al carrello."
 msgid "Basket does not qualify for coupon code {code}."
 msgstr "Il carrello non è autorizzato per utilizzare il codice coupon {code}."
 
-#: ecommerce/extensions/basket/views.py:205
+#: ecommerce/extensions/basket/views.py:204
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr "Impossibile richiedere il codice '{code}'; necessita del consenso alla condivisione dei dati."
 
-#: ecommerce/extensions/basket/views.py:296
+#: ecommerce/extensions/basket/views.py:295
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
 msgstr "Dopo aver completato l'ordine, sarà possibile selezionare le date del corso dalla propria dashboard."
 
-#: ecommerce/extensions/basket/views.py:311
+#: ecommerce/extensions/basket/views.py:310
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "verified track of the course."
 msgstr "Dopo aver completato l'ordine si verrà automaticamente iscritti al percorso verificato del corso."
 
-#: ecommerce/extensions/basket/views.py:315
+#: ecommerce/extensions/basket/views.py:314
 msgid "After you complete your order you will receive credit for your course."
 msgstr "Dopo aver completato l'ordine si riceverà un credito per il proprio corso. "
 
-#: ecommerce/extensions/basket/views.py:318
+#: ecommerce/extensions/basket/views.py:317
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
 msgstr "Dopo aver completato l'ordine si verrà automaticamente iscritti al corso."
 
-#: ecommerce/extensions/basket/views.py:322
+#: ecommerce/extensions/basket/views.py:321
 #, python-brace-format
 msgid ""
 "{paragraph_start}By purchasing, you and your organization agree to the "
@@ -1001,7 +1002,7 @@ msgid ""
 "{paragraph_end}"
 msgstr "{paragraph_start}Attraverso l'acquisto, tu e la tua organizzazione accettate le seguenti condizioni:{paragraph_end} {ul_start} {li_start}Ogni codice è valido per il corso coperto e può essere utilizzato una sola volta.{li_end} {li_start}Sarai responsabile della distribuzione dei codici ai tuoi studenti nell'organizzazione.{li_end} {li_start}Ogni codice scadrà dopo un anno dalla data di acquisto o, se precedente, al termine del corso.{li_end} {li_start}Se un corso non è designato come in apprendimento autonomo, sarà necessario verificare che il corso si svolgerà prima della scadenza. {li_end} {li_start}Non è possibile rivendere i codici a terzi.{li_end} {li_start}Tutte le vendite di edX for Business sono definitive e non possono essere rimborsate.{li_end}{ul_end} {paragraph_start}Riceverai un'email all'indirizzo {user_email} con il tuo codice(i) di iscrizione. {paragraph_end}"
 
-#: ecommerce/extensions/basket/views.py:360
+#: ecommerce/extensions/basket/views.py:359
 #, python-brace-format
 msgid ""
 "{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If "
@@ -1010,39 +1011,39 @@ msgid ""
 "enroll directly.{paragraph_end}"
 msgstr "{strong_start}Stai acquistando per te stesso?{strong_end}{paragraph_start}Se stai acquistando un codice singolo per qualcun altro, continua con il checkout. Tuttavia, se sei uno studente {link_start}torna qui{link_end} per iscriverti direttamente.{paragraph_end}"
 
-#: ecommerce/extensions/basket/views.py:438
+#: ecommerce/extensions/basket/views.py:437
 msgid "You have already purchased these products"
 msgstr "Hai già acquistato questi prodotti"
 
-#: ecommerce/extensions/basket/views.py:483
+#: ecommerce/extensions/basket/views.py:482
 msgid "No product is available to buy."
 msgstr "Nessun prodotto disponibile per l'acquisto."
 
-#: ecommerce/extensions/basket/views.py:900
+#: ecommerce/extensions/basket/views.py:899
 msgid "quantity successfully updated"
 msgstr "quantità aggiornata correttamente"
 
-#: ecommerce/extensions/basket/views.py:919
+#: ecommerce/extensions/basket/views.py:918
 msgid ""
 "Your basket couldn't be updated. Please correct any validation errors below."
 msgstr "Impossibile aggiornare il carrello. Correggere gli errori di convalida riportati di seguito."
 
-#: ecommerce/extensions/basket/views.py:973
+#: ecommerce/extensions/basket/views.py:972
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr "Hai già aggiunto un codice coupon '{code}' al tuo carrello."
 
-#: ecommerce/extensions/basket/views.py:1049
+#: ecommerce/extensions/basket/views.py:1048
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr "Codice coupon '{code}' non esiste. "
 
-#: ecommerce/extensions/basket/views.py:1134
+#: ecommerce/extensions/basket/views.py:1133
 #, python-format
 msgid "No coupon found with id '%s'"
 msgstr "Impossibile trovare un coupon con id '%s'"
 
-#: ecommerce/extensions/basket/views.py:1138
+#: ecommerce/extensions/basket/views.py:1137
 #, python-format
 msgid "Coupon code '%s' was removed from your basket."
 msgstr "Il codice coupon '%s' è stato rimosso dal carrello."
@@ -1091,8 +1092,8 @@ msgid "Refund ID"
 msgstr "ID del rimborso"
 
 #: ecommerce/extensions/dashboard/refunds/forms.py:16
-#: ecommerce/extensions/refund/models.py:70
-#: ecommerce/extensions/refund/models.py:267
+#: ecommerce/extensions/refund/models.py:72
+#: ecommerce/extensions/refund/models.py:316
 #: ecommerce/extensions/voucher/utils.py:222
 #: ecommerce/extensions/voucher/utils.py:281
 #: ecommerce/extensions/voucher/utils.py:318
@@ -1145,23 +1146,23 @@ msgstr "Automatico"
 msgid "Manual"
 msgstr "Manuale"
 
-#: ecommerce/extensions/offer/models.py:416
+#: ecommerce/extensions/offer/models.py:426
 msgid "Course Catalog ID from the Discovery Service."
 msgstr "ID catalogo corsi del servizio Discovery."
 
-#: ecommerce/extensions/offer/models.py:427
+#: ecommerce/extensions/offer/models.py:437
 msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
 msgstr "UUID di un EnterpriseCustomerCatalog del servizio Enterprise."
 
-#: ecommerce/extensions/offer/models.py:551
+#: ecommerce/extensions/offer/models.py:569
 msgid "EnterpriseCustomer Name"
 msgstr "Nome EnterpriseCustomer"
 
-#: ecommerce/extensions/offer/models.py:556
+#: ecommerce/extensions/offer/models.py:574
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr "UUID EnterpriseCustomerCatalog "
 
-#: ecommerce/extensions/offer/models.py:561
+#: ecommerce/extensions/offer/models.py:579
 #: ecommerce/extensions/voucher/utils.py:53
 #: ecommerce/extensions/voucher/utils.py:190
 #: ecommerce/extensions/voucher/utils.py:270
@@ -1172,35 +1173,35 @@ msgstr "UUID EnterpriseCustomerCatalog "
 msgid "Program UUID"
 msgstr "UUID programma"
 
-#: ecommerce/extensions/offer/models.py:574
+#: ecommerce/extensions/offer/models.py:592
 msgid "Email to user pending."
 msgstr "Email utente in sospeso"
 
-#: ecommerce/extensions/offer/models.py:575
+#: ecommerce/extensions/offer/models.py:593
 msgid "Code successfully assigned to user."
 msgstr "Codice correttamente assegnato all'utente."
 
-#: ecommerce/extensions/offer/models.py:576
+#: ecommerce/extensions/offer/models.py:594
 msgid "Code has been redeemed by user."
 msgstr "Il codice è stato riscattato dall'utente. "
 
-#: ecommerce/extensions/offer/models.py:577
+#: ecommerce/extensions/offer/models.py:595
 msgid "Email to user bounced."
 msgstr "E-mail all'utente respinta. "
 
-#: ecommerce/extensions/offer/models.py:578
+#: ecommerce/extensions/offer/models.py:596
 msgid "Code has been revoked for this user."
 msgstr "Il codice per questo utente è stato revocato. "
 
-#: ecommerce/extensions/offer/models.py:624
+#: ecommerce/extensions/offer/models.py:642
 msgid "Make a particular template version active."
 msgstr "Rendi attiva una particolare versione del template."
 
-#: ecommerce/extensions/offer/models.py:837
+#: ecommerce/extensions/offer/models.py:855
 msgid "Email has been sent."
 msgstr "Email inviata."
 
-#: ecommerce/extensions/offer/models.py:838
+#: ecommerce/extensions/offer/models.py:856
 msgid "This user should receive email"
 msgstr "Questo utente deve ricevere e-mail "
 
@@ -1379,7 +1380,7 @@ msgstr "Non è consentita una percentuale superiore a 100."
 #. to indicate that truncation has occurred. For example, if a title may only
 #. be at most 11 characters long, "A Very Long Title" (17 characters) would be
 #. truncated to "A Ve...itle".
-#: ecommerce/extensions/payment/utils.py:74
+#: ecommerce/extensions/payment/utils.py:75
 msgid "..."
 msgstr "..."
 
@@ -1397,38 +1398,38 @@ msgid ""
 "switch. Be careful when re-activating this switch!"
 msgstr "L'amministrazione dei rimborsi è stata disabilitata a causa del carico sul database. Questa funzionalità può essere ripristinata attivando l'opzione Waffle {switch_name}. Prestare attenzione quando di riattiva questa opzione."
 
-#: ecommerce/extensions/refund/models.py:65
+#: ecommerce/extensions/refund/models.py:67
 msgid "Order"
 msgstr "Ordine"
 
-#: ecommerce/extensions/refund/models.py:66
+#: ecommerce/extensions/refund/models.py:68
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:680
 msgid "User"
 msgstr "Utente"
 
-#: ecommerce/extensions/refund/models.py:67
+#: ecommerce/extensions/refund/models.py:69
 msgid "Total Credit (excl. tax)"
 msgstr "Credito complessivo (meno tassa)"
 
-#: ecommerce/extensions/refund/models.py:68
+#: ecommerce/extensions/refund/models.py:70
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:200
 msgid "Currency"
 msgstr "Valuta"
 
-#: ecommerce/extensions/refund/models.py:259
+#: ecommerce/extensions/refund/models.py:308
 msgid "Refund"
 msgstr "Rimborso"
 
-#: ecommerce/extensions/refund/models.py:262
+#: ecommerce/extensions/refund/models.py:311
 msgid "Order Line"
 msgstr "Riga di ordinazione"
 
-#: ecommerce/extensions/refund/models.py:264
+#: ecommerce/extensions/refund/models.py:313
 msgid "Line Credit (excl. tax)"
 msgstr "Riga di credito (meno tassa)"
 
-#: ecommerce/extensions/refund/models.py:265
-#: ecommerce/templates/edx/checkout/receipt.html:95
+#: ecommerce/extensions/refund/models.py:314
+#: ecommerce/templates/edx/checkout/receipt.html:93
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:30
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:51
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:43
@@ -1473,39 +1474,39 @@ msgstr "Questo batch del codice deve essere pubblico o privato per essere assegn
 msgid "This voucher is assigned to another user."
 msgstr "Questo voucher è assegnato a un altro utente. "
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:211
+#: ecommerce/extensions/voucher/tests/test_utils.py:215
 #: ecommerce/extensions/voucher/utils.py:76
 #: ecommerce/extensions/voucher/utils.py:318
 msgid "Redeemed"
 msgstr "Riscosso"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:375
-#: ecommerce/extensions/voucher/tests/test_utils.py:380
+#: ecommerce/extensions/voucher/tests/test_utils.py:379
+#: ecommerce/extensions/voucher/tests/test_utils.py:384
 #: ecommerce/extensions/voucher/utils.py:95
 #: ecommerce/extensions/voucher/utils.py:161
-#: ecommerce/templates/edx/checkout/receipt.html:127
+#: ecommerce/templates/edx/checkout/receipt.html:125
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:261
 msgid "Discount"
 msgstr "Sconto"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:375
-#: ecommerce/extensions/voucher/tests/test_utils.py:380
+#: ecommerce/extensions/voucher/tests/test_utils.py:379
+#: ecommerce/extensions/voucher/tests/test_utils.py:384
 #: ecommerce/extensions/voucher/utils.py:95
 #: ecommerce/extensions/voucher/utils.py:161
 msgid "Enrollment"
 msgstr "Iscrizione"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:376
-#: ecommerce/extensions/voucher/tests/test_utils.py:384
+#: ecommerce/extensions/voucher/tests/test_utils.py:380
+#: ecommerce/extensions/voucher/tests/test_utils.py:388
 #: ecommerce/extensions/voucher/utils.py:96
 #: ecommerce/extensions/voucher/utils.py:165
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} %"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:540
+#: ecommerce/extensions/voucher/tests/test_utils.py:544
 #: ecommerce/extensions/voucher/utils.py:78
 msgid "Inactive"
 msgstr "Inattivo"
@@ -1912,15 +1913,15 @@ msgstr "Voucher"
 msgid "Reports"
 msgstr "Rapporti"
 
-#: ecommerce/settings/base.py:90
+#: ecommerce/settings/base.py:92
 msgid "English"
 msgstr "Inglese"
 
-#: ecommerce/settings/base.py:91
+#: ecommerce/settings/base.py:93
 msgid "Spanish"
 msgstr "Spagnolo"
 
-#: ecommerce/settings/base.py:92
+#: ecommerce/settings/base.py:94
 msgid "Spanish (Latin American)"
 msgstr "Spagnolo (America Latina)"
 
@@ -2026,91 +2027,88 @@ msgid ""
 msgstr "L'ordine è stato completato. Riceverai un messaggio di conferma e il codice(i) di iscrizione all'indirizzo {link_start}{email}{link_end}. Se hai bisogno di una ricevuta, puoi stampare questa pagina. "
 
 #: ecommerce/templates/edx/checkout/receipt.html:59
-#, python-brace-format
 msgid ""
-"Your order is complete. If you need a receipt, you can print this page. You "
-"will also receive a confirmation message with this information at "
-"{link_start}{email}{link_end}."
-msgstr "L'ordine è stato completato. Se hai bisogno di una ricevuta, puoi stampare questa pagina. Riceverai anche un messaggio di conferma con queste informazioni all'indirizzo {link_start}{email}{link_end}. "
+"Your order is complete. If you need a receipt, you can print this page."
+msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:79
+#: ecommerce/templates/edx/checkout/receipt.html:77
 msgid "Order Number:"
 msgstr "Numero ordine:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:82
+#: ecommerce/templates/edx/checkout/receipt.html:80
 msgid "Payment Method:"
 msgstr "Metodo di pagamento:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:85
+#: ecommerce/templates/edx/checkout/receipt.html:83
 msgid "Order Date:"
 msgstr "Data ordine:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:91
+#: ecommerce/templates/edx/checkout/receipt.html:89
 msgid "Order Information"
 msgstr "Informazioni sull'ordine"
 
-#: ecommerce/templates/edx/checkout/receipt.html:96
+#: ecommerce/templates/edx/checkout/receipt.html:94
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:59
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:12
 msgid "Description"
 msgstr "Descrizione"
 
-#: ecommerce/templates/edx/checkout/receipt.html:97
+#: ecommerce/templates/edx/checkout/receipt.html:95
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:39
 msgid "Item Price"
 msgstr "Prezzo articolo"
 
-#: ecommerce/templates/edx/checkout/receipt.html:101
+#: ecommerce/templates/edx/checkout/receipt.html:99
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:184
 msgid "Quantity:"
 msgstr "Quantità:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:103
+#: ecommerce/templates/edx/checkout/receipt.html:101
 msgid "Description:"
 msgstr "Descrizione:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:112
+#: ecommerce/templates/edx/checkout/receipt.html:110
 msgid "Item Price:"
 msgstr "Prezzo articolo:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:118
+#: ecommerce/templates/edx/checkout/receipt.html:116
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:52
 msgid "Subtotal"
 msgstr "Subtotale"
 
-#: ecommerce/templates/edx/checkout/receipt.html:134
+#: ecommerce/templates/edx/checkout/receipt.html:132
 #, python-format
 msgid "%(voucher_discount_amount)s off"
 msgstr "Sconto di %(voucher_discount_amount)s "
 
-#: ecommerce/templates/edx/checkout/receipt.html:144
+#: ecommerce/templates/edx/checkout/receipt.html:142
 #, python-format
 msgid "Discount of type %(type)s provided by %(enterprise_name)s"
 msgstr "Sconto di tipo %(type)s effettuato da %(enterprise_name)s"
 
-#: ecommerce/templates/edx/checkout/receipt.html:149
+#: ecommerce/templates/edx/checkout/receipt.html:147
 msgid "Discount for your first upgrade"
 msgstr "Sconto per il primo upgrade"
 
-#: ecommerce/templates/edx/checkout/receipt.html:152
+#: ecommerce/templates/edx/checkout/receipt.html:150
 #, python-format
 msgid "Discount of type %(type)s is provided."
 msgstr "È stato apportato lo sconto di tipo %(type)s ."
 
-#: ecommerce/templates/edx/checkout/receipt.html:166
+#: ecommerce/templates/edx/checkout/receipt.html:164
 #, python-format
 msgid "Courtesy of %(enterprise_name)s."
 msgstr "Offerto da %(enterprise_name)s."
 
-#: ecommerce/templates/edx/checkout/receipt.html:179
+#: ecommerce/templates/edx/checkout/receipt.html:177
 msgid "Total"
 msgstr "Totale"
 
-#: ecommerce/templates/edx/checkout/receipt.html:186
+#: ecommerce/templates/edx/checkout/receipt.html:184
 msgid "Get Your Course Credit"
 msgstr "Ricevi il credito per il tuo corso"
 
-#: ecommerce/templates/edx/checkout/receipt.html:188
+#: ecommerce/templates/edx/checkout/receipt.html:186
 #, python-brace-format
 msgid ""
 "To receive academic credit for this course, you must apply for credit at the"
@@ -2120,11 +2118,11 @@ msgid ""
 " course name."
 msgstr "Per ricevere crediti accademici per questo corso, è necessario richiedere un credito presso l'organizzazione che li offre. Puoi trovare un link al sito web dell'organizzazione sulla tua {link_start}{lms_dashboard_url}{link_middle}dashboard{link_end}, accanto al nome del corso. "
 
-#: ecommerce/templates/edx/checkout/receipt.html:201
+#: ecommerce/templates/edx/checkout/receipt.html:199
 msgid "Go to dashboard"
 msgstr "Vai alla dashboard"
 
-#: ecommerce/templates/edx/checkout/receipt.html:204
+#: ecommerce/templates/edx/checkout/receipt.html:202
 msgid "Find more courses"
 msgstr "Trova altri corsi"
 

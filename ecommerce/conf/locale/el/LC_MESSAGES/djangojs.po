@@ -8,6 +8,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Angelos Chraniotis, 2016
 # Dimitris Agelakis <minoan07@gmail.com>, 2019
 # Evdokia <evipericleous@live.co.uk>, 2016
@@ -19,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-08 20:12+0000\n"
+"POT-Creation-Date: 2022-06-12 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Dimitris Agelakis <minoan07@gmail.com>, 2019\n"
 "Language-Team: Greek (http://www.transifex.com/open-edx/edx-platform/language/el/)\n"

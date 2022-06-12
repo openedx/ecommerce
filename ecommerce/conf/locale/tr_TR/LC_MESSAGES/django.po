@@ -8,6 +8,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Adem Özgür <admozgur@gmail.com>, 2015
 # Ali Işıngör <ali@artistanbul.io>, 2017-2022
 # ali selek <aliselek01@gmail.com>, 2015
@@ -23,7 +24,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-08 20:12+0000\n"
+"POT-Creation-Date: 2022-06-12 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>, 2017-2022\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
@@ -55,236 +56,236 @@ msgid ""
 " Be careful when re-activating this switch!"
 msgstr "Veritabanındaki yük nedeniyle kullanıcı yönetimi devre dışı bırakıldı. Bu işlev {switch_name} anahtarı açılarak geri getirilebilir. Bu anahtarı yeniden etkinleştirirken dikkatli olun!"
 
-#: ecommerce/core/models.py:43
+#: ecommerce/core/models.py:40
 msgid "LMS base url for custom site/microsite"
 msgstr "Özellleştirilmiş site/mikrosite için LMS taban url"
 
-#: ecommerce/core/models.py:44
+#: ecommerce/core/models.py:41
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
 msgstr "Bu sitenin LMS arayüzünün kök dizini (örn: https://courses.stage.edx.org)"
 
-#: ecommerce/core/models.py:49
+#: ecommerce/core/models.py:46
 msgid "Path to custom site theme"
 msgstr "Özelleştirilmiş site teması yolu"
 
-#: ecommerce/core/models.py:56
+#: ecommerce/core/models.py:53
 msgid "Payment processors"
 msgstr "Ödeme altyapısı"
 
-#: ecommerce/core/models.py:57
+#: ecommerce/core/models.py:54
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
 msgstr "Virgüllerle ayrılmış ödeme altyapısı isim listesi: 'cybersource,paypal'"
 
-#: ecommerce/core/models.py:63
+#: ecommerce/core/models.py:60
 msgid "Client-side payment processor"
 msgstr "İstemci tarafı ödeme altyapısı"
 
-#: ecommerce/core/models.py:64
+#: ecommerce/core/models.py:61
 msgid "Processor that will be used for client-side payments"
 msgstr "İstemci tarafı ödemelerinde kullanılacak altyapı"
 
-#: ecommerce/core/models.py:70
+#: ecommerce/core/models.py:67
 msgid "OAuth settings"
 msgstr "OAuth ayarları"
 
-#: ecommerce/core/models.py:71
+#: ecommerce/core/models.py:68
 msgid "JSON string containing OAuth backend settings."
 msgstr "OAuth backend ayarlarını içeren JSON katarları."
 
-#: ecommerce/core/models.py:77
+#: ecommerce/core/models.py:74
 msgid "Segment key"
 msgstr "Segment anahtarı"
 
-#: ecommerce/core/models.py:78
+#: ecommerce/core/models.py:75
 msgid "Segment write/API key."
 msgstr "Segment yazma/API anahtarı."
 
-#: ecommerce/core/models.py:84
+#: ecommerce/core/models.py:81
 msgid "From email"
 msgstr "Gönderen e-posta"
 
-#: ecommerce/core/models.py:85
+#: ecommerce/core/models.py:82
 msgid "Address from which emails are sent."
 msgstr "E-postaların gönderildiği adres."
 
-#: ecommerce/core/models.py:91
+#: ecommerce/core/models.py:88
 msgid "Enable enrollment codes"
 msgstr "Kayıt kodlarını etkinleştir"
 
-#: ecommerce/core/models.py:92
+#: ecommerce/core/models.py:89
 msgid "Enable the creation of enrollment codes."
 msgstr "Kayıt kodlarının oluşturulmasını etkinleştir."
 
-#: ecommerce/core/models.py:97
+#: ecommerce/core/models.py:94
 msgid "Payment support email"
 msgstr "Ödeme süreçleri destek e-postası"
 
-#: ecommerce/core/models.py:98
+#: ecommerce/core/models.py:95
 msgid "Contact email for payment support issues."
 msgstr "Ödeme süreçlerinde destek verecek e-posta iletişim adresi."
 
-#: ecommerce/core/models.py:104
+#: ecommerce/core/models.py:101
 msgid "Payment support url"
 msgstr "Ödeme süreçleri destek url"
 
-#: ecommerce/core/models.py:105
+#: ecommerce/core/models.py:102
 msgid "URL for payment support issues."
 msgstr "Ödeme süreçleri sorunları için URL."
 
-#: ecommerce/core/models.py:110
+#: ecommerce/core/models.py:107
 msgid "UTM Cookie Name"
 msgstr "UTM Çerez Adı"
 
-#: ecommerce/core/models.py:111
+#: ecommerce/core/models.py:108
 msgid "Name of cookie storing UTM data."
 msgstr "UTM verisini tutan çerezin adı."
 
-#: ecommerce/core/models.py:117
+#: ecommerce/core/models.py:114
 msgid "Affiliate Cookie Name"
 msgstr "Satış Ortağı Çerez Adı"
 
-#: ecommerce/core/models.py:118
+#: ecommerce/core/models.py:115
 msgid "Name of cookie storing affiliate data."
 msgstr "Satış ortağı verisini tutan çerezin adı."
 
-#: ecommerce/core/models.py:124
+#: ecommerce/core/models.py:121
 msgid "Send refund email notification"
 msgstr "Ücret iadesi e-posta bildirimi gönder"
 
-#: ecommerce/core/models.py:129
+#: ecommerce/core/models.py:126
 msgid "Enable SDN check"
 msgstr "SDN kontrolünü etkinleştir"
 
-#: ecommerce/core/models.py:130
+#: ecommerce/core/models.py:127
 msgid "Enable SDN check at checkout."
 msgstr "Ödeme aşamasında SDN kontrolünü etkinleştir."
 
-#: ecommerce/core/models.py:134
+#: ecommerce/core/models.py:131
 msgid "[Deprecated] US Treasury SDN API URL"
 msgstr "[Kullanımdan kaldırıldı] ABD Hazinesi SDN API URL"
 
-#: ecommerce/core/models.py:139
+#: ecommerce/core/models.py:136
 msgid "[Deprecated] US Treasury SDN API key"
 msgstr "[Kullanımdan kaldırıldı] ABD Hazinesi SDN API anahtarı"
 
-#: ecommerce/core/models.py:144
+#: ecommerce/core/models.py:141
 msgid "SDN lists"
 msgstr "SDN listeleri"
 
-#: ecommerce/core/models.py:145
+#: ecommerce/core/models.py:142
 msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr "ABD Hazinesi OFAC denetim listelerinin virgüllerle ayrılmış listesi."
 
-#: ecommerce/core/models.py:150
+#: ecommerce/core/models.py:147
 msgid "Require Account Activation"
 msgstr "Hesap Etkinleştirme Gerektiriyor"
 
-#: ecommerce/core/models.py:151
+#: ecommerce/core/models.py:148
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
 msgstr "Kullanıcılar indirim kuponlarını kullanmak için öncelikle hesaplarını etkinleştirmeliler."
 
-#: ecommerce/core/models.py:155
+#: ecommerce/core/models.py:152
 msgid "Optimizely snippet source URL"
 msgstr "Optimizely kod parçacığı kaynak URL"
 
-#: ecommerce/core/models.py:156
+#: ecommerce/core/models.py:153
 msgid "This script will be loaded on every page."
 msgstr "Bu betik her sayfada yüklenecek."
 
-#: ecommerce/core/models.py:161
+#: ecommerce/core/models.py:158
 msgid "Base Cookie Domain"
 msgstr "Temel Çerez Alanı"
 
-#: ecommerce/core/models.py:162
+#: ecommerce/core/models.py:159
 msgid "Base cookie domain used to share cookies across services."
 msgstr "Servisler arası paylaşılacak çerezlerin kullanacağı temel çalışma alanı."
 
-#: ecommerce/core/models.py:168
+#: ecommerce/core/models.py:165
 msgid "Enable embargo check"
 msgstr "Ambargo denetimini etkinleştir"
 
-#: ecommerce/core/models.py:169
+#: ecommerce/core/models.py:166
 msgid "Enable embargo check at checkout."
 msgstr "Ödeme aşamasında ambargo denetimini etkinleştir."
 
-#: ecommerce/core/models.py:173
+#: ecommerce/core/models.py:170
 msgid "Discovery API URL"
 msgstr "Discovery API URL"
 
 #. Translators: Do not translate "Apple Pay"
-#: ecommerce/core/models.py:179
+#: ecommerce/core/models.py:176
 msgid "Enable Apple Pay"
 msgstr "Apple Pay'i Etkinleştir"
 
-#: ecommerce/core/models.py:183
+#: ecommerce/core/models.py:180
 msgid "Enable Partial Program Offer"
 msgstr "Kısmi Program Teklifini Etkinleştir"
 
-#: ecommerce/core/models.py:184
+#: ecommerce/core/models.py:181
 msgid ""
 "Enable the application of program offers to remaining unenrolled or "
 "unverified courses"
 msgstr ""
 
-#: ecommerce/core/models.py:189
+#: ecommerce/core/models.py:186
 msgid "Hubspot Portal Secret Key"
 msgstr "Hubspot Portalı Gizlilik Anahtarı"
 
-#: ecommerce/core/models.py:190
+#: ecommerce/core/models.py:187
 msgid "Secret key for Hubspot portal authentication"
 msgstr "Hubspot portalı kimlik doğrulaması için gizlilik anahtarı"
 
-#: ecommerce/core/models.py:195
+#: ecommerce/core/models.py:192
 msgid "Enable Microfrontend for Basket Page"
 msgstr "Sepet Sayfası için Mikro Frontend'i Etkinleştir"
 
-#: ecommerce/core/models.py:196
+#: ecommerce/core/models.py:193
 msgid ""
 "Use the microfrontend implementation of the basket page instead of the "
 "server-side template"
 msgstr "Sunucu tarafı şablonu yerine sepet sayfasının microfrontend uygulamasını kullanın"
 
-#: ecommerce/core/models.py:201
+#: ecommerce/core/models.py:198
 msgid "Payment Microfrontend URL"
 msgstr "Ödeme Sayfası Microfrontend URL"
 
-#: ecommerce/core/models.py:202
+#: ecommerce/core/models.py:199
 msgid ""
 "URL for the Payment Microfrontend (used if Enable Microfrontend for Basket "
 "Page is set)"
 msgstr "Ödeme Microfrontend Sayfası için URL (Sepet için Microfrontend ayarı etkinleştirildiğinde)"
 
-#: ecommerce/core/models.py:494
+#: ecommerce/core/models.py:438
 msgid "last name"
 msgstr "soyadı"
 
-#: ecommerce/core/models.py:497
+#: ecommerce/core/models.py:441
 msgid "first name"
 msgstr "ad"
 
-#: ecommerce/core/models.py:498
+#: ecommerce/core/models.py:442
 msgid "Full Name"
 msgstr "Tam Ad"
 
-#: ecommerce/core/models.py:504
+#: ecommerce/core/models.py:448
 msgid "LMS user id"
 msgstr "LMS kullanıcı kimliği"
 
-#: ecommerce/core/models.py:757 ecommerce/extensions/basket/models.py:130
+#: ecommerce/core/models.py:702 ecommerce/extensions/basket/models.py:130
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:54
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
 msgstr "İsim"
 
-#: ecommerce/core/models.py:759 ecommerce/extensions/offer/models.py:543
+#: ecommerce/core/models.py:704 ecommerce/extensions/offer/models.py:561
 msgid "EnterpriseCustomer UUID"
 msgstr "KurumsalMüşteri UUID"
 
-#: ecommerce/core/models.py:760 ecommerce/extensions/offer/models.py:421
-#: ecommerce/extensions/offer/models.py:637
-#: ecommerce/extensions/offer/models.py:703
+#: ecommerce/core/models.py:705 ecommerce/extensions/offer/models.py:431
+#: ecommerce/extensions/offer/models.py:655
+#: ecommerce/extensions/offer/models.py:721
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
@@ -373,7 +374,7 @@ msgid "This coupon code is not valid for this course. Try a different course."
 msgstr "Bu kupon kodu bu eğitim için geçerli değil. Lütfen başka bir eğitimle deneyin."
 
 #: ecommerce/courses/models.py:32 ecommerce/extensions/basket/models.py:20
-#: ecommerce/extensions/offer/models.py:225
+#: ecommerce/extensions/offer/models.py:235
 #: ecommerce/extensions/payment/models.py:68
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
@@ -385,58 +386,58 @@ msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "Bu ürün için doğrulama teslim edilebileceği son tarih / saat."
 
-#: ecommerce/courses/publishers.py:61
+#: ecommerce/courses/publishers.py:62
 #, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr "{course_id} e-ticaret verilerinin LMS üzerinde yayınlanmasında hata."
 
-#: ecommerce/courses/utils.py:131
+#: ecommerce/courses/utils.py:139
 msgid "Audit"
 msgstr "Gözlemle"
 
-#: ecommerce/courses/utils.py:132
+#: ecommerce/courses/utils.py:140
 msgid "Credit"
 msgstr "Kredi"
 
-#: ecommerce/courses/utils.py:133
+#: ecommerce/courses/utils.py:141
 msgid "Honor"
 msgstr "Onur"
 
-#: ecommerce/courses/utils.py:134
+#: ecommerce/courses/utils.py:142
 msgid "Professional"
 msgstr "Profesyonel"
 
-#: ecommerce/courses/utils.py:135
+#: ecommerce/courses/utils.py:143
 msgid "Verified"
 msgstr "Onaylanmış"
 
-#: ecommerce/courses/utils.py:136
+#: ecommerce/courses/utils.py:144
 msgid "Executive Education"
 msgstr "Yönetici Eğitimi"
 
-#: ecommerce/courses/utils.py:137
+#: ecommerce/courses/utils.py:145
 msgid "Paid Executive Education"
 msgstr ""
 
-#: ecommerce/courses/utils.py:138
+#: ecommerce/courses/utils.py:146
 msgid "Unpaid Executive Education"
 msgstr ""
 
-#: ecommerce/courses/utils.py:139
+#: ecommerce/courses/utils.py:147
 msgid "Paid Bootcamp"
 msgstr ""
 
-#: ecommerce/courses/utils.py:140
+#: ecommerce/courses/utils.py:148
 msgid "Unpaid Bootcamp"
 msgstr ""
 
-#: ecommerce/credit/views.py:39
+#: ecommerce/credit/views.py:41
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
 " credit. Try the transaction again."
 msgstr "Bir hata oluştu. Ders kredisine uygun olduğunuzu doğrulayamadık. İşlemi tekrar deneyin."
 
-#: ecommerce/credit/views.py:60
+#: ecommerce/credit/views.py:62
 #, python-brace-format
 msgid ""
 "Credit is not currently available for \"{course_name}\". If you are "
@@ -445,7 +446,7 @@ msgid ""
 "Support Team."
 msgstr "Kredi şu anda \"{course_name}\" için kullanılamıyor. Şu anda derse kayıtlıysanız, lütfen tüm not verme işlemi tamamlandıktan sonra tekrar deneyin. Ek yardıma ihtiyacınız varsa, lütfen {site_name} Destek Ekibi ile iletişime geçin."
 
-#: ecommerce/credit/views.py:74
+#: ecommerce/credit/views.py:76
 msgid ""
 "An error has occurred. We could not confirm that the institution you "
 "selected offers this course credit. Try the transaction again."
@@ -473,7 +474,7 @@ msgstr "Yüzde"
 msgid "Absolute"
 msgstr "Kesin"
 
-#: ecommerce/enterprise/conditions.py:208
+#: ecommerce/enterprise/conditions.py:213
 #, python-brace-format
 msgid ""
 "This coupon has been made available through {new_enterprise}. To redeem this"
@@ -481,7 +482,7 @@ msgid ""
 "{new_enterprise} as your enterprise and try again."
 msgstr "Bu kupon {new_enterprise} aracılığıyla kullanıma sunulmuştur. Bu kuponu kullanmak için önce çıkış yapmalısınız. Tekrar oturum açtığınızda, lütfen kuruluşunuz olarak {new_enterprise} seçin ve tekrar deneyin."
 
-#: ecommerce/enterprise/conditions.py:362
+#: ecommerce/enterprise/conditions.py:367
 msgid ""
 "This code is not valid with your email. Please login with the correct email "
 "assigned to the code or contact your Learning Manager for additional "
@@ -741,31 +742,31 @@ msgid ""
 "              "
 msgstr "\n                %(platform_name)s Kurumsal Teklif Yönetim Aracı\n              "
 
-#: ecommerce/enterprise/utils.py:238
+#: ecommerce/enterprise/utils.py:239
 #, python-brace-format
 msgid "SKU {sku} does not exist."
 msgstr "Ürün Çeşit Türü {sku} bilgisi mevcut değil."
 
-#: ecommerce/enterprise/utils.py:247
+#: ecommerce/enterprise/utils.py:248
 #, python-brace-format
 msgid "There is no Enterprise Customer associated with SKU {sku}."
 msgstr "Ürün Çeşit Türü {sku} bilgisiyle bağlantılı bir Kurumsal Müşteri bulunmuyor."
 
-#: ecommerce/enterprise/utils.py:255
+#: ecommerce/enterprise/utils.py:256
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise}."
 msgstr "Verilerinizin paylaşımıyla ilgili bir endişeniz varsa, lütfen {enterprise} yöneticileriyle iletişime geçin."
 
-#: ecommerce/enterprise/utils.py:258
+#: ecommerce/enterprise/utils.py:259
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise} at {contact_info}."
 msgstr "Verilerinizin paylaşımıyla ilgili bir endişeniz varsa, lütfen {enterprise} yöneticileriyle {contact_info} üzerinden iletişime geçin."
 
-#: ecommerce/enterprise/utils.py:264
+#: ecommerce/enterprise/utils.py:265
 #, python-brace-format
 msgid "Enrollment in {course_name} was not complete."
 msgstr "{course_name} eğitimine kayıt işlemi tamamlanmadı."
@@ -801,41 +802,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:250
+#: ecommerce/extensions/api/serializers.py:252
 msgid "EXPIRED"
 msgstr "SÜRESİ DOLDU"
 
-#: ecommerce/extensions/api/serializers.py:252
+#: ecommerce/extensions/api/serializers.py:254
 msgid "INACTIVE"
 msgstr "PASİF"
 
-#: ecommerce/extensions/api/serializers.py:253
+#: ecommerce/extensions/api/serializers.py:255
 msgid "ACTIVE"
 msgstr "AKTİF"
 
-#: ecommerce/extensions/api/serializers.py:554
+#: ecommerce/extensions/api/serializers.py:559
 msgid "Products must have a certificate type."
 msgstr "Ürünler bir sertifika türüne sahip olmak zorunda."
 
-#: ecommerce/extensions/api/serializers.py:557
-#: ecommerce/extensions/api/serializers.py:597
+#: ecommerce/extensions/api/serializers.py:562
+#: ecommerce/extensions/api/serializers.py:602
 msgid "Products must have a price."
 msgstr "Ürünlerin ücreti olmak zorunda."
 
-#: ecommerce/extensions/api/serializers.py:564
+#: ecommerce/extensions/api/serializers.py:569
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:593
+#: ecommerce/extensions/api/serializers.py:598
 msgid "Products must indicate whether ID verification is required."
 msgstr "Ürünler, kimlik doğrulamasının gerekli olup olmadığını belirtmelidir."
 
-#: ecommerce/extensions/api/serializers.py:664
+#: ecommerce/extensions/api/serializers.py:669
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Geçersiz istenen  [{product_class}] ürün sınıfı."
 
-#: ecommerce/extensions/api/serializers.py:696
+#: ecommerce/extensions/api/serializers.py:701
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -843,39 +844,39 @@ msgid ""
 " been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1280
+#: ecommerce/extensions/api/serializers.py:1332
 msgid "Enrollment code"
 msgstr "Kayıt kodu"
 
-#: ecommerce/extensions/api/serializers.py:1281
+#: ecommerce/extensions/api/serializers.py:1333
 msgid "Discount code"
 msgstr "İndirim kodu"
 
-#: ecommerce/extensions/api/serializers.py:1746
+#: ecommerce/extensions/api/serializers.py:1800
 msgid "Invalid order number or order {} does not exists."
 msgstr "Geçersiz sipariş numarası ya da {} siparişi mevcut değil."
 
-#: ecommerce/extensions/api/serializers.py:1801
+#: ecommerce/extensions/api/serializers.py:1855
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1819
+#: ecommerce/extensions/api/serializers.py:1873
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1850
+#: ecommerce/extensions/api/serializers.py:1904
 msgid "Could note create new voucher for the order: {}"
 msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:445
-#: ecommerce/extensions/basket/views.py:459
+#: ecommerce/extensions/basket/views.py:458
 msgid "No SKUs provided."
 msgstr "SKU bilgisi mevcut değil."
 
 #: ecommerce/extensions/api/v2/views/baskets.py:456
-#: ecommerce/extensions/basket/views.py:466
+#: ecommerce/extensions/basket/views.py:465
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr "Ürün Çeşit Türü (SKU) [{skus}] numaralı bu ürünler mevcut değil."
@@ -963,34 +964,34 @@ msgstr "'{code}' kupon kodu sepete eklendi."
 msgid "Basket does not qualify for coupon code {code}."
 msgstr "Sepet, {code} kupon kodu için uygun değil."
 
-#: ecommerce/extensions/basket/views.py:205
+#: ecommerce/extensions/basket/views.py:204
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr "'{code}' kodu uygulanamadı; veri paylaşımı onayı gerektiriyor."
 
-#: ecommerce/extensions/basket/views.py:296
+#: ecommerce/extensions/basket/views.py:295
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
 msgstr "Siparişinizi tamamladıktan sonra panelden ders tarihlerini seçebileceksiniz."
 
-#: ecommerce/extensions/basket/views.py:311
+#: ecommerce/extensions/basket/views.py:310
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "verified track of the course."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:315
+#: ecommerce/extensions/basket/views.py:314
 msgid "After you complete your order you will receive credit for your course."
 msgstr "Siparişinizi tamamladıktan sonra bu ders için kredi alacaksınız."
 
-#: ecommerce/extensions/basket/views.py:318
+#: ecommerce/extensions/basket/views.py:317
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
 msgstr "Siparişinizi tamamladıktan sonra otomatik olarak bu derse kayıt olacaksınız."
 
-#: ecommerce/extensions/basket/views.py:322
+#: ecommerce/extensions/basket/views.py:321
 #, python-brace-format
 msgid ""
 "{paragraph_start}By purchasing, you and your organization agree to the "
@@ -1007,7 +1008,7 @@ msgid ""
 "{paragraph_end}"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:360
+#: ecommerce/extensions/basket/views.py:359
 #, python-brace-format
 msgid ""
 "{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If "
@@ -1016,39 +1017,39 @@ msgid ""
 "enroll directly.{paragraph_end}"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:438
+#: ecommerce/extensions/basket/views.py:437
 msgid "You have already purchased these products"
 msgstr "Bu ürünleri zaten satın aldınız"
 
-#: ecommerce/extensions/basket/views.py:483
+#: ecommerce/extensions/basket/views.py:482
 msgid "No product is available to buy."
 msgstr "Satın alınabilecek ürün yok."
 
-#: ecommerce/extensions/basket/views.py:900
+#: ecommerce/extensions/basket/views.py:899
 msgid "quantity successfully updated"
 msgstr "miktar başarıyla güncellendi"
 
-#: ecommerce/extensions/basket/views.py:919
+#: ecommerce/extensions/basket/views.py:918
 msgid ""
 "Your basket couldn't be updated. Please correct any validation errors below."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:973
+#: ecommerce/extensions/basket/views.py:972
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr "'{code}' kupon kodu sepetinize hali hazırda ekli."
 
-#: ecommerce/extensions/basket/views.py:1049
+#: ecommerce/extensions/basket/views.py:1048
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr "'{code}' kupon kodu mevcut değil."
 
-#: ecommerce/extensions/basket/views.py:1134
+#: ecommerce/extensions/basket/views.py:1133
 #, python-format
 msgid "No coupon found with id '%s'"
 msgstr "'%s' numaralı kupon bulunamadı"
 
-#: ecommerce/extensions/basket/views.py:1138
+#: ecommerce/extensions/basket/views.py:1137
 #, python-format
 msgid "Coupon code '%s' was removed from your basket."
 msgstr "'%s' kupon kodu sepetinizden kaldırıldı."
@@ -1097,8 +1098,8 @@ msgid "Refund ID"
 msgstr "İade ID"
 
 #: ecommerce/extensions/dashboard/refunds/forms.py:16
-#: ecommerce/extensions/refund/models.py:70
-#: ecommerce/extensions/refund/models.py:267
+#: ecommerce/extensions/refund/models.py:72
+#: ecommerce/extensions/refund/models.py:316
 #: ecommerce/extensions/voucher/utils.py:222
 #: ecommerce/extensions/voucher/utils.py:281
 #: ecommerce/extensions/voucher/utils.py:318
@@ -1151,23 +1152,23 @@ msgstr "Otomatik"
 msgid "Manual"
 msgstr "El ile"
 
-#: ecommerce/extensions/offer/models.py:416
+#: ecommerce/extensions/offer/models.py:426
 msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:427
+#: ecommerce/extensions/offer/models.py:437
 msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:551
+#: ecommerce/extensions/offer/models.py:569
 msgid "EnterpriseCustomer Name"
 msgstr "KurumsalMüşteri Adı"
 
-#: ecommerce/extensions/offer/models.py:556
+#: ecommerce/extensions/offer/models.py:574
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr "KurumsalMüşteriKatalog UUID"
 
-#: ecommerce/extensions/offer/models.py:561
+#: ecommerce/extensions/offer/models.py:579
 #: ecommerce/extensions/voucher/utils.py:53
 #: ecommerce/extensions/voucher/utils.py:190
 #: ecommerce/extensions/voucher/utils.py:270
@@ -1178,35 +1179,35 @@ msgstr "KurumsalMüşteriKatalog UUID"
 msgid "Program UUID"
 msgstr "Program UUID"
 
-#: ecommerce/extensions/offer/models.py:574
+#: ecommerce/extensions/offer/models.py:592
 msgid "Email to user pending."
 msgstr "Kullanıcıya gönderilecek e-posta beklemede."
 
-#: ecommerce/extensions/offer/models.py:575
+#: ecommerce/extensions/offer/models.py:593
 msgid "Code successfully assigned to user."
 msgstr "Kod başarıyla kullanıcıya atandı."
 
-#: ecommerce/extensions/offer/models.py:576
+#: ecommerce/extensions/offer/models.py:594
 msgid "Code has been redeemed by user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:577
+#: ecommerce/extensions/offer/models.py:595
 msgid "Email to user bounced."
 msgstr "Kullanıcıya gönderilen e-posta geri döndü."
 
-#: ecommerce/extensions/offer/models.py:578
+#: ecommerce/extensions/offer/models.py:596
 msgid "Code has been revoked for this user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:624
+#: ecommerce/extensions/offer/models.py:642
 msgid "Make a particular template version active."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:837
+#: ecommerce/extensions/offer/models.py:855
 msgid "Email has been sent."
 msgstr "E-posta gönderildi."
 
-#: ecommerce/extensions/offer/models.py:838
+#: ecommerce/extensions/offer/models.py:856
 msgid "This user should receive email"
 msgstr "Bu kullanıcı e-posta alabilir"
 
@@ -1385,7 +1386,7 @@ msgstr "Yüzde cinsinden oran 100'den yüksek olamaz."
 #. to indicate that truncation has occurred. For example, if a title may only
 #. be at most 11 characters long, "A Very Long Title" (17 characters) would be
 #. truncated to "A Ve...itle".
-#: ecommerce/extensions/payment/utils.py:74
+#: ecommerce/extensions/payment/utils.py:75
 msgid "..."
 msgstr "..."
 
@@ -1403,38 +1404,38 @@ msgid ""
 "switch. Be careful when re-activating this switch!"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:65
+#: ecommerce/extensions/refund/models.py:67
 msgid "Order"
 msgstr "Sipariş"
 
-#: ecommerce/extensions/refund/models.py:66
+#: ecommerce/extensions/refund/models.py:68
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:680
 msgid "User"
 msgstr "Kullanıcı"
 
-#: ecommerce/extensions/refund/models.py:67
+#: ecommerce/extensions/refund/models.py:69
 msgid "Total Credit (excl. tax)"
 msgstr "Toplam Kredi (vergi hariç)"
 
-#: ecommerce/extensions/refund/models.py:68
+#: ecommerce/extensions/refund/models.py:70
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:200
 msgid "Currency"
 msgstr "Para"
 
-#: ecommerce/extensions/refund/models.py:259
+#: ecommerce/extensions/refund/models.py:308
 msgid "Refund"
 msgstr "İade"
 
-#: ecommerce/extensions/refund/models.py:262
+#: ecommerce/extensions/refund/models.py:311
 msgid "Order Line"
 msgstr "Sipariş Hattı"
 
-#: ecommerce/extensions/refund/models.py:264
+#: ecommerce/extensions/refund/models.py:313
 msgid "Line Credit (excl. tax)"
 msgstr "Kredi Limiti (vergi hariç)"
 
-#: ecommerce/extensions/refund/models.py:265
-#: ecommerce/templates/edx/checkout/receipt.html:95
+#: ecommerce/extensions/refund/models.py:314
+#: ecommerce/templates/edx/checkout/receipt.html:93
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:30
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:51
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:43
@@ -1479,39 +1480,39 @@ msgstr ""
 msgid "This voucher is assigned to another user."
 msgstr ""
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:211
+#: ecommerce/extensions/voucher/tests/test_utils.py:215
 #: ecommerce/extensions/voucher/utils.py:76
 #: ecommerce/extensions/voucher/utils.py:318
 msgid "Redeemed"
 msgstr "Mahsuplaşıldı"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:375
-#: ecommerce/extensions/voucher/tests/test_utils.py:380
+#: ecommerce/extensions/voucher/tests/test_utils.py:379
+#: ecommerce/extensions/voucher/tests/test_utils.py:384
 #: ecommerce/extensions/voucher/utils.py:95
 #: ecommerce/extensions/voucher/utils.py:161
-#: ecommerce/templates/edx/checkout/receipt.html:127
+#: ecommerce/templates/edx/checkout/receipt.html:125
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:261
 msgid "Discount"
 msgstr "İndirim"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:375
-#: ecommerce/extensions/voucher/tests/test_utils.py:380
+#: ecommerce/extensions/voucher/tests/test_utils.py:379
+#: ecommerce/extensions/voucher/tests/test_utils.py:384
 #: ecommerce/extensions/voucher/utils.py:95
 #: ecommerce/extensions/voucher/utils.py:161
 msgid "Enrollment"
 msgstr "Kayıt"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:376
-#: ecommerce/extensions/voucher/tests/test_utils.py:384
+#: ecommerce/extensions/voucher/tests/test_utils.py:380
+#: ecommerce/extensions/voucher/tests/test_utils.py:388
 #: ecommerce/extensions/voucher/utils.py:96
 #: ecommerce/extensions/voucher/utils.py:165
 #, python-brace-format
 msgid "{percentage} %"
 msgstr " % {percentage}"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:540
+#: ecommerce/extensions/voucher/tests/test_utils.py:544
 #: ecommerce/extensions/voucher/utils.py:78
 msgid "Inactive"
 msgstr "Pasif"
@@ -1918,15 +1919,15 @@ msgstr "Hediye Kartları"
 msgid "Reports"
 msgstr "Raporlar"
 
-#: ecommerce/settings/base.py:90
+#: ecommerce/settings/base.py:92
 msgid "English"
 msgstr "İngilizce"
 
-#: ecommerce/settings/base.py:91
+#: ecommerce/settings/base.py:93
 msgid "Spanish"
 msgstr "İspanyolca"
 
-#: ecommerce/settings/base.py:92
+#: ecommerce/settings/base.py:94
 msgid "Spanish (Latin American)"
 msgstr "İspanyolca (Latin Amerika)"
 
@@ -2032,91 +2033,88 @@ msgid ""
 msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:59
-#, python-brace-format
 msgid ""
-"Your order is complete. If you need a receipt, you can print this page. You "
-"will also receive a confirmation message with this information at "
-"{link_start}{email}{link_end}."
+"Your order is complete. If you need a receipt, you can print this page."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:79
+#: ecommerce/templates/edx/checkout/receipt.html:77
 msgid "Order Number:"
 msgstr "Sipariş Numarası:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:82
+#: ecommerce/templates/edx/checkout/receipt.html:80
 msgid "Payment Method:"
 msgstr "Ödeme Yöntemi:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:85
+#: ecommerce/templates/edx/checkout/receipt.html:83
 msgid "Order Date:"
 msgstr "Sipariş Tarihi:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:91
+#: ecommerce/templates/edx/checkout/receipt.html:89
 msgid "Order Information"
 msgstr "Sipariş Bilgisi"
 
-#: ecommerce/templates/edx/checkout/receipt.html:96
+#: ecommerce/templates/edx/checkout/receipt.html:94
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:59
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:12
 msgid "Description"
 msgstr "Açıklama"
 
-#: ecommerce/templates/edx/checkout/receipt.html:97
+#: ecommerce/templates/edx/checkout/receipt.html:95
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:39
 msgid "Item Price"
 msgstr "Ürün Fiyatı"
 
-#: ecommerce/templates/edx/checkout/receipt.html:101
+#: ecommerce/templates/edx/checkout/receipt.html:99
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:184
 msgid "Quantity:"
 msgstr "Adet:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:103
+#: ecommerce/templates/edx/checkout/receipt.html:101
 msgid "Description:"
 msgstr "Açıklama:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:112
+#: ecommerce/templates/edx/checkout/receipt.html:110
 msgid "Item Price:"
 msgstr "Ürün Fiyatı:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:118
+#: ecommerce/templates/edx/checkout/receipt.html:116
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:52
 msgid "Subtotal"
 msgstr "Alt toplam"
 
-#: ecommerce/templates/edx/checkout/receipt.html:134
+#: ecommerce/templates/edx/checkout/receipt.html:132
 #, python-format
 msgid "%(voucher_discount_amount)s off"
 msgstr "%(voucher_discount_amount)s indirimi"
 
-#: ecommerce/templates/edx/checkout/receipt.html:144
+#: ecommerce/templates/edx/checkout/receipt.html:142
 #, python-format
 msgid "Discount of type %(type)s provided by %(enterprise_name)s"
 msgstr "%(enterprise_name)s tarafından sunulan %(type)s indirim türü"
 
-#: ecommerce/templates/edx/checkout/receipt.html:149
+#: ecommerce/templates/edx/checkout/receipt.html:147
 msgid "Discount for your first upgrade"
 msgstr "İlk yükseltme için indirim oranı"
 
-#: ecommerce/templates/edx/checkout/receipt.html:152
+#: ecommerce/templates/edx/checkout/receipt.html:150
 #, python-format
 msgid "Discount of type %(type)s is provided."
 msgstr "%(type)s indirim türü sunuluyor."
 
-#: ecommerce/templates/edx/checkout/receipt.html:166
+#: ecommerce/templates/edx/checkout/receipt.html:164
 #, python-format
 msgid "Courtesy of %(enterprise_name)s."
 msgstr "%(enterprise_name)s katkılarıyla."
 
-#: ecommerce/templates/edx/checkout/receipt.html:179
+#: ecommerce/templates/edx/checkout/receipt.html:177
 msgid "Total"
 msgstr "Toplam"
 
-#: ecommerce/templates/edx/checkout/receipt.html:186
+#: ecommerce/templates/edx/checkout/receipt.html:184
 msgid "Get Your Course Credit"
 msgstr "Eğitim Kredinizi Alın"
 
-#: ecommerce/templates/edx/checkout/receipt.html:188
+#: ecommerce/templates/edx/checkout/receipt.html:186
 #, python-brace-format
 msgid ""
 "To receive academic credit for this course, you must apply for credit at the"
@@ -2126,11 +2124,11 @@ msgid ""
 " course name."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:201
+#: ecommerce/templates/edx/checkout/receipt.html:199
 msgid "Go to dashboard"
 msgstr "Ana panele git"
 
-#: ecommerce/templates/edx/checkout/receipt.html:204
+#: ecommerce/templates/edx/checkout/receipt.html:202
 msgid "Find more courses"
 msgstr "Yeni dersler bul"
 
