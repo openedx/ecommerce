@@ -8,6 +8,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Hoà Lê Thanh <hoa.lethanh@gmail.com>, 2017
 # h4cl3s <nl98hk@gmail.com>, 2021
 # Nguyen Nhat Quang <technicalmanager@gmail.com>, 2016
@@ -16,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-08 20:12+0000\n"
+"POT-Creation-Date: 2022-06-12 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: h4cl3s <nl98hk@gmail.com>, 2021\n"
 "Language-Team: Vietnamese (http://www.transifex.com/open-edx/edx-platform/language/vi/)\n"
