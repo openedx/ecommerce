@@ -604,9 +604,6 @@ CELERY_ACCEPT_CONTENT = ['json', 'pickle', 'yaml']
 
 THEME_SCSS = 'sass/themes/default.scss'
 
-# Path to the receipt page
-RECEIPT_PAGE_PATH = '/checkout/receipt/'
-
 # URL for Discovery Service
 COURSE_CATALOG_API_URL = 'http://localhost:8008/api/v1/'
 
