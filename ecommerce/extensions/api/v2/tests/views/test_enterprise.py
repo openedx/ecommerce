@@ -3969,6 +3969,68 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
         response = self.client.get(path)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_view_usage_type_filter(self):
+        """
+        Verify endpoint returns correct number of enterprise offers.
+        """
+
+        enterprise_customer_uuid = str(uuid4())
+        # Make % discount offers
+        for _ in range(2):
+            benefit = extended_factories.EnterprisePercentageDiscountBenefitFactory(value=100)
+            condition = extended_factories.EnterpriseCustomerConditionFactory(
+                enterprise_customer_uuid=enterprise_customer_uuid
+            )
+            extended_factories.EnterpriseOfferFactory(
+                condition=condition,
+                benefit=benefit,
+                max_discount=20,
+                max_basket_applications=2,
+                partner=self.partner,
+            )
+
+        # Make absolute discount offer
+        benefit = extended_factories.EnterpriseAbsoluteDiscountBenefitFactory(value=100)
+        condition = extended_factories.EnterpriseCustomerConditionFactory(
+            enterprise_customer_uuid=enterprise_customer_uuid
+        )
+        extended_factories.EnterpriseOfferFactory(
+            condition=condition,
+            benefit=benefit,
+            max_discount=20,
+            max_basket_applications=2,
+            partner=self.partner,
+        )
+
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=enterprise_customer_uuid
+        )
+
+        # Try out the filter
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid},
+        )
+        query_params = {'usage_type': 'PerCenTaGe'}
+        response = self.client.get(path, query_params)
+        assert len(response.json()['results']) == 2
+
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid},
+        )
+        query_params = {'usage_type': 'abSolute'}
+        response = self.client.get(path, query_params)
+        assert len(response.json()['results']) == 1
+
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid},
+        )
+        query_params = {'usage_type': 'free!!'}
+        response = self.client.get(path, query_params)
+        assert len(response.json()['results']) == 0
+
 
 class OfferAssignmentSummaryViewSetTests(
         CouponMixin,

@@ -27,6 +27,7 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_catalogs,
     get_enterprise_customers
 )
+from ecommerce.extensions.api.filters import OfferApiFilter
 from ecommerce.extensions.api.pagination import DatatablesDefaultPagination
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
@@ -1023,6 +1024,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
 class BaseOfferApiViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
     model = ConditionalOffer
     permission_classes = (IsAuthenticated,)
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filterset_class = OfferApiFilter
 
     def get_permission_object(self):
         return self.kwargs.get('enterprise_customer')
