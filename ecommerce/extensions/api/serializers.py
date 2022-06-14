@@ -994,6 +994,7 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
         representation['usage_type'] = get_benefit_type(instance.benefit)
         representation['discount_value'] = instance.benefit.value
+        representation['status'] = instance.status
 
         return representation
 
