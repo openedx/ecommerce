@@ -3863,7 +3863,7 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
         assert len(response_json['results']) == 1
         enterprise_offer_data = response_json['results'][0]
         assert enterprise_offer_data['enterprise_customer_uuid'] == enterprise_customer_uuid
-        assert enterprise_offer_data['remaining_balance'] == 1.63
+        assert enterprise_offer_data['remaining_balance'] == "1.63"
 
     def test_admin_view_permission_search_403_wrong_permission(self):
         """

@@ -1015,7 +1015,11 @@ class EnterpriseAdminOfferApiSerializer(serializers.ModelSerializer):  # pylint:
         representation['discount_value'] = instance.benefit.value
         representation['enterprise_customer_uuid'] = instance.condition.enterprise_customer_uuid
         representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
-        representation['remaining_balance'] = calculate_remaining_offer_balance(instance)
+
+        remaining_balance = calculate_remaining_offer_balance(instance)
+        if remaining_balance is not None:
+            remaining_balance = str(remaining_balance)
+        representation['remaining_balance'] = remaining_balance
 
         return representation
 
