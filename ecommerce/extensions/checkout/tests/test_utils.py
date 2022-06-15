@@ -93,7 +93,9 @@ class UtilTests(TestCase):
             use_new_page=value
         )
 
-        if value and FA_ECOMMERCE_URL_ROOT:
-            self.assertEqual(receipt_url, FA_ECOMMERCE_URL_ROOT + '/orders' + test_params)
+        if value is not None and FA_ECOMMERCE_URL_ROOT is not None:
+            result = FA_ECOMMERCE_URL_ROOT + '/orders'
+            second_result = result + test_params
+            self.assertEqual(receipt_url, second_result)
         else:
             self.assertEqual(receipt_url, ECOMMERCE_ROOT + 'checkout/receipt/' + test_params)
