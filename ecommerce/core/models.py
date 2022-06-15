@@ -319,6 +319,15 @@ class SiteConfiguration(models.Model):
         ecommerce_url_root = "{scheme}://{domain}".format(scheme=scheme, domain=self.site.domain)
         return urljoin(ecommerce_url_root, path)
 
+    def build_fa_ecommerce_url(self, path=''):
+        """
+        Returns path joined with the appropriate frontend_app_ecommerce URL root.
+
+        Returns:
+            str
+        """
+        return urljoin(self.fa_ecommerce_url_root, path)
+
     def build_lms_url(self, path=''):
         """
         Returns path joined with the appropriate LMS URL root for the current site.
