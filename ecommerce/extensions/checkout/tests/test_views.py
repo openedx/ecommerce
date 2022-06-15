@@ -108,29 +108,6 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         )
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
-    @responses.activate
-    def test_successful_redirect_ecommerce_MFE(self):
-        """ Verify redirect to the new ecommerce MFE receipt page. """
-        ORDER_DISPLAY_ROOT = 'http://localhost:1996'
-        url_suffix = '/orders'  # will replace this with receipt page when available
-        temporary_path = ORDER_DISPLAY_ROOT + url_suffix
-
-        self.prepare_basket(0)
-        self.assertEqual(Order.objects.count(), 0)
-        response = self.client.get(self.path)  # response = self.client.get(temporary_path)
-        self.assertEqual(Order.objects.count(), 1)
-
-        use_new_receipt_page = True
-        order = Order.objects.first()
-        expected_url = get_receipt_page_url(
-            order_number=order.number,
-            site_configuration=order.site.siteconfiguration,
-            disable_back_button=True,
-            use_new_page=use_new_receipt_page
-        )
-        print(temporary_path, response, expected_url)
-        # self.assertRedirects(response, expected_url, fetch_redirect_response=False)
-
 
 class CancelCheckoutViewTests(TestCase):
     """ CancelCheckoutView view tests. """
