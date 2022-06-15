@@ -977,6 +977,16 @@ class CouponListSerializer(serializers.ModelSerializer):
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
 
 
+def _serialize_remaining_balance_value(conditional_offer):
+    """
+    Change value into string and return it unless it is None.
+    """
+    remaining_balance = calculate_remaining_offer_balance(conditional_offer)
+    if remaining_balance is not None:
+        remaining_balance = str(remaining_balance)
+    return remaining_balance
+
+
 class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
     """
     Serializer for EnterpriseOffer learner endpoint.
@@ -995,11 +1005,7 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation['usage_type'] = get_benefit_type(instance.benefit)
         representation['discount_value'] = instance.benefit.value
         representation['status'] = instance.status
-
-        remaining_balance = calculate_remaining_offer_balance(instance)
-        if remaining_balance is not None:
-            remaining_balance = str(remaining_balance)
-        representation['remaining_balance'] = remaining_balance
+        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
 
         return representation
 
@@ -1021,11 +1027,7 @@ class EnterpriseAdminOfferApiSerializer(serializers.ModelSerializer):  # pylint:
         representation['enterprise_customer_uuid'] = instance.condition.enterprise_customer_uuid
         representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
         representation['display_name'] = generate_offer_display_name(instance)
-
-        remaining_balance = calculate_remaining_offer_balance(instance)
-        if remaining_balance is not None:
-            remaining_balance = str(remaining_balance)
-        representation['remaining_balance'] = remaining_balance
+        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
 
         return representation
 
