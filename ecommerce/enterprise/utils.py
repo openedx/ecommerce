@@ -736,3 +736,20 @@ def calculate_remaining_offer_balance(conditional_offer):
     if conditional_offer.max_discount:
         return conditional_offer.max_discount - conditional_offer.total_discount
     return None
+
+
+def generate_offer_display_name(conditional_offer):
+    """
+    Generate a user-friendly display name for an offer.
+
+    Returns None if start_date is not available.
+    """
+    enterprise_name = conditional_offer.condition.enterprise_customer_name
+
+    start_date = conditional_offer.start_datetime
+    if start_date is not None:
+        start_date = start_date.strftime('%b%y').upper()
+
+    if enterprise_name and start_date:
+        return "{} - {}".format(enterprise_name, start_date)
+    return None

@@ -35,6 +35,7 @@ from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
 from ecommerce.enterprise.utils import (
     calculate_remaining_offer_balance,
+    generate_offer_display_name,
     get_enterprise_customer_reply_to_email,
     get_enterprise_customer_sender_alias,
     get_enterprise_customer_uuid_from_voucher
@@ -976,6 +977,16 @@ class CouponListSerializer(serializers.ModelSerializer):
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
 
 
+def _serialize_remaining_balance_value(conditional_offer):
+    """
+    Change value into string and return it unless it is None.
+    """
+    remaining_balance = calculate_remaining_offer_balance(conditional_offer)
+    if remaining_balance is not None:
+        remaining_balance = str(remaining_balance)
+    return remaining_balance
+
+
 class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
     """
     Serializer for EnterpriseOffer learner endpoint.
@@ -987,7 +998,6 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation = OrderedDict()
 
         representation['id'] = instance.id
-        representation['remaining_balance'] = calculate_remaining_offer_balance(instance)
         representation['max_discount'] = instance.max_discount
         representation['start_datetime'] = instance.start_datetime
         representation['end_datetime'] = instance.end_datetime
@@ -995,6 +1005,7 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation['usage_type'] = get_benefit_type(instance.benefit)
         representation['discount_value'] = instance.benefit.value
         representation['status'] = instance.status
+        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
 
         return representation
 
@@ -1015,11 +1026,8 @@ class EnterpriseAdminOfferApiSerializer(serializers.ModelSerializer):  # pylint:
         representation['discount_value'] = instance.benefit.value
         representation['enterprise_customer_uuid'] = instance.condition.enterprise_customer_uuid
         representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
-
-        remaining_balance = calculate_remaining_offer_balance(instance)
-        if remaining_balance is not None:
-            remaining_balance = str(remaining_balance)
-        representation['remaining_balance'] = remaining_balance
+        representation['display_name'] = generate_offer_display_name(instance)
+        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
 
         return representation
 

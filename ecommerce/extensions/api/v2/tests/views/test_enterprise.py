@@ -3763,6 +3763,7 @@ class EnterpriseCouponViewSetRbacTests(
         assert OfferAssignmentEmailSentRecord.objects.filter(email_type=REVOKE).count() == offer_assignments.count()
 
 
+@ddt.ddt
 class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase):
 
     def setUp(self):
@@ -4030,6 +4031,41 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
         query_params = {'usage_type': 'free!!'}
         response = self.client.get(path, query_params)
         assert len(response.json()['results']) == 0
+
+    @ddt.data(
+        (datetime.datetime(1337, 12, 4), 'Company Name - DEC37'),
+        (None, None)
+    )
+    @ddt.unpack
+    def test_admin_view_display_name(self, start_datetime, expected_display_name):
+        """
+        Verify display_name in api output if conditions are met.
+        """
+
+        enterprise_customer_uuid = str(uuid4())
+        benefit = extended_factories.EnterprisePercentageDiscountBenefitFactory(value=100)
+        condition = extended_factories.EnterpriseCustomerConditionFactory(
+            enterprise_customer_uuid=enterprise_customer_uuid,
+            enterprise_customer_name='Company Name'
+        )
+        extended_factories.EnterpriseOfferFactory(
+            start_datetime=start_datetime,
+            condition=condition,
+            benefit=benefit,
+            max_discount=20,
+            max_basket_applications=2,
+            partner=self.partner,
+        )
+
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=enterprise_customer_uuid
+        )
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid},
+        )
+        response_json = self.client.get(path).json()
+        assert response_json['results'][0]['display_name'] == expected_display_name
 
 
 class OfferAssignmentSummaryViewSetTests(
