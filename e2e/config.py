@@ -26,7 +26,7 @@ ECOMMERCE_API_URL = os.environ.get('ECOMMERCE_API_URL', ECOMMERCE_URL_ROOT + '/a
 ECOMMERCE_TEST_WEB_SECURITY = os.environ.get('ECOMMERCE_TEST_WEB_SECURITY')
 
 # FA_ECOMMERCE_URL_ROOT = 'http://localhost:1996'
-FA_ECOMMERCE_URL_ROOT = os.environ.get('FA_ECOMMERCE_URL_ROOT').strip('/')
+FA_ECOMMERCE_URL_ROOT = os.environ.get('FA_ECOMMERCE_URL_ROOT')
 # Do we want to raise an exception? (doing nothing just uses existing page)
 # try:
 #     FA_ECOMMERCE_URL_ROOT = os.environ.get('FA_ECOMMERCE_URL_ROOT').strip('/')

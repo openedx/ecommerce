@@ -81,10 +81,10 @@ class UtilTests(TestCase):
         test_params = '?order_number=EDX-100001&disable_back_button=1'
 
         ECOMMERCE_ROOT = 'http://testserver.fake/'
-        # do something better, like:         base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
+        # do something better, like: base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
 
-        ECOMMERCE_URL = ECOMMERCE_ROOT + 'checkout/receipt/' + test_params
-        FA_ECOMMERCE_URL = FA_ECOMMERCE_URL_ROOT + '/orders' + test_params
+        # ECOMMERCE_URL = ECOMMERCE_ROOT + 'checkout/receipt/' + test_params
+        # FA_ECOMMERCE_URL = FA_ECOMMERCE_URL_ROOT + '/orders' + test_params
 
         receipt_url = get_receipt_page_url(
             order_number=self.order_number,
@@ -93,7 +93,7 @@ class UtilTests(TestCase):
             use_new_page=value
         )
 
-        if value:
-            self.assertEqual(receipt_url, FA_ECOMMERCE_URL)
+        if value and FA_ECOMMERCE_URL_ROOT:
+            self.assertEqual(receipt_url, FA_ECOMMERCE_URL_ROOT + '/orders' + test_params)
         else:
-            self.assertEqual(receipt_url, ECOMMERCE_URL)
+            self.assertEqual(receipt_url, ECOMMERCE_ROOT + 'checkout/receipt/' + test_params)

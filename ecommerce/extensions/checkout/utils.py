@@ -7,7 +7,7 @@ from babel.numbers import format_currency as default_format_currency
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import get_language, to_locale
-from e2e.config import FA_ECOMMERCE_URL_ROOT  # RuntimeError: Valid OAuth details must be provided.
+from e2e.config import FA_ECOMMERCE_URL_ROOT
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import HTTPError, Timeout
 
