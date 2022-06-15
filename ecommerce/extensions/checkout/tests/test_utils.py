@@ -7,6 +7,7 @@ import responses
 from requests import ConnectionError as ReqConnectionError
 from requests import Timeout
 
+from e2e.config import FA_ECOMMERCE_URL_ROOT
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.tests.testcases import TestCase
 
@@ -77,8 +78,14 @@ class UtilTests(TestCase):
     def test_get_receipt_page_url(self, value):
         """ Verify the function returns the appropriate url when waffle flag is True, False, missing"""
 
-        ECOMMERCE_URL = 'http://testserver.fake/checkout/receipt/?order_number=EDX-100001&disable_back_button=1'
-        FA_ECOMMERCE_URL = 'http://localhost:1996/orders?order_number=EDX-100001&disable_back_button=1'
+        test_params = '?order_number=EDX-100001&disable_back_button=1'
+
+        ECOMMERCE_ROOT = 'http://testserver.fake/'
+        # do something better, like:         base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
+
+        ECOMMERCE_URL = ECOMMERCE_ROOT + 'checkout/receipt/' + test_params
+        FA_ECOMMERCE_URL = FA_ECOMMERCE_URL_ROOT + '/orders' + test_params
+
         receipt_url = get_receipt_page_url(
             order_number=self.order_number,
             site_configuration=self.site_configuration,

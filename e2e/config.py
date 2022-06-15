@@ -24,6 +24,8 @@ except AttributeError as attribute_error:
 
 ECOMMERCE_API_URL = os.environ.get('ECOMMERCE_API_URL', ECOMMERCE_URL_ROOT + '/api/v2')
 ECOMMERCE_TEST_WEB_SECURITY = os.environ.get('ECOMMERCE_TEST_WEB_SECURITY')
+# FA_ECOMMERCE_URL_ROOT = os.environ.get('FA_ECOMMERCE_URL_ROOT').strip('/')
+FA_ECOMMERCE_URL_ROOT='http://localhost:1996'
 
 PAYPAL_EMAIL = os.environ.get('PAYPAL_EMAIL')
 PAYPAL_PASSWORD = os.environ.get('PAYPAL_PASSWORD')
