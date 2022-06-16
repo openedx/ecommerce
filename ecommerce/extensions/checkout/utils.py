@@ -7,7 +7,7 @@ from babel.numbers import format_currency as default_format_currency
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import get_language, to_locale
-from e2e.config import FA_ECOMMERCE_URL_ROOT
+from e2e.config import ECOMMERCE_MICROFRONTEND_URL
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import HTTPError, Timeout
 
@@ -59,7 +59,7 @@ def get_receipt_page_url(site_configuration, order_number=None, override_url=Non
         url_params['disable_back_button'] = int(disable_back_button)
     if use_new_page:
         url_suffix = '/orders'  # will replace this with receipt page when available
-        base_url = FA_ECOMMERCE_URL_ROOT + url_suffix
+        base_url = ECOMMERCE_MICROFRONTEND_URL + url_suffix
     else:
         base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
     params = parse.urlencode(url_params)

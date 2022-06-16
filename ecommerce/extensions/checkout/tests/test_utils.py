@@ -7,7 +7,7 @@ import responses
 from requests import ConnectionError as ReqConnectionError
 from requests import Timeout
 
-from e2e.config import FA_ECOMMERCE_URL_ROOT
+from e2e.config import ECOMMERCE_MICROFRONTEND_URL
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.tests.testcases import TestCase
 
@@ -84,7 +84,7 @@ class UtilTests(TestCase):
         # do something better, like: base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
 
         # ECOMMERCE_URL = ECOMMERCE_ROOT + 'checkout/receipt/' + test_params
-        # FA_ECOMMERCE_URL = FA_ECOMMERCE_URL_ROOT + '/orders' + test_params
+        # FA_ECOMMERCE_URL = ECOMMERCE_MICROFRONTEND_URL + '/orders' + test_params
 
         receipt_url = get_receipt_page_url(
             order_number=self.order_number,
@@ -93,8 +93,8 @@ class UtilTests(TestCase):
             use_new_page=value
         )
 
-        if value is not None and FA_ECOMMERCE_URL_ROOT is not None:
-            result = FA_ECOMMERCE_URL_ROOT + '/orders'
+        if value is not None and ECOMMERCE_MICROFRONTEND_URL is not None:
+            result = ECOMMERCE_MICROFRONTEND_URL + '/orders'
             second_result = result + test_params
             self.assertEqual(receipt_url, second_result)
         else:
