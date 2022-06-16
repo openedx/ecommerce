@@ -37,7 +37,7 @@ Please also read `How To Contribute <https://github.com/edx/edx-platform/blob/ma
 Reporting Security Issues
 -------------------------
 
-Please do not report security issues in public. Please email security@edx.org.
+TEST Please do not report security issues in public. Please email security@edx.org.
 
 Get Help
 --------
