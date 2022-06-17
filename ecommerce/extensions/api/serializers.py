@@ -585,13 +585,16 @@ class EntitlementProductHelper:
         id_verified_default = certificate_type == 'professional'
         id_verification_required = attrs.get('id_verification_required', id_verified_default)
 
+        credit_provider = attrs.get('credit_provider')
+
         entitlement = create_or_update_course_entitlement(
             certificate_type,
             price,
             partner,
             uuid,
             course.name,
-            id_verification_required=id_verification_required
+            id_verification_required=id_verification_required,
+            credit_provider=credit_provider
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.
