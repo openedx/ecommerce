@@ -49,6 +49,7 @@ from ecommerce.extensions.api.v2.constants import (
     REFUND_ORDER_EMAIL_SUBJECT
 )
 from ecommerce.extensions.catalogue.utils import attach_vouchers_to_coupon_product
+from ecommerce.extensions.checkout.views import ReceiptResponseView
 from ecommerce.extensions.offer.constants import (
     ASSIGN,
     AUTOMATIC_EMAIL,
@@ -339,6 +340,7 @@ class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSer
     attribute_values = serializers.SerializerMethodField()
     product_class = serializers.SerializerMethodField()
     is_available_to_buy = serializers.SerializerMethodField()
+    is_enrollment_code_product = serializers.SerializerMethodField()
     stockrecords = StockRecordSerializer(many=True, read_only=True)
 
     def get_attribute_values(self, product):
@@ -358,10 +360,15 @@ class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSer
         info = self._get_info(product)
         return info.availability.is_available_to_buy
 
+    def get_is_enrollment_code_product(self, product):
+        return product.is_enrollment_code_product
+
     class Meta:
         model = Product
-        fields = ('id', 'url', 'structure', 'product_class', 'title', 'price', 'expires', 'attribute_values',
-                  'is_available_to_buy', 'stockrecords',)
+        fields = (
+            'id', 'url', 'structure', 'product_class', 'title', 'price', 'expires', 'attribute_values',
+            'is_available_to_buy', 'is_enrollment_code_product', 'stockrecords'
+        )
         extra_kwargs = {
             'url': {'view_name': PRODUCT_DETAIL_VIEW},
         }
