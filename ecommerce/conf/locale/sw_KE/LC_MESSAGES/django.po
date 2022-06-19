@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-12 20:12+0000\n"
+"POT-Creation-Date: 2022-06-19 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: YAHAYA MWAVURIZI <translations_1@camara.ie>, 2017\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
@@ -798,41 +798,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:252
+#: ecommerce/extensions/api/serializers.py:253
 msgid "EXPIRED"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:254
+#: ecommerce/extensions/api/serializers.py:255
 msgid "INACTIVE"
 msgstr "HAIPO HAI"
 
-#: ecommerce/extensions/api/serializers.py:255
+#: ecommerce/extensions/api/serializers.py:256
 msgid "ACTIVE"
 msgstr "HAI"
 
-#: ecommerce/extensions/api/serializers.py:559
+#: ecommerce/extensions/api/serializers.py:560
 msgid "Products must have a certificate type."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:562
-#: ecommerce/extensions/api/serializers.py:602
+#: ecommerce/extensions/api/serializers.py:563
+#: ecommerce/extensions/api/serializers.py:603
 msgid "Products must have a price."
 msgstr "Bidhaa lazima ziwe na bei."
 
-#: ecommerce/extensions/api/serializers.py:569
+#: ecommerce/extensions/api/serializers.py:570
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:598
+#: ecommerce/extensions/api/serializers.py:599
 msgid "Products must indicate whether ID verification is required."
 msgstr "Bidhaa lazima zioneshe kama Kitambulisho cha uhakiki kinahitajika."
 
-#: ecommerce/extensions/api/serializers.py:669
+#: ecommerce/extensions/api/serializers.py:670
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Daraja la bidhaa zisizo halali [{product_class}] limeombwa."
 
-#: ecommerce/extensions/api/serializers.py:701
+#: ecommerce/extensions/api/serializers.py:702
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -840,29 +840,29 @@ msgid ""
 " been saved."
 msgstr "Kozi [{course_id}] haikuchapishwa kwenye LMS kwasababu kibonye cha [publish_course_modes_to_Ims] kimezuiwa. Kuepuka SKUs hewa, ujumbe haujahifadhiwa."
 
-#: ecommerce/extensions/api/serializers.py:1332
+#: ecommerce/extensions/api/serializers.py:1345
 msgid "Enrollment code"
 msgstr "Kificho cha 'usajili'"
 
-#: ecommerce/extensions/api/serializers.py:1333
+#: ecommerce/extensions/api/serializers.py:1346
 msgid "Discount code"
 msgstr "Kificho cha 'punguzo'"
 
-#: ecommerce/extensions/api/serializers.py:1800
+#: ecommerce/extensions/api/serializers.py:1813
 msgid "Invalid order number or order {} does not exists."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1855
+#: ecommerce/extensions/api/serializers.py:1868
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1873
+#: ecommerce/extensions/api/serializers.py:1886
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1904
+#: ecommerce/extensions/api/serializers.py:1917
 msgid "Could note create new voucher for the order: {}"
 msgstr ""
 
