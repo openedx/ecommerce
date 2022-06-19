@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-12 20:12+0000\n"
+"POT-Creation-Date: 2022-06-19 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: Domenico Casanica <domenico.casanica@sistinf.it>, 2021\n"
 "Language-Team: Italian (Italy) (http://www.transifex.com/open-edx/edx-platform/language/it_IT/)\n"
@@ -796,41 +796,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr "Non sono state richiamate sufficienti informazioni sull'utente per eseguire il calcolo. "
 
-#: ecommerce/extensions/api/serializers.py:252
+#: ecommerce/extensions/api/serializers.py:253
 msgid "EXPIRED"
 msgstr "SCADUTO"
 
-#: ecommerce/extensions/api/serializers.py:254
+#: ecommerce/extensions/api/serializers.py:255
 msgid "INACTIVE"
 msgstr "INATTIVO"
 
-#: ecommerce/extensions/api/serializers.py:255
+#: ecommerce/extensions/api/serializers.py:256
 msgid "ACTIVE"
 msgstr "ATTIVO"
 
-#: ecommerce/extensions/api/serializers.py:559
+#: ecommerce/extensions/api/serializers.py:560
 msgid "Products must have a certificate type."
 msgstr "I prodotti devono avere un tipo di certificato. "
 
-#: ecommerce/extensions/api/serializers.py:562
-#: ecommerce/extensions/api/serializers.py:602
+#: ecommerce/extensions/api/serializers.py:563
+#: ecommerce/extensions/api/serializers.py:603
 msgid "Products must have a price."
 msgstr "I prodotti devono avere un prezzo."
 
-#: ecommerce/extensions/api/serializers.py:569
+#: ecommerce/extensions/api/serializers.py:570
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "È necessario fornire un UUID del corso per creare le titolarità al corso. "
 
-#: ecommerce/extensions/api/serializers.py:598
+#: ecommerce/extensions/api/serializers.py:599
 msgid "Products must indicate whether ID verification is required."
 msgstr "I prodotti devono indicare se la verifica dell'ID è necessaria."
 
-#: ecommerce/extensions/api/serializers.py:669
+#: ecommerce/extensions/api/serializers.py:670
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "La classe di prodotto [{product_class}] richiesta non è valida."
 
-#: ecommerce/extensions/api/serializers.py:701
+#: ecommerce/extensions/api/serializers.py:702
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -838,29 +838,29 @@ msgid ""
 " been saved."
 msgstr "Il corso [{course_id}] non è stato pubblicato su LMS perché lo switch [publish_course_modes_to_lms] è disabilitato. I dati non sono stati salvati per evitare SKU non visibili. "
 
-#: ecommerce/extensions/api/serializers.py:1332
+#: ecommerce/extensions/api/serializers.py:1345
 msgid "Enrollment code"
 msgstr "Codice iscrizione"
 
-#: ecommerce/extensions/api/serializers.py:1333
+#: ecommerce/extensions/api/serializers.py:1346
 msgid "Discount code"
 msgstr "Codice sconto"
 
-#: ecommerce/extensions/api/serializers.py:1800
+#: ecommerce/extensions/api/serializers.py:1813
 msgid "Invalid order number or order {} does not exists."
 msgstr "Numero d'ordine non valido oppure l'ordine {} non esiste. "
 
-#: ecommerce/extensions/api/serializers.py:1855
+#: ecommerce/extensions/api/serializers.py:1868
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr "Errore di assegnazione del nuovo voucher coupon. Errore: {}"
 
-#: ecommerce/extensions/api/serializers.py:1873
+#: ecommerce/extensions/api/serializers.py:1886
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr "L'ordine {} non può essere rimborsato poiché il coupon '{}' non può essere rimborsato. "
 
-#: ecommerce/extensions/api/serializers.py:1904
+#: ecommerce/extensions/api/serializers.py:1917
 msgid "Could note create new voucher for the order: {}"
 msgstr "Impossibile creare nuovo voucher per l'ordine: {}"
 
