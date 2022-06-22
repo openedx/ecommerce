@@ -1011,7 +1011,7 @@ def _serialize_is_current_value(conditional_offer):
     elif end_date and start_date is None:
         is_current = end_date >= now
     else:
-        is_current = start_date <= now and end_date >= now
+        is_current = start_date <= now < end_date
 
     return is_current
 
