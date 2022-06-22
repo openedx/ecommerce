@@ -997,7 +997,7 @@ def _serialize_is_current_value(conditional_offer):
       - neither start or end date is set
       - start date is set, but not end date AND today's date is on/after the start date
       - end date is set, but not start date AND today's date is before the end date
-      - both start and end dates are set AND today's is between the start and end dates
+      - both start and end dates are set AND today's date is between the start and end dates
     """
     start_date = conditional_offer.start_datetime
     end_date = conditional_offer.end_datetime

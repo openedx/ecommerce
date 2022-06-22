@@ -4115,13 +4115,12 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
     @ddt.unpack
     def test_admin_view_is_current(self, start_datetime, end_datetime, expected_is_current):
         """
-        Verify display_name in api output if conditions are met.
+        Verify is_current in api output if conditions are met.
         """
         enterprise_customer_uuid = str(uuid4())
         benefit = extended_factories.EnterprisePercentageDiscountBenefitFactory(value=100)
         condition = extended_factories.EnterpriseCustomerConditionFactory(
             enterprise_customer_uuid=enterprise_customer_uuid,
-            enterprise_customer_name='Company Name'
         )
         extended_factories.EnterpriseOfferFactory(
             start_datetime=start_datetime,
