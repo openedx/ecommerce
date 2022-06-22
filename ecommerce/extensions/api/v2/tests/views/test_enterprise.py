@@ -104,6 +104,8 @@ TEMPLATE_FILES_WITH_URLS = [{'name': 'abc.png', 'size': 123, 'url': 'https://www
 UPLOAD_FILES_TO_S3_PATH = 'ecommerce.extensions.api.v2.views.enterprise.upload_files_for_enterprise_coupons'
 DELETE_FILE_FROM_S3_PATH = 'ecommerce.extensions.offer.models.delete_files_from_s3'
 
+NOW = datetime.datetime.now()
+
 
 class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
 
@@ -3932,6 +3934,7 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
             'enterprise_catalog_uuid',
             'usage_type',
             'discount_value',
+            'is_current',
         ]
         for key in keys:
             assert key in response.json()
@@ -4066,6 +4069,78 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
         )
         response_json = self.client.get(path).json()
         assert response_json['results'][0]['display_name'] == expected_display_name
+
+    @ddt.data(
+        {
+            'start_datetime': None,
+            'end_datetime': None,
+            'expected_is_current': True,
+        },
+        {
+            'start_datetime': NOW - datetime.timedelta(days=20),
+            'end_datetime': None,
+            'expected_is_current': True,
+        },
+        {
+            'start_datetime': NOW + datetime.timedelta(days=20),
+            'end_datetime': None,
+            'expected_is_current': False,
+        },
+        {
+            'start_datetime': None,
+            'end_datetime': NOW + datetime.timedelta(days=20),
+            'expected_is_current': True,
+        },
+        {
+            'start_datetime': None,
+            'end_datetime': NOW - datetime.timedelta(days=20),
+            'expected_is_current': False,
+        },
+        {
+            'start_datetime': NOW - datetime.timedelta(days=20),
+            'end_datetime': NOW + datetime.timedelta(days=20),
+            'expected_is_current': True,
+        },
+        {
+            'start_datetime': NOW + datetime.timedelta(days=20),
+            'end_datetime': NOW + datetime.timedelta(days=20),
+            'expected_is_current': False,
+        },
+        {
+            'start_datetime': NOW - datetime.timedelta(days=20),
+            'end_datetime': NOW - datetime.timedelta(days=20),
+            'expected_is_current': False,
+        },
+    )
+    @ddt.unpack
+    def test_admin_view_is_current(self, start_datetime, end_datetime, expected_is_current):
+        """
+        Verify is_current in api output if conditions are met.
+        """
+        enterprise_customer_uuid = str(uuid4())
+        benefit = extended_factories.EnterprisePercentageDiscountBenefitFactory(value=100)
+        condition = extended_factories.EnterpriseCustomerConditionFactory(
+            enterprise_customer_uuid=enterprise_customer_uuid,
+        )
+        extended_factories.EnterpriseOfferFactory(
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
+            condition=condition,
+            benefit=benefit,
+            max_discount=20,
+            max_basket_applications=2,
+            partner=self.partner,
+        )
+
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=enterprise_customer_uuid
+        )
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid},
+        )
+        response_json = self.client.get(path).json()
+        assert response_json['results'][0]['is_current'] == expected_is_current
 
 
 class OfferAssignmentSummaryViewSetTests(

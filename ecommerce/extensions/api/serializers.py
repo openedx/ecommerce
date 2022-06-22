@@ -3,10 +3,12 @@
 import logging
 import re
 from collections import OrderedDict
+from datetime import datetime
 from decimal import Decimal
 from urllib.parse import urljoin
 
 import bleach
+import pytz
 import waffle
 from dateutil.parser import parse
 from django.conf import settings
@@ -987,6 +989,33 @@ def _serialize_remaining_balance_value(conditional_offer):
     return remaining_balance
 
 
+def _serialize_is_current_value(conditional_offer):
+    """
+    Compute whether offer is current based on start and end dates.
+
+    Returns true in the following situations:
+      - neither start or end date is set
+      - start date is set, but not end date AND today's date is on/after the start date
+      - end date is set, but not start date AND today's date is before the end date
+      - both start and end dates are set AND today's date is between the start and end dates
+    """
+    start_date = conditional_offer.start_datetime
+    end_date = conditional_offer.end_datetime
+    is_current = False
+    now = datetime.now(pytz.UTC)
+
+    if start_date is None and end_date is None:
+        is_current = True
+    elif start_date and end_date is None:
+        is_current = start_date <= now
+    elif end_date and start_date is None:
+        is_current = end_date >= now
+    else:
+        is_current = start_date <= now < end_date
+
+    return is_current
+
+
 class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
     """
     Serializer for EnterpriseOffer learner endpoint.
@@ -1006,6 +1035,7 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation['discount_value'] = instance.benefit.value
         representation['status'] = instance.status
         representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
+        representation['is_current'] = _serialize_is_current_value(instance)
 
         return representation
 
@@ -1028,6 +1058,7 @@ class EnterpriseAdminOfferApiSerializer(serializers.ModelSerializer):  # pylint:
         representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
         representation['display_name'] = generate_offer_display_name(instance)
         representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
+        representation['is_current'] = _serialize_is_current_value(instance)
 
         return representation
 
