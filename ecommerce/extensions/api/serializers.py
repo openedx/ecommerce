@@ -394,7 +394,7 @@ class OrderSerializer(serializers.ModelSerializer):
     vouchers = serializers.SerializerMethodField()
     enable_hoist_order_history = serializers.SerializerMethodField()
     payment_method = serializers.SerializerMethodField()
-
+    enterprise_customer_info = serializers.SerializerMethodField()
 
     def get_vouchers(self, obj):
         try:
@@ -441,6 +441,23 @@ class OrderSerializer(serializers.ModelSerializer):
             )
         return payment_method
 
+    def get_enterprise_customer_info(self, obj):
+        try:
+            learner_portal_url = ReceiptResponseView().add_message_if_enterprise_user(obj)
+            discount = obj.discounts.first()
+            if discount and learner_portal_url:
+                return {
+                    'learner_portal_url': learner_portal_url,
+                    'offer_condition_enterprise_customer_name': discount.offer.condition.enterprise_customer_name,
+                    'offer_condition_name': discount.offer.condition.name,
+                }
+        except (AttributeError, TypeError, ValueError):
+            logger.exception(
+                'Failed to retrieve enterprise_customer_info for order [%s]',
+                obj
+            )
+        return None
+
     class Meta:
         model = Order
         fields = (
@@ -449,6 +466,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'date_placed',
             'discount',
             'enable_hoist_order_history',
+            'enterprise_customer_info',
             'lines',
             'number',
             'payment_processor',
