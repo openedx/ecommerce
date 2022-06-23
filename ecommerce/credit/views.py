@@ -1,6 +1,5 @@
 
 
-import json
 import logging
 from urllib.parse import urljoin
 
@@ -184,7 +183,7 @@ class Checkout(TemplateView):
         try:
             client = self.request.site.siteconfiguration.oauth_api_client
             credit_url = urljoin(f"{self.request.site.siteconfiguration.credit_api_url}/", "providers/")
-            resp = client.get(credit_url, params={"provider_ids": json.dumps(provider_ids)})
+            resp = client.get(credit_url, params={"provider_ids": provider_ids})
             resp.raise_for_status()
             return resp.json()
         except HTTPError:
