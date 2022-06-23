@@ -670,6 +670,8 @@ ENTERPRISE_API_CACHE_TIMEOUT = 300  # Value is in seconds
 
 ENTERPRISE_CATALOG_SERVICE_URL = 'http://localhost:18160/'
 
+ENTERPRISE_ANALYTICS_API_URL = 'http://localhost:19001'
+
 ENTERPRISE_LEARNER_PORTAL_HOSTNAME = os.environ.get('ENTERPRISE_LEARNER_PORTAL_HOSTNAME', 'localhost:8734')
 
 # Name for waffle switch to use for enabling enterprise features on runtime.
