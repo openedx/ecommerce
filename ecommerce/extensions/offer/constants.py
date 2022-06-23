@@ -78,5 +78,18 @@ SENDER_CATEGORY_TYPES = (
     (MANUAL_EMAIL, _('Manual')),
 )
 
+
+class OfferUsageEmailTypes:
+    DIGEST = 'digest'
+    LOW_BALANCE = 'low_balance'
+    OUT_OF_BALANCE = 'out_of_balance'
+
+    CHOICES = (
+        (DIGEST, 'Digest email'),
+        (LOW_BALANCE, 'Low balance email'),
+        (OUT_OF_BALANCE, 'Out of balance email')
+    )
+
+
 # Max files size for coupon attachments: 250kb
 MAX_FILES_SIZE_FOR_COUPONS = 256000
