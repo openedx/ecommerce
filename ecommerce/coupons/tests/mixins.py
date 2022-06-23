@@ -1,9 +1,11 @@
 
 
 import datetime
+from urllib.parse import urljoin
 
 import mock
 import responses
+from django.conf import settings
 from django.test import RequestFactory
 from edx_django_utils.cache import TieredCache
 from oscar.core.utils import slugify
@@ -20,6 +22,8 @@ from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, S
 
 class DiscoveryMockMixin:
     """ Mocks for the Discovery service response. """
+    ENTERPRISE_CATALOG_URL = urljoin(settings.ENTERPRISE_CATALOG_API_URL, 'enterprise-catalogs/')
+
     def setUp(self):
         super(DiscoveryMockMixin, self).setUp()
         TieredCache.dangerous_clear_all_tiers()
@@ -210,7 +214,7 @@ class DiscoveryMockMixin:
         )
 
     def mock_enterprise_catalog_course_endpoint(
-            self, enterprise_api_url, enterprise_catalog_id, course_run=None, course_info=None
+            self, enterprise_catalog_id, course_run=None, course_info=None
     ):
         """
         Helper function to register a enterprise API endpoint for getting course information.
@@ -240,13 +244,9 @@ class DiscoveryMockMixin:
                     'course_runs': [],
                 }],
             }
-        enterprise_catalog_url = '{}enterprise_catalogs/{}/'.format(
-            enterprise_api_url,
-            enterprise_catalog_id
-        )
         responses.add(
             responses.GET,
-            enterprise_catalog_url,
+            url=urljoin(f'{self.ENTERPRISE_CATALOG_URL}{enterprise_catalog_id}/', 'get_content_metadata/'),
             json=course_info,
             content_type='application/json'
         )

@@ -272,7 +272,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         Verify that "get_enterprise_customer_catalogs" works as expected with and without caching.
         """
         enterprise_customer_uuid = str(uuid.uuid4())
-        base_url = self.LEGACY_ENTERPRISE_CATALOG_URL
+        base_url = self.ENTERPRISE_CATALOG_URL
 
         self.mock_access_token_response()
         self.mock_enterprise_catalog_api(enterprise_customer_uuid)
@@ -294,7 +294,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         Verify that "get_enterprise_customer_catalogs" return default response on exception.
         """
         enterprise_customer_uuid = str(uuid.uuid4())
-        base_url = self.LEGACY_ENTERPRISE_CATALOG_URL
+        base_url = self.ENTERPRISE_CATALOG_URL
 
         self.mock_access_token_response()
         self.mock_enterprise_catalog_api(enterprise_customer_uuid, raise_exception=True)

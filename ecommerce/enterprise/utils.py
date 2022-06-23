@@ -32,13 +32,10 @@ CONSENT_FAILED_PARAM = 'consent_failed'
 log = logging.getLogger(__name__)
 
 CUSTOMER_CATALOGS_DEFAULT_RESPONSE = {
-    'count': 0,
-    'num_pages': 0,
-    'current_page': 0,
-    'start': 0,
-    'next': None,
-    'previous': None,
-    'results': [],
+    "count": 0,
+    "next": None,
+    "previous": None,
+    "results": []
 }
 
 
@@ -150,6 +147,7 @@ def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_cust
 
     Args:
         site (Site): The site which is handling the current request
+        endpoint_request_url (str): endpoint request url
         enterprise_customer_uuid (str): The uuid of the Enterprise Customer
 
     Returns:
@@ -158,35 +156,34 @@ def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_cust
     Response will look like
 
         {
-            'count': 2,
-            'num_pages': 1,
-            'current_page': 1,
-            'results': [
+            "count": 2,
+            "next": None,
+            "previous": None,
+            "results": [
                 {
-                    'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
-                    'uuid': '869d26dd-2c44-487b-9b6a-24eee973f9a4',
-                    'title': 'batman_catalog'
+                    "uuid": "869d26dd-2c44-487b-9b6a-24eee973f9a4",
+                    "title": "batman_catalog",
+                    "enterprise_customer": "6ae013d4-c5c4-474d-8da9-0e559b2448e2",
+                    "catalog_query_uuid": None,
+                    "content_last_modified": None,
+                    "catalog_modified": "2022-05-26T12:56:20.346837Z",
+                    "query_title": None
                 },
                 {
-                    'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
-                    'uuid': '1a61de70-f8e8-4e8c-a76e-01783a930ae6',
-                    'title': 'new catalog'
+                    "uuid": "1a61de70-f8e8-4e8c-a76e-01783a930ae6",
+                    "title": "new_catalog",
+                    "enterprise_customer": "6ae013d4-c5c4-474d-8da9-0e559b2448e2",
+                    "catalog_query_uuid": None,
+                    "content_last_modified": None,
+                    "catalog_modified": "2022-05-26T12:56:20.346837Z",
+                    "query_title": None
                 }
             ],
-            'next': None,
-            'start': 0,
-            'previous': None
         }
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = u'{site_domain}_{partner_code}_{resource}_{uuid}_{page}'.format(
-        site_domain=site.domain,
-        partner_code=partner_code,
-        resource=resource,
-        uuid=enterprise_customer_uuid,
-        page=page,
-    )
+    cache_key = f'{site.domain}_{partner_code}_{resource}_{enterprise_customer_uuid}_{page}'
     cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
 
     cached_response = TieredCache.get_cached_response(cache_key)
@@ -195,7 +192,7 @@ def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_cust
 
     api_client = site.siteconfiguration.oauth_api_client
     enterprise_api_url = urljoin(
-        f"{site.siteconfiguration.enterprise_api_url}/", f"{resource}/"
+        f"{site.siteconfiguration.enterprise_catalog_api_url}/", "enterprise-catalogs/"
     )
 
     try:
@@ -527,31 +524,89 @@ def has_enterprise_offer(basket):
     return False
 
 
-def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_request_url=None):
+# pylint: disable=line-too-long
+def get_enterprise_catalog(site, enterprise_catalog, page_size, page, endpoint_request_url=None):
     """
-    Get the EnterpriseCustomerCatalog for a given catalog uuid.
+    Get the EnterpriseCatalog for a given catalog uuid.
 
     Args:
         site (Site): The site which is handling the current request
         enterprise_catalog (str): The uuid of the Enterprise Catalog
-        limit (int): The number of results to return per page.
+        page_size (int): The number of results to return per page.
         page (int): The page number to fetch.
         endpoint_request_url (str): This is used to replace the lms url with ecommerce url
 
     Returns:
         dict: The result set containing the content objects associated with the Enterprise Catalog.
         NoneType: Return None if no catalog with that uuid is found.
+
+    Response will look like
+
+        {
+            "count": 1,
+            "next": null,
+            "previous": null,
+            "uuid": "5589518b-f858-4459-a8c3-e44df4fc7af6",
+            "title": "All Course Runs",
+            "enterprise_customer": "caf06525-701b-4cf4-a05f-2c78659c4cb7",
+            "results": [
+                {
+                "aggregation_key": "courserun:edX+DemoX",
+                "content_type": "courserun",
+                "authoring_organization_uuids": [
+                    "7aeefb23-e236-41e3-92a2-bed343ec8bfe"
+                ],
+                "availability": "Current",
+                "end": null,
+                "enrollment_end": null,
+                "enrollment_start": null,
+                "first_enrollable_paid_seat_sku": "8CF08E5",
+                "first_enrollable_paid_seat_price": 149,
+                "full_description": null,
+                "go_live_date": null,
+                "has_enrollable_seats": true,
+                "image_url": null,
+                "is_enrollable": true,
+                "key": "course-v1:edX+DemoX+Demo_Course",
+                "language": null,
+                "level_type": null,
+                "logo_image_urls": [],
+                "marketing_url": "course/demonstration-course-course-v1edxdemoxdemo_course?utm_medium=enterprise&utm_source=test-enterprise",
+                "max_effort": null,
+                "min_effort": null,
+                "mobile_available": false,
+                "number": "DemoX",
+                "org": "edX",
+                "pacing_type": "instructor_paced",
+                "partner": "edx",
+                "program_types": [
+                    "MicroMasters"
+                ],
+                "published": false,
+                "seat_types": [
+                    "verified",
+                    "audit"
+                ],
+                "skill_names": [],
+                "skills": [],
+                "short_description": null,
+                "staff_uuids": [],
+                "start": "2013-02-05T05:00:00Z",
+                "subject_uuids": [],
+                "title": "Demonstration Course",
+                "transcript_languages": [],
+                "type": "verified",
+                "weeks_to_complete": null,
+                "content_last_modified": "2022-06-08T15:24:08.020654Z",
+                "enrollment_url": "http://localhost:8734/test-enterprise/course/edX+DemoX?course_run_key=course-v1%3AedX%2BDemoX%2BDemo_Course&utm_medium=enterprise&utm_source=test-enterprise",
+                "xapi_activity_id": "http://edx.devstack.lms:18000/xapi/activities/courserun/course-v1:edX+DemoX+Demo_Course"
+                }
+            ]
+        }
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = u'{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
-        site_domain=site.domain,
-        partner_code=partner_code,
-        resource=resource,
-        catalog=enterprise_catalog,
-        limit=limit,
-        page=page
-    )
+    cache_key = f'{site.domain}_{partner_code}_{resource}_{enterprise_catalog}_{page_size}_{page}'
     cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
 
     cached_response = TieredCache.get_cached_response(cache_key)
@@ -560,14 +615,14 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_reque
 
     api_client = site.siteconfiguration.oauth_api_client
     enterprise_api_url = urljoin(
-        f"{site.siteconfiguration.enterprise_api_url}/",
-        f"{resource}/{str(enterprise_catalog)}/"
+        f"{site.siteconfiguration.enterprise_catalog_api_url}/",
+        f"enterprise-catalogs/{str(enterprise_catalog)}/get_content_metadata/"
     )
 
     response = api_client.get(
         enterprise_api_url,
         params={
-            "limit": limit,
+            "page_size": page_size,
             "page": page,
         }
     )

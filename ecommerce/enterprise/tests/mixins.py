@@ -2,7 +2,7 @@
 
 import json
 import re
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urljoin
 from uuid import uuid4
 
 import requests
@@ -46,9 +46,6 @@ class EnterpriseServiceMockMixin:
     ENTERPRISE_CATALOG_URL_CUSTOMER_RESOURCE = '{}enterprise-customer/'.format(
         settings.ENTERPRISE_CATALOG_API_URL
     )
-    LEGACY_ENTERPRISE_CATALOG_URL = '{}enterprise_catalogs/'.format(
-        settings.ENTERPRISE_API_URL
-    )
 
     def setUp(self):
         super(EnterpriseServiceMockMixin, self).setUp()
@@ -79,11 +76,13 @@ class EnterpriseServiceMockMixin:
 
     def mock_enterprise_catalog_api_get(self, enterprise_catalog_uuid, custom_response=None):
         """
-        Helper function to register the legacy enterprise catalog API endpoint using responses.
+        Helper function to register the enterprise catalog API endpoint using responses.
         """
         enterprise_catalog_api_response = {
             "count": 60,
-            "next": "{}{}/?page=2".format(self.LEGACY_ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            "next": urljoin(
+                f'{self.ENTERPRISE_CATALOG_URL}{enterprise_catalog_uuid}/', 'get_content_metadata/?page=2'
+            ),
             "previous": None,
             "results": [
                 {
@@ -146,7 +145,7 @@ class EnterpriseServiceMockMixin:
         self.mock_access_token_response()
         responses.add(
             method=responses.GET,
-            url='{}{}/?'.format(self.LEGACY_ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            url=urljoin(f'{self.ENTERPRISE_CATALOG_URL}{enterprise_catalog_uuid}/', 'get_content_metadata/'),
             json=enterprise_catalog_api_response,
             content_type='application/json'
         )
@@ -565,23 +564,34 @@ class EnterpriseServiceMockMixin:
         """
         enterprise_catalog_api_response = {
             'count': 10,
-            'num_pages': 3,
-            'current_page': 2,
+            'next': urljoin(
+                self.ENTERPRISE_CATALOG_URL,
+                f'?enterprise_customer={enterprise_customer_uuid}/page=3&page_size=2'
+            ),
+            'previous': urljoin(
+                self.ENTERPRISE_CATALOG_URL,
+                f'?enterprise_customer={enterprise_customer_uuid}/page=1&page_size=2'
+            ),
             'results': [
                 {
-                    'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
                     'uuid': '869d26dd-2c44-487b-9b6a-24eee973f9a4',
-                    'title': 'batman_catalog'
+                    'title': 'batman_catalog',
+                    'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
+                    'catalog_query_uuid': None,
+                    'content_last_modified': None,
+                    'catalog_modified': '2022-05-26T12:56:20.346837Z',
+                    'query_title': None
                 },
                 {
+                    'uuid': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                    'title': 'updated_catalog',
                     'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
-                    'uuid': '1a61de70-f8e8-4e8c-a76e-01783a930ae6',
-                    'title': 'new catalog'
-                }
+                    'catalog_query_uuid': None,
+                    'content_last_modified': None,
+                    'catalog_modified': '2022-05-26T12:56:20.346837Z',
+                    'query_title': None
+                },
             ],
-            'next': "{}?enterprise_customer={}&page=3".format(self.ENTERPRISE_CATALOG_URL, enterprise_customer_uuid),
-            'previous': "{}?enterprise_customer={}".format(self.ENTERPRISE_CATALOG_URL, enterprise_customer_uuid),
-            'start': 0,
         }
 
         self.mock_access_token_response()
@@ -591,7 +601,7 @@ class EnterpriseServiceMockMixin:
         )
         responses.add(
             method=responses.GET,
-            url='{}'.format(self.LEGACY_ENTERPRISE_CATALOG_URL),
+            url=self.ENTERPRISE_CATALOG_URL,
             body=body,
             content_type='application/json'
         )

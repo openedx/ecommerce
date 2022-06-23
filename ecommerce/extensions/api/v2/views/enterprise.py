@@ -128,7 +128,7 @@ class EnterpriseCustomerCatalogsViewSet(ViewSet):
             catalog = get_enterprise_catalog(
                 site=request.site,
                 enterprise_catalog=kwargs.get('enterprise_catalog_uuid'),
-                limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
+                page_size=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
                 page=request.GET.get('page', '1'),
                 endpoint_request_url=endpoint_request_url
             )

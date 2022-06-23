@@ -485,7 +485,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         course, seat = self.create_course_and_seat()
         enterprise_catalog_id = str(uuid4())
         self.mock_enterprise_catalog_course_endpoint(
-            self.site_configuration.enterprise_api_url, enterprise_catalog_id, course_run=course
+            enterprise_catalog_id, course_run=course
         )
         new_range, __ = Range.objects.get_or_create(
             catalog_query='*:*',
@@ -526,7 +526,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         enterprise_customer_id = str(uuid4())
         enterprise_catalog_id = str(uuid4())
         self.mock_enterprise_catalog_course_endpoint(
-            self.site_configuration.enterprise_api_url, enterprise_catalog_id, course_run=course
+            enterprise_catalog_id, course_run=course
         )
         voucher = prepare_enterprise_voucher(
             benefit_value=10,
