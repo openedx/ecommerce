@@ -18,7 +18,7 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.core.url_utils import (
-    get_lms_courseware_url,
+    get_lms_course_about_url,
     get_lms_dashboard_url,
     get_lms_explore_courses_url,
     get_lms_program_dashboard_url
@@ -76,7 +76,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                     url = get_lms_program_dashboard_url(program_uuid)
                 else:
                     course_run_id = order.lines.all()[:1].get().product.course.id
-                    url = get_lms_courseware_url(course_run_id)
+                    url = get_lms_course_about_url(course_run_id)
             else:
                 receipt_path = get_receipt_page_url(
                     order_number=order.number,
