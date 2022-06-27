@@ -10,6 +10,7 @@ from uuid import uuid4
 import bleach
 import ddt
 import mock
+import pytz
 import responses
 import rules  # pylint: disable=unused-import
 from django.conf import settings
@@ -104,7 +105,7 @@ TEMPLATE_FILES_WITH_URLS = [{'name': 'abc.png', 'size': 123, 'url': 'https://www
 UPLOAD_FILES_TO_S3_PATH = 'ecommerce.extensions.api.v2.views.enterprise.upload_files_for_enterprise_coupons'
 DELETE_FILE_FROM_S3_PATH = 'ecommerce.extensions.offer.models.delete_files_from_s3'
 
-NOW = datetime.datetime.now()
+NOW = datetime.datetime.now(pytz.UTC)
 
 
 class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
@@ -1758,6 +1759,65 @@ class EnterpriseCouponViewSetRbacTests(
     #     for actual_result in overview_response['results']:
     #         self.assertIn(actual_result, expected_results)
         raise SkipTest("Fix in ENT-5824")
+
+    def test_coupon_overview_is_current_filter(self):
+        """
+        Test that only current enterprise coupons are returned if is_current=true is passed as a query param.
+        """
+        enterprise_customer_uuid = self.data['enterprise_customer']['id']
+
+        effective_coupon = self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=enterprise_customer_uuid,
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='A',
+            start_datetime=datetime.datetime.now(),
+            end_datetime=datetime.datetime.now() + datetime.timedelta(days=500)
+        )
+
+        # expired coupon
+        self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=enterprise_customer_uuid,
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='B',
+            start_datetime=datetime.datetime.now() - datetime.timedelta(days=500),
+            end_datetime=datetime.datetime.now()
+        )
+
+        # pending coupon
+        self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=enterprise_customer_uuid,
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='C',
+            start_datetime=datetime.datetime.now() + datetime.timedelta(days=1),
+            end_datetime=datetime.datetime.now() + datetime.timedelta(days=500)
+        )
+
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_LEARNER_ROLE, context=enterprise_customer_uuid
+        )
+        query_params = {
+            'is_current': True
+        }
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-overview',
+                kwargs={'enterprise_id': enterprise_customer_uuid},
+            ),
+            query_params,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json()['results']
+
+        assert len(results) == 1
+        assert results[0]['id'] == effective_coupon.id
 
     # @ddt.data(
     #     (
@@ -4035,6 +4095,93 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
         response = self.client.get(path, query_params)
         assert len(response.json()['results']) == 0
 
+    def test_is_current_filter(self):
+        """
+        Verify endpoint returns correct number of enterprise offers.
+        """
+
+        enterprise_customer_uuid = str(uuid4())
+        condition = extended_factories.EnterpriseCustomerConditionFactory(
+            enterprise_customer_uuid=enterprise_customer_uuid
+        )
+
+        current_offer_date_ranges = [
+            {
+                'start': None,
+                'end': None,
+            },
+            {
+                'start': NOW - datetime.timedelta(days=20),
+                'end': None,
+            },
+            {
+                'start': None,
+                'end': NOW + datetime.timedelta(days=20),
+            },
+            {
+                'start': NOW - datetime.timedelta(days=20),
+                'end': NOW + datetime.timedelta(days=20),
+            },
+        ]
+
+        current_offer_ids = []
+        for date_range in current_offer_date_ranges:
+            offer = extended_factories.EnterpriseOfferFactory(
+                condition=condition,
+                partner=self.partner,
+                start_datetime=date_range['start'],
+                end_datetime=date_range['end'],
+            )
+            current_offer_ids.append(offer.id)
+
+        non_current_offer_date_ranges = [
+            {
+                'start': NOW + datetime.timedelta(days=20),
+                'end': None,
+            },
+            {
+                'start': None,
+                'end': NOW - datetime.timedelta(days=20),
+            },
+            {
+                'start': NOW + datetime.timedelta(days=20),
+                'end': NOW + datetime.timedelta(days=20),
+            },
+            {
+                'start': NOW - datetime.timedelta(days=20),
+                'end': NOW - datetime.timedelta(days=20),
+            },
+        ]
+        non_current_offer_ids = []
+
+        for date_range in non_current_offer_date_ranges:
+            offer = extended_factories.EnterpriseOfferFactory(
+                condition=condition,
+                partner=self.partner,
+                start_datetime=date_range['start'],
+                end_datetime=date_range['end'],
+            )
+            non_current_offer_ids.append(offer.id)
+
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=enterprise_customer_uuid
+        )
+
+        path = reverse(
+            'api:v2:enterprise-admin-offers-api-list',
+            kwargs={'enterprise_customer': enterprise_customer_uuid},
+        )
+
+        query_params = {'is_current': True}
+        response = self.client.get(path, query_params)
+        results = response.json()['results']
+        self.assertCountEqual([offer['id'] for offer in results], current_offer_ids)
+
+        query_params = {'is_current': False}
+        response = self.client.get(path, query_params)
+        results = response.json()['results']
+        self.assertCountEqual([offer['id'] for offer in results], non_current_offer_ids)
+
     @ddt.data(
         (datetime.datetime(1337, 12, 4), 'Company Name - DEC37'),
         (None, None)
@@ -4069,78 +4216,6 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
         )
         response_json = self.client.get(path).json()
         assert response_json['results'][0]['display_name'] == expected_display_name
-
-    @ddt.data(
-        {
-            'start_datetime': None,
-            'end_datetime': None,
-            'expected_is_current': True,
-        },
-        {
-            'start_datetime': NOW - datetime.timedelta(days=20),
-            'end_datetime': None,
-            'expected_is_current': True,
-        },
-        {
-            'start_datetime': NOW + datetime.timedelta(days=20),
-            'end_datetime': None,
-            'expected_is_current': False,
-        },
-        {
-            'start_datetime': None,
-            'end_datetime': NOW + datetime.timedelta(days=20),
-            'expected_is_current': True,
-        },
-        {
-            'start_datetime': None,
-            'end_datetime': NOW - datetime.timedelta(days=20),
-            'expected_is_current': False,
-        },
-        {
-            'start_datetime': NOW - datetime.timedelta(days=20),
-            'end_datetime': NOW + datetime.timedelta(days=20),
-            'expected_is_current': True,
-        },
-        {
-            'start_datetime': NOW + datetime.timedelta(days=20),
-            'end_datetime': NOW + datetime.timedelta(days=20),
-            'expected_is_current': False,
-        },
-        {
-            'start_datetime': NOW - datetime.timedelta(days=20),
-            'end_datetime': NOW - datetime.timedelta(days=20),
-            'expected_is_current': False,
-        },
-    )
-    @ddt.unpack
-    def test_admin_view_is_current(self, start_datetime, end_datetime, expected_is_current):
-        """
-        Verify is_current in api output if conditions are met.
-        """
-        enterprise_customer_uuid = str(uuid4())
-        benefit = extended_factories.EnterprisePercentageDiscountBenefitFactory(value=100)
-        condition = extended_factories.EnterpriseCustomerConditionFactory(
-            enterprise_customer_uuid=enterprise_customer_uuid,
-        )
-        extended_factories.EnterpriseOfferFactory(
-            start_datetime=start_datetime,
-            end_datetime=end_datetime,
-            condition=condition,
-            benefit=benefit,
-            max_discount=20,
-            max_basket_applications=2,
-            partner=self.partner,
-        )
-
-        self.set_jwt_cookie(
-            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=enterprise_customer_uuid
-        )
-        path = reverse(
-            'api:v2:enterprise-admin-offers-api-list',
-            kwargs={'enterprise_customer': enterprise_customer_uuid},
-        )
-        response_json = self.client.get(path).json()
-        assert response_json['results'][0]['is_current'] == expected_is_current
 
 
 class OfferAssignmentSummaryViewSetTests(
@@ -4410,9 +4485,10 @@ class OfferAssignmentSummaryViewSetTests(
         assert oa_code4 in results_codes
         assert oa_code5 not in results_codes
 
-    def test_view_excludes_expired_codes_for_is_active(self):
-        # create an expired voucher
-        non_expired_coupon = self.create_coupon(
+    def test_view_excludes_pending_and_expired_codes_for_is_active(self):
+        # create a pending voucher
+        pending_coupon = self.create_coupon(
+            start_datetime=datetime.datetime.now() + datetime.timedelta(seconds=100),
             max_uses=1,
             quantity=1,
             voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
@@ -4421,6 +4497,7 @@ class OfferAssignmentSummaryViewSetTests(
             enterprise_customer=self.enterprise_customer['id'],
             enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
         )
+        # create an expired voucher
         expired_coupon = self.create_coupon(
             end_datetime=datetime.datetime.now() + datetime.timedelta(seconds=100),
             max_uses=1,
@@ -4431,13 +4508,18 @@ class OfferAssignmentSummaryViewSetTests(
             enterprise_customer=self.enterprise_customer['id'],
             enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
         )
+        non_expired_coupon = self.create_coupon(
+            max_uses=1,
+            quantity=1,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.0,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
+        )
+        self.assign_user_to_code(pending_coupon.id, [{'email': self.user.email}], [])
         self.assign_user_to_code(expired_coupon.id, [{'email': self.user.email}], [])
         self.assign_user_to_code(non_expired_coupon.id, [{'email': self.user.email}], [])
-
-        oa_expired_code = OfferAssignment.objects.get(
-            user_email=self.user.email,
-            offer__vouchers__coupon_vouchers__coupon__id=expired_coupon.id
-        ).code
 
         oa_non_expired_code = OfferAssignment.objects.get(
             user_email=self.user.email,
@@ -4447,9 +4529,7 @@ class OfferAssignmentSummaryViewSetTests(
         with freeze_time(datetime.datetime.now() + datetime.timedelta(seconds=110)):
             response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK + "?is_active=True&full_discount_only=True").json()
             assert response['count'] == 1
-            results_codes = [result['code'] for result in response['results']]
-            assert oa_non_expired_code in results_codes
-            assert oa_expired_code not in results_codes
+            assert response['results'][0]['code'] == oa_non_expired_code
 
     def test_view_returns_only_coupons_for_enterprise(self):
         enterprise_customer_2 = {'name': 'BearsRus', 'id': str(uuid4())}
