@@ -112,14 +112,14 @@ def send_course_purchase_email(sender, order=None, request=None, **kwargs):  # p
             logger.info('Currently support receipt emails for order with one item.')
             return
 
-        use_new_receipt_page = waffle.flag_is_active(request, 'use_new_receipt_page')
+        use_external_receipt_page = waffle.flag_is_active(request, 'enable_receipts_via_ecommerce_mfe')
         product = order.lines.first().product
         if product.is_seat_product or product.is_course_entitlement_product:
             recipient = request.POST.get('req_bill_to_email', order.user.email) if request else order.user.email
             receipt_page_url = get_receipt_page_url(
                 order_number=order.number,
                 site_configuration=order.site.siteconfiguration,
-                use_new_page=use_new_receipt_page
+                use_new_page=use_external_receipt_page
             )
             credit_provider_id = getattr(product.attr, 'credit_provider', None)
             if credit_provider_id:

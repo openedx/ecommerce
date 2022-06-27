@@ -98,13 +98,13 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
 
-        use_new_receipt_page = False
+        use_external_receipt_page = False
         order = Order.objects.first()
         expected_url = get_receipt_page_url(
             order_number=order.number,
             site_configuration=order.site.siteconfiguration,
             disable_back_button=True,
-            use_new_page=use_new_receipt_page
+            use_new_page=use_external_receipt_page
         )
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 

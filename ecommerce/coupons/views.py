@@ -269,13 +269,13 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                     return HttpResponseRedirect(
                         get_lms_course_about_url(product.course.id)
                     )
-                use_new_receipt_page = waffle.flag_is_active(self.request, 'use_new_receipt_page')
+                use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_external_receipt_page')
                 return HttpResponseRedirect(
                     get_receipt_page_url(
                         site_configuration,
                         order.number,
                         disable_back_button=True,
-                        use_new_page=use_new_receipt_page
+                        use_new_page=use_external_receipt_page
                     ),
                 )
             except:  # pylint: disable=bare-except

@@ -91,12 +91,12 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         if not basket:
             return redirect(self.payment_processor.error_url)
 
-        use_new_receipt_page = waffle.flag_is_active(self.request, 'use_new_receipt_page')
+        use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
         receipt_url = get_receipt_page_url(
             order_number=basket.order_number,
             site_configuration=basket.site.siteconfiguration,
             disable_back_button=True,
-            use_new_page=use_new_receipt_page
+            use_new_page=use_external_receipt_page
         )
 
         try:
