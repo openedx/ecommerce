@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, prefetch_related_objects
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.utils.timezone import now
+from django.utils import timezone
 from edx_rbac.decorators import permission_required
 from edx_rbac.mixins import PermissionRequiredMixin
 from oscar.core.loading import get_model
@@ -167,7 +167,7 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
 
         If `is_active` is in the request parameters, does not include codes that are:
          - set to inactive state via attributes.code
-         - whose voucher expiration date has passed (compared to now())
+         - whose voucher is outside of its effective period (not started or expired)
         """
         queryset = OfferAssignment.objects.filter(
             user_email=self.request.user.email,
@@ -188,10 +188,12 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
                 attribute_values__value_boolean=False
             )
 
+            now = timezone.now()
             queryset = queryset.filter(code__in=Product.objects
                                        .filter(product_class__name=COUPON_PRODUCT_CLASS_NAME)
                                        .filter(active_coupon)
-                                       .filter(coupon_vouchers__vouchers__end_datetime__gte=now())
+                                       .filter(coupon_vouchers__vouchers__start_datetime__lte=now)
+                                       .filter(coupon_vouchers__vouchers__end_datetime__gt=now)
                                        .distinct()
                                        .values_list('coupon_vouchers__vouchers__code', flat=True))
 
@@ -236,6 +238,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 attribute_values__value_boolean=False
             )
             coupons = coupons.filter(active_coupon)
+
+        if self.request.query_params.get('is_current', 'false').lower() == 'true':
+            now = timezone.now()
+            coupons = coupons.filter(
+                coupon_vouchers__vouchers__start_datetime__lte=now,
+                coupon_vouchers__vouchers__end_datetime__gt=now
+            )
 
         return coupons.distinct()
 
