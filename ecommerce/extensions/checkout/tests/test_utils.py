@@ -81,7 +81,6 @@ class UtilTests(TestCase):
         """ Verify the function returns the appropriate url when waffle flag is True, False, missing"""
 
         with override_settings(ECOMMERCE_MICROFRONTEND_URL='http://test.MFE.domain'):
-            ECOMMERCE_BASE_URL = self.site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
             params = '?order_number=EDX-100001&disable_back_button=1'
 
             receipt_url = get_receipt_page_url(
@@ -94,4 +93,5 @@ class UtilTests(TestCase):
             if use_new_page:
                 self.assertEqual(receipt_url, settings.ECOMMERCE_MICROFRONTEND_URL + '/receipt/' + params)
             else:
-                self.assertEqual(receipt_url, ECOMMERCE_BASE_URL + params)
+                self.assertEqual(receipt_url, self.site_configuration.build_ecommerce_url(reverse('checkout:receipt')) +
+                                 params)
