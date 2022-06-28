@@ -3,6 +3,7 @@
 import logging
 from urllib import parse
 
+import waffle
 from babel.numbers import format_currency as default_format_currency
 from django.conf import settings
 from django.urls import reverse
@@ -33,8 +34,7 @@ def get_credit_provider_details(credit_provider_id, site_configuration):
         return None
 
 
-def get_receipt_page_url(site_configuration, order_number=None, override_url=None, disable_back_button=False,
-                         use_new_page=False):
+def get_receipt_page_url(request, site_configuration, order_number=None, override_url=None, disable_back_button=False):
     """ Returns the receipt page URL.
 
     Args:
@@ -51,12 +51,14 @@ def get_receipt_page_url(site_configuration, order_number=None, override_url=Non
     if override_url:
         return override_url
 
+    use_external_receipt_page = waffle.flag_is_active(request, 'enable_receipts_via_ecommerce_mfe')
+
     url_params = {}
     if order_number:
         url_params['order_number'] = order_number
     if disable_back_button:
         url_params['disable_back_button'] = int(disable_back_button)
-    if use_new_page and settings.ECOMMERCE_MICROFRONTEND_URL:
+    if use_external_receipt_page and settings.ECOMMERCE_MICROFRONTEND_URL:
         url_suffix = '/receipt/'
         base_url = settings.ECOMMERCE_MICROFRONTEND_URL + url_suffix
     else:

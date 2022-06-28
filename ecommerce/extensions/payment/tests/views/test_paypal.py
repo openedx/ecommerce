@@ -4,7 +4,6 @@
 import ddt
 import mock
 import responses
-import waffle
 from django.test.client import RequestFactory
 from django.urls import reverse
 from oscar.apps.order.exceptions import UnableToPlaceOrder
@@ -82,14 +81,13 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         execution_response = self.mock_payment_execution_response(self.basket, payer_info=payer_info)
 
         response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
-        use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
         self.assertRedirects(
             response,
             url_redirect or get_receipt_page_url(
+                self.request,
                 order_number=self.basket.order_number,
                 site_configuration=self.basket.site.siteconfiguration,
-                disable_back_button=True,
-                use_new_page=use_external_receipt_page
+                disable_back_button=True
             ),
             fetch_redirect_response=False
         )
@@ -130,14 +128,13 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.mock_payment_execution_response(self.basket)
 
         response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
-        use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
         self.assertRedirects(
             response,
             get_receipt_page_url(
+                self.request,
                 order_number=self.basket.order_number,
                 site_configuration=self.basket.site.siteconfiguration,
-                disable_back_button=True,
-                use_new_page=use_external_receipt_page
+                disable_back_button=True
             ),
             fetch_redirect_response=False
         )
@@ -171,14 +168,13 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         basket_add_organization_attribute(self.basket, self.RETURN_DATA)
 
         response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
-        use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
         self.assertRedirects(
             response,
             get_receipt_page_url(
+                self.request,
                 order_number=self.basket.order_number,
                 site_configuration=self.basket.site.siteconfiguration,
-                disable_back_button=True,
-                use_new_page=use_external_receipt_page
+                disable_back_button=True
             ),
             fetch_redirect_response=False
         )

@@ -3,7 +3,6 @@
 import logging
 
 import unicodecsv as csv
-import waffle
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -269,13 +268,12 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                     return HttpResponseRedirect(
                         get_lms_course_about_url(product.course.id)
                     )
-                use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
                 return HttpResponseRedirect(
                     get_receipt_page_url(
+                        self.request,
                         site_configuration,
                         order.number,
-                        disable_back_button=True,
-                        use_new_page=use_external_receipt_page
+                        disable_back_button=True
                     ),
                 )
             except:  # pylint: disable=bare-except

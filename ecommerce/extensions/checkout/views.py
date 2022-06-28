@@ -4,7 +4,6 @@
 import logging
 from decimal import Decimal
 
-import waffle
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -79,12 +78,11 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                     course_run_id = order.lines.all()[:1].get().product.course.id
                     url = get_lms_course_about_url(course_run_id)
             else:
-                use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
                 receipt_path = get_receipt_page_url(
+                    self.request,
                     order_number=order.number,
                     site_configuration=order.site.siteconfiguration,
-                    disable_back_button=True,
-                    use_new_page=use_external_receipt_page
+                    disable_back_button=True
                 )
                 url = site.siteconfiguration.build_lms_url(receipt_path)
         else:

@@ -5,7 +5,6 @@ import logging
 import os
 from io import StringIO
 
-import waffle
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.management import call_command
 from django.db import transaction
@@ -91,12 +90,11 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         if not basket:
             return redirect(self.payment_processor.error_url)
 
-        use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
         receipt_url = get_receipt_page_url(
+            self.request,
             order_number=basket.order_number,
             site_configuration=basket.site.siteconfiguration,
-            disable_back_button=True,
-            use_new_page=use_external_receipt_page
+            disable_back_button=True
         )
 
         try:

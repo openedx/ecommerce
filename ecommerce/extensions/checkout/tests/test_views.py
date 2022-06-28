@@ -10,10 +10,12 @@ from django.urls import reverse
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
+from waffle.testutils import override_flag
 
 from ecommerce.core.url_utils import get_lms_course_about_url, get_lms_program_dashboard_url
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.extensions.api.v2.constants import ENABLE_RECEIPTS_VIA_ECOMMERCE_MFE
 from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -90,6 +92,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         expected_url = get_lms_course_about_url(self.course_run.id)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
+    @override_flag(ENABLE_RECEIPTS_VIA_ECOMMERCE_MFE, active=False)
     @responses.activate
     def test_successful_redirect(self):
         """ Verify redirect to the receipt page. """
@@ -98,13 +101,12 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
 
-        use_external_receipt_page = False
         order = Order.objects.first()
         expected_url = get_receipt_page_url(
+            self.request,
             order_number=order.number,
             site_configuration=order.site.siteconfiguration,
-            disable_back_button=True,
-            use_new_page=use_external_receipt_page
+            disable_back_button=True
         )
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 

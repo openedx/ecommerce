@@ -8,7 +8,6 @@ from urllib.parse import urljoin
 import ddt
 import mock
 import responses
-import waffle
 from django.conf import settings
 from django.urls import reverse
 from factory.django import mute_signals
@@ -650,13 +649,12 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
 
         response = self.client.post(self.path, notification)
-        use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
 
         expected_redirect = get_receipt_page_url(
+            self.request,
             self.site.siteconfiguration,
             order_number=notification.get('req_reference_number'),
-            disable_back_button=True,
-            use_new_page=use_external_receipt_page
+            disable_back_button=True
         )
 
         self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
