@@ -1,10 +1,20 @@
+# ⛔️ DEPRECATION WARNING
+
+**This repository is deprecated and in maintainence-only operation while we work on a replacement, please see [this announcement](https://discuss.openedx.org/t/deprecation-removal-ecommerce-service-depr-22/6839) for more information.**
+
+Although we have stopped integrating new contributions, we always appreciate security disclosures and patches sent to [security@edx.org](mailto:security@edx.org)
+
 <!--
 Please give the pull request a short but descriptive title.
 
 Use this template as a guide. Omit sections that don't apply. You may link to information rather than copy it.
 -->
 
-## Anyone merging to this repository is expected to [release and monitor their changes](https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories); if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
+## Anyone internally merging to this repository is expected to [release and monitor their changes](https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories); if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
+
+## Required Testing
+- [ ] Before deploying this change, complete a purchase in the stage environment. 
+(^ We can remove that manual check once REV-2624 is done and the corresponding e2e test runs again)
 
 ## Description
 

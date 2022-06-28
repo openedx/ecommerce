@@ -2,7 +2,7 @@
 
 import uuid
 
-import httpretty
+import responses
 from django.conf import settings
 from django.urls import reverse
 from oscar.core.loading import get_model
@@ -24,13 +24,13 @@ class EnterpriseOfferListViewTests(EnterpriseServiceMockMixin, ViewTestMixin, Te
     def setUp(self):
         super(EnterpriseOfferListViewTests, self).setUp()
 
-        httpretty.enable()
+        responses.start()
         self.mock_access_token_response()
 
     def tearDown(self):
         super(EnterpriseOfferListViewTests, self).tearDown()
-        httpretty.disable()
-        httpretty.reset()
+        responses.stop()
+        responses.reset()
 
     def test_get(self):
         """ The context should contain a list of enterprise offers. """
@@ -47,7 +47,7 @@ class EnterpriseOfferListViewTests(EnterpriseServiceMockMixin, ViewTestMixin, Te
         self.assertEqual(list(response.context['object_list']), enterprise_offers)
 
         # The page should load even if the Enterprise API is inaccessible
-        httpretty.disable()
+        responses.reset()
         response = self.assert_get_response_status(200)
         self.assertEqual(list(response.context['object_list']), enterprise_offers)
 
@@ -81,15 +81,12 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         super(EnterpriseOfferUpdateViewTests, self).setUp()
         self.enterprise_offer = factories.EnterpriseOfferFactory(partner=self.partner)
         self.path = reverse('enterprise:offers:edit', kwargs={'pk': self.enterprise_offer.pk})
-
-        # NOTE: We activate httpretty here so that we don't have to decorate every test method.
-        httpretty.enable()
+        responses.start()
         self.mock_specific_enterprise_customer_api(self.enterprise_offer.condition.enterprise_customer_uuid)
 
     def tearDown(self):
         super(EnterpriseOfferUpdateViewTests, self).tearDown()
-        httpretty.disable()
-        httpretty.reset()
+        responses.reset()
 
     def test_get(self):
         """ The context should contain the enterprise offer. """
@@ -97,7 +94,7 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         self.assertEqual(response.context['object'], self.enterprise_offer)
 
         # The page should load even if the Enterprise API is inaccessible
-        httpretty.disable()
+        responses.reset()
         response = self.assert_get_response_status(200)
         self.assertEqual(response.context['object'], self.enterprise_offer)
 
@@ -118,11 +115,11 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         self.assertRedirects(response, self.path)
 
 
-@httpretty.activate
 class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, TestCase):
 
     path = reverse('enterprise:offers:new')
 
+    @responses.activate
     def test_post(self):
         """ A new enterprise offer should be created. """
         expected_ec_uuid = uuid.uuid4()

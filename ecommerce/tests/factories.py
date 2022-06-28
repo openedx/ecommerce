@@ -52,7 +52,7 @@ class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = get_model('core', 'User')
 
-    username = factory.Sequence(lambda n: 'ecommerce_test_user %d' % n)
+    username = factory.Sequence(lambda n: 'ecommerce_test_user_%d' % n)
     email = factory.Sequence(lambda n: 'ecommerce_test_%s@example.com' % n)
     first_name = 'Ecommerce'
     last_name = 'User'

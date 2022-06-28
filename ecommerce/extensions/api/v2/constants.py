@@ -5,3 +5,13 @@ REFUND_ORDER_EMAIL_GREETING = 'Hello! We see you unenrolled from a course provid
                               'original code.'
 REFUND_ORDER_EMAIL_CLOSING = 'We hope you find a course that meets your learning needs! For any questions, reach out ' \
                              'to your Learning Manager at your organization.'
+
+# .. toggle_name: enable_hoist_order_history
+# .. toggle_type: waffle_flag
+# .. toggle_default: False
+# .. toggle_description: Allows order fetching from Commerce Coordinator API for display in Order History MFE.
+# .. toggle_use_cases: open_edx
+# .. toggle_creation_date: 2022-04-05
+# .. toggle_tickets: REV-2576
+# .. toggle_status: supported
+ENABLE_HOIST_ORDER_HISTORY = 'enable_hoist_order_history'

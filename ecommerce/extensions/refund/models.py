@@ -20,6 +20,8 @@ from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 
 logger = logging.getLogger(__name__)
 
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
+OrderDiscount = get_model('order', 'OrderDiscount')
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 post_refund = get_class('refund.signals', 'post_refund')
@@ -191,6 +193,51 @@ class Refund(StatusMixin, TimeStampedModel):
             # This occurs when attempting to refund free orders.
             logger.info("No payments to credit for Refund [%d]", self.id)
 
+    def _issue_credit_for_enterprise_offer(self):
+        """
+        Credits the enterprise offers used for the order, if applicable.
+
+        This is an edge case that we won't deal with for now. This happens when there were multiple lines in
+        an order but not all lines were refunded. We have no good way to determine how much of the discount was
+        applied to each line. We also don't know if partial refunds count as 1 application & order.
+        Note that there has not been an order with partial refund that uses enterprise offers currently.
+        """
+        try:
+            for discount in self.order.discounts.all():
+                offer = discount.offer
+
+                if offer.offer_type == ConditionalOffer.SITE and offer.condition.enterprise_customer_uuid:
+
+                    if self.lines.count() != self.order.lines.count():
+                        logger.error(
+                            "[Enterprise Offer Refund] Refund %d has %d lines, but order %d has %d lines,"
+                            "enterprise offer cannot be automatically credited.",
+                            self.id,
+                            self.lines.count(),
+                            self.order.id,
+                            self.order.lines.count()
+                        )
+                        return
+
+                    amount_discounted = discount.amount
+                    frequency = discount.frequency
+
+                    # do the opposite of record_usage
+                    # https://github.com/django-oscar/django-oscar/blob/ce125497f062865f5426238aabdb9e05b23d4cea/src/oscar/apps/offer/abstract_models.py#L353
+                    offer.num_applications -= frequency
+                    offer.total_discount -= amount_discounted
+                    offer.num_orders -= 1
+
+                    logger.info(
+                        "[Enterprise Offer Refund] Crediting enterprise offer %d for $%d for refund %d.",
+                        offer.id,
+                        amount_discounted, self.id
+                    )
+
+                    offer.save()
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("[Enterprise Offer Refund] Failed to credit enterprise offer for refund %d.", self.id)
+
     def _revoke_lines(self):
         """Revoke fulfillment for the lines in this Refund."""
         if revoke_fulfillment_for_refund(self):
@@ -214,6 +261,8 @@ class Refund(StatusMixin, TimeStampedModel):
                 logger.exception('Failed to issue credit for refund [%d].', self.id)
                 self.set_status(REFUND.PAYMENT_REFUND_ERROR)
                 return False
+
+            self._issue_credit_for_enterprise_offer()
 
         if revoke_fulfillment and self.status in (REFUND.PAYMENT_REFUNDED, REFUND.REVOCATION_ERROR):
             self._revoke_lines()

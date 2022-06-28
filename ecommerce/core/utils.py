@@ -32,7 +32,7 @@ def get_cache_key(**kwargs):
     return get_django_cache_key(**kwargs)
 
 
-def deprecated_traverse_pagination(response, endpoint):
+def deprecated_traverse_pagination(response, client, api_url):
     """
     Traverse a paginated API response.
 
@@ -44,7 +44,8 @@ def deprecated_traverse_pagination(response, endpoint):
 
     Arguments:
         response (Dict): Current response dict from service API
-        endpoint (slumber Resource object): slumber Resource object from edx-rest-api-client
+        client (requests.Session): OAuthAPIClient object from edx-rest-api-client
+        api_url (str): API endpoint URL
 
     Returns:
         list of dict.
@@ -55,14 +56,11 @@ def deprecated_traverse_pagination(response, endpoint):
     next_page = response.get('next')
     while next_page:
         if waffle.switch_is_active("debug_logging_for_deprecated_traverse_pagination"):  # pragma: no cover
-            base_url = ""
-            try:
-                base_url = endpoint._store['base_url']  # pylint: disable=protected-access
-            except:  # pylint: disable=bare-except
-                pass
-            logger.info("deprecated_traverse_pagination method is called for endpoint %s", base_url)
+            logger.info("deprecated_traverse_pagination method is called for endpoint %s", api_url)
         querystring = parse_qs(urlparse(next_page).query, keep_blank_values=True)
-        response = endpoint.get(**querystring)
+        response = client.get(api_url, params=querystring)
+        response.raise_for_status()
+        response = response.json()
         results += response.get('results', [])
         next_page = response.get('next')
 

@@ -4,9 +4,9 @@ import sys
 from datetime import datetime
 from io import StringIO
 
-import httpretty
 import mock
 import pytz
+import responses
 from django.core.management import call_command
 
 from ecommerce.courses.models import Course
@@ -30,9 +30,10 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
         self.assertTrue(verified_seat.attr.id_verification_required)
         self.assertEqual(verified_seat.stockrecords.get(partner=self.partner).price_excl_tax, price)
 
-    @httpretty.activate
+    @responses.activate
     def test_handle(self):
-        """ The command should create the demo course with audit and verified seats,
+        """
+        The command should create the demo course with audit and verified seats,
         and publish that data to the LMS.
         """
         self.mock_access_token_response()
@@ -43,9 +44,10 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
 
         self.assert_seats_created('course-v1:edX+DemoX+Demo_Course', 'edX Demonstration Course', 149)
 
-    @httpretty.activate
+    @responses.activate
     def test_handle_with_existing_course(self):
-        """ The command should create the demo course with audit and verified seats,
+        """
+        The command should create the demo course with audit and verified seats,
         and publish that data to the LMS.
         """
         self.mock_access_token_response()
@@ -66,9 +68,11 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
 
         self.assert_seats_created('course-v1:edX+DemoX+Demo_Course', 'edX Demonstration Course', 149)
 
-    @httpretty.activate
+    @responses.activate
     def test_handle_with_overrides(self):
-        """ Users should be able to specify the course ID, course title, and price of the verified seat. """
+        """
+        Users should be able to specify the course ID, course title, and price of the verified seat.
+        """
         course_id = 'a/b/c'
         course_title = 'ABCs'
         price = 1e6
@@ -81,7 +85,7 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
 
         self.assert_seats_created(course_id, course_title, price)
 
-    @httpretty.activate
+    @responses.activate
     def test_handle_with_error_in_publish_to_lms(self):
         """
         The command should log error message if there was an error in publish to LMS.

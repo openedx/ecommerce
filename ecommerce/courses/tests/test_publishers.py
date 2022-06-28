@@ -2,10 +2,11 @@
 
 import datetime
 import json
+from urllib.parse import urljoin
 
 import ddt
-import httpretty
 import mock
+import responses
 from django.utils import timezone
 from oscar.core.loading import get_model
 from requests import Timeout
@@ -29,7 +30,6 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
 
-        httpretty.enable()
         self.mock_access_token_response()
 
         self.course = CourseFactory(
@@ -42,26 +42,22 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         self.error_message = 'Failed to publish commerce data for {course_id} to LMS.'.format(course_id=self.course.id)
 
     def tearDown(self):
-        super(LMSPublisherTests, self).tearDown()
-        httpretty.disable()
-        httpretty.reset()
+        super().tearDown()
+        responses.stop()
+        responses.reset()
 
     def _mock_commerce_api(self, status=200, body=None):
-        self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Commerce API calls.')
-
         body = body or {}
         url = self.site_configuration.build_lms_url('/api/commerce/v1/courses/{}/'.format(self.course.id))
-        httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body), content_type=JSON)
+        responses.add(responses.PUT, url, status=status, json=body, content_type=JSON)
 
     def mock_creditcourse_endpoint(self, course_id, status, body=None):
-        self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Credit API calls.')
-
         url = get_lms_url('/api/credit/v1/courses/{}/'.format(course_id))
-        httpretty.register_uri(
-            httpretty.PUT,
+        responses.add(
+            responses.PUT,
             url,
             status=status,
-            body=json.dumps(body),
+            json=body,
             content_type=JSON
         )
 
@@ -74,30 +70,33 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
                 logger.check(
                     (
                         LOGGER_NAME, 'ERROR',
-                        'Failed to publish commerce data for [{course_id}] to LMS.'.format(course_id=self.course.id)
+                        f"Failed to publish commerce data for [{self.course.id}] to LMS."
                     )
                 )
                 self.assertEqual(actual, self.error_message)
 
+    @responses.activate
     def test_api_error(self):
         """ If the Commerce API returns a non-successful status, an ERROR message should be logged. """
         status = 400
-        expected_msg = 'deadline issue'
-        api_body = {'non_field_errors': [expected_msg]}
 
-        self._mock_commerce_api(status, api_body)
+        self._mock_commerce_api(status)
         with LogCapture(LOGGER_NAME) as logger:
             actual = self.publisher.publish(self.course)
+            url = urljoin(f"{self.site.siteconfiguration.commerce_api_url}/", f"courses/{self.course.id}/")
             logger.check(
                 (
                     LOGGER_NAME, 'ERROR',
-                    'Failed to publish commerce data for [{}] to LMS. Status was [{}]. Body was [{}].'.format(
-                        self.course.id, status, json.dumps(api_body))
+                    (
+                        f"Failed to publish commerce data for [{self.course.id}] to LMS. Error was {status} "
+                        f"Client Error: Bad Request for url: {url}."
+                    )
                 )
             )
 
-            self.assertEqual(actual, self.error_message + ' ' + expected_msg)
+            self.assertEqual(actual, self.error_message)
 
+    @responses.activate
     def test_api_success(self):
         """ If the Commerce API returns a successful status, an INFO message should be logged. """
         self._mock_commerce_api()
@@ -108,7 +107,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
 
             logger.check((LOGGER_NAME, 'INFO', 'Successfully published commerce data for [{}].'.format(self.course.id)))
 
-        last_request = httpretty.last_request()
+        last_request = responses.calls[-1].request
 
         # Verify the data passed to the API was correct.
         actual = json.loads(last_request.body.decode('utf-8'))
@@ -202,25 +201,29 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
 
     def assert_creditcourse_endpoint_called(self):
         """ Verify the Credit API's CreditCourse endpoint was called. """
-        paths = [request.path for request in httpretty.httpretty.latest_requests]
+        paths = [call.request.path_url for call in responses.calls]
         self.assertIn('/api/credit/v1/courses/{}/'.format(self.course.id), paths)
 
+    @responses.activate
     def test_credit_publication_success(self):
         """ Verify the endpoint returns successfully when credit publication succeeds. """
         error_message = self.attempt_credit_publication(201)
         self.assertIsNone(error_message)
         self.assert_creditcourse_endpoint_called()
 
+    @responses.activate
     def test_credit_publication_api_failure(self):
         """ Verify the endpoint fails appropriately when Credit API calls return an error. """
         course_id = self.course.id
+        url = urljoin(f"{self.site.siteconfiguration.credit_api_url}/", f"courses/{self.course.id}/")
         with LogCapture(LOGGER_NAME) as logger:
             status = 400
             actual = self.attempt_credit_publication(status)
 
-            # Ensure the HTTP status and response are logged
-            expected_log = 'Failed to publish CreditCourse for [{course_id}] to LMS. ' \
-                           'Status was [{status}]. Body was [null].'.format(course_id=course_id, status=status)
+            expected_log = (
+                f"Failed to publish CreditCourse for [{self.course.id}] to LMS. Error was {status} Client Error: "
+                f"Bad Request for url: {url}."
+            )
             logger.check((LOGGER_NAME, 'ERROR', expected_log))
 
         expected = 'Failed to publish commerce data for {} to LMS.'.format(course_id)

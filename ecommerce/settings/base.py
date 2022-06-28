@@ -12,9 +12,13 @@ from django.utils.translation import ugettext_lazy as _
 
 from ecommerce.core.constants import (
     ENTERPRISE_COUPON_ADMIN_ROLE,
+    ENTERPRISE_COUPON_LEARNER_ROLE,
+    ENTERPRISE_OFFER_ADMIN_ROLE,
+    ENTERPRISE_OFFER_LEARNER_ROLE,
     ORDER_MANAGER_ROLE,
     STUDENT_SUPPORT_ADMIN_ROLE,
     SYSTEM_ENTERPRISE_ADMIN_ROLE,
+    SYSTEM_ENTERPRISE_LEARNER_ROLE,
     SYSTEM_ENTERPRISE_OPERATOR_ROLE
 )
 from ecommerce.settings._oscar import *
@@ -218,6 +222,7 @@ MIDDLEWARE = (
     'corsheaders.middleware.CorsMiddleware',
     'edx_django_utils.monitoring.DeploymentMonitoringMiddleware',
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
+    'edx_django_utils.monitoring.CookieMonitoringMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -675,9 +680,23 @@ ENTERPRISE_CUSTOMER_COOKIE_NAME = 'enterprise_customer_uuid'
 ENTERPRISE_DATA_API_GROUP = 'enterprise_data_api_access'
 
 SYSTEM_TO_FEATURE_ROLE_MAPPING = {
-    SYSTEM_ENTERPRISE_ADMIN_ROLE: [ENTERPRISE_COUPON_ADMIN_ROLE],
-    SYSTEM_ENTERPRISE_OPERATOR_ROLE: [ENTERPRISE_COUPON_ADMIN_ROLE],
+    SYSTEM_ENTERPRISE_ADMIN_ROLE: [
+        ENTERPRISE_COUPON_ADMIN_ROLE,
+        ENTERPRISE_COUPON_LEARNER_ROLE,
+        ENTERPRISE_OFFER_ADMIN_ROLE,
+        ENTERPRISE_OFFER_LEARNER_ROLE,
+    ],
+    SYSTEM_ENTERPRISE_OPERATOR_ROLE: [
+        ENTERPRISE_COUPON_ADMIN_ROLE,
+        ENTERPRISE_COUPON_LEARNER_ROLE,
+        ENTERPRISE_OFFER_ADMIN_ROLE,
+        ENTERPRISE_OFFER_LEARNER_ROLE,
+    ],
     STUDENT_SUPPORT_ADMIN_ROLE: [ORDER_MANAGER_ROLE],
+    SYSTEM_ENTERPRISE_LEARNER_ROLE: [
+        ENTERPRISE_COUPON_LEARNER_ROLE,
+        ENTERPRISE_OFFER_LEARNER_ROLE,
+    ]
 }
 
 # END ENTERPRISE CONFIGURATION

@@ -1,4 +1,3 @@
-import datetime
 import logging
 from urllib.parse import urljoin, urlsplit
 
@@ -12,14 +11,12 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils import monitoring as monitoring_utils
-from edx_django_utils.cache import TieredCache
 from edx_rbac.models import UserRole, UserRoleAssignment
-from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_api_client.client import OAuthAPIClient
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
+from requests.exceptions import RequestException, Timeout
 from simple_history.models import HistoricalRecords
-from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, ALLOW_MISSING_LMS_USER_ID
 from ecommerce.core.exceptions import MissingLmsUserIdException
@@ -381,106 +378,53 @@ class SiteConfiguration(models.Model):
         return self.site.domain
 
     @property
-    def access_token(self):
-        """ Returns an access token for this site's service user.
-
-        The access token is retrieved using the current site's OAuth credentials and the client credentials grant.
-        The token is cached for the lifetime of the token, as specified by the OAuth provider's response. The token
-        type is JWT.
+    def oauth_api_client(self):
+        """
+        This client is authenticated with the configured oauth settings and automatically cached.
 
         Returns:
-            str: JWT access token
+            requests.Session: API client
         """
-        key = 'siteconfiguration_access_token_{}'.format(self.id)
-        access_token_cached_response = TieredCache.get_cached_response(key)
-        if access_token_cached_response.is_found:
-            return access_token_cached_response.value
-
-        url = '{root}/access_token'.format(root=self.oauth2_provider_url)
-        access_token, expiration_datetime = EdxRestApiClient.get_oauth_access_token(
-            url,
-            self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_KEY'],  # pylint: disable=unsubscriptable-object
-            self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_SECRET'],  # pylint: disable=unsubscriptable-object
-            token_type='jwt'
+        return OAuthAPIClient(
+            settings.BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL,
+            settings.BACKEND_SERVICE_EDX_OAUTH2_KEY,
+            settings.BACKEND_SERVICE_EDX_OAUTH2_SECRET,
         )
 
-        expires = (expiration_datetime - datetime.datetime.utcnow()).seconds
-        TieredCache.set_all_tiers(key, access_token, expires)
-        return access_token
-
     @cached_property
-    def discovery_api_client(self):
-        """
-        Returns an API client to access the Discovery service.
-
-        Returns:
-            EdxRestApiClient: The client to access the Discovery service.
-        """
-
-        return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
-
-    @cached_property
-    def embargo_api_client(self):
+    def embargo_api_url(self):
         """ Returns the URL for the embargo API """
-        return EdxRestApiClient(self.build_lms_url('/api/embargo/v1'), jwt=self.access_token)
+        return self.build_lms_url('/api/embargo/v1/')
 
     @cached_property
-    def enterprise_api_client(self):
-        """
-        Constructs a Slumber-based REST API client for the provided site.
-
-        Example:
-            site.siteconfiguration.enterprise_api_client.enterprise-learner(learner.username).get()
-
-        Returns:
-            EdxRestApiClient: The client to access the Enterprise service.
-
-        """
-        return EdxRestApiClient(self.enterprise_api_url, jwt=self.access_token)
+    def consent_api_url(self):
+        return self.build_lms_url('/consent/api/v1/')
 
     @cached_property
-    def enterprise_catalog_api_client(self):
-        """
-        Returns a REST API client for the provided enterprise catalog service
-
-        Example:
-            site.siteconfiguration.enterprise_catalog_api_client.enterprise-catalog.get()
-
-        Returns:
-            EdxRestApiClient: The client to access the Enterprise Catalog service.
-
-        """
-        return EdxRestApiClient(self.enterprise_catalog_api_url, jwt=self.access_token)
-
-    @cached_property
-    def consent_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/consent/api/v1/'), jwt=self.access_token, append_slash=False)
-
-    @cached_property
-    def user_api_client(self):
+    def user_api_url(self):
         """
         Returns the API client to access the user API endpoint on LMS.
 
         Returns:
-            EdxRestApiClient: The client to access the LMS user API service.
+            str: The URL to access the LMS user API service.
         """
-        return EdxRestApiClient(self.build_lms_url('/api/user/v1/'), jwt=self.access_token)
+        return self.build_lms_url('/api/user/v1/')
 
     @cached_property
-    def commerce_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/api/commerce/v1/'), jwt=self.access_token)
+    def commerce_api_url(self):
+        return self.build_lms_url('/api/commerce/v1/')
 
     @cached_property
-    def credit_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/api/credit/v1/'), jwt=self.access_token)
+    def credit_api_url(self):
+        return self.build_lms_url('/api/credit/v1/')
 
     @cached_property
-    def enrollment_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/api/enrollment/v1/'), jwt=self.access_token, append_slash=False)
+    def enrollments_api_url(self):
+        return self.build_lms_url('/api/enrollment/v1/enrollment')
 
     @cached_property
-    def entitlement_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/api/entitlements/v1/'), jwt=self.access_token)
+    def entitlements_api_url(self):
+        return self.build_lms_url('/api/entitlements/v1/entitlements/')
 
 
 class User(AbstractUser):
@@ -557,13 +501,11 @@ class User(AbstractUser):
         """
         if user_emails:
             try:
-                api = EdxRestApiClient(
-                    site.siteconfiguration.build_lms_url('/api/user/v1/accounts'),
-                    append_slash=False,
-                    jwt=site.siteconfiguration.access_token
-                )
-                response = api.search_emails.post({'emails': user_emails})
-                return response
+                api_client = site.siteconfiguration.oauth_api_client
+                api_url = urljoin(f"{site.siteconfiguration.user_api_url}/", "accounts/search_emails")
+                response = api_client.post(api_url, json={'emails': user_emails})
+                response.raise_for_status()
+                return response.json()
             except Exception as error:  # pylint: disable=broad-except
                 log.exception('Failed to get users for emails: [%s], error: [%s]', user_emails, error)
         return []
@@ -676,18 +618,16 @@ class User(AbstractUser):
             A dictionary of account details.
 
         Raises:
-            ConnectionError, SlumberBaseException and Timeout for failures in establishing a
+            ConnectionError, RequestException and Timeout for failures in establishing a
             connection with the LMS account API endpoint.
         """
         try:
-            api = EdxRestApiClient(
-                request.site.siteconfiguration.build_lms_url('/api/user/v1'),
-                append_slash=False,
-                jwt=request.site.siteconfiguration.access_token
-            )
-            response = api.accounts(self.username).get()
-            return response
-        except (ReqConnectionError, SlumberBaseException, Timeout):
+            api_client = request.site.siteconfiguration.oauth_api_client
+            api_url = urljoin(f"{request.site.siteconfiguration.user_api_url}/", f"accounts/{self.username}")
+            response = api_client.get(api_url)
+            response.raise_for_status()
+            return response.json()
+        except (ReqConnectionError, RequestException, Timeout):
             log.exception(
                 'Failed to retrieve account details for [%s]',
                 self.username
@@ -707,7 +647,7 @@ class User(AbstractUser):
             A list that contains eligibility information, or empty if user is not eligible.
 
         Raises:
-            ConnectionError, SlumberBaseException and Timeout for failures in establishing a
+            ConnectionError, RequestException and Timeout for failures in establishing a
             connection with the LMS eligibility API endpoint.
         """
         query_strings = {
@@ -715,16 +655,18 @@ class User(AbstractUser):
             'course_key': course_key
         }
         try:
-            api = site_configuration.credit_api_client
-            response = api.eligibility().get(**query_strings)
-        except (ReqConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
+            client = site_configuration.oauth_api_client
+            credit_url = urljoin(f"{site_configuration.credit_api_url}/", "eligibility/")
+            response = client.get(credit_url, params=query_strings)
+            response.raise_for_status()
+            return response.json()
+        except (ReqConnectionError, RequestException, Timeout):  # pragma: no cover
             log.exception(
                 'Failed to retrieve eligibility details for [%s] in course [%s]',
                 self.username,
                 course_key
             )
             raise
-        return response
 
     def deactivate_account(self, site_configuration):
         """Deactivate the user's account.
@@ -737,8 +679,11 @@ class User(AbstractUser):
             Response from the deactivation API endpoint.
         """
         try:
-            api = site_configuration.user_api_client
-            return api.accounts(self.username).deactivate().post()
+            api_client = site_configuration.oauth_api_client
+            accounts_api_url = urljoin(f"{site_configuration.user_api_url}/", f"accounts/{self.username}/deactivate/")
+            response = api_client.post(accounts_api_url)
+            response.raise_for_status()
+            return response.json()
         except:  # pylint: disable=bare-except
             log.exception(
                 'Failed to deactivate account for user [%s]',

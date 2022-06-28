@@ -12,14 +12,13 @@ from edx_rbac.decorators import permission_required
 from edx_rbac.mixins import PermissionRequiredMixin
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
+from requests.exceptions import HTTPError, Timeout
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, ViewSet
-from slumber.exceptions import SlumberHttpBaseException
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, ViewSet
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import is_coupon_available
@@ -28,17 +27,20 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_catalogs,
     get_enterprise_customers
 )
+from ecommerce.extensions.api.filters import OfferApiFilter
 from ecommerce.extensions.api.pagination import DatatablesDefaultPagination
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
     CouponCodeRemindSerializer,
     CouponCodeRevokeSerializer,
     CouponSerializer,
+    EnterpriseAdminOfferApiSerializer,
     EnterpriseCouponCreateSerializer,
     EnterpriseCouponListSerializer,
     EnterpriseCouponOverviewListSerializer,
     EnterpriseCouponSearchSerializer,
     EnterpriseCouponUpdateSerializer,
+    EnterpriseLearnerOfferApiSerializer,
     NotAssignedCodeUsageSerializer,
     NotRedeemedCodeUsageSerializer,
     OfferAssignmentEmailTemplatesSerializer,
@@ -84,6 +86,7 @@ logger = logging.getLogger(__name__)
 CouponVouchers = get_model('voucher', 'CouponVouchers')
 Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 TemplateFileAttachment = get_model('offer', 'TemplateFileAttachment')
@@ -129,7 +132,7 @@ class EnterpriseCustomerCatalogsViewSet(ViewSet):
                 page=request.GET.get('page', '1'),
                 endpoint_request_url=endpoint_request_url
             )
-        except (ReqConnectionError, SlumberHttpBaseException, Timeout) as exc:
+        except (ReqConnectionError, HTTPError, Timeout) as exc:
             logger.exception(
                 'Unable to retrieve catalog for enterprise customer! customer: %s, Exception: %s',
                 kwargs.get('enterprise_catalog_uuid'),
@@ -287,6 +290,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
             cleaned_voucher_data.get('notify_email'),
             cleaned_voucher_data['enterprise_customer'],
             cleaned_voucher_data['sales_force_id']
+        )
+        logger.info(
+            "Calling attach_or_update_contract_metadata_on_coupon "
+            "from api/v2/views/enterprise.py for coupon [%s]",
+            coupon_product.id
         )
         attach_or_update_contract_metadata_on_coupon(
             coupon_product,
@@ -634,15 +642,31 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'code': voucher.code,
                 'voucher_id': voucher.id,
             }
+
+            applications = None
+            # If we have a User, it means we're searching via user_email
+            # which means we should return applications related only to that user
             if user is not None:
-                for application in voucher.applications.all():
-                    if application.user.id == user.id:
-                        line = application.order.lines.first()
-                        redemption_data = dict(coupon_data)
-                        redemption_data['course_title'] = line.product.course.name
-                        redemption_data['course_key'] = line.product.course.id
-                        redemption_data['redeemed_date'] = application.date_created
-                        redemptions_and_assignments.append(redemption_data)
+                applications = voucher.applications.filter(user__id=user.id)
+            # If we don't have a user_email it means we're searching by code
+            # and we want to return all applications across all users
+            elif not user_email:
+                applications = voucher.applications.all()
+
+            # applications should be None when we are searching via user_email of
+            # a user that we do not have a user object for yet. If there is no
+            # user object, then there will not be an application of a voucher,
+            # just an assignment, so do nothing here in this block.
+            if applications is not None:
+
+                for application in applications:
+                    line = application.order.lines.first()
+                    redemption_data = dict(coupon_data)
+                    redemption_data['course_title'] = line.product.course.name
+                    redemption_data['course_key'] = line.product.course.id
+                    redemption_data['redeemed_date'] = application.date_created
+                    redemption_data['user_email'] = application.user.email if application.user else None
+                    redemptions_and_assignments.append(redemption_data)
 
             offer = voucher and voucher.enterprise_offer
             all_offer_assignments = offer.offerassignment_set.all()
@@ -664,18 +688,19 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return redemptions_and_assignments
 
     @action(detail=False, url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
-    @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
+    @permission_required('enterprise.can_view_coupon_overview', fn=lambda request, enterprise_id: enterprise_id)
     def overview(self, request, enterprise_id):  # pylint: disable=unused-argument
         """
         Overview of Enterprise coupons.
         Returns the following data:
             - Coupon ID
-            - Coupon name.
-            - Max number of codes available (Maximum coupon usage).
-            - Number of codes.
-            - Redemption count.
-            - Valid from.
-            - Valid end.
+            - Coupon name
+            - Enterprise catalog UUID
+            - Max number of codes available (Maximum coupon usage)
+            - Number of codes
+            - Redemption count
+            - Valid from
+            - Valid end
         """
         enterprise_coupons = self.get_queryset()
         coupon_id = self.request.query_params.get('coupon_id', None)
@@ -994,6 +1019,35 @@ class EnterpriseCouponViewSet(CouponViewSet):
                         delete_file_from_s3_with_key(file['name'])
                 return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BaseOfferApiViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
+    model = ConditionalOffer
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filterset_class = OfferApiFilter
+
+    def get_permission_object(self):
+        return self.kwargs.get('enterprise_customer')
+
+    def get_queryset(self):
+        return ConditionalOffer.objects.filter(
+            partner=self.request.site.siteconfiguration.partner,
+            condition__enterprise_customer_uuid=self.kwargs.get('enterprise_customer'),
+            offer_type=ConditionalOffer.SITE
+        ).select_related('condition', 'benefit')
+
+
+class EnterpriseLearnerOfferApiViewSet(BaseOfferApiViewSet):
+
+    serializer_class = EnterpriseLearnerOfferApiSerializer
+    permission_required = 'enterprise.can_view_enterprise_learner_offer'
+
+
+class EnterpriseAdminOfferApiViewSet(BaseOfferApiViewSet):
+
+    serializer_class = EnterpriseAdminOfferApiSerializer
+    permission_required = 'enterprise.can_view_enterprise_admin_offer'
 
 
 class OfferAssignmentEmailTemplatesViewSet(PermissionRequiredMixin, ModelViewSet):

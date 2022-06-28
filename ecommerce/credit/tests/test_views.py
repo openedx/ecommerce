@@ -3,11 +3,10 @@ Tests for the checkout page.
 """
 
 
-import json
 from datetime import timedelta
 
 import ddt
-import httpretty
+import responses
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
@@ -71,23 +70,23 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
     def _mock_eligibility_api(self, body, status=200):
         """ Mock GET requests to the Credit API's eligibility endpoint. """
 
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.eligibility_url,
+        responses.add(
+            method=responses.GET,
+            url=self.eligibility_url,
             status=status,
             content_type=JSON,
-            body=json.dumps(body)
+            json=body
         )
 
     def _mock_providers_api(self, body, status=200):
         """ Mock GET requests to the Credit API's provider endpoint. """
 
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.provider_url,
+        responses.add(
+            method=responses.GET,
+            url=self.provider_url,
             status=status,
             content_type=JSON,
-            body=json.dumps(body)
+            json=body
         )
 
     def _enable_payment_providers(self):
@@ -149,14 +148,14 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         response = self.client.get(path)
         self.assertEqual(response.status_code, 404)
 
-    @httpretty.activate
+    @responses.activate
     def test_get_without_deadline(self):
         """ Verify an error is shown if the user is not eligible for credit. """
         self.mock_access_token_response()
         self._mock_eligibility_api(body=[])
         self._assert_error_without_deadline()
 
-    @httpretty.activate
+    @responses.activate
     def test_get_without_provider(self):
         """ Verify an error is shown if the Credit API returns an empty list of
         providers.
@@ -171,7 +170,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         self._mock_providers_api(body=[])
         self._assert_error_without_providers()
 
-    @httpretty.activate
+    @responses.activate
     def test_eligibility_api_failure(self):
         """ Verify an error is shown if an exception is raised when requesting
         eligibility information from the Credit API.
@@ -180,7 +179,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         self._mock_eligibility_api(body=[], status=500)
         self._assert_error_without_deadline()
 
-    @httpretty.activate
+    @responses.activate
     def test_provider_api_failure(self):
         """ Verify an error is shown if an exception is raised when requesting
         provider(s) details from the Credit API.
@@ -195,7 +194,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         self._mock_providers_api(body=[], status=500)
         self._assert_error_without_providers()
 
-    @httpretty.activate
+    @responses.activate
     def test_get_checkout_page_with_credit_seats(self):
         """ Verify the page loads with the proper context, if all Credit API
         calls return successfully.
@@ -211,7 +210,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
 
         self._assert_success_checkout_page(sku=credit_seat.stockrecords.first().partner_sku)
 
-    @httpretty.activate
+    @responses.activate
     def test_get_checkout_page_with_audit_seats(self):
         """ Verify the page loads with the proper context, if all Credit API
         calls return successfully.
@@ -230,7 +229,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
 
         self._assert_success_checkout_page(sku=credit_seat.stockrecords.first().partner_sku)
 
-    @httpretty.activate
+    @responses.activate
     def test_seat_unavailable(self):
         """ Verify the view displays an error message to the user if no seat is available for purchase. """
         expires = timezone.now() - timedelta(days=1)
@@ -251,7 +250,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         )
         self.assertEqual(response.context['error'], expected)
 
-    @httpretty.activate
+    @responses.activate
     @ddt.data(
         (Benefit.PERCENTAGE, '100%'), (Benefit.FIXED, '$100.00')
     )

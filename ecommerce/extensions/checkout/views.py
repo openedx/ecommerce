@@ -15,11 +15,10 @@ from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
-from slumber.exceptions import SlumberHttpBaseException
+from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.core.url_utils import (
-    get_lms_courseware_url,
+    get_lms_course_about_url,
     get_lms_dashboard_url,
     get_lms_explore_courses_url,
     get_lms_program_dashboard_url
@@ -77,7 +76,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                     url = get_lms_program_dashboard_url(program_uuid)
                 else:
                     course_run_id = order.lines.all()[:1].get().product.course.id
-                    url = get_lms_courseware_url(course_run_id)
+                    url = get_lms_course_about_url(course_run_id)
             else:
                 receipt_path = get_receipt_page_url(
                     order_number=order.number,
@@ -256,7 +255,7 @@ class ReceiptResponseView(ThankYouView):
         try:
             # If enterprise feature is enabled return all the enterprise_customer associated with user.
             learner_data = fetch_enterprise_learner_data(request.site, request.user)
-        except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        except (ReqConnectionError, KeyError, HTTPError, Timeout) as exc:
             log.info('[enterprise learner message] Exception while retrieving enterprise learner data for '
                      'User: %s, Exception: %s', request.user, exc)
             return None

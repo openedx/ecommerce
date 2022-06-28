@@ -2,7 +2,7 @@
 
 import uuid
 
-import httpretty
+import responses
 from requests import ConnectionError as ReqConnectionError
 
 from ecommerce.programs.api import ProgramsApiClient
@@ -14,14 +14,13 @@ class ProgramsApiClientTests(ProgramTestMixin, TestCase):
     def setUp(self):
         super(ProgramsApiClientTests, self).setUp()
 
-        httpretty.enable()
+        responses.start()
         self.mock_access_token_response()
-        self.client = ProgramsApiClient(self.site.siteconfiguration.discovery_api_client, self.site.domain)
+        self.client = ProgramsApiClient(self.site.siteconfiguration)
 
     def tearDown(self):
         super(ProgramsApiClientTests, self).tearDown()
-        httpretty.disable()
-        httpretty.reset()
+        responses.reset()
 
     def test_get_program(self):
         """ The method should return data from the Programs API. Data should be cached for subsequent calls. """
@@ -30,7 +29,7 @@ class ProgramsApiClientTests(ProgramTestMixin, TestCase):
         self.assertEqual(self.client.get_program(program_uuid), data)
 
         # Subsequent calls should pull from the cache
-        httpretty.disable()
+        responses.reset()
         self.assertEqual(self.client.get_program(program_uuid), data)
 
         # Calls from different domains should not pull from cache

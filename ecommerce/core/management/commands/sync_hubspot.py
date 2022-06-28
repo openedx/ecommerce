@@ -9,13 +9,14 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from decimal import Decimal as D
+from urllib.parse import urljoin
 
+import requests
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
-from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_class, get_model
-from slumber.exceptions import HttpClientError, HttpServerError
+from requests.exceptions import HTTPError, RequestException
 
 from ecommerce.extensions.fulfillment.status import ORDER
 
@@ -174,6 +175,8 @@ LINE_ITEM = "LINE_ITEM"
 DEAL = "DEAL"
 BATCH_SIZE = 200
 
+EXPECTED_METHODS = ["GET", "POST", "PUT"]
+
 
 class Command(BaseCommand):
     help = 'Sync Product, Orders and Lines to Hubspot server.'
@@ -189,14 +192,12 @@ class Command(BaseCommand):
         """
         This function is responsible for all the calls of hubspot.
         """
-        client = EdxRestApiClient('/'.join([HUBSPOT_API_BASE_URL, api_url]))
-        if method == "GET":
-            return getattr(client, hubspot_object).get(**kwargs)
-        if method == "POST":
-            return getattr(client, hubspot_object).post(**kwargs)
-        if method == "PUT":
-            return getattr(client, hubspot_object).put(body, **kwargs)
-        raise ValueError("Unexpected method {}".format(method))
+        api_url = urljoin(f"{HUBSPOT_API_BASE_URL}/", f"{api_url}/{hubspot_object}")
+        if method not in EXPECTED_METHODS:
+            raise ValueError(f"Unexpected method {method}. Allowed methods are: {EXPECTED_METHODS}")
+        response = requests.request(method, api_url, json=body, params=kwargs)
+        response.raise_for_status()
+        return response.json()
 
     def _install_hubspot_ecommerce_bridge(self, site_configuration):
         """
@@ -216,7 +217,7 @@ class Command(BaseCommand):
                 )
             )
             status = True
-        except (HttpClientError, HttpServerError) as ex:
+        except (HTTPError, RequestException) as ex:
             self.stderr.write(
                 'An error occurred while installing hubspot ecommerce bridge for site {site}, {message}'.format(
                     site=site_configuration.site.domain, message=ex
@@ -243,7 +244,7 @@ class Command(BaseCommand):
                 )
             )
             status = True
-        except (HttpClientError, HttpServerError) as ex:
+        except (HTTPError, RequestException) as ex:
             self.stderr.write(
                 'An error occurred while defining hubspot ecommerce settings for site {site}, {message}'.format(
                     site=site_configuration.site.domain, message=ex
@@ -416,7 +417,7 @@ class Command(BaseCommand):
                         site=site_configuration.site.domain
                     )
                 )
-        except (HttpClientError, HttpServerError) as ex:
+        except (HTTPError, RequestException) as ex:
             self.stderr.write(
                 'An error occurred while upserting {object_type} for site {site}: {message}'.format(
                     object_type=object_type, site=site_configuration.site.domain, message=ex
@@ -443,7 +444,7 @@ class Command(BaseCommand):
                         message=error.get('details')
                     )
                 )
-        except (HttpClientError, HttpServerError) as ex:
+        except (HTTPError, RequestException) as ex:
             self.stderr.write(
                 'An error occurred while getting the error syncing message for site {site}: {message} '.format(
                     site=site_configuration.site.domain, message=ex

@@ -126,7 +126,7 @@ compile_translations: requirements.tox
 fake_translations: extract_translations dummy_translations compile_translations
 
 pull_translations:
-	cd ecommerce && tx pull -af --mode reviewed
+	cd ecommerce && tx pull -a -f --mode reviewed
 
 push_translations:
 	cd ecommerce && tx push -s
@@ -137,7 +137,8 @@ update_translations: pull_translations fake_translations
 detect_changed_source_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-detect_changed_translations
 
-check_translations_up_to_date: fake_translations detect_changed_source_translations
+# @FIXME: skip detect_changed_source_translations until git diff works again (REV-2737)
+check_translations_up_to_date: fake_translations # detect_changed_source_translations
 
 # Validate translations
 validate_translations: requirements.tox

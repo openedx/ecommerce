@@ -89,6 +89,7 @@ pyjwt[crypto]==1.7.1
     #   -c requirements/base.txt
     #   edx-rest-api-client
 pyparsing==3.0.7
+
     # via
     #   -c requirements/base.txt
     #   packaging

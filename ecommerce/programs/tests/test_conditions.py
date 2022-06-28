@@ -1,12 +1,11 @@
 
 
 import ddt
-import httpretty
 import mock
+import responses
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
-from requests import Timeout
-from slumber.exceptions import HttpNotFoundError, SlumberBaseException
+from requests import HTTPError, RequestException, Timeout
 
 from ecommerce.core.constants import COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
 from ecommerce.courses.models import Course
@@ -34,7 +33,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         expected = 'Basket contains a seat for every course in program {}'.format(condition.program_uuid)
         self.assertEqual(condition.name, expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_is_satisfied_no_enrollments(self):
         """ The method should return True if the basket contains one course run seat corresponding to each
         course in the program. """
@@ -86,7 +85,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
             basket.add_product(verified_seat)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
-    @httpretty.activate
+    @responses.activate
     def test_is_satisfied_with_enrollments(self):
         """ The condition should be satisfied if one valid course run from each course is in either the
         basket or the user's enrolled courses and the site has enabled partial program offers. """
@@ -130,12 +129,12 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
 
         # Verify the user enrollments are cached
         basket.site.siteconfiguration.enable_partial_program = True
-        httpretty.disable()
+        responses.reset()
         with mock.patch('ecommerce.programs.conditions.get_program',
                         return_value=program):
             self.assertTrue(self.condition.is_satisfied(offer, basket))
 
-    @ddt.data(HttpNotFoundError, SlumberBaseException, Timeout)
+    @ddt.data(HTTPError, RequestException, Timeout)
     def test_is_satisfied_with_exception_for_programs(self, value):
         """ The method should return False if there is an exception when trying to get program details. """
         offer = factories.ProgramOfferFactory(partner=self.partner, condition=self.condition)
@@ -146,7 +145,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
                         side_effect=value):
             self.assertFalse(self.condition.is_satisfied(offer, basket))
 
-    @httpretty.activate
+    @responses.activate
     def test_is_satisfied_with_exception_for_enrollments(self):
         """ The method should return True despite having an error at the enrollment check, given 1 course run seat
         corresponding to each course in the program. """
@@ -189,7 +188,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         self.condition.program_uuid = None
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
-    @httpretty.activate
+    @responses.activate
     def test_is_satisfied_with_entitlements(self):
         """
         The condition should be satisfied if, for each course in the program, their is either an entitlement sku in the
@@ -217,8 +216,10 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
                 if entitlement.attr.UUID in course_uuids and entitlement.attr.certificate_type == 'verified':
                     verified_entitlements.append(entitlement)
 
-        self.mock_user_data(basket.owner.username, mocked_api='entitlements', owned_products=entitlements_response)
-        self.mock_user_data(basket.owner.username)
+        self.mock_user_data(
+            basket.owner.username.replace(' ', '+'), mocked_api='entitlements', owned_products=entitlements_response
+        )
+        self.mock_user_data(basket.owner.username.replace(' ', '+'))
         # If the user has not added all of the remaining courses in program to their basket,
         # the condition should not be satisfied
         basket.flush()
@@ -238,12 +239,12 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
 
         # Verify the user enrollments are cached
         basket.site.siteconfiguration.enable_partial_program = True
-        httpretty.disable()
+        responses.reset()
         with mock.patch('ecommerce.programs.conditions.get_program',
                         return_value=program):
             self.assertTrue(self.condition.is_satisfied(offer, basket))
 
-    @httpretty.activate
+    @responses.activate
     def test_is_satisfied_program_without_entitlements(self):
         """
         User entitlements should not be retrieved if no course in the program has a course entitlement product
@@ -274,29 +275,29 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
             self.assertFalse(self.condition.is_satisfied(offer, basket))
             mock_processing_entitlements.assert_not_called()
 
-    @httpretty.activate
+    @responses.activate
     def test_get_lms_resource_for_user_caching_none(self):
         """
         LMS resource should be properly cached when enrollments is None.
         """
         basket = BasketFactory(site=self.site, owner=UserFactory())
         resource_name = 'test_resource_name'
-        mock_endpoint = mock.Mock()
-        mock_endpoint.get.return_value = None
+        mock_client = mock.Mock()
+        mock_client.get.return_value.json.return_value = None
 
-        return_value = self.condition._get_lms_resource_for_user(basket, resource_name, mock_endpoint)  # pylint: disable=protected-access
-
-        self.assertEqual(return_value, [])
-        self.assertEqual(mock_endpoint.get.call_count, 1, 'Endpoint should be called before caching.')
-
-        mock_endpoint.reset_mock()
-
-        return_value = self.condition._get_lms_resource_for_user(basket, resource_name, mock_endpoint)  # pylint: disable=protected-access
+        return_value = self.condition._get_lms_resource_for_user(basket, resource_name, mock_client, 'fake-url')  # pylint: disable=protected-access
 
         self.assertEqual(return_value, [])
-        self.assertEqual(mock_endpoint.get.call_count, 0, 'Endpoint should NOT be called after caching.')
+        self.assertEqual(mock_client.get.call_count, 1, 'Endpoint should be called before caching.')
 
-    @httpretty.activate
+        mock_client.reset_mock()
+
+        return_value = self.condition._get_lms_resource_for_user(basket, resource_name, mock_client, 'fake-url')  # pylint: disable=protected-access
+
+        self.assertEqual(return_value, [])
+        self.assertEqual(mock_client.get.call_count, 0, 'Endpoint should NOT be called after caching.')
+
+    @responses.activate
     def test_is_satisfied_with_non_active_program(self):
         """
         Is satisfied should return false if program is not active.

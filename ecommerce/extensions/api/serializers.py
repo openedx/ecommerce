@@ -3,10 +3,12 @@
 import logging
 import re
 from collections import OrderedDict
+from datetime import datetime
 from decimal import Decimal
 from urllib.parse import urljoin
 
 import bleach
+import pytz
 import waffle
 from dateutil.parser import parse
 from django.conf import settings
@@ -34,12 +36,15 @@ from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
 from ecommerce.enterprise.utils import (
+    calculate_remaining_offer_balance,
+    generate_offer_display_name,
     get_enterprise_customer_reply_to_email,
     get_enterprise_customer_sender_alias,
     get_enterprise_customer_uuid_from_voucher
 )
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.v2.constants import (
+    ENABLE_HOIST_ORDER_HISTORY,
     REFUND_ORDER_EMAIL_CLOSING,
     REFUND_ORDER_EMAIL_GREETING,
     REFUND_ORDER_EMAIL_SUBJECT
@@ -80,6 +85,7 @@ Catalog = get_model('catalogue', 'Catalog')
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 TemplateFileAttachment = get_model('offer', 'TemplateFileAttachment')
@@ -175,6 +181,20 @@ def retrieve_all_vouchers(obj):
 def retrieve_voucher_usage(obj):
     """Helper method to retrieve usage from voucher. """
     return retrieve_voucher(obj).usage
+
+
+def retrieve_enterprise_customer_catalog(coupon):
+    """
+    Helper method to retrieve the Enterprise Customer Catalog UUID
+    attached to a given coupon.
+    """
+    offer_range = retrieve_range(coupon)
+    offer_condition = retrieve_condition(coupon)
+    if offer_range and offer_range.enterprise_customer_catalog:
+        return offer_range.enterprise_customer_catalog
+    if offer_condition.enterprise_customer_catalog_uuid:
+        return offer_condition.enterprise_customer_catalog_uuid
+    return None
 
 
 def _flatten(attrs):
@@ -366,6 +386,7 @@ class OrderSerializer(serializers.ModelSerializer):
     payment_processor = serializers.SerializerMethodField()
     user = UserSerializer()
     vouchers = serializers.SerializerMethodField()
+    enable_hoist_order_history = serializers.SerializerMethodField()
 
     def get_vouchers(self, obj):
         try:
@@ -389,6 +410,18 @@ class OrderSerializer(serializers.ModelSerializer):
         except IndexError:
             return '0'
 
+    def get_enable_hoist_order_history(self, obj):
+        try:
+            request = self.context.get('request')
+            order_history_enabled = waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
+            obj.enable_hoist_order_history = order_history_enabled
+        except (AttributeError, ValueError) as error:
+            logger.exception(
+                'An error occurred while attempting to set ENABLE_HOIST_ORDER_HISTORY flag, error: [%s]',
+                error
+            )
+        return obj.enable_hoist_order_history
+
     class Meta:
         model = Order
         fields = (
@@ -396,6 +429,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'currency',
             'date_placed',
             'discount',
+            'enable_hoist_order_history',
             'lines',
             'number',
             'payment_processor',
@@ -945,6 +979,94 @@ class CouponListSerializer(serializers.ModelSerializer):
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
 
 
+def _serialize_remaining_balance_value(conditional_offer):
+    """
+    Change value into string and return it unless it is None.
+    """
+    remaining_balance = calculate_remaining_offer_balance(conditional_offer)
+    if remaining_balance is not None:
+        remaining_balance = str(remaining_balance)
+    return remaining_balance
+
+
+def _serialize_is_current_value(conditional_offer):
+    """
+    Compute whether offer is current based on start and end dates.
+
+    Returns true in the following situations:
+      - neither start or end date is set
+      - start date is set, but not end date AND today's date is on/after the start date
+      - end date is set, but not start date AND today's date is before the end date
+      - both start and end dates are set AND today's date is between the start and end dates
+    """
+    start_date = conditional_offer.start_datetime
+    end_date = conditional_offer.end_datetime
+    is_current = False
+    now = datetime.now(pytz.UTC)
+
+    if start_date is None and end_date is None:
+        is_current = True
+    elif start_date and end_date is None:
+        is_current = start_date <= now
+    elif end_date and start_date is None:
+        is_current = end_date >= now
+    else:
+        is_current = start_date <= now < end_date
+
+    return is_current
+
+
+class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
+    """
+    Serializer for EnterpriseOffer learner endpoint.
+
+    Uses serializers.BaseSerializer to keep this lightweight.
+    """
+
+    def to_representation(self, instance):
+        representation = OrderedDict()
+
+        representation['id'] = instance.id
+        representation['max_discount'] = instance.max_discount
+        representation['start_datetime'] = instance.start_datetime
+        representation['end_datetime'] = instance.end_datetime
+        representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
+        representation['usage_type'] = get_benefit_type(instance.benefit)
+        representation['discount_value'] = instance.benefit.value
+        representation['status'] = instance.status
+        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
+        representation['is_current'] = _serialize_is_current_value(instance)
+
+        return representation
+
+
+class EnterpriseAdminOfferApiSerializer(serializers.ModelSerializer):  # pylint: disable=abstract-method
+    """
+    Serializer for EnterpriseOffer admin endpoint.
+
+    Uses serializers.ModelSerializer to get __all__ fields serialized easily.
+    Opted not to use inheritance from EnterpriseLearnerOfferApiSerializer
+    due to complexity around overriding serializer's Meta class.
+    """
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        representation['usage_type'] = get_benefit_type(instance.benefit)
+        representation['discount_value'] = instance.benefit.value
+        representation['enterprise_customer_uuid'] = instance.condition.enterprise_customer_uuid
+        representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
+        representation['display_name'] = generate_offer_display_name(instance)
+        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
+        representation['is_current'] = _serialize_is_current_value(instance)
+
+        return representation
+
+    class Meta:
+        model = ConditionalOffer
+        fields = '__all__'
+
+
 class OfferAssignmentSummarySerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
     """
     Serializer for OfferAssignment endpoint.
@@ -1113,6 +1235,7 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
             'num_unassigned': self._get_num_unassigned(vouchers),
             'errors': self._get_errors(coupon),
             'available': is_coupon_available(coupon),
+            'enterprise_catalog_uuid': retrieve_enterprise_customer_catalog(coupon),
         }
 
         return dict(representation, **data)
@@ -1280,8 +1403,10 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
 
     def get_enterprise_catalog_content_metadata_url(self, obj):
         uuid = self.get_enterprise_customer_catalog(obj)
-        return urljoin(settings.ENTERPRISE_CATALOG_API_URL,
-                       'enterprise-catalogs/' + str(uuid) + '/get_content_metadata') if uuid else ''
+        return urljoin(
+            f"{settings.ENTERPRISE_CATALOG_API_URL}/",
+            f"enterprise-catalogs/{str(uuid)}/get_content_metadata"
+        ) if uuid else ''
 
     def get_enterprise_customer(self, obj):
         """ Get the Enterprise Customer attached to a coupon. """
@@ -1300,14 +1425,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
 
     def get_enterprise_customer_catalog(self, obj):
         """ Get the Enterprise Customer Catalog UUID attached to a coupon. """
-        offer_range = retrieve_range(obj)
-        offer_condition = retrieve_condition(obj)
-        if offer_range and offer_range.enterprise_customer_catalog:
-            return offer_range.enterprise_customer_catalog
-        if offer_condition.enterprise_customer_catalog_uuid:
-            return offer_condition.enterprise_customer_catalog_uuid
-
-        return None
+        return retrieve_enterprise_customer_catalog(obj)
 
     def get_inactive(self, obj):
         """ Get inactive attribute for Coupon Product"""

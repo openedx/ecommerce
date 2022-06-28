@@ -85,7 +85,7 @@ class ProgramOfferForm(forms.ModelForm):
         site = self.request.site
         current_date = str(datetime.today().strftime('%Y-%m-%d'))
 
-        client = ProgramsApiClient(site.siteconfiguration.discovery_api_client, site.domain)
+        client = ProgramsApiClient(site.siteconfiguration)
         program = client.get_program(program_uuid)
         offer_name = _(u'{current_date} Discount for the {program_title} {program_type} Program'.format(
             current_date=current_date,

@@ -4,9 +4,9 @@ import datetime
 from uuid import uuid4
 
 import ddt
-import httpretty
 import mock
 import pytz
+import responses
 from django.http import Http404
 from django.urls import reverse
 from django.utils.timezone import now
@@ -14,10 +14,9 @@ from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.test.factories import BenefitFactory, OrderFactory, OrderLineFactory, ProductFactory, RangeFactory
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
+from requests.exceptions import RequestException, Timeout
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
-from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -52,6 +51,10 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         super(VoucherViewSetTests, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
+
+    def tearDown(self):
+        super().tearDown()
+        responses.reset()
 
     def create_vouchers(self, partner=None, count=1):
         """Helper function that creates vouchers with a mocked coupon relation."""
@@ -148,7 +151,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
     def build_offers_url(self, voucher):
         return '{path}?code={code}'.format(path=reverse('api:v2:vouchers-offers'), code=voucher.code)
 
-    @httpretty.activate
+    @responses.activate
     def test_omitting_unavailable_seats(self):
         """ Verify an unavailable seat is omitted from offer page results. """
         self.mock_access_token_response()
@@ -166,12 +169,13 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 1)
 
-    @httpretty.activate
+    @responses.activate
     def test_omitting_already_bought_credit_seat(self):
         """ Verify a seat that the user bought is omitted from offer page results. """
         self.mock_access_token_response()
         products, request, voucher = self.prepare_get_offers_response(quantity=2, seat_type='credit')
-        self.mock_eligibility_api(request, self.user, 'a/b/c', eligible=True)
+        self.mock_eligibility_api(request, self.user, products[0].attr.course_key, eligible=True)
+        self.mock_eligibility_api(request, self.user, products[1].attr.course_key, eligible=True)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 2)
 
@@ -180,7 +184,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 1)
 
-    @httpretty.activate
+    @responses.activate
     @ddt.data((1, True), (0, False))
     @ddt.unpack
     def test_omitting_uneligible_credit_seat(self, offer_num, eligible):
@@ -191,7 +195,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), offer_num)
 
-    @httpretty.activate
+    @responses.activate
     def test_multiple_providers(self):
         """ Verify offer contains information about credit providers. """
         course = CourseFactory(partner=self.partner)
@@ -264,7 +268,6 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
 
 
 @ddt.ddt
-@httpretty.activate
 class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryTestMixin, LmsApiMockMixin,
                                      TestCase):
     """ Tests for the VoucherViewSet offers endpoint. """
@@ -292,6 +295,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
 
         self.assertEqual(response.status_code, 400)
 
+    @responses.activate
     def test_voucher_offers_listing_for_a_single_course_voucher(self):
         """ Verify the endpoint returns offers data when a single product is in voucher range. """
         self.mock_access_token_response()
@@ -311,7 +315,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         response = self.endpointView(request)
         self.assertEqual(response.status_code, 404)
 
-    @ddt.data((ReqConnectionError,), (Timeout,), (SlumberBaseException,))
+    @ddt.data((ReqConnectionError,), (Timeout,), (RequestException,))
     @ddt.unpack
     def test_voucher_offers_listing_api_exception_caught(self, exception):
         """ Verify the endpoint returns status 400 Bad Request when ConnectionError occurs """
@@ -341,6 +345,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
 
             self.assertEqual(response.status_code, 404)
 
+    @responses.activate
     def test_voucher_offers_listing_product_found(self):
         """ Verify the endpoint returns offers data for single product range. """
         self.mock_access_token_response()
@@ -367,6 +372,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         )
     )
     @ddt.unpack
+    @responses.activate
     def test_voucher_offers_listing_catalog_query_exception(self, return_value, method):
         """
         Verify the endpoint returns status 200 and an empty list of course offers
@@ -387,6 +393,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
             self.assertEqual(len(offers), 0)
 
+    @responses.activate
     def test_voucher_offers_listing_catalog_query(self):
         """ Verify the endpoint returns offers data for single product range. """
         self.mock_access_token_response()
@@ -403,6 +410,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.data), 0)
 
+    @responses.activate
     def test_get_offers_for_single_course_voucher(self):
         """ Verify that the course offers data is returned for a single course voucher. """
         self.mock_access_token_response()
@@ -436,6 +444,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             'voucher_end_date': voucher.end_datetime,
         })
 
+    @responses.activate
     def test_get_offers_for_multiple_courses_voucher(self):
         """ Verify that the course offers data is returned for a multiple courses voucher. """
         self.mock_access_token_response()
@@ -469,6 +478,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             'voucher_end_date': voucher.end_datetime,
         })
 
+    @responses.activate
     def test_get_offers_for_enterprise_catalog_voucher(self):
         """ Verify that the course offers data is returned for an enterprise catalog voucher. """
         self.mock_access_token_response()
@@ -508,6 +518,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             'voucher_end_date': voucher.end_datetime,
         })
 
+    @responses.activate
     def test_get_offers_for_enterprise_offer(self):
         """ Verify that the course offers data is returned for an enterprise catalog voucher. """
         self.mock_access_token_response()
@@ -545,6 +556,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             'voucher_end_date': voucher.end_datetime,
         })
 
+    @responses.activate
     def test_get_offers_for_enterprise_offer_no_catalog(self):
         """ Verify that the course offers data is returned for an enterprise catalog voucher. """
         self.mock_access_token_response()
@@ -557,6 +569,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 0)
 
+    @responses.activate
     def test_get_offers_for_course_catalog_voucher(self):
         """ Verify that the course offers data is returned for a course catalog voucher. """
         catalog_id = 1
@@ -671,6 +684,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         self.assertEqual(offer['image_url'], '')
         self.assertEqual(offer['course_start_date'], None)
 
+    @responses.activate
     def test_offers_api_endpoint_for_course_catalog_voucher(self):
         """
         Verify that the course offers data is returned for a course catalog voucher.
@@ -721,6 +735,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             }],
         )
 
+    @responses.activate
     def test_get_offers_for_course_catalog_voucher_api_error(self):
         """
         Verify that offers api endpoint returns proper message if Discovery Service API returns error.

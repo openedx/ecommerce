@@ -1,5 +1,7 @@
 
 
+from urllib.parse import urljoin
+
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
@@ -40,18 +42,27 @@ def _get_discovery_response(site, cache_key, resource, resource_id):
         return course_cached_response.value
 
     params = {}
-    api = site.siteconfiguration.discovery_api_client
-    endpoint = getattr(api, resource)
 
     if resource == 'course_runs':
         params['partner'] = site.siteconfiguration.partner.short_code
-    response = endpoint(resource_id).get(**params)
+
+    api_client = site.siteconfiguration.oauth_api_client
+    resource_path = f"{resource_id}/" if resource_id else ""
+    discovery_api_url = urljoin(
+        f"{site.siteconfiguration.discovery_api_url}/",
+        f"{resource}/{resource_path}"
+    )
+
+    response = api_client.get(discovery_api_url, params=params)
+    response.raise_for_status()
+
+    result = response.json()
 
     if resource_id is None:
-        response = deprecated_traverse_pagination(response, endpoint)
+        result = deprecated_traverse_pagination(result, api_client, discovery_api_url)
 
-    TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
-    return response
+    TieredCache.set_all_tiers(cache_key, result, settings.COURSES_API_CACHE_TIMEOUT)
+    return result
 
 
 def get_course_detail(site, course_resource_id):
@@ -113,10 +124,7 @@ def get_course_catalogs(site, resource_id=None):
         dict: Course catalogs received from Discovery API
 
     Raises:
-        ConnectionError: requests exception "ConnectionError"
-        SlumberBaseException: slumber exception "SlumberBaseException"
-        Timeout: requests exception "Timeout"
-
+        HTTPError: requests exception "HTTPError"
     """
     resource = "catalogs"
     cache_key = get_cache_key(
@@ -133,7 +141,11 @@ def get_certificate_type_display_value(certificate_type):
         'honor': _('Honor'),
         'professional': _('Professional'),
         'verified': _('Verified'),
-        'executive-education': _('Executive Education')
+        'executive-education': _('Executive Education'),
+        'paid-executive-education': _('Paid Executive Education'),
+        'unpaid-executive-education': _('Unpaid Executive Education'),
+        'paid-bootcamp': _('Paid Bootcamp'),
+        'unpaid-bootcamp': _('Unpaid Bootcamp'),
     }
 
     if certificate_type not in display_values:

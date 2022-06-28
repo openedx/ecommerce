@@ -3,18 +3,15 @@ import json
 import logging
 import random
 import string
-import time
 from urllib.parse import urlencode
 
 import ddt
-import httpretty
 import mock
-from django.conf import settings
+import responses
 from django.contrib.sessions.middleware import SessionMiddleware
-from django.test import RequestFactory, override_settings
+from django.test import RequestFactory
 from oscar.test import factories
 from requests.exceptions import HTTPError, Timeout
-from testfixtures import LogCapture
 
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.core.sdn import (
@@ -59,40 +56,35 @@ class SDNCheckTests(TestCase):
         """ Mock the SDN check API endpoint response. """
         params = urlencode({
             'sources': self.site_configuration.sdn_api_list,
-            'api_key': self.sdn_api_key,
             'type': 'individual',
             'name': str(self.name).encode('utf-8'),
-            'address': str(self.city).encode('utf-8'),
+            'city': str(self.city).encode('utf-8'),
             'countries': self.country
         })
+
         sdn_check_url = '{api_url}?{params}'.format(
             api_url=self.sdn_api_url,
             params=params
         )
 
-        httpretty.register_uri(
-            httpretty.GET,
+        responses.add(
+            responses.GET,
             sdn_check_url,
             status=status_code,
-            body=response,
+            body=response() if callable(response) else response,
             content_type='application/json'
         )
 
-    @httpretty.activate
-    @override_settings(SDN_CHECK_REQUEST_TIMEOUT=0.1)
+    @responses.activate
     def test_sdn_check_timeout(self):
         """Verify SDN check logs an exception if the request times out."""
-        def mock_timeout(_request, _uri, headers):
-            time.sleep(settings.SDN_CHECK_REQUEST_TIMEOUT + 0.1)
-            return (200, headers, {'total': 1})
-
-        self.mock_sdn_response(mock_timeout, status_code=200)
+        self.mock_sdn_response(Timeout, status_code=200)
         with self.assertRaises(Timeout):
             with mock.patch('ecommerce.extensions.payment.utils.logger.exception') as mock_logger:
                 self.sdn_validator.search(self.name, self.city, self.country)
                 self.assertTrue(mock_logger.called)
 
-    @httpretty.activate
+    @responses.activate
     def test_sdn_check_connection_error(self):
         """ Verify the check logs an exception in case of a connection error. """
         self.mock_sdn_response(json.dumps({'total': 1}), status_code=400)
@@ -101,7 +93,7 @@ class SDNCheckTests(TestCase):
                 self.sdn_validator.search(self.name, self.city, self.country)
                 self.assertTrue(mock_logger.called)
 
-    @httpretty.activate
+    @responses.activate
     def test_sdn_check_match(self):
         """ Verify the SDN check returns the number of matches and records the match. """
         sdn_response = {'total': 1}
@@ -109,7 +101,7 @@ class SDNCheckTests(TestCase):
         response = self.sdn_validator.search(self.name, self.city, self.country)
         self.assertEqual(response, sdn_response)
 
-    @httpretty.activate
+    @responses.activate
     def test_sdn_check_unicode_match(self):
         """ Verify the SDN check returns the number of matches and records the match. """
         sdn_response = {'total': 1}

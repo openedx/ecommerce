@@ -13,11 +13,10 @@ from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import Timeout
+from requests.exceptions import RequestException, Timeout
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import fetch_course_catalog, get_catalog_course_runs
@@ -83,7 +82,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
         try:
             offers_data = self.get_offers(request, voucher)
-        except (ReqConnectionError, SlumberBaseException, Timeout):
+        except (ReqConnectionError, RequestException, Timeout):
             logger.exception('Could not connect to Discovery Service.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except Product.DoesNotExist:

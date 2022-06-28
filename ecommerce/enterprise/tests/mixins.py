@@ -1,11 +1,12 @@
 
 
 import json
+import re
 from urllib.parse import urlencode
 from uuid import uuid4
 
-import httpretty
 import requests
+import responses
 from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -21,10 +22,6 @@ from ecommerce.extensions.test.factories import (
 from ecommerce.extensions.voucher.models import CouponVouchers
 
 ProductClass = get_model('catalogue', 'ProductClass')
-
-
-def raise_timeout(request, uri, headers):  # pylint: disable=unused-argument
-    raise requests.Timeout('Connection timed out.')
 
 
 class EnterpriseServiceMockMixin:
@@ -72,18 +69,17 @@ class EnterpriseServiceMockMixin:
             },
         ]
 
-        enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.ENTERPRISE_CUSTOMER_BASIC_LIST_URL,
-            body=enterprise_customer_api_response_json,
+        responses.add(
+            method=responses.GET,
+            url=self.ENTERPRISE_CUSTOMER_BASIC_LIST_URL,
+            json=enterprise_customer_api_response,
             content_type='application/json'
         )
 
     def mock_enterprise_catalog_api_get(self, enterprise_catalog_uuid, custom_response=None):
         """
-        Helper function to register the legacy enterprise catalog API endpoint using httpretty.
+        Helper function to register the legacy enterprise catalog API endpoint using responses.
         """
         enterprise_catalog_api_response = {
             "count": 60,
@@ -146,13 +142,12 @@ class EnterpriseServiceMockMixin:
             ]
         }
         enterprise_catalog_api_response = custom_response or enterprise_catalog_api_response
-        enterprise_catalog_api_body = json.dumps(enterprise_catalog_api_response)
 
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{}{}/'.format(self.LEGACY_ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
-            body=enterprise_catalog_api_body,
+        responses.add(
+            method=responses.GET,
+            url='{}{}/?'.format(self.LEGACY_ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            json=enterprise_catalog_api_response,
             content_type='application/json'
         )
 
@@ -177,13 +172,12 @@ class EnterpriseServiceMockMixin:
             },
             'contact_email': contact_email,
         }
-        enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
 
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
-            body=enterprise_customer_api_response_json,
+        responses.add(
+            method=responses.GET,
+            url='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
+            json=enterprise_customer_api_response,
             content_type='application/json'
         )
 
@@ -194,13 +188,12 @@ class EnterpriseServiceMockMixin:
         enterprise_customer_api_response = {
             'detail': 'Not found.'
         }
-        enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
 
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
-            body=enterprise_customer_api_response_json,
+        responses.add(
+            method=responses.GET,
+            url='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
+            json=enterprise_customer_api_response,
             content_type='application/json',
             status=404,
         )
@@ -266,13 +259,12 @@ class EnterpriseServiceMockMixin:
             'start': 0,
             'previous': None
         }
-        enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.ENTERPRISE_LEARNER_URL,
-            body=enterprise_learner_api_response_json,
+        responses.add(
+            method=responses.GET,
+            url=self.ENTERPRISE_LEARNER_URL,
+            json=enterprise_learner_api_response,
             content_type='application/json'
         )
 
@@ -284,13 +276,12 @@ class EnterpriseServiceMockMixin:
             'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
             'username': 'the_j_meister',
         }
-        enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.POST,
-            uri=self.ENTERPRISE_LEARNER_URL,
-            body=enterprise_learner_api_response_json,
+        responses.add(
+            method=responses.POST,
+            url=self.ENTERPRISE_LEARNER_URL,
+            json=enterprise_learner_api_response,
             content_type='application/json'
         )
 
@@ -300,10 +291,10 @@ class EnterpriseServiceMockMixin:
             'contains_content_items': True
         }
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{}{}/contains_content_items/'.format(self.ENTERPRISE_CATALOG_URL, uuid),
-            body=json.dumps(catalog_contains_content_response),
+        responses.add(
+            method=responses.GET,
+            url='{}{}/contains_content_items/'.format(self.ENTERPRISE_CATALOG_URL, uuid),
+            json=catalog_contains_content_response,
             content_type='application/json'
         )
 
@@ -321,13 +312,12 @@ class EnterpriseServiceMockMixin:
             'start': 0,
             'previous': None
         }
-        enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.ENTERPRISE_LEARNER_URL,
-            body=enterprise_learner_api_response_json,
+        responses.add(
+            method=responses.GET,
+            url=self.ENTERPRISE_LEARNER_URL,
+            json=enterprise_learner_api_response,
             content_type='application/json'
         )
 
@@ -360,13 +350,12 @@ class EnterpriseServiceMockMixin:
             'start': 0,
             'previous': None
         }
-        enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.ENTERPRISE_LEARNER_URL,
-            body=enterprise_learner_api_response_json,
+        responses.add(
+            method=responses.GET,
+            url=self.ENTERPRISE_LEARNER_URL,
+            json=enterprise_learner_api_response,
             content_type='application/json'
         )
 
@@ -375,10 +364,10 @@ class EnterpriseServiceMockMixin:
         Helper function to register enterprise learner API endpoint and raise an exception.
         """
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.ENTERPRISE_LEARNER_URL,
-            body=raise_timeout
+        responses.add(
+            method=responses.GET,
+            url=self.ENTERPRISE_LEARNER_URL,
+            body=requests.Timeout('Connection timed out.')
         )
 
     def mock_enterprise_learner_api_for_failure(self):
@@ -387,9 +376,9 @@ class EnterpriseServiceMockMixin:
         failure.
         """
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.ENTERPRISE_LEARNER_URL,
+        responses.add(
+            method=responses.GET,
+            url=self.ENTERPRISE_LEARNER_URL,
             status=500,
         )
 
@@ -427,13 +416,12 @@ class EnterpriseServiceMockMixin:
             'start': 0,
             'previous': None
         }
-        enterprise_enrollment_api_response_json = json.dumps(enterprise_enrollment_api_response)
 
         self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.ENTERPRISE_COURSE_ENROLLMENT_URL,
-            body=enterprise_enrollment_api_response_json,
+        responses.add(
+            method=responses.GET,
+            url=self.ENTERPRISE_COURSE_ENROLLMENT_URL,
+            json=enterprise_enrollment_api_response,
             content_type='application/json'
         )
 
@@ -442,7 +430,7 @@ class EnterpriseServiceMockMixin:
             username,
             course_id,
             ec_uuid,
-            method=httpretty.GET,
+            method=responses.GET,
             granted=True,
             required=False,
             exists=True,
@@ -458,11 +446,13 @@ class EnterpriseServiceMockMixin:
         }
 
         self.mock_access_token_response()
-        httpretty.register_uri(
+        url = re.compile(self.site.siteconfiguration.build_lms_url('/consent/api/v1/data_sharing_consent'))
+
+        responses.add(
             method=method,
-            uri=self.site.siteconfiguration.build_lms_url('/consent/api/v1/data_sharing_consent'),
+            url=url,
             content_type='application/json',
-            body=json.dumps(response_body),
+            json=response_body,
             status=response_code or 200,
         )
 
@@ -503,10 +493,13 @@ class EnterpriseServiceMockMixin:
     ):
         self.mock_access_token_response()
         query_params = urlencode({'course_run_ids': course_run_ids}, True)
-        body = raise_timeout if raise_exception else json.dumps({'contains_content_items': contains_content})
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{api_url}{enterprise_customer_uuid}/contains_content_items/?{query_params}'.format(
+        body = (
+            requests.Timeout('Connection timed out.') if raise_exception else
+            json.dumps({'contains_content_items': contains_content})
+        )
+        responses.add(
+            method=responses.GET,
+            url='{api_url}{enterprise_customer_uuid}/contains_content_items/?{query_params}'.format(
                 api_url=self.ENTERPRISE_CATALOG_URL_CUSTOMER_RESOURCE,
                 enterprise_customer_uuid=enterprise_customer_uuid,
                 query_params=query_params
@@ -515,9 +508,9 @@ class EnterpriseServiceMockMixin:
             content_type='application/json'
         )
         if enterprise_customer_catalog_uuid:
-            httpretty.register_uri(
-                method=httpretty.GET,
-                uri='{api_url}{customer_catalog_uuid}/contains_content_items/?{query_params}'.format(
+            responses.add(
+                method=responses.GET,
+                url='{api_url}{customer_catalog_uuid}/contains_content_items/?{query_params}'.format(
                     api_url=self.ENTERPRISE_CATALOG_URL,
                     customer_catalog_uuid=enterprise_customer_catalog_uuid,
                     query_params=query_params
@@ -555,10 +548,10 @@ class EnterpriseServiceMockMixin:
             'permissions': [enterprise_data_api_group],
             'enterprise_id': enterprise_id,
         }, True)
-        body = raise_timeout if raise_exception else json.dumps(expected_response)
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{}enterprise-customer/with_access_to/?{}'.format(
+        body = requests.Timeout('Connection timed out.') if raise_exception else json.dumps(expected_response)
+        responses.add(
+            method=responses.GET,
+            url='{}enterprise-customer/with_access_to/?{}'.format(
                 self.site.siteconfiguration.enterprise_api_url,
                 query_params
             ),
@@ -592,10 +585,13 @@ class EnterpriseServiceMockMixin:
         }
 
         self.mock_access_token_response()
-        body = raise_timeout if raise_exception else json.dumps(enterprise_catalog_api_response)
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{}'.format(self.LEGACY_ENTERPRISE_CATALOG_URL),
+        body = (
+            requests.Timeout('Connection timed out.')
+            if raise_exception else json.dumps(enterprise_catalog_api_response)
+        )
+        responses.add(
+            method=responses.GET,
+            url='{}'.format(self.LEGACY_ENTERPRISE_CATALOG_URL),
             body=body,
             content_type='application/json'
         )

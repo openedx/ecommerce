@@ -14,9 +14,6 @@ cybersource-rest-client-python==0.0.21
 # Django 3.2 support is added in version 2.2 so pinning it to 2.2
 django-oscar==2.2
 
-# causing tests failures
-httpretty==0.9.7
-
 # jsonfield2 > 3.0.3 dropped support for python 3.5
 jsonfield2<=3.0.3
 
