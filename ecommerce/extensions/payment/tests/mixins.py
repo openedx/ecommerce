@@ -650,7 +650,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
 
         response = self.client.post(self.path, notification)
-        use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_external_receipt_page')
+        use_external_receipt_page = waffle.flag_is_active(self.request, 'enable_receipts_via_ecommerce_mfe')
 
         expected_redirect = get_receipt_page_url(
             self.site.siteconfiguration,
