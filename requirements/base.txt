@@ -202,11 +202,7 @@ edx-django-release-util==1.2.0
     # via -r requirements/base.in
 edx-django-sites-extensions==4.0.0
     # via -r requirements/base.in
-<<<<<<< HEAD
 edx-django-utils==4.5.0
-=======
-edx-django-utils==4.8.1
->>>>>>> master
     # via
     #   -r requirements/base.in
     #   django-config-models
