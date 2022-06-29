@@ -51,14 +51,14 @@ def get_receipt_page_url(request, site_configuration, order_number=None, overrid
     if override_url:
         return override_url
 
-    use_external_receipt_page = waffle.flag_is_active(request, 'enable_receipts_via_ecommerce_mfe')
+    use_MFE_receipt_page = waffle.flag_is_active(request, 'enable_receipts_via_ecommerce_mfe')
 
     url_params = {}
     if order_number:
         url_params['order_number'] = order_number
     if disable_back_button:
         url_params['disable_back_button'] = int(disable_back_button)
-    if use_external_receipt_page and settings.ECOMMERCE_MICROFRONTEND_URL:
+    if use_MFE_receipt_page and settings.ECOMMERCE_MICROFRONTEND_URL:
         url_suffix = '/receipt/'
         base_url = settings.ECOMMERCE_MICROFRONTEND_URL + url_suffix
     else:
