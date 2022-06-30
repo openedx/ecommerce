@@ -42,8 +42,7 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
     OFFER_REDEEMED,
-    SENDER_CATEGORY_TYPES,
-    OfferUsageEmailTypes
+    SENDER_CATEGORY_TYPES
 )
 from ecommerce.extensions.offer.utils import format_assigned_offer_email
 
@@ -791,21 +790,14 @@ class OfferAssignmentEmailSentRecord(TimeStampedModel):
 
 class OfferUsageEmail(TimeStampedModel):
     offer = models.ForeignKey('offer.ConditionalOffer', on_delete=models.CASCADE)
-    email_type = models.CharField(
-        max_length=32,
-        blank=True,
-        null=True,
-        choices=OfferUsageEmailTypes.CHOICES,
-        help_text=("Which type of email was sent."),
-    )
     offer_email_metadata = JSONField(default={})
 
     @classmethod
-    def create_record(cls, email_type, offer, meta_data=None):
+    def create_record(cls, offer, meta_data=None):
         """
         Create object by given data.
         """
-        record = cls(email_type=email_type, offer=offer)
+        record = cls(offer=offer)
         if meta_data:
             record.offer_email_metadata = meta_data
         record.save()

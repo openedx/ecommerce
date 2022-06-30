@@ -21,7 +21,6 @@ from ecommerce.core.constants import (
     SYSTEM_ENTERPRISE_LEARNER_ROLE,
     SYSTEM_ENTERPRISE_OPERATOR_ROLE
 )
-from ecommerce.extensions.offer.constants import OfferUsageEmailTypes
 from ecommerce.settings._oscar import *
 
 # PATH CONFIGURATION
@@ -854,12 +853,3 @@ FAVICON_URL = None
 ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_NAME = ''
 ENTERPRISE_EMAIL_FILE_ATTACHMENTS_BUCKET_LOCATION = 'us-east-1'  # change this when developing with your own bucket
 
-BRAZE_OFFER_DIGEST_CAMPAIGN = ''
-BRAZE_OFFER_LOW_BALANCE_CAMPAIGN = ''
-BRAZE_OFFER_NO_BALANCE_CAMPAIGN = ''
-
-CAMPAIGN_IDS_BY_EMAIL_TYPE = {
-    OfferUsageEmailTypes.DIGEST: BRAZE_OFFER_DIGEST_CAMPAIGN,
-    OfferUsageEmailTypes.LOW_BALANCE: BRAZE_OFFER_LOW_BALANCE_CAMPAIGN,
-    OfferUsageEmailTypes.OUT_OF_BALANCE: BRAZE_OFFER_NO_BALANCE_CAMPAIGN
-}
