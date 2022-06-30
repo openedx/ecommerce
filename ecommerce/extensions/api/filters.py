@@ -1,6 +1,9 @@
 
 
+from datetime import datetime
+
 import django_filters
+import pytz
 from django.db.models import Q
 from oscar.core.loading import get_model
 
@@ -36,6 +39,21 @@ class OfferApiFilter(django_filters.FilterSet):
     status = django_filters.CharFilter(field_name='status', lookup_expr='iexact')
     usage_type = django_filters.CharFilter(method='filter_by_usage_type')
     discount_value = django_filters.NumberFilter(field_name='benefit__value')
+    is_current = django_filters.BooleanFilter(method='filter_is_current')
+
+    def filter_is_current(self, queryset, name, value):  # pylint: disable=unused-argument
+        now = datetime.now(pytz.UTC)
+
+        query = Q(
+            Q(start_datetime=None, end_datetime=None) |
+            Q(start_datetime__lte=now, end_datetime=None) |
+            Q(start_datetime=None, end_datetime__gte=now) |
+            Q(start_datetime__lte=now, end_datetime__gte=now)
+        )
+
+        return queryset.filter(
+            query if value else ~query
+        )
 
     def filter_by_usage_type(self, queryset, name, value):  # pylint: disable=unused-argument
 
@@ -58,4 +76,4 @@ class OfferApiFilter(django_filters.FilterSet):
 
     class Meta:
         model = ConditionalOffer
-        fields = ('status', 'usage_type', 'discount_value',)
+        fields = ('status', 'usage_type', 'discount_value', 'is_current',)
