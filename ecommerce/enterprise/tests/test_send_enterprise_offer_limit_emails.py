@@ -143,8 +143,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.LOW_BALANCE]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 22},
                     'Offer Usage Notification',
@@ -156,8 +154,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 22},
                     'Offer Usage Notification',
@@ -170,8 +166,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.LOW_BALANCE]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
             ])
 
     @responses.activate
@@ -249,8 +243,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.OUT_OF_BALANCE]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 22},
                     'Offer Usage Notification',
@@ -262,8 +254,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.OUT_OF_BALANCE]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
             ])
 
     @responses.activate
@@ -340,8 +330,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 44, ' example_2@example.com': 44},
                     'Offer Usage Notification',
@@ -353,8 +341,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 44, ' example_2@example.com': 44},
                     'Offer Usage Notification',
@@ -366,8 +352,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 44, ' example_2@example.com': 44},
                     'Offer Usage Notification',
@@ -379,8 +363,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 44, ' example_2@example.com': 44},
                     'Offer Usage Notification',
@@ -392,8 +374,6 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
             ])
 
     @responses.activate
@@ -431,6 +411,4 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
             ])
