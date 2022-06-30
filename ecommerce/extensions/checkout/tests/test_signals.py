@@ -1,5 +1,7 @@
 
 
+import json
+
 import mock
 import responses
 from django.core import mail
@@ -219,8 +221,25 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 )
             )
 
-    def _generate_event_properties(self, order, voucher=None, bundle_id=None, fullBundle=False):
+    def _generate_event_properties(
+            self, order, voucher=None, bundle_id=None, fullBundle=False, recommendations=None):
         coupon = voucher.code if voucher else None
+        products = []
+        for line in order.lines.all():
+            order_line = {
+                'id': line.partner_sku,
+                'sku': mode_for_product(line.product),
+                'name': line.product.course.id if line.product.course else line.product.title,
+                'price': float(line.line_price_excl_tax),
+                'quantity': line.quantity,
+                'category': line.product.get_product_class().name,
+                'title': line.product.title,
+            }
+
+            if recommendations and line.product.course.id in recommendations['course_keys']:
+                order_line['is_personalized_recommendation'] = recommendations['is_personalized_recommendation']
+            products.append(order_line)
+
         properties = {
             'orderId': order.number,
             'total': float(order.total_excl_tax),
@@ -228,17 +247,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             'currency': order.currency,
             'coupon': coupon,
             'discount': float(order.total_discount_incl_tax),
-            'products': [
-                {
-                    'id': line.partner_sku,
-                    'sku': mode_for_product(line.product),
-                    'name': line.product.course.id if line.product.course else line.product.title,
-                    'price': float(line.line_price_excl_tax),
-                    'quantity': line.quantity,
-                    'category': line.product.get_product_class().name,
-                    'title': line.product.title,
-                } for line in order.lines.all()
-            ],
+            'products': products,
         }
         if order.user:
             properties['email'] = order.user.email
@@ -261,6 +270,13 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
 
         return properties
 
+    def _get_recommendations_data(self, order):
+        course_keys = [line.product.course.id for line in order.lines.all() if line.product.course]
+        return {
+            'course_keys': course_keys,
+            'is_personalized_recommendation': True
+        }
+
     def test_track_completed_order(self):
         """ An event should be sent to Segment. """
 
@@ -274,6 +290,27 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             mock_track.reset_mock()
             order = create_order()
             track_completed_order(None, order)
+            properties = self._generate_event_properties(order)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties, traits=properties)
+
+    def test_track_completed_order_with_recommendation(self):
+        """ An event should be sent to Segment with personalized recommendation property set. """
+
+        with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
+            order = self.prepare_order('verified')
+            recommendation_data = self._get_recommendations_data(order)
+
+            # Event emitted with matching recommended courses.
+            self.request.COOKIES['edx-user-personalized-recommendation'] = json.dumps(recommendation_data)
+            track_completed_order(None, order, request=self.request)
+            properties = self._generate_event_properties(order, recommendations=recommendation_data)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties, traits=properties)
+
+            # Event emitted without matching recommended courses.
+            mock_track.reset_mock()
+            recommendation_data['course_keys'] = ['course-v1:test-org+test+test']
+            self.request.COOKIES['edx-user-personalized-recommendation'] = json.dumps(recommendation_data)
+            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties, traits=properties)
 

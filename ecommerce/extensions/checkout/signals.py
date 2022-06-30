@@ -6,7 +6,7 @@ import waffle
 from django.dispatch import receiver
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.courses.utils import mode_for_product
+from ecommerce.courses.utils import get_is_personalized_recommendation, mode_for_product
 from ecommerce.extensions.analytics.utils import silence_exceptions, track_segment_event
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.notifications.notifications import send_notification
@@ -33,6 +33,34 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
     if order.total_excl_tax <= 0:
         return
 
+    products = []
+    for line in order.lines.all():
+        order_line = {
+            # For backwards-compatibility with older events the `sku` field is (ab)used to
+            # store the product's `certificate_type`, while the `id` field holds the product's
+            # SKU. Marketing is aware that this approach will not scale once we start selling
+            # products other than courses, and will need to change in the future.
+            'id': line.partner_sku,
+            'sku': mode_for_product(line.product),
+            'name': line.product.course.id if line.product.course else line.product.title,
+            'price': float(line.line_price_excl_tax),
+            'quantity': int(line.quantity),
+            'category': line.product.get_product_class().name,
+            # TODO: DENG-797: remove the the `title` once we are no longer forwarding
+            # these events to Hubspot.
+            'title': line.product.title,
+        }
+
+        # VAN-987: Adding segment event property 'is_personalized_recommendation'
+        # for the course recommendations.
+        is_personalized_recommendation = get_is_personalized_recommendation(
+            line.product.course, kwargs.get('request', None)
+        )
+        if is_personalized_recommendation is not None:
+            order_line['is_personalized_recommendation'] = is_personalized_recommendation
+
+        products.append(order_line)
+
     properties = {
         'orderId': order.number,
         'total': float(order.total_excl_tax),
@@ -41,23 +69,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'revenue': float(order.total_excl_tax),
         'currency': order.currency,
         'discount': float(order.total_discount_incl_tax),
-        'products': [
-            {
-                # For backwards-compatibility with older events the `sku` field is (ab)used to
-                # store the product's `certificate_type`, while the `id` field holds the product's
-                # SKU. Marketing is aware that this approach will not scale once we start selling
-                # products other than courses, and will need to change in the future.
-                'id': line.partner_sku,
-                'sku': mode_for_product(line.product),
-                'name': line.product.course.id if line.product.course else line.product.title,
-                'price': float(line.line_price_excl_tax),
-                'quantity': int(line.quantity),
-                'category': line.product.get_product_class().name,
-                # TODO: DENG-797: remove the the `title` once we are no longer forwarding
-                # these events to Hubspot.
-                'title': line.product.title,
-            } for line in order.lines.all()
-        ],
+        'products': products,
     }
     if order.user:
         properties['email'] = order.user.email
