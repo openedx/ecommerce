@@ -3,15 +3,12 @@ Send the enterprise offer limits emails.
 """
 import logging
 from datetime import datetime
-from urllib.parse import urljoin
 
-from django.conf import settings
-from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
+from django.db.models import Sum
 from ecommerce_worker.email.v1.api import send_offer_usage_email
-from requests.exceptions import RequestException
 
-from ecommerce.core.models import User
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.programs.custom import get_model
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -21,6 +18,13 @@ OrderDiscount = get_model('order', 'OrderDiscount')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# pylint: disable=line-too-long
+EMAIL_BODY = """
+You have used {percentage_usage}% of the {offer_type} Limit associated with the entitlement offer called "{offer_name}"
+{offer_type}s Redeemed: {current_usage}
+{offer_type}s Limit: {total_limit}
+Please reach out to customersuccess@edx.org, or to your Account Manager or Customer Success representative, if you have any questions.
+"""
 EMAIL_SUBJECT = 'Offer Usage Notification'
 
 
@@ -58,44 +62,35 @@ class Command(BaseCommand):
         return int(offer.max_global_applications), percentage_usage, int(offer.num_orders)
 
     @staticmethod
-    def get_booking_limits(site, offer):
+    def get_booking_limits(offer):
         """
         Return the total discount limit, percentage usage and current usage of booking limit.
         """
-        api_client = site.siteconfiguration.oauth_api_client
-        enterprise_customer_uuid = offer.condition.enterprise_customer_uuid
-        offer_analytics_url = urljoin(
-            settings.ENTERPRISE_ANALYTICS_API_URL,
-            f'/enterprise/api/v1/enterprise/{enterprise_customer_uuid}/offers/{offer.id}/',
-        )
-        response = api_client.get(offer_analytics_url)
-        response.raise_for_status()
-        offer_analytics = response.json()
+        total_used_discount_amount = OrderDiscount.objects.filter(
+            offer_id=offer.id,
+            order__status=ORDER.COMPLETE
+        ).aggregate(Sum('amount'))['amount__sum']
+        total_used_discount_amount = total_used_discount_amount if total_used_discount_amount else 0
 
-        return (
-            offer_analytics['max_discount'],
-            offer_analytics['percent_of_offer_spent'],
-            offer_analytics['amount_of_offer_spent'],
-        )
+        percentage_usage = int((total_used_discount_amount / offer.max_discount) * 100)
+        return int(offer.max_discount), percentage_usage, int(total_used_discount_amount)
 
-    def get_email_content(self, site, offer):
+    def get_email_content(self, offer):
         """
         Return the appropriate email body and subject of given offer.
         """
         is_enrollment_limit_offer = bool(offer.max_global_applications)
-        total_limit, percentage_usage, current_usage = (
-            self.get_enrollment_limits(offer)
-            if is_enrollment_limit_offer
-            else self.get_booking_limits(site, offer)
-        )
+        total_limit, percentage_usage, current_usage = self.get_enrollment_limits(offer) if is_enrollment_limit_offer \
+            else self.get_booking_limits(offer)
 
-        return {
-            'percent_usage': percentage_usage,
-            'total_limit': total_limit if is_enrollment_limit_offer else "${}".format(total_limit),
-            'offer_type': 'Enrollment' if is_enrollment_limit_offer else 'Booking',
-            'offer_name': offer.name,
-            'current_usage': current_usage if is_enrollment_limit_offer else "${}".format(current_usage),
-        }
+        email_body = EMAIL_BODY.format(
+            percentage_usage=percentage_usage,
+            total_limit=total_limit if is_enrollment_limit_offer else "{}$".format(total_limit),
+            offer_type='Enrollment' if is_enrollment_limit_offer else 'Booking',
+            offer_name=offer.name,
+            current_usage=current_usage if is_enrollment_limit_offer else "{}$".format(current_usage),
+        )
+        return email_body, EMAIL_SUBJECT
 
     @staticmethod
     def _get_enterprise_offers():
@@ -108,7 +103,7 @@ class Command(BaseCommand):
         ).exclude(emails_for_usage_alert='')
 
     def handle(self, *args, **options):
-        successful_send_count = 0
+        send_enterprise_offer_count = 0
         enterprise_offers = self._get_enterprise_offers()
         total_enterprise_offers_count = enterprise_offers.count()
         logger.info('[Offer Usage Alert] Total count of enterprise offers is %s.', total_enterprise_offers_count)
@@ -119,40 +114,16 @@ class Command(BaseCommand):
                     enterprise_offer.name,
                     enterprise_offer.id
                 )
-                site = Site.objects.get_current()
-                try:
-                    email_body_variables = self.get_email_content(site, enterprise_offer)
-                except RequestException as exc:
-                    logger.warning(
-                        'Exception getting offer email content for offer %s. Exception: %s',
-                        enterprise_offer.id,
-                        exc,
-                    )
-                    continue
-
-                lms_user_ids_by_email = {
-                    user_email: User.get_lms_user_attribute_using_email(site, user_email, attribute='id')
-                    for user_email in enterprise_offer.emails_for_usage_alert.strip().split(',')
-                }
-
-                task_result = send_offer_usage_email.delay(
-                    lms_user_ids_by_email,
-                    EMAIL_SUBJECT,
-                    email_body_variables,
-                )
-                # Block until the task is done, since we're inside a management command
-                # and likely running from a job scheduler (ex. Jenkins).
-                # propagate=False means we won't re-raise (and exit this method) if any one task fails.
-                task_result.get(propagate=False)
-                if task_result.successful():
-                    successful_send_count += 1
-                    OfferUsageEmail.create_record(enterprise_offer, meta_data={
-                        'email_usage_data': email_body_variables,
-                        'email_subject': EMAIL_SUBJECT,
-                        'email_addresses': enterprise_offer.emails_for_usage_alert
-                    })
+                send_enterprise_offer_count += 1
+                email_body, email_subject = self.get_email_content(enterprise_offer)
+                OfferUsageEmail.create_record(enterprise_offer, meta_data={
+                    'email_body': email_body,
+                    'email_subject': email_subject,
+                    'email_addresses': enterprise_offer.emails_for_usage_alert
+                })
+                send_offer_usage_email.delay(enterprise_offer.emails_for_usage_alert, email_subject, email_body)
         logger.info(
-            '[Offer Usage Alert] %s of %s offers with usage alerts configured had an email sent.',
-            successful_send_count,
+            '[Offer Usage Alert] %s of %s added to the email sending queue.',
             total_enterprise_offers_count,
+            send_enterprise_offer_count
         )
