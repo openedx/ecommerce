@@ -36,7 +36,6 @@ class OrderFilter(django_filters.FilterSet):
 
 
 class OfferApiFilter(django_filters.FilterSet):
-    status = django_filters.CharFilter(field_name='status', lookup_expr='iexact')
     usage_type = django_filters.CharFilter(method='filter_by_usage_type')
     discount_value = django_filters.NumberFilter(field_name='benefit__value')
     is_current = django_filters.BooleanFilter(method='filter_is_current')
@@ -76,4 +75,9 @@ class OfferApiFilter(django_filters.FilterSet):
 
     class Meta:
         model = ConditionalOffer
-        fields = ('status', 'usage_type', 'discount_value', 'is_current',)
+
+        fields = {
+            'status': ['exact'],
+            'max_user_applications': ['isnull'],
+            'max_user_discount': ['isnull']
+        }
