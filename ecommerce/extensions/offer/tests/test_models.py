@@ -3,11 +3,13 @@
 
 import logging
 from collections import namedtuple
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 import botocore
 import ddt
 import mock
+import pytz
 import responses
 from botocore.exceptions import ClientError
 from django.core.exceptions import ValidationError
@@ -38,6 +40,8 @@ OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRec
 Range = get_model('offer', 'Range')
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 CodeAssignmentNudgeEmailTemplates = get_model('offer', 'CodeAssignmentNudgeEmailTemplates')
+
+NOW = datetime.now(pytz.UTC)
 
 
 @ddt.ddt
@@ -551,6 +555,56 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         """Verify creating ConditionalOffer with no partner specified"""
         offer = factories.ConditionalOfferFactory()
         self.assertEqual(offer.partner, None)
+
+    @ddt.data(
+        {
+            'start_datetime': None,
+            'end_datetime': None,
+            'expected_is_current': True,
+        },
+        {
+            'start_datetime': NOW - timedelta(days=20),
+            'end_datetime': None,
+            'expected_is_current': True,
+        },
+        {
+            'start_datetime': NOW + timedelta(days=20),
+            'end_datetime': None,
+            'expected_is_current': False,
+        },
+        {
+            'start_datetime': None,
+            'end_datetime': NOW + timedelta(days=20),
+            'expected_is_current': True,
+        },
+        {
+            'start_datetime': None,
+            'end_datetime': NOW - timedelta(days=20),
+            'expected_is_current': False,
+        },
+        {
+            'start_datetime': NOW - timedelta(days=20),
+            'end_datetime': NOW + timedelta(days=20),
+            'expected_is_current': True,
+        },
+        {
+            'start_datetime': NOW + timedelta(days=20),
+            'end_datetime': NOW + timedelta(days=20),
+            'expected_is_current': False,
+        },
+        {
+            'start_datetime': NOW - timedelta(days=20),
+            'end_datetime': NOW - timedelta(days=20),
+            'expected_is_current': False,
+        },
+    )
+    @ddt.unpack
+    def test_is_current(self, start_datetime, end_datetime, expected_is_current):
+        offer = factories.ConditionalOfferFactory(
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
+        )
+        assert offer.is_current is expected_is_current
 
 
 class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):

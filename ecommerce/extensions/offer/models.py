@@ -1,9 +1,10 @@
-import datetime
 import logging
 import re
+from datetime import datetime
 from urllib.parse import urljoin
 
 import boto3
+import pytz
 from botocore.exceptions import ClientError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -41,7 +42,8 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
     OFFER_REDEEMED,
-    SENDER_CATEGORY_TYPES
+    SENDER_CATEGORY_TYPES,
+    OfferUsageEmailTypes
 )
 from ecommerce.extensions.offer.utils import format_assigned_offer_email
 
@@ -382,6 +384,24 @@ class ConditionalOffer(AbstractConditionalOffer):
             return is_satisfied
 
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
+
+    @property
+    def is_current(self):
+        start_date = self.start_datetime
+        end_date = self.end_datetime
+        is_current = False
+        now = datetime.now(pytz.UTC)
+
+        if start_date is None and end_date is None:
+            is_current = True
+        elif start_date and end_date is None:
+            is_current = start_date <= now
+        elif end_date and start_date is None:
+            is_current = end_date > now
+        else:
+            is_current = start_date <= now < end_date
+
+        return is_current
 
 
 def validate_credit_seat_type(course_seat_types):
@@ -771,14 +791,21 @@ class OfferAssignmentEmailSentRecord(TimeStampedModel):
 
 class OfferUsageEmail(TimeStampedModel):
     offer = models.ForeignKey('offer.ConditionalOffer', on_delete=models.CASCADE)
+    email_type = models.CharField(
+        max_length=32,
+        blank=True,
+        null=True,
+        choices=OfferUsageEmailTypes.CHOICES,
+        help_text=("Which type of email was sent."),
+    )
     offer_email_metadata = JSONField(default={})
 
     @classmethod
-    def create_record(cls, offer, meta_data=None):
+    def create_record(cls, email_type, offer, meta_data=None):
         """
         Create object by given data.
         """
-        record = cls(offer=offer)
+        record = cls(email_type=email_type, offer=offer)
         if meta_data:
             record.offer_email_metadata = meta_data
         record.save()
@@ -864,7 +891,7 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
         """
         Subscribe the nudge email cycle for given user email and code.
         """
-        now_datetime = datetime.datetime.now()
+        now_datetime = datetime.now()
         for days, email_type in NUDGE_EMAIL_CYCLE.items():
             email_template = CodeAssignmentNudgeEmailTemplates.get_nudge_email_template(email_type=email_type)
             if email_template:
