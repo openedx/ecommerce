@@ -3995,6 +3995,8 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
             'usage_type',
             'discount_value',
             'is_current',
+            'max_global_applications',
+            'num_applications',
         ]
         for key in keys:
             assert key in response.json()

@@ -1007,6 +1007,8 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation['status'] = instance.status
         representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
         representation['is_current'] = instance.is_current
+        representation['max_global_applications'] = instance.max_global_applications
+        representation['num_applications'] = instance.num_applications
 
         return representation
 
