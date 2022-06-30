@@ -273,26 +273,27 @@ class Command(BaseCommand):
                     for user_email in enterprise_offer.emails_for_usage_alert.strip().split(',')
                 }
 
-                send_offer_usage_email.delay(
+                task_result = send_offer_usage_email.delay(
                     lms_user_ids_by_email,
                     EMAIL_SUBJECT,
                     email_body_variables,
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[email_type]
                 )
 
-                # We can't block until the task is done, because no celery backend
-                # is configured for ecommerce/ecommerce-worker.  So there
-                # may be instances where an OfferUsageEmail record exists,
-                # but no email was really successfully sent.
-                successful_send_count += 1
-                OfferUsageEmail.create_record(
-                    email_type=email_type,
-                    offer=enterprise_offer,
-                    meta_data={
-                        'email_usage_data': email_body_variables,
-                        'email_subject': EMAIL_SUBJECT,
-                        'email_addresses': enterprise_offer.emails_for_usage_alert
-                    })
+                # Block until the task is done, since we're inside a management command
+                # and likely running from a job scheduler (ex. Jenkins).
+                # propagate=False means we won't re-raise (and exit this method) if any one task fails.
+                task_result.get(propagate=False)
+                if task_result.successful():
+                    successful_send_count += 1
+                    OfferUsageEmail.create_record(
+                        email_type=email_type,
+                        offer=enterprise_offer,
+                        meta_data={
+                            'email_usage_data': email_body_variables,
+                            'email_subject': EMAIL_SUBJECT,
+                            'email_addresses': enterprise_offer.emails_for_usage_alert
+                        })
         logger.info(
             '[Offer Usage Alert] %s of %s offers with usage alerts configured had an email sent.',
             successful_send_count,
