@@ -38,7 +38,7 @@ def _use_microfrontend_receipt(request):
     """
     Return whether the current request should use the ecommerce MFE receipt.
     """
-    return(
+    return (
         waffle.flag_is_active(request, 'enable_receipts_via_ecommerce_mfe') and
         settings.ECOMMERCE_MICROFRONTEND_URL
     )
