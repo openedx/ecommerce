@@ -164,36 +164,3 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                 mock.call().get(propagate=False),
                 mock.call().successful(),
             ])
-
-    @responses.activate
-    def test_command_single_enterprise(self):
-        """
-        Test the send_enterprise_offer_limit_emails command on a single enterprise customer.
-        """
-        offer_usage_count = OfferUsageEmail.objects.all().count()
-        admin_email_1, admin_email_2 = 'example_1@example.com', 'example_2@example.com'
-        self.mock_lms_user_responses({
-            admin_email_1: 22,
-            admin_email_2: 44,
-        })
-
-        customer_uuid = self.offer_1.condition.enterprise_customer_uuid
-        self.mock_offer_analytics_response(customer_uuid, self.offer_1.id)
-
-        with mock.patch(COMMAND_PATH + '.send_offer_usage_email.delay') as mock_send_email:
-            mock_send_email.return_value = mock.Mock()
-            call_command('send_enterprise_offer_limit_emails', enterprise_customer_uuid=customer_uuid)
-            # if self.offer_with_404 had email content, this 5 would be a 6.
-            assert mock_send_email.call_count == 1
-            assert OfferUsageEmail.objects.all().count() == offer_usage_count + 1
-
-            mock_send_email.assert_has_calls([
-                mock.call(
-                    {'example_1@example.com': 22, ' example_2@example.com': 44},
-                    'Offer Usage Notification',
-                    {'percent_usage': 50.0, 'total_limit': '$10000.0', 'offer_type': 'Booking',
-                     'offer_name': self.offer_1.name, 'current_usage': '$5000.0'}
-                ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
-            ])

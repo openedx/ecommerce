@@ -98,30 +98,18 @@ class Command(BaseCommand):
         }
 
     @staticmethod
-    def _get_enterprise_offers(enterprise_customer_uuid=None):
+    def _get_enterprise_offers():
         """
         Return the enterprise offers which have opted for email usage alert.
         """
-        filter_kwargs = {
-            'emails_for_usage_alert__isnull': False,
-            'condition__enterprise_customer_uuid__isnull': False,
-        }
-
-        if enterprise_customer_uuid:
-            filter_kwargs['condition__enterprise_customer_uuid'] = enterprise_customer_uuid
-
-        return ConditionalOffer.objects.filter(**filter_kwargs).exclude(emails_for_usage_alert='')
-
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--enterprise-customer-uuid',
-            default=None,
-            help="Run command only for the given Customer's Offers",
-        )
+        return ConditionalOffer.objects.filter(
+            emails_for_usage_alert__isnull=False,
+            condition__enterprise_customer_uuid__isnull=False
+        ).exclude(emails_for_usage_alert='')
 
     def handle(self, *args, **options):
         successful_send_count = 0
-        enterprise_offers = self._get_enterprise_offers(options['enterprise_customer_uuid'])
+        enterprise_offers = self._get_enterprise_offers()
         total_enterprise_offers_count = enterprise_offers.count()
         logger.info('[Offer Usage Alert] Total count of enterprise offers is %s.', total_enterprise_offers_count)
         for enterprise_offer in enterprise_offers:
