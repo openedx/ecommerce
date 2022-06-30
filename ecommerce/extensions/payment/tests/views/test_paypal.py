@@ -87,7 +87,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 self.request,
                 order_number=self.basket.order_number,
                 site_configuration=self.basket.site.siteconfiguration,
-                disable_back_button=True
+                disable_back_button=True,
             ),
             fetch_redirect_response=False
         )
