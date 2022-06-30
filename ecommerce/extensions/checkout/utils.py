@@ -33,14 +33,16 @@ def get_credit_provider_details(credit_provider_id, site_configuration):
         logger.exception('Failed to retrieve credit provider details for provider [%s].', credit_provider_id)
         return None
 
+
 def _use_microfrontend_receipt(request):
     """
-	Return whether the current request should use the ecommerce MFE receipt.
-	"""
+    Return whether the current request should use the ecommerce MFE receipt.
+    """
     return(
-        waffle.flag_is_active(request, 'enable_receipts_via_ecommerce_mfe')
-        and settings.ECOMMERCE_MICROFRONTEND_URL
+        waffle.flag_is_active(request, 'enable_receipts_via_ecommerce_mfe') and
+        settings.ECOMMERCE_MICROFRONTEND_URL
     )
+
 
 def get_receipt_page_url(request, site_configuration, order_number=None, override_url=None, disable_back_button=False):
     """ Returns the receipt page URL.
