@@ -422,14 +422,13 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_enable_hoist_order_history(self, obj):
         try:
             request = self.context.get('request')
-            order_history_enabled = waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
-            obj.enable_hoist_order_history = order_history_enabled
-        except (AttributeError, ValueError) as error:
+            return waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
+        except ValueError:
             logger.exception(
-                'An error occurred while attempting to set ENABLE_HOIST_ORDER_HISTORY flag, error: [%s]',
-                error
+                'An error occurred while attempting to get ENABLE_HOIST_ORDER_HISTORY flag for order [%s]',
+                obj
             )
-        return obj.enable_hoist_order_history
+            return None
 
     def get_payment_method(self, obj):
         payment_method = None
