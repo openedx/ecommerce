@@ -270,9 +270,10 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                     )
                 return HttpResponseRedirect(
                     get_receipt_page_url(
+                        self.request,
                         site_configuration,
                         order.number,
-                        disable_back_button=True,
+                        disable_back_button=True
                     ),
                 )
             except:  # pylint: disable=bare-except

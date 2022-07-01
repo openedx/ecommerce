@@ -79,9 +79,10 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                     url = get_lms_course_about_url(course_run_id)
             else:
                 receipt_path = get_receipt_page_url(
+                    self.request,
                     order_number=order.number,
                     site_configuration=order.site.siteconfiguration,
-                    disable_back_button=True,
+                    disable_back_button=True
                 )
                 url = site.siteconfiguration.build_lms_url(receipt_path)
         else:

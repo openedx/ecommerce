@@ -460,9 +460,10 @@ class CybersourceAuthorizeAPIView(
 
     def redirect_to_receipt_page(self):
         receipt_page_url = get_receipt_page_url(
+            self.request,
             self.request.site.siteconfiguration,
             order_number=self.order_number,
-            disable_back_button=True,
+            disable_back_button=True
         )
         return JsonResponse({
             'receipt_page_url': receipt_page_url,

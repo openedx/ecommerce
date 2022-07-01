@@ -116,6 +116,7 @@ def send_course_purchase_email(sender, order=None, request=None, **kwargs):  # p
         if product.is_seat_product or product.is_course_entitlement_product:
             recipient = request.POST.get('req_bill_to_email', order.user.email) if request else order.user.email
             receipt_page_url = get_receipt_page_url(
+                request,
                 order_number=order.number,
                 site_configuration=order.site.siteconfiguration
             )
