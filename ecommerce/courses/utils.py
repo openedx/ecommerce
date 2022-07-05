@@ -1,6 +1,6 @@
 
-
-from urllib.parse import urljoin
+import json
+from urllib.parse import unquote, urljoin
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -152,3 +152,17 @@ def get_certificate_type_display_value(certificate_type):
         raise ValueError('Certificate Type [{}] not found.'.format(certificate_type))
 
     return display_values[certificate_type]
+
+
+def get_is_personalized_recommendation(course, request):
+    """
+    Returns the personalized recommendation value from the cookie.
+    """
+    if request and course:
+        recommendations = request.COOKIES.get('edx-user-personalized-recommendation', None)
+        if recommendations:
+            recommendations = json.loads(unquote(recommendations))
+            if course.id in recommendations['course_keys']:
+                return recommendations['is_personalized_recommendation']
+
+    return None
