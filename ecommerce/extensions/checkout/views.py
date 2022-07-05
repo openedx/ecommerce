@@ -187,8 +187,8 @@ class ReceiptResponseView(ThankYouView):
             'payment_method': self.get_payment_method(order),
             'display_credit_messaging': self.order_contains_credit_seat(order),
         })
-        context.update(self.get_order_dashboard_context(order))
         context.update({
+            'order_dashboard_url': self.get_order_dashboard_url(order),
             'explore_courses_url': get_lms_explore_courses_url(),
             'has_enrollment_code_product': has_enrollment_code_product,
             'disable_back_button': self.request.GET.get('disable_back_button', 0),
@@ -244,13 +244,13 @@ class ReceiptResponseView(ThankYouView):
                 return True
         return False
 
-    def get_order_dashboard_context(self, order):
+    def get_order_dashboard_url(self, order):
         program_uuid = get_program_uuid(order)
         if program_uuid:
             order_dashboard_url = get_lms_program_dashboard_url(program_uuid)
         else:
             order_dashboard_url = get_lms_dashboard_url()
-        return {'order_dashboard_url': order_dashboard_url}
+        return order_dashboard_url
 
     def add_message_if_enterprise_user(self, request):
         try:

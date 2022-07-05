@@ -386,6 +386,7 @@ class LineSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     """Serializer for parsing order data."""
     billing_address = BillingAddressSerializer(allow_null=True)
+    dashboard_url = serializers.SerializerMethodField()
     date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
     discount = serializers.SerializerMethodField()
     lines = LineSerializer(many=True)
@@ -410,6 +411,16 @@ class OrderSerializer(serializers.ModelSerializer):
         try:
             return obj.sources.all()[0].source_type.name
         except IndexError:
+            return None
+
+    def get_dashboard_url(self, obj):
+        try:
+            return ReceiptResponseView.get_order_dashboard_url(self, obj)
+        except ValueError:
+            logger.exception(
+                'Failed to retrieve get_dashboard_url for [%s]',
+                obj
+            )
             return None
 
     def get_discount(self, obj):
@@ -470,6 +481,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'billing_address',
             'currency',
             'date_placed',
+            'dashboard_url',
             'discount',
             'enable_hoist_order_history',
             'enterprise_customer_info',
