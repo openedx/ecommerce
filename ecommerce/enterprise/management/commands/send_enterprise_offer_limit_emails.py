@@ -1,4 +1,5 @@
 """
+DEPRECATED: in favor of the api-triggered version of this command.
 Send the enterprise offer limits emails.
 """
 import logging
@@ -9,6 +10,7 @@ from django.db.models import Sum
 from ecommerce_worker.email.v1.api import send_offer_usage_email
 
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.offer.constants import OfferUsageEmailTypes
 from ecommerce.programs.custom import get_model
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -116,14 +118,18 @@ class Command(BaseCommand):
                 )
                 send_enterprise_offer_count += 1
                 email_body, email_subject = self.get_email_content(enterprise_offer)
-                OfferUsageEmail.create_record(enterprise_offer, meta_data={
-                    'email_body': email_body,
-                    'email_subject': email_subject,
-                    'email_addresses': enterprise_offer.emails_for_usage_alert
-                })
+                OfferUsageEmail.create_record(
+                    offer=enterprise_offer,
+                    email_type=OfferUsageEmailTypes.DIGEST,
+                    meta_data={
+                        'email_body': email_body,
+                        'email_subject': email_subject,
+                        'email_addresses': enterprise_offer.emails_for_usage_alert,
+                    },
+                )
                 send_offer_usage_email.delay(enterprise_offer.emails_for_usage_alert, email_subject, email_body)
         logger.info(
             '[Offer Usage Alert] %s of %s added to the email sending queue.',
+            send_enterprise_offer_count,
             total_enterprise_offers_count,
-            send_enterprise_offer_count
         )
