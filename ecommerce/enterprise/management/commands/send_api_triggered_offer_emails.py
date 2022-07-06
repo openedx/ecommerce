@@ -204,6 +204,11 @@ class Command(BaseCommand):
         percentage_usage = usage_info['percentage_usage']
         current_usage = usage_info['current_usage']
         remaining_balance = usage_info['remaining_balance']
+        remaining_balance_str = (
+            str(remaining_balance)
+            if is_enrollment_limit_offer
+            else "${}".format(remaining_balance)
+        )
 
         email_type = self.get_email_type(offer, usage_info, is_enrollment_limit_offer)
 
@@ -218,7 +223,7 @@ class Command(BaseCommand):
             'current_usage': current_usage,
             'current_usage_str': current_usage if is_enrollment_limit_offer else "${}".format(current_usage),
             'remaining_balance': remaining_balance,
-            'remaining_balance_str': str(remaining_balance) if is_enrollment_limit_offer else "${}".format(remaining_balance),
+            'remaining_balance_str': remaining_balance_str,
         }
 
     @staticmethod
