@@ -2,6 +2,7 @@ import datetime
 from unittest import mock
 from uuid import uuid4
 
+from django.test import RequestFactory
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
@@ -9,13 +10,80 @@ from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
     CouponCodeRemindSerializer,
-    CouponCodeRevokeSerializer
+    CouponCodeRevokeSerializer,
+    OrderSerializer
 )
 from ecommerce.extensions.test import factories
 from ecommerce.tests.testcases import TestCase
 
 OfferAssignment = get_model('offer', 'OfferAssignment')
 Voucher = get_model('voucher', 'Voucher')
+
+
+class OrderSerializerTests(TestCase):
+    """ Test for order serializers. """
+    LOGGER_NAME = 'ecommerce.extensions.api.serializers'
+
+    def setUp(self):
+        super(OrderSerializerTests, self).setUp()
+        self.user = self.create_user()
+
+    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.get_order_dashboard_url')
+    def test_get_dashboard_url(self, mock_receipt_dashboard_url):
+        mock_receipt_dashboard_url.side_effect = ValueError()
+        order = factories.create_order(site=self.site, user=self.user)
+        serializer = OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')})
+
+        expected = [
+            (
+                self.LOGGER_NAME,
+                'ERROR',
+                'Failed to retrieve get_dashboard_url for [{}]'.format(order)
+            ),
+        ]
+
+        with LogCapture(self.LOGGER_NAME) as logger:
+            serializer.get_dashboard_url(order)
+            self.assertTrue(mock_receipt_dashboard_url.called)
+            logger.check_present(*expected)
+
+    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.get_payment_method')
+    def test_get_payment_method(self, mock_receipt_payment_method):
+        mock_receipt_payment_method.side_effect = ValueError()
+        order = factories.create_order(site=self.site, user=self.user)
+        serializer = OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')})
+
+        expected = [
+            (
+                self.LOGGER_NAME,
+                'ERROR',
+                'Failed to retrieve payment_method for order [{}]'.format(order)
+            ),
+        ]
+
+        with LogCapture(self.LOGGER_NAME) as logger:
+            serializer.get_payment_method(order)
+            self.assertTrue(mock_receipt_payment_method)
+            logger.check_present(*expected)
+
+    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.add_message_if_enterprise_user')
+    def test_get_enterprise_customer_info(self, mock_learner_portal_url):
+        mock_learner_portal_url.side_effect = ValueError()
+        order = factories.create_order(site=self.site, user=self.user)
+        serializer = OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')})
+
+        expected = [
+            (
+                self.LOGGER_NAME,
+                'ERROR',
+                'Failed to retrieve enterprise_customer_info for order [{}]'.format(order)
+            ),
+        ]
+
+        with LogCapture(self.LOGGER_NAME) as logger:
+            serializer.get_enterprise_customer_info(order)
+            self.assertTrue(mock_learner_portal_url)
+            logger.check_present(*expected)
 
 
 class CouponCodeSerializerTests(CouponMixin, TestCase):

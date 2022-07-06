@@ -127,42 +127,50 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self, certificate_type, has_discount, percent_benefit,
         credit_provider, credit_hours, create_enrollment_code, sku
     ):
-        """ Verify that orders have the values added in the Orders API serializer """
-        price = 100
-        course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
-        product = factories.ProductFactory(
-            categories=[],
-            stockrecords__price_excl_tax=price,
-            stockrecords__price_currency='USD'
-        )
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        product = course.create_or_update_seat(
-            certificate_type,
-            True,
-            price,
-            credit_provider=credit_provider,
-            credit_hours=credit_hours,
-            create_enrollment_code=create_enrollment_code,
-            sku=sku,
-        )
-
-        if has_discount:
-            voucher, product = prepare_voucher(
-                _range=factories.RangeFactory(products=[product]),
-                benefit_value=percent_benefit,
-                benefit_type=Benefit.PERCENTAGE
+        """
+        Verify that orders have the values added in the Orders API serializer
+        to be utilized in the receipt page in ecommerce MFE.
+        """
+        with mock.patch(
+                'ecommerce.extensions.checkout.views.ReceiptResponseView.add_message_if_enterprise_user'
+        ) as mock_learner_portal_url:
+            test_learner_portal_url = 'http://fake-learner-portal-url.org'
+            mock_learner_portal_url.return_value = test_learner_portal_url
+            price = 100
+            course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
+            product = factories.ProductFactory(
+                categories=[],
+                stockrecords__price_excl_tax=price,
+                stockrecords__price_currency='USD'
             )
-            basket.vouchers.add(voucher)
+            basket = factories.BasketFactory(owner=self.user, site=self.site)
+            product = course.create_or_update_seat(
+                certificate_type,
+                True,
+                price,
+                credit_provider=credit_provider,
+                credit_hours=credit_hours,
+                create_enrollment_code=create_enrollment_code,
+                sku=sku,
+            )
 
-        basket.add_product(product)
-        Applicator().apply(basket, user=basket.owner, request=self.request)
-        order = factories.create_order(basket=basket, user=self.user)
+            if has_discount:
+                voucher, product = prepare_voucher(
+                    _range=factories.RangeFactory(products=[product]),
+                    benefit_value=percent_benefit,
+                    benefit_type=Benefit.PERCENTAGE
+                )
+                basket.vouchers.add(voucher)
 
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
-        self.assertEqual(response.status_code, 200)
+            basket.add_product(product)
+            Applicator().apply(basket, user=basket.owner, request=self.request)
+            order = factories.create_order(basket=basket, user=self.user)
 
-        content = json.loads(response.content.decode('utf-8'))
-        payment_method = ReceiptResponseView().get_payment_method(order)
+            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+            self.assertEqual(response.status_code, 200)
+
+            content = json.loads(response.content.decode('utf-8'))
+            payment_method = ReceiptResponseView().get_payment_method(order)
 
         for line in order.lines.all():
             # Test for: is_enrollment_code_product
@@ -188,6 +196,11 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
         # Test for: enterprise_customer
         self.assertIn('enterprise_customer_info', content['results'][0])
+        if has_discount:
+            self.assertEqual(
+                test_learner_portal_url,
+                content['results'][0]['enterprise_customer_info']['learner_portal_url']
+            )
 
     def test_with_other_users_orders(self):
         """ The view should only return orders for the authenticated users. """
