@@ -40,10 +40,12 @@ class Command(BaseCommand):
         Return the total limit, percentage usage and current usage of enrollment limit.
         """
         percentage_usage = int((offer.num_orders / offer.max_global_applications) * 100)
+        remaining_balance = offer.max_global_applications - offer.num_orders
         return {
             'total_limit': int(offer.max_global_applications),
             'percentage_usage': percentage_usage,
-            'current_usage': int(offer.num_orders)
+            'current_usage': int(offer.num_orders),
+            'remaining_balance': remaining_balance,
         }
 
     @staticmethod
@@ -64,7 +66,8 @@ class Command(BaseCommand):
         return {
             'total_limit': offer_analytics['max_discount'],
             'percentage_usage': offer_analytics['percent_of_offer_spent'] * 100,  # percent_of_offer_spent is 0-1
-            'current_usage': offer_analytics['amount_of_offer_spent']
+            'current_usage': offer_analytics['amount_of_offer_spent'],
+            'remaining_balance': offer_analytics['remaining_balance'],
         }
 
     @staticmethod
@@ -200,6 +203,7 @@ class Command(BaseCommand):
         total_limit = usage_info['total_limit']
         percentage_usage = usage_info['percentage_usage']
         current_usage = usage_info['current_usage']
+        remaining_balance = usage_info['remaining_balance']
 
         email_type = self.get_email_type(offer, usage_info, is_enrollment_limit_offer)
 
@@ -213,6 +217,8 @@ class Command(BaseCommand):
             'offer_name': offer.name,
             'current_usage': current_usage,
             'current_usage_str': current_usage if is_enrollment_limit_offer else "${}".format(current_usage),
+            'remaining_balance': remaining_balance,
+            'remaining_balance_str': str(remaining_balance) if is_enrollment_limit_offer else "${}".format(remaining_balance),
         }
 
     @staticmethod
