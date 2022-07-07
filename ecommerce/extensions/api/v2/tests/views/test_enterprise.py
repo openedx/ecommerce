@@ -3996,6 +3996,7 @@ class EnterpriseOfferApiViewTests(EnterpriseServiceMockMixin, JwtMixin, TestCase
             'discount_value',
             'is_current',
             'max_global_applications',
+            'max_user_discount',
             'num_applications',
         ]
         for key in keys:
