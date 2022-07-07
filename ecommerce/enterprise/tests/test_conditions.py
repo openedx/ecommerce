@@ -13,7 +13,7 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.conditions import EnterpriseCustomerCondition, sum_user_discounts_for_offer
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.serializers import CouponCodeAssignmentSerializer
@@ -482,6 +482,35 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertEqual(self.condition.is_satisfied(offer, basket), is_satisfied)
+
+    def test_sum_user_discounts_for_offer(self):
+        offer = factories.EnterpriseOfferFactory(
+            partner=self.partner,
+            benefit=factories.EnterprisePercentageDiscountBenefitFactory(value=100),
+            max_user_discount=150
+        )
+        order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
+        order_discounts = [
+            OrderDiscountFactory(order=order, offer_id=offer.id, amount=10),
+            OrderDiscountFactory(order=order, offer_id=offer.id, amount=30)
+        ]
+
+        refunded_order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
+        OrderDiscountFactory(order=refunded_order, offer_id=offer.id, amount=40)
+        RefundFactory(order=order, user=self.user, status=REFUND.COMPLETE)
+
+        sum_user_discounts = sum_user_discounts_for_offer(self.user, offer)
+        assert sum_user_discounts == sum(discount.amount for discount in order_discounts)
+
+    def test_sum_user_discounts_for_offer_no_discounts(self):
+        offer = factories.EnterpriseOfferFactory(
+            partner=self.partner,
+            benefit=factories.EnterprisePercentageDiscountBenefitFactory(value=100),
+            max_user_discount=150
+        )
+
+        sum_user_discounts = sum_user_discounts_for_offer(self.user, offer)
+        assert sum_user_discounts == 0
 
     @ddt.data(
         {

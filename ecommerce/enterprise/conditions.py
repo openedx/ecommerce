@@ -37,6 +37,18 @@ Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
+def sum_user_discounts_for_offer(user, offer):
+    refunded_order_ids = Refund.objects.filter(
+        user_id=user.id, status=REFUND.COMPLETE
+    ).values_list('order_id', flat=True)
+
+    sum_user_discounts = OrderDiscount.objects.filter(
+        offer_id=offer.id, order__user_id=user.id, order__status=ORDER.COMPLETE
+    ).exclude(order_id__in=refunded_order_ids).aggregate(Sum('amount'))['amount__sum'] or Decimal(0.00)
+
+    return sum_user_discounts
+
+
 def is_offer_max_user_discount_available(basket, offer):
     """Calculate if the user has the per user discount amount available"""
     # no need to do anything if this is not an enterprise offer or `user_max_discount` is not set
@@ -44,16 +56,7 @@ def is_offer_max_user_discount_available(basket, offer):
         return True
     discount_value = _get_basket_discount_value(basket, offer)
 
-    # discard all refunded orders so they are not counted in per user booking limit
-    refunded_order_ids = list(Refund.objects.filter(
-        user_id=basket.owner.id, status=REFUND.COMPLETE
-    ).values_list('order_id', flat=True))
-
-    # check if offer has discount available for user
-    sum_user_discounts_for_this_offer = OrderDiscount.objects.filter(
-        offer_id=offer.id, order__user_id=basket.owner.id, order__status=ORDER.COMPLETE
-    ).exclude(order_id__in=refunded_order_ids).aggregate(Sum('amount'))['amount__sum'] or Decimal(0.00)
-
+    sum_user_discounts_for_this_offer = sum_user_discounts_for_offer(basket.owner, offer)
     new_total_discount = discount_value + sum_user_discounts_for_this_offer
     if new_total_discount <= offer.max_user_discount:
         return True
