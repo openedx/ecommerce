@@ -144,10 +144,10 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.LOW_BALANCE, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 75.0, 'total_limit': 10000.0, 'total_limit_str': '$10000.0',
+                        'percent_usage': 75.0, 'total_limit': 10000.0, 'total_limit_str': '$10,000.00',
                         'offer_type': 'Booking', 'offer_name': offer_with_low_balance.name,
-                        'current_usage': 7500.0, 'current_usage_str': '$7500.0',
-                        'remaining_balance': 2500.0, 'remaining_balance_str': '$2500.0',
+                        'current_usage': 7500.0, 'current_usage_str': '$7,500.00',
+                        'remaining_balance': 2500.0, 'remaining_balance_str': '$2,500.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.LOW_BALANCE]
                 ),
@@ -156,10 +156,10 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 75.0, 'total_limit': 10000.0, 'total_limit_str': '$10000.0',
+                        'percent_usage': 75.0, 'total_limit': 10000.0, 'total_limit_str': '$10,000.00',
                         'offer_type': 'Booking', 'offer_name': offer_with_low_balance_email_sent_before.name,
-                        'current_usage': 7500.0, 'current_usage_str': '$7500.0',
-                        'remaining_balance': 2500.0, 'remaining_balance_str': '$2500.0',
+                        'current_usage': 7500.0, 'current_usage_str': '$7,500.00',
+                        'remaining_balance': 2500.0, 'remaining_balance_str': '$2,500.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -168,11 +168,11 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.LOW_BALANCE, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 75.0, 'total_limit': 20000.0, 'total_limit_str': '$20000.0',
+                        'percent_usage': 75.0, 'total_limit': 20000.0, 'total_limit_str': '$20,000.00',
                         'offer_type': 'Booking',
                         'offer_name': replenished_offer_with_low_balance_email_sent_before.name,
-                        'current_usage': 15000.0, 'current_usage_str': '$15000.0',
-                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5000.0',
+                        'current_usage': 15000.0, 'current_usage_str': '$15,000.00',
+                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.LOW_BALANCE]
                 ),
@@ -250,10 +250,10 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.OUT_OF_BALANCE, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 99.0, 'total_limit_str': '$10000.0', 'total_limit': 10000.0,
+                        'percent_usage': 99.0, 'total_limit_str': '$10,000.00', 'total_limit': 10000.0,
                         'offer_type': 'Booking', 'offer_name': offer_with_no_balance.name,
-                        'current_usage': 9900.0, 'current_usage_str': '$9900.0',
-                        'remaining_balance': 100.0, 'remaining_balance_str': '$100.0',
+                        'current_usage': 9900.0, 'current_usage_str': '$9,900.00',
+                        'remaining_balance': 100.0, 'remaining_balance_str': '$100.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.OUT_OF_BALANCE]
                 ),
@@ -262,10 +262,10 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.OUT_OF_BALANCE, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 99.5, 'total_limit_str': '$20000.0', 'total_limit': 20000.0,
+                        'percent_usage': 99.5, 'total_limit_str': '$20,000.00', 'total_limit': 20000.0,
                         'offer_type': 'Booking', 'offer_name': replenished_offer_with_no_balance_email_sent_before.name,
-                        'current_usage': 19900.0, 'current_usage_str': '$19900.0',
-                        'remaining_balance': 100.0, 'remaining_balance_str': '$100.0',
+                        'current_usage': 19900.0, 'current_usage_str': '$19,900.00',
+                        'remaining_balance': 100.0, 'remaining_balance_str': '$100.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.OUT_OF_BALANCE]
                 ),
@@ -339,10 +339,10 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 50.0, 'total_limit_str': '$10000.0', 'offer_type': 'Booking',
+                        'percent_usage': 50.0, 'total_limit_str': '$10,000.00', 'offer_type': 'Booking',
                         'total_limit': 10000.0, 'offer_name': offer_1.name, 'current_usage': 5000.0,
-                        'current_usage_str': '$5000.0',
-                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5000.0',
+                        'current_usage_str': '$5,000.00',
+                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -351,10 +351,10 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 50.0, 'total_limit_str': '$10000.0', 'total_limit': 10000.0,
+                        'percent_usage': 50.0, 'total_limit_str': '$10,000.00', 'total_limit': 10000.0,
                         'offer_type': 'Booking', 'offer_name': offer_2.name, 'current_usage': 5000.0,
-                        'current_usage_str': '$5000.0',
-                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5000.0',
+                        'current_usage_str': '$5,000.00',
+                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -430,10 +430,10 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 50.0, 'total_limit': 10000.0, 'total_limit_str': '$10000.0',
+                        'percent_usage': 50.0, 'total_limit': 10000.0, 'total_limit_str': '$10,000.00',
                         'offer_type': 'Booking', 'offer_name': offer_1.name, 'current_usage': 5000.0,
-                        'current_usage_str': '$5000.0',
-                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5000.0',
+                        'current_usage_str': '$5,000.00',
+                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
