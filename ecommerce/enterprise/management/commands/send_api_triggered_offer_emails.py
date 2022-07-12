@@ -200,6 +200,7 @@ class Command(BaseCommand):
             else self.get_booking_limits(site, offer)
         )
 
+        money_template = '${:,.2f}'
         total_limit = usage_info['total_limit']
         percentage_usage = usage_info['percentage_usage']
         current_usage = usage_info['current_usage']
@@ -207,7 +208,7 @@ class Command(BaseCommand):
         remaining_balance_str = (
             str(remaining_balance)
             if is_enrollment_limit_offer
-            else "${}".format(remaining_balance)
+            else money_template.format(remaining_balance)
         )
 
         email_type = self.get_email_type(offer, usage_info, is_enrollment_limit_offer)
@@ -217,11 +218,11 @@ class Command(BaseCommand):
             'percent_usage': percentage_usage,
             'is_enrollment_limit_offer': is_enrollment_limit_offer,
             'total_limit': total_limit,
-            'total_limit_str': total_limit if is_enrollment_limit_offer else "${}".format(total_limit),
+            'total_limit_str': total_limit if is_enrollment_limit_offer else money_template.format(total_limit),
             'offer_type': 'Enrollment' if is_enrollment_limit_offer else 'Booking',
             'offer_name': offer.name,
             'current_usage': current_usage,
-            'current_usage_str': current_usage if is_enrollment_limit_offer else "${}".format(current_usage),
+            'current_usage_str': current_usage if is_enrollment_limit_offer else money_template.format(current_usage),
             'remaining_balance': remaining_balance,
             'remaining_balance_str': remaining_balance_str,
         }
