@@ -444,12 +444,20 @@ class EnterpriseCouponViewSet(CouponViewSet):
             raise serializers.ValidationError(
                 "visibility_filter must be specified as 'public' or 'private' received: {}".format(visibility_filter))
 
+        # Alex Dusenbery 2022-07-15: `redeem_url` is omitted because it points to a
+        # deprecated offers page for enterprise codes.
+        # https://2u-internal.atlassian.net/browse/ENT-3805
+        serializer_kwargs = {
+            'many': True,
+            'context': {'usage_type': usage_type},
+            'ignore_fields': ['redeem_url'],
+        }
         if format is None:
             page = self.paginate_queryset(queryset)
-            serializer = serializer_class(page, many=True, context={'usage_type': usage_type})
+            serializer = serializer_class(page, **serializer_kwargs)
             return self.get_paginated_response(serializer.data)
 
-        serializer = serializer_class(queryset, many=True, context={'usage_type': usage_type})
+        serializer = serializer_class(queryset, **serializer_kwargs)
         return Response(serializer.data)
 
     def _get_not_assigned_usages(self, vouchers):

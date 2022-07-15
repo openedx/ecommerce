@@ -34,7 +34,6 @@ from ecommerce.core.constants import (  # pylint: disable=unused-import
     SYSTEM_ENTERPRISE_OPERATOR_ROLE
 )
 from ecommerce.core.models import EcommerceFeatureRole, EcommerceFeatureRoleAssignment
-from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.tests.factories import CourseFactory
@@ -701,10 +700,6 @@ class EnterpriseCouponViewSetRbacTests(
         for result in expected:
             expected_result = result
             expected_result['code'] = codes[result['code']]
-            expected_result['redeem_url'] = '{url}?code={code}'.format(
-                url=get_ecommerce_url('/coupons/offer/'),
-                code=expected_result['code']
-            )
             assignment = OfferAssignment.objects.filter(
                 code=expected_result['code'], user_email=expected_result['assigned_to']
             ).first()
@@ -981,8 +976,11 @@ class EnterpriseCouponViewSetRbacTests(
         # Strip out first row (headers) and last row (extra csv line)
         csv_data = csv_content[1:-1]
         # Verify headers.
-        self.assertEqual(csv_header, 'assigned_to,assignment_date,code,is_public,last_reminder_date,redeem_url,'
-                                     'redemptions.total,redemptions.used,revocation_date')
+        expected_header = (
+            'assigned_to,assignment_date,code,is_public,last_reminder_date,'
+            'redemptions.total,redemptions.used,revocation_date'
+        )
+        self.assertEqual(csv_header, expected_header)
 
         # Verify csv data.
         self.assert_coupon_codes_response(

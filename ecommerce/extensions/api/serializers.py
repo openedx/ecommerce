@@ -828,6 +828,19 @@ class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-m
     revocation_date = serializers.SerializerMethodField()
     is_public = serializers.SerializerMethodField()
 
+    def __init__(self, *args, **kwargs):
+        """
+        Takes an optional `ignore_fields` argument that allows
+        for the dynamic exclusion of fields during serialization.
+        See: https://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
+        """
+        ignore_fields = kwargs.pop('ignore_fields', None)
+        super().__init__(*args, **kwargs)
+
+        if ignore_fields is not None:
+            for field_name in ignore_fields:
+                self.fields.pop(field_name, None)
+
     def _get_assignment(self, obj):
         assigned_to = self.get_assigned_to(obj)
         code = self.get_code(obj)
