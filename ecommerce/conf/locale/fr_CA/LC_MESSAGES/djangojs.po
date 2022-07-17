@@ -9,14 +9,14 @@
 # Translators:
 # Translators:
 # Translators:
-# Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2020
+# Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2020,2022
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-19 20:12+0000\n"
+"POT-Creation-Date: 2022-07-17 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
-"Last-Translator: Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2020\n"
+"Last-Translator: Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2020,2022\n"
 "Language-Team: French (Canada) (http://www.transifex.com/open-edx/edx-platform/language/fr_CA/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -70,7 +70,7 @@ msgstr "Un ID de cours valide est nécessaire"
 
 #: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
-msgstr "Un UUID de Programme valide est requis."
+msgstr "Un UUID de Programme valide est obligatoire."
 
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
