@@ -385,6 +385,7 @@ class LineSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     """Serializer for parsing order data."""
+    basket_discounts = serializers.SerializerMethodField()
     billing_address = BillingAddressSerializer(allow_null=True)
     dashboard_url = serializers.SerializerMethodField()
     date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
@@ -398,6 +399,30 @@ class OrderSerializer(serializers.ModelSerializer):
     enterprise_customer_info = serializers.SerializerMethodField()
     total_before_discounts_incl_tax = serializers.SerializerMethodField()
     order_product_ids = serializers.SerializerMethodField()
+
+    def get_basket_discounts(self, obj):
+        basket_discounts = []
+        try:
+            discounts = obj.basket_discounts
+            if discounts:
+                for discount in discounts:
+                    basket_discount = {
+                        'amount': discount.amount,
+                        'benefit_value': discount.voucher.benefit.value,
+                        'code': discount.voucher_code,
+                        'condition_name': discount.offer.condition.name,
+                        'contains_offer': bool(discount.offer),
+                        'currency': obj.currency,
+                        'enterprise_customer_name': discount.offer.condition.enterprise_customer_name,
+                        'offer_type': discount.offer.offer_type,
+                    }
+                    basket_discounts.append(basket_discount)
+        except (AttributeError, TypeError, ValueError):
+            logger.exception(
+                'Failed to retrieve get_basket_discounts for [%s]',
+                obj
+            )
+        return basket_discounts
 
     def get_vouchers(self, obj):
         try:
@@ -489,6 +514,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
+            'basket_discounts',
             'billing_address',
             'currency',
             'date_placed',

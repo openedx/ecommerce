@@ -136,12 +136,13 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         ) as mock_learner_portal_url:
             test_learner_portal_url = 'http://fake-learner-portal-url.org'
             mock_learner_portal_url.return_value = test_learner_portal_url
-            price = 100
+            price = 100.00
+            currency = 'USD'
             course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
             product = factories.ProductFactory(
                 categories=[],
                 stockrecords__price_excl_tax=price,
-                stockrecords__price_currency='USD'
+                stockrecords__price_currency=currency
             )
             basket = factories.BasketFactory(owner=self.user, site=self.site)
             product = course.create_or_update_seat(
@@ -178,6 +179,18 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
             # Test for: credit_provider in attr
             self.assertEqual(getattr(line.product.attr, 'credit_provider', None), credit_provider)
+
+        # Test for: basket_discounts
+        self.assertIn('basket_discounts', content['results'][0])
+        if has_discount:
+            self.assertEqual(
+                float(percent_benefit),
+                content['results'][0]['basket_discounts'][0]['benefit_value']
+            )
+            self.assertEqual(
+                currency,
+                content['results'][0]['basket_discounts'][0]['currency']
+            )
 
         # Test for: payment_method
         self.assertEqual(payment_method, content['results'][0]['payment_method'])
