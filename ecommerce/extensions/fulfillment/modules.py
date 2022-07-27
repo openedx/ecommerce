@@ -11,6 +11,7 @@ import json
 import logging
 from urllib.parse import urlencode, urljoin
 
+import pytz
 import requests
 import waffle
 from django.conf import settings
@@ -37,6 +38,7 @@ from ecommerce.enterprise.utils import (
 )
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
+from ecommerce.extensions.api_client.get_smarter import GetSmarterEnterpriseApiClient
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.models import BasketAttribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -902,3 +904,87 @@ class CourseEntitlementFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmen
             logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
 
         return False
+
+
+class ExecutiveEducation2UFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule):
+    """
+    Fulfillment Module for creating an enrollment through the GetSmarter Enterprise API Gateway(GEAG).
+
+    Only applicable to products with certificate type of `paid-executive-education`.
+    """
+
+    def __init__(self):
+        self.get_smarter_api_client = GetSmarterEnterpriseApiClient()
+
+    def _create_enterprise_customer_user(self, order):
+        """
+        Create the enterprise customer user if an EnterpriseCustomer UUID is associated in the order's discount voucher.
+        """
+        for discount in order.discounts.all():
+            if discount.offer.condition.enterprise_customer_uuid:
+                enterprise_customer_uuid = discount.offer.condition.enterprise_customer_uuid
+                logger.info(
+                    "Getting or creating enterprise_customer_user "
+                    "for site [%s], enterprise customer [%s], and username [%s], for order [%s]",
+                    order.site, enterprise_customer_uuid, order.user.username, order.number
+                )
+                get_or_create_enterprise_customer_user(
+                    order.site,
+                    enterprise_customer_uuid,
+                    order.user.username
+                )
+                logger.info(
+                    "Finished get_or_create enterpruise customer user for order [%s]",
+                    order.number
+                )
+
+    def fulfill_product(self, order, lines, email_opt_in=False):
+        """
+        Fulfill the purchase of a 2U exec ed course by calling the /allocations endpoint of GetSmarter Enterprise API Gateway(GEAG).
+
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled. The user associated with the order
+                is presumed to be the student to grant an entitlement.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
+                be "Course Entitlement" products.
+            email_opt_in (bool): Whether the user should be opted in to emails
+                as part of the fulfillment. Defaults to False.
+
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+        """
+
+        print("fulfilling 2u exec ed product.")
+
+        # get or create enterprise customer user
+        self._create_enterprise_customer_user(order)
+        pass
+
+    def supports_line(self, line):
+        """
+        Return True if the product in line is a 2U Exec Ed course entitlement.
+        """
+        certificate_type = getattr(line.product, 'certificate_type', None)
+        return certificate_type == 'paid-executive-education'  # move to enum
+
+    def get_supported_lines(self, lines):
+        """ Return a list of supported lines (2U Exec Ed course entitlement)
+
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+
+        Returns:
+            A supported list of lines, unmodified.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def revoke_line(self, line):
+        """ Revokes the specified line.
+
+        Args:
+            line (Line): Order Line to be revoked.
+
+        Returns:
+            True, if the product is revoked; otherwise, False.
+        """
+        raise NotImplementedError("Revoke method not implemented!")
