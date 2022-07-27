@@ -7,6 +7,7 @@ import urllib
 from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
+from functools import cached_property
 
 import dateutil.parser
 import newrelic.agent
@@ -23,10 +24,13 @@ from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import RequestException, Timeout
+from requests.exceptions import HTTPError, RequestException, Timeout
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_extensions.cache.decorators import cache_response
 
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import absolute_redirect, get_lms_course_about_url, get_lms_url
@@ -46,6 +50,7 @@ from ecommerce.extensions.analytics.utils import (
     track_segment_event,
     translate_basket_line_for_segment
 )
+from ecommerce.extensions.api_client.get_smarter import GetSmarterEnterpriseApiClient
 from ecommerce.extensions.basket import message_utils
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
@@ -1138,3 +1143,28 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):
 
         self.reload_basket()
         return self.get_payment_api_response()
+
+
+class ExecutiveEducation2UAPIViewSet(viewsets.ViewSet):
+    permission_classes = (IsAuthenticated,)
+
+    TERMS_CACHE_TIMEOUT = 60 * 15
+    TERMS_CACHE_KEY = 'executive-education-terms'
+
+    @cached_property
+    def get_smarter_client(self):
+        return GetSmarterEnterpriseApiClient()
+
+    @cache_response(
+        TERMS_CACHE_TIMEOUT,
+        key_func=lambda *args, **kwargs: ExecutiveEducation2UAPIViewSet.TERMS_CACHE_KEY,
+        cache_errors=False,
+    )
+    @action(detail=False, methods=['get'], url_path='terms')
+    def get_terms_and_conditions(self, request):
+        try:
+            terms = self.get_smarter_client.get_terms_and_conditions()
+            return Response(terms)
+        except HTTPError as ex:
+            logger.exception(ex)
+            return Response('Failed to retrieve terms and conditions', status.HTTP_500_INTERNAL_SERVER_ERROR)

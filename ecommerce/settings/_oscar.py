@@ -38,8 +38,8 @@ OSCAR_APPS = [
     'ecommerce.extensions.voucher',
 
     # Dashboard applications depend on models declared in the core applications (basket, catalogue, etc).
-    # To prevent issues with Oscar’s dynamic model loading, overrides of dashboard applications should 
-    # follow overrides of core applications 
+    # To prevent issues with Oscar’s dynamic model loading, overrides of dashboard applications should
+    # follow overrides of core applications
     'oscar.apps.dashboard.reports',
     'oscar.apps.dashboard.catalogue',
     'oscar.apps.dashboard.partners',
@@ -110,6 +110,7 @@ FULFILLMENT_MODULES = [
     'ecommerce.extensions.fulfillment.modules.EnrollmentCodeFulfillmentModule',
     'ecommerce.extensions.fulfillment.modules.CourseEntitlementFulfillmentModule',
     'ecommerce.extensions.fulfillment.modules.DonationsFromCheckoutTestFulfillmentModule',
+    'ecommerce.extensions.fulfillment.modules.ExecutiveEducation2UFulfillmentModule',
 ]
 
 HAYSTACK_CONNECTIONS = {
