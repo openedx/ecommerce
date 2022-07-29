@@ -733,6 +733,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         product = order.lines.first().product
         course = Course.objects.get(id=product.attr.course_key)
         receipt_page_url = get_receipt_page_url(
+            None,
             order_number=order.number,
             site_configuration=order.site.siteconfiguration
         )

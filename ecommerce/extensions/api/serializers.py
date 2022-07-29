@@ -32,6 +32,7 @@ from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
+from ecommerce.enterprise.conditions import sum_user_discounts_for_offer
 from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
 from ecommerce.enterprise.utils import (
     calculate_remaining_offer_balance,
@@ -827,6 +828,19 @@ class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-m
     revocation_date = serializers.SerializerMethodField()
     is_public = serializers.SerializerMethodField()
 
+    def __init__(self, *args, **kwargs):
+        """
+        Takes an optional `ignore_fields` argument that allows
+        for the dynamic exclusion of fields during serialization.
+        See: https://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
+        """
+        ignore_fields = kwargs.pop('ignore_fields', None)
+        super().__init__(*args, **kwargs)
+
+        if ignore_fields is not None:
+            for field_name in ignore_fields:
+                self.fields.pop(field_name, None)
+
     def _get_assignment(self, obj):
         assigned_to = self.get_assigned_to(obj)
         code = self.get_code(obj)
@@ -994,6 +1008,14 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
     Uses serializers.BaseSerializer to keep this lightweight.
     """
 
+    def _serialize_remaining_balance_for_user(self, instance):
+        request = self.context.get('request')
+
+        if request and instance.max_user_discount is not None:
+            return str(instance.max_user_discount - sum_user_discounts_for_offer(request.user, instance))
+
+        return None
+
     def to_representation(self, instance):
         representation = OrderedDict()
 
@@ -1007,6 +1029,10 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation['status'] = instance.status
         representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
         representation['is_current'] = instance.is_current
+        representation['max_global_applications'] = instance.max_global_applications
+        representation['max_user_discount'] = instance.max_user_discount
+        representation['num_applications'] = instance.num_applications
+        representation['remaining_balance_for_user'] = self._serialize_remaining_balance_for_user(instance)
 
         return representation
 

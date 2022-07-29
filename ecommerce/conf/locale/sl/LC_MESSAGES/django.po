@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-19 20:12+0000\n"
+"POT-Creation-Date: 2022-07-24 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: Črtomir Podlipnik, 2022\n"
 "Language-Team: Slovenian (http://www.transifex.com/open-edx/edx-platform/language/sl/)\n"
@@ -269,13 +269,13 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: ecommerce/core/models.py:704 ecommerce/extensions/offer/models.py:561
+#: ecommerce/core/models.py:704 ecommerce/extensions/offer/models.py:581
 msgid "EnterpriseCustomer UUID"
 msgstr ""
 
-#: ecommerce/core/models.py:705 ecommerce/extensions/offer/models.py:431
-#: ecommerce/extensions/offer/models.py:655
-#: ecommerce/extensions/offer/models.py:721
+#: ecommerce/core/models.py:705 ecommerce/extensions/offer/models.py:451
+#: ecommerce/extensions/offer/models.py:675
+#: ecommerce/extensions/offer/models.py:741
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
@@ -354,17 +354,17 @@ msgstr ""
 msgid "You have already purchased {course} seat."
 msgstr ""
 
-#: ecommerce/coupons/views.py:284
+#: ecommerce/coupons/views.py:285
 #, python-brace-format
 msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
 msgstr ""
 
-#: ecommerce/coupons/views.py:294
+#: ecommerce/coupons/views.py:295
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr ""
 
 #: ecommerce/courses/models.py:32 ecommerce/extensions/basket/models.py:20
-#: ecommerce/extensions/offer/models.py:235
+#: ecommerce/extensions/offer/models.py:237
 #: ecommerce/extensions/payment/models.py:68
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
@@ -421,13 +421,13 @@ msgstr ""
 msgid "Unpaid Bootcamp"
 msgstr ""
 
-#: ecommerce/credit/views.py:41
+#: ecommerce/credit/views.py:40
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
 " credit. Try the transaction again."
 msgstr ""
 
-#: ecommerce/credit/views.py:62
+#: ecommerce/credit/views.py:61
 #, python-brace-format
 msgid ""
 "Credit is not currently available for \"{course_name}\". If you are "
@@ -436,7 +436,7 @@ msgid ""
 "Support Team."
 msgstr ""
 
-#: ecommerce/credit/views.py:76
+#: ecommerce/credit/views.py:75
 msgid ""
 "An error has occurred. We could not confirm that the institution you "
 "selected offers this course credit. Try the transaction again."
@@ -464,7 +464,7 @@ msgstr ""
 msgid "Absolute"
 msgstr ""
 
-#: ecommerce/enterprise/conditions.py:213
+#: ecommerce/enterprise/conditions.py:216
 #, python-brace-format
 msgid ""
 "This coupon has been made available through {new_enterprise}. To redeem this"
@@ -472,7 +472,7 @@ msgid ""
 "{new_enterprise} as your enterprise and try again."
 msgstr ""
 
-#: ecommerce/enterprise/conditions.py:367
+#: ecommerce/enterprise/conditions.py:370
 msgid ""
 "This code is not valid with your email. Please login with the correct email "
 "assigned to the code or contact your Learning Manager for additional "
@@ -792,41 +792,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:253
+#: ecommerce/extensions/api/serializers.py:254
 msgid "EXPIRED"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:255
+#: ecommerce/extensions/api/serializers.py:256
 msgid "INACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:256
+#: ecommerce/extensions/api/serializers.py:257
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:560
+#: ecommerce/extensions/api/serializers.py:561
 msgid "Products must have a certificate type."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:563
-#: ecommerce/extensions/api/serializers.py:603
+#: ecommerce/extensions/api/serializers.py:564
+#: ecommerce/extensions/api/serializers.py:604
 msgid "Products must have a price."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:570
+#: ecommerce/extensions/api/serializers.py:571
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:599
+#: ecommerce/extensions/api/serializers.py:600
 msgid "Products must indicate whether ID verification is required."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:670
+#: ecommerce/extensions/api/serializers.py:671
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:702
+#: ecommerce/extensions/api/serializers.py:703
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -834,29 +834,29 @@ msgid ""
 " been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1345
+#: ecommerce/extensions/api/serializers.py:1373
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1346
+#: ecommerce/extensions/api/serializers.py:1374
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1813
+#: ecommerce/extensions/api/serializers.py:1841
 msgid "Invalid order number or order {} does not exists."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1868
+#: ecommerce/extensions/api/serializers.py:1896
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1886
+#: ecommerce/extensions/api/serializers.py:1914
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1917
+#: ecommerce/extensions/api/serializers.py:1945
 msgid "Could note create new voucher for the order: {}"
 msgstr ""
 
@@ -1142,23 +1142,23 @@ msgstr ""
 msgid "Manual"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:426
+#: ecommerce/extensions/offer/models.py:446
 msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:437
+#: ecommerce/extensions/offer/models.py:457
 msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:569
+#: ecommerce/extensions/offer/models.py:589
 msgid "EnterpriseCustomer Name"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:574
+#: ecommerce/extensions/offer/models.py:594
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:579
+#: ecommerce/extensions/offer/models.py:599
 #: ecommerce/extensions/voucher/utils.py:53
 #: ecommerce/extensions/voucher/utils.py:190
 #: ecommerce/extensions/voucher/utils.py:270
@@ -1169,35 +1169,35 @@ msgstr ""
 msgid "Program UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:592
+#: ecommerce/extensions/offer/models.py:612
 msgid "Email to user pending."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:593
+#: ecommerce/extensions/offer/models.py:613
 msgid "Code successfully assigned to user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:594
+#: ecommerce/extensions/offer/models.py:614
 msgid "Code has been redeemed by user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:595
+#: ecommerce/extensions/offer/models.py:615
 msgid "Email to user bounced."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:596
+#: ecommerce/extensions/offer/models.py:616
 msgid "Code has been revoked for this user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:642
+#: ecommerce/extensions/offer/models.py:662
 msgid "Make a particular template version active."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:855
+#: ecommerce/extensions/offer/models.py:882
 msgid "Email has been sent."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:856
+#: ecommerce/extensions/offer/models.py:883
 msgid "This user should receive email"
 msgstr ""
 
@@ -1909,15 +1909,15 @@ msgstr ""
 msgid "Reports"
 msgstr ""
 
-#: ecommerce/settings/base.py:92
+#: ecommerce/settings/base.py:93
 msgid "English"
 msgstr ""
 
-#: ecommerce/settings/base.py:93
+#: ecommerce/settings/base.py:94
 msgid "Spanish"
 msgstr ""
 
-#: ecommerce/settings/base.py:94
+#: ecommerce/settings/base.py:95
 msgid "Spanish (Latin American)"
 msgstr ""
 

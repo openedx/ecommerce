@@ -84,7 +84,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
 
     def _get_receipt_url(self):
         """DRY helper for getting receipt page URL."""
-        return get_receipt_page_url(site_configuration=self.site.siteconfiguration)
+        return get_receipt_page_url(self.request, site_configuration=self.site.siteconfiguration)
 
     def _assert_transaction_parameters_retry(self, api_responses, response_success, failure_log_message):
         self.processor.retry_attempts = 2

@@ -3,12 +3,14 @@
 Contains the tests for sending the enterprise offer limit emails command.
 """
 import datetime
+import logging
 from urllib.parse import urljoin
 
 import mock
 import responses
 from django.conf import settings
 from django.core.management import call_command
+from testfixtures import LogCapture
 
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.offer.constants import OfferUsageEmailTypes
@@ -20,8 +22,9 @@ from ecommerce.tests.testcases import TestCase
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferUsageEmail = get_model('offer', 'OfferUsageEmail')
 
-COMMAND_PATH = 'ecommerce.enterprise.management.commands.send_enterprise_offer_limit_emails'
-LOGGER_NAME = COMMAND_PATH
+BASE_COMMAND_PATH = 'ecommerce.enterprise.management.commands'
+API_TRIGGERED_PATH = BASE_COMMAND_PATH + '.send_api_triggered_offer_emails'
+DEPRECATED_PATH = BASE_COMMAND_PATH + '.send_enterprise_offer_limit_emails'
 
 
 class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseServiceMockMixin):
@@ -53,7 +56,8 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
         enterprise_uuid,
         offer_id,
         max_discount=10000.0,
-        amount_of_offer_spent=5000.0
+        amount_of_offer_spent=5000.0,
+        remaining_balance=5000.0
     ):
         route = f'/enterprise/api/v1/enterprise/{enterprise_uuid}/offers/{offer_id}/'
         api_url = f'{settings.ENTERPRISE_ANALYTICS_API_URL}{route}'
@@ -64,6 +68,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                 'max_discount': max_discount,
                 'percent_of_offer_spent': (amount_of_offer_spent / max_discount),
                 'amount_of_offer_spent': amount_of_offer_spent,
+                'remaining_balance': remaining_balance,
             },
             content_type='application/json',
         )
@@ -108,14 +113,16 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
         self.mock_offer_analytics_response(
             offer_with_low_balance.condition.enterprise_customer_uuid,
             offer_with_low_balance.id,
-            amount_of_offer_spent=7500.0
+            amount_of_offer_spent=7500.0,
+            remaining_balance=2500.0,
         )
 
         # low balance email sent before, should result in digest email
         self.mock_offer_analytics_response(
             offer_with_low_balance_email_sent_before.condition.enterprise_customer_uuid,
             offer_with_low_balance_email_sent_before.id,
-            amount_of_offer_spent=7500.0
+            amount_of_offer_spent=7500.0,
+            remaining_balance=2500.0,
         )
 
         # low balance email sent before but offer is replenished, should send low balance email again
@@ -123,12 +130,12 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
             replenished_offer_with_low_balance_email_sent_before.condition.enterprise_customer_uuid,
             replenished_offer_with_low_balance_email_sent_before.id,
             amount_of_offer_spent=15000.0,
-            max_discount=20000.0
+            max_discount=20000.0,
         )
 
-        with mock.patch(COMMAND_PATH + '.send_offer_usage_email.delay') as mock_send_email:
+        with mock.patch(API_TRIGGERED_PATH + '.send_api_triggered_offer_usage_email.delay') as mock_send_email:
             mock_send_email.return_value = mock.Mock()
-            call_command('send_enterprise_offer_limit_emails')
+            call_command('send_api_triggered_offer_emails')
             assert mock_send_email.call_count == 3
 
             mock_send_email.assert_has_calls([
@@ -137,41 +144,38 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.LOW_BALANCE, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 75.0, 'total_limit': 10000.0, 'total_limit_str': '$10000.0',
+                        'percent_usage': 75.0, 'total_limit': 10000.0, 'total_limit_str': '$10,000.00',
                         'offer_type': 'Booking', 'offer_name': offer_with_low_balance.name,
-                        'current_usage': 7500.0, 'current_usage_str': '$7500.0',
+                        'current_usage': 7500.0, 'current_usage_str': '$7,500.00',
+                        'remaining_balance': 2500.0, 'remaining_balance_str': '$2,500.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.LOW_BALANCE]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 22},
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 75.0, 'total_limit': 10000.0, 'total_limit_str': '$10000.0',
+                        'percent_usage': 75.0, 'total_limit': 10000.0, 'total_limit_str': '$10,000.00',
                         'offer_type': 'Booking', 'offer_name': offer_with_low_balance_email_sent_before.name,
-                        'current_usage': 7500.0, 'current_usage_str': '$7500.0'
+                        'current_usage': 7500.0, 'current_usage_str': '$7,500.00',
+                        'remaining_balance': 2500.0, 'remaining_balance_str': '$2,500.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 22},
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.LOW_BALANCE, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 75.0, 'total_limit': 20000.0, 'total_limit_str': '$20000.0',
+                        'percent_usage': 75.0, 'total_limit': 20000.0, 'total_limit_str': '$20,000.00',
                         'offer_type': 'Booking',
                         'offer_name': replenished_offer_with_low_balance_email_sent_before.name,
-                        'current_usage': 15000.0, 'current_usage_str': '$15000.0'
+                        'current_usage': 15000.0, 'current_usage_str': '$15,000.00',
+                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.LOW_BALANCE]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
             ])
 
     @responses.activate
@@ -215,14 +219,16 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
         self.mock_offer_analytics_response(
             offer_with_no_balance.condition.enterprise_customer_uuid,
             offer_with_no_balance.id,
-            amount_of_offer_spent=9900.0
+            amount_of_offer_spent=9900.0,
+            remaining_balance=100.0,
         )
 
         # no balance email sent before, should result in no email
         self.mock_offer_analytics_response(
             offer_with_no_balance_email_sent_before.condition.enterprise_customer_uuid,
             offer_with_no_balance_email_sent_before.id,
-            amount_of_offer_spent=9900.0
+            amount_of_offer_spent=9900.0,
+            remaining_balance=100.0,
         )
 
         # no balance email sent before but offer is replenished, should send no balance email again
@@ -230,12 +236,13 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
             replenished_offer_with_no_balance_email_sent_before.condition.enterprise_customer_uuid,
             replenished_offer_with_no_balance_email_sent_before.id,
             amount_of_offer_spent=19900.0,
-            max_discount=20000.0
+            max_discount=20000.0,
+            remaining_balance=100.0,
         )
 
-        with mock.patch(COMMAND_PATH + '.send_offer_usage_email.delay') as mock_send_email:
+        with mock.patch(API_TRIGGERED_PATH + '.send_api_triggered_offer_usage_email.delay') as mock_send_email:
             mock_send_email.return_value = mock.Mock()
-            call_command('send_enterprise_offer_limit_emails')
+            call_command('send_api_triggered_offer_emails')
             assert mock_send_email.call_count == 2
             mock_send_email.assert_has_calls([
                 mock.call(
@@ -243,33 +250,31 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.OUT_OF_BALANCE, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 99.0, 'total_limit_str': '$10000.0', 'total_limit': 10000.0,
+                        'percent_usage': 99.0, 'total_limit_str': '$10,000.00', 'total_limit': 10000.0,
                         'offer_type': 'Booking', 'offer_name': offer_with_no_balance.name,
-                        'current_usage': 9900.0, 'current_usage_str': '$9900.0'
+                        'current_usage': 9900.0, 'current_usage_str': '$9,900.00',
+                        'remaining_balance': 100.0, 'remaining_balance_str': '$100.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.OUT_OF_BALANCE]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 22},
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.OUT_OF_BALANCE, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 99.5, 'total_limit_str': '$20000.0', 'total_limit': 20000.0,
+                        'percent_usage': 99.5, 'total_limit_str': '$20,000.00', 'total_limit': 20000.0,
                         'offer_type': 'Booking', 'offer_name': replenished_offer_with_no_balance_email_sent_before.name,
-                        'current_usage': 19900.0, 'current_usage_str': '$19900.0'
+                        'current_usage': 19900.0, 'current_usage_str': '$19,900.00',
+                        'remaining_balance': 100.0, 'remaining_balance_str': '$100.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.OUT_OF_BALANCE]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
             ])
 
     @responses.activate
     def test_digest_email(self):
         """
-        Test the send_enterprise_offer_limit_emails command
+        Test the send_api_triggered_offer_emails command
         """
 
         offer_1 = EnterpriseOfferFactory(max_discount=100)
@@ -322,9 +327,9 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
         for offer in ConditionalOffer.objects.exclude(id=offer_with_404.id):
             self.mock_offer_analytics_response(offer.condition.enterprise_customer_uuid, offer.id)
 
-        with mock.patch(COMMAND_PATH + '.send_offer_usage_email.delay') as mock_send_email:
+        with mock.patch(API_TRIGGERED_PATH + '.send_api_triggered_offer_usage_email.delay') as mock_send_email:
             mock_send_email.return_value = mock.Mock()
-            call_command('send_enterprise_offer_limit_emails')
+            call_command('send_api_triggered_offer_emails')
             # if offer_with_404 had email content, this 5 would be a 6.
             assert mock_send_email.call_count == 5
             assert OfferUsageEmail.objects.all().count() == offer_usage_count + 5
@@ -334,27 +339,25 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 50.0, 'total_limit_str': '$10000.0', 'offer_type': 'Booking',
+                        'percent_usage': 50.0, 'total_limit_str': '$10,000.00', 'offer_type': 'Booking',
                         'total_limit': 10000.0, 'offer_name': offer_1.name, 'current_usage': 5000.0,
-                        'current_usage_str': '$5000.0'
+                        'current_usage_str': '$5,000.00',
+                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 44, ' example_2@example.com': 44},
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 50.0, 'total_limit_str': '$10000.0', 'total_limit': 10000.0,
+                        'percent_usage': 50.0, 'total_limit_str': '$10,000.00', 'total_limit': 10000.0,
                         'offer_type': 'Booking', 'offer_name': offer_2.name, 'current_usage': 5000.0,
-                        'current_usage_str': '$5000.0'
+                        'current_usage_str': '$5,000.00',
+                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 44, ' example_2@example.com': 44},
                     'Offer Usage Notification',
@@ -362,12 +365,11 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': True,
                         'percent_usage': 0, 'total_limit_str': 10, 'total_limit': 10,
                         'offer_type': 'Enrollment', 'offer_name': offer_with_daily_frequency.name, 'current_usage': 0,
-                        'current_usage_str': 0
+                        'current_usage_str': 0,
+                        'remaining_balance': 10, 'remaining_balance_str': '10',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 44, ' example_2@example.com': 44},
                     'Offer Usage Notification',
@@ -375,12 +377,11 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': True,
                         'percent_usage': 0, 'total_limit_str': 10, 'total_limit': 10,
                         'offer_type': 'Enrollment', 'offer_name': offer_with_weekly_frequency.name, 'current_usage': 0,
-                        'current_usage_str': 0
+                        'current_usage_str': 0,
+                        'remaining_balance': 10, 'remaining_balance_str': '10',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
                 mock.call(
                     {'example_1@example.com': 44, ' example_2@example.com': 44},
                     'Offer Usage Notification',
@@ -388,18 +389,18 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': True,
                         'percent_usage': 0, 'total_limit_str': 10, 'total_limit': 10, 'offer_type': 'Enrollment',
                         'offer_name': offer_with_monthly_frequency.name,
-                        'current_usage': 0, 'current_usage_str': 0
+                        'current_usage': 0, 'current_usage_str': 0,
+                        'remaining_balance': 10, 'remaining_balance_str': '10',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
             ])
 
     @responses.activate
-    def test_command_single_enterprise(self):
+    def test_command_force_digest_single_enterprise(self):
         """
-        Test the send_enterprise_offer_limit_emails command on a single enterprise customer.
+        Test the send_api_triggered_offer_emails command on a single enterprise customer, forcing
+        it to send the digest email.
         """
 
         offer_1 = EnterpriseOfferFactory(max_discount=100)
@@ -413,9 +414,13 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
         customer_uuid = offer_1.condition.enterprise_customer_uuid
         self.mock_offer_analytics_response(customer_uuid, offer_1.id)
 
-        with mock.patch(COMMAND_PATH + '.send_offer_usage_email.delay') as mock_send_email:
+        with mock.patch(API_TRIGGERED_PATH + '.send_api_triggered_offer_usage_email.delay') as mock_send_email:
             mock_send_email.return_value = mock.Mock()
-            call_command('send_enterprise_offer_limit_emails', enterprise_customer_uuid=customer_uuid)
+            call_command(
+                'send_api_triggered_offer_emails',
+                enterprise_customer_uuid=customer_uuid,
+                force_type=OfferUsageEmailTypes.DIGEST,
+            )
             assert mock_send_email.call_count == 1
             assert OfferUsageEmail.objects.all().count() == offer_usage_count + 1
 
@@ -425,12 +430,45 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                     'Offer Usage Notification',
                     {
                         'email_type': OfferUsageEmailTypes.DIGEST, 'is_enrollment_limit_offer': False,
-                        'percent_usage': 50.0, 'total_limit': 10000.0, 'total_limit_str': '$10000.0',
+                        'percent_usage': 50.0, 'total_limit': 10000.0, 'total_limit_str': '$10,000.00',
                         'offer_type': 'Booking', 'offer_name': offer_1.name, 'current_usage': 5000.0,
-                        'current_usage_str': '$5000.0'
+                        'current_usage_str': '$5,000.00',
+                        'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
-                mock.call().get(propagate=False),
-                mock.call().successful(),
             ])
+
+    def test_deprecated_command(self):
+        """
+        Test the deprecated version of the command.
+        """
+        ConditionalOffer.objects.all().delete()
+        OfferUsageEmail.objects.all().delete()
+
+        EnterpriseOfferFactory(max_discount=100)
+
+        with mock.patch(DEPRECATED_PATH + '.send_offer_usage_email.delay') as mock_send_email:
+            with LogCapture(level=logging.INFO) as log:
+                mock_send_email.return_value = mock.Mock()
+                call_command('send_enterprise_offer_limit_emails')
+                assert mock_send_email.call_count == 1
+                assert OfferUsageEmail.objects.all().count() == 1
+        log.check_present(
+            (
+                DEPRECATED_PATH,
+                'INFO',
+                '[Offer Usage Alert] Total count of enterprise offers is {total_enterprise_offers_count}.'.format(
+                    total_enterprise_offers_count=1
+                )
+            ),
+            (
+                DEPRECATED_PATH,
+                'INFO',
+                '[Offer Usage Alert] {total_enterprise_offers_count} of {send_enterprise_offer_count} added to the'
+                ' email sending queue.'.format(
+                    total_enterprise_offers_count=1,
+                    send_enterprise_offer_count=1,
+                )
+            )
+        )

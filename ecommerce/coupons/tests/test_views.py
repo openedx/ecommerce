@@ -390,7 +390,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         response = self.redeem_coupon(code=code, consent_token=consent_token)
 
         order = Order.objects.first()
-        receipt_page_url = get_receipt_page_url(self.site.siteconfiguration)
+        receipt_page_url = get_receipt_page_url(self.request, self.site.siteconfiguration)
         expected_url = format_url(
             base=receipt_page_url,
             params={

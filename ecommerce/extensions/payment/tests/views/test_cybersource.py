@@ -284,6 +284,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
             assert response.status_code == 201
             assert response['content-type'] == JSON
             assert json.loads(response.content)['receipt_page_url'] == get_receipt_page_url(
+                self.request,
                 self.site.siteconfiguration,
                 order_number=order_number,
                 disable_back_button=True,
@@ -315,6 +316,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         assert response.status_code == 201
         assert response['content-type'] == JSON
         assert json.loads(response.content)['receipt_page_url'] == get_receipt_page_url(
+            self.request,
             self.site.siteconfiguration,
             order_number=order_number,
             disable_back_button=True,

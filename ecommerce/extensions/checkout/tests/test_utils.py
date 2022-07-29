@@ -4,10 +4,15 @@ import ddt
 import mock
 import requests
 import responses
+from django.conf import settings
+from django.test import override_settings
+from django.urls import reverse
 from requests import ConnectionError as ReqConnectionError
 from requests import Timeout
+from waffle.testutils import override_flag
 
-from ecommerce.extensions.checkout.utils import get_credit_provider_details
+from ecommerce.extensions.api.v2.constants import ENABLE_RECEIPTS_VIA_ECOMMERCE_MFE
+from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.tests.testcases import TestCase
 
 
@@ -18,6 +23,7 @@ class UtilTests(TestCase):
         self.credit_provider_id = 'HGW'
         self.credit_provider_name = 'Hogwarts'
         self.body = {'display_name': self.credit_provider_name}
+        self.order_number = 'EDX-100001'
 
     def get_credit_provider_details_url(self, credit_provider_id):
         """
@@ -71,3 +77,36 @@ class UtilTests(TestCase):
                     self.site.siteconfiguration
                 )
             )
+
+    @override_flag(ENABLE_RECEIPTS_VIA_ECOMMERCE_MFE, active=True)
+    def test_get_receipt_page_url_gives_MFE_when_enabled(self):
+        """ Verify the function returns the appropriate url when waffle flag is True, False, missing"""
+
+        with override_settings(ECOMMERCE_MICROFRONTEND_URL='http://test.MFE.domain'):
+            params = '?order_number=EDX-100001&disable_back_button=1'
+
+            receipt_url = get_receipt_page_url(
+                self.request,
+                order_number=self.order_number,
+                site_configuration=self.site_configuration,
+                disable_back_button=True
+            )
+
+            self.assertEqual(receipt_url, settings.ECOMMERCE_MICROFRONTEND_URL + '/receipt/' + params)
+
+    @override_flag(ENABLE_RECEIPTS_VIA_ECOMMERCE_MFE, active=False)
+    def test_get_receipt_page_url_gives_ecommerce_if_no_waffle(self):
+        """ Verify the function returns the appropriate url when waffle flag is True, False, missing"""
+
+        with override_settings(ECOMMERCE_MICROFRONTEND_URL='http://test.MFE.domain'):
+            params = '?order_number=EDX-100001&disable_back_button=1'
+
+            receipt_url = get_receipt_page_url(
+                self.request,
+                order_number=self.order_number,
+                site_configuration=self.site_configuration,
+                disable_back_button=True
+            )
+
+            self.assertEqual(receipt_url, self.site_configuration.build_ecommerce_url(reverse('checkout:receipt')) +
+                             params)

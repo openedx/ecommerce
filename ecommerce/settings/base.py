@@ -580,6 +580,7 @@ CELERY_DEFAULT_EXCHANGE = 'ecommerce'
 CELERY_DEFAULT_ROUTING_KEY = 'ecommerce'
 CELERY_DEFAULT_QUEUE = DEFAULT_PRIORITY_QUEUE
 CELERY_ROUTES = {
+    'ecommerce_worker.email.v1.tasks.send_api_triggered_offer_usage_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.email.v1.tasks.send_offer_assignment_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.email.v1.tasks.send_offer_update_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.email.v1.tasks.send_offer_usage_email': {'queue': 'ecommerce.email_marketing'},
@@ -604,9 +605,6 @@ CELERY_ACCEPT_CONTENT = ['json', 'pickle', 'yaml']
 
 
 THEME_SCSS = 'sass/themes/default.scss'
-
-# Path to the receipt page
-RECEIPT_PAGE_PATH = '/checkout/receipt/'
 
 # URL for Discovery Service
 COURSE_CATALOG_API_URL = 'http://localhost:8008/api/v1/'
@@ -830,6 +828,8 @@ BACKEND_SERVICE_EDX_OAUTH2_SECRET = "ecommerce-backend-service-secret"
 BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://127.0.0.1:8000/oauth2"
 EXTRA_APPS = []
 API_ROOT = None
+
+ECOMMERCE_MICROFRONTEND_URL = os.environ.get('ECOMMERCE_MICROFRONTEND_URL')
 
 # Needed to link to the payment micro-frontend
 PAYMENT_MICROFRONTEND_URL = None

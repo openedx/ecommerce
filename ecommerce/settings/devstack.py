@@ -60,6 +60,8 @@ CORS_ALLOW_HEADERS = corsheaders_default_headers + (
 )
 CORS_ALLOW_CREDENTIALS = True
 
+ECOMMERCE_MICROFRONTEND_URL = 'http://localhost:1996'
+
 ENTERPRISE_CATALOG_API_URL = urljoin(f"{ENTERPRISE_CATALOG_SERVICE_URL}/", 'api/v1/')
 
 ENTERPRISE_ANALYTICS_API_URL = 'http://edx.devstack.analyticsapi:19001'

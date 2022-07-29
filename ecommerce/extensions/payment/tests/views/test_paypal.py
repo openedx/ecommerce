@@ -84,6 +84,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.assertRedirects(
             response,
             url_redirect or get_receipt_page_url(
+                self.request,
                 order_number=self.basket.order_number,
                 site_configuration=self.basket.site.siteconfiguration,
                 disable_back_button=True,
@@ -130,9 +131,10 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.assertRedirects(
             response,
             get_receipt_page_url(
+                self.request,
                 order_number=self.basket.order_number,
                 site_configuration=self.basket.site.siteconfiguration,
-                disable_back_button=True,
+                disable_back_button=True
             ),
             fetch_redirect_response=False
         )
@@ -169,9 +171,10 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.assertRedirects(
             response,
             get_receipt_page_url(
+                self.request,
                 order_number=self.basket.order_number,
                 site_configuration=self.basket.site.siteconfiguration,
-                disable_back_button=True,
+                disable_back_button=True
             ),
             fetch_redirect_response=False
         )

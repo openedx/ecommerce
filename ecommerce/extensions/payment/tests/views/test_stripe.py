@@ -41,9 +41,10 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
     def assert_successful_order_response(self, response, order_number):
         assert response.status_code == 201
         receipt_url = get_receipt_page_url(
+            self.request,
             self.site_configuration,
             order_number,
-            disable_back_button=True,
+            disable_back_button=True
         )
         assert response.json() == {'url': receipt_url}
 
