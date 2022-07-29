@@ -86,7 +86,7 @@ class OrderSerializerTests(TestCase):
             logger.check_present(*expected)
 
     @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.add_message_if_enterprise_user')
-    def test_get_enterprise_customer_info(self, mock_learner_portal_url):
+    def test_get_enterprise_learner_portal_url(self, mock_learner_portal_url):
         mock_learner_portal_url.side_effect = ValueError()
         order = factories.create_order(site=self.site, user=self.user)
         serializer = OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')})
@@ -95,12 +95,12 @@ class OrderSerializerTests(TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                'Failed to retrieve enterprise_customer_info for order [{}]'.format(order)
+                'Failed to retrieve get_enterprise_learner_portal_url for order [{}]'.format(order)
             ),
         ]
 
         with LogCapture(self.LOGGER_NAME) as logger:
-            serializer.get_enterprise_customer_info(order)
+            serializer.get_enterprise_learner_portal_url(order)
             self.assertTrue(mock_learner_portal_url)
             logger.check_present(*expected)
 

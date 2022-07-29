@@ -397,7 +397,7 @@ class OrderSerializer(serializers.ModelSerializer):
     vouchers = serializers.SerializerMethodField()
     enable_hoist_order_history = serializers.SerializerMethodField()
     payment_method = serializers.SerializerMethodField()
-    enterprise_customer_info = serializers.SerializerMethodField()
+    enterprise_learner_portal_url = serializers.SerializerMethodField()
     total_before_discounts_incl_tax = serializers.SerializerMethodField()
     order_product_ids = serializers.SerializerMethodField()
 
@@ -489,22 +489,15 @@ class OrderSerializer(serializers.ModelSerializer):
             )
         return payment_method
 
-    def get_enterprise_customer_info(self, obj):
+    def get_enterprise_learner_portal_url(self, obj):
         try:
-            learner_portal_url = ReceiptResponseView().add_message_if_enterprise_user(obj)
-            discount = obj.discounts.first()
-            if discount and learner_portal_url:
-                return {
-                    'learner_portal_url': learner_portal_url,
-                    'offer_condition_enterprise_customer_name': discount.offer.condition.enterprise_customer_name,
-                    'offer_condition_name': discount.offer.condition.name,
-                }
-        except (AttributeError, TypeError, ValueError):
+            return ReceiptResponseView().add_message_if_enterprise_user(obj)
+        except (AttributeError, ValueError):
             logger.exception(
-                'Failed to retrieve enterprise_customer_info for order [%s]',
+                'Failed to retrieve get_enterprise_learner_portal_url for order [%s]',
                 obj
             )
-        return None
+            return None
 
     def get_total_before_discounts_incl_tax(self, obj):
         try:
@@ -533,7 +526,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'dashboard_url',
             'discount',
             'enable_hoist_order_history',
-            'enterprise_customer_info',
+            'enterprise_learner_portal_url',
             'lines',
             'number',
             'order_product_ids',

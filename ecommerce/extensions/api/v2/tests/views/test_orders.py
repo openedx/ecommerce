@@ -213,11 +213,11 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assertIn('dashboard_url', content['results'][0])
 
         # Test for: enterprise_customer
-        self.assertIn('enterprise_customer_info', content['results'][0])
+        self.assertIn('enterprise_learner_portal_url', content['results'][0])
         if has_discount:
             self.assertEqual(
                 test_learner_portal_url,
-                content['results'][0]['enterprise_customer_info']['learner_portal_url']
+                content['results'][0]['enterprise_learner_portal_url']
             )
 
         # Test for: order_product_ids
