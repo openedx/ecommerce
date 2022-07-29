@@ -387,6 +387,7 @@ class OrderSerializer(serializers.ModelSerializer):
     """Serializer for parsing order data."""
     basket_discounts = serializers.SerializerMethodField()
     billing_address = BillingAddressSerializer(allow_null=True)
+    contains_credit_seat = serializers.SerializerMethodField()
     dashboard_url = serializers.SerializerMethodField()
     date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
     discount = serializers.SerializerMethodField()
@@ -456,6 +457,16 @@ class OrderSerializer(serializers.ModelSerializer):
         except IndexError:
             return '0'
 
+    def get_contains_credit_seat(self, obj):
+        try:
+            return ReceiptResponseView().order_contains_credit_seat(obj)
+        except ValueError:
+            logger.exception(
+                'Failed to retrieve get_contains_credit_seat for [%s]',
+                obj
+            )
+            return None
+
     def get_enable_hoist_order_history(self, obj):
         try:
             request = self.context.get('request')
@@ -473,7 +484,7 @@ class OrderSerializer(serializers.ModelSerializer):
             payment_method = ReceiptResponseView().get_payment_method(obj)
         except ValueError:
             logger.exception(
-                'Failed to retrieve payment_method for order [%s]',
+                'Failed to retrieve get_payment_method for order [%s]',
                 obj
             )
         return payment_method
@@ -506,7 +517,7 @@ class OrderSerializer(serializers.ModelSerializer):
             return ','.join(map(str, obj.lines.values_list('product_id', flat=True)))
         except (AttributeError, ValueError):
             logger.exception(
-                'Failed to retrieve order_product_ids for order [%s]',
+                'Failed to retrieve get_order_product_ids for order [%s]',
                 obj
             )
             return None
@@ -516,6 +527,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = (
             'basket_discounts',
             'billing_address',
+            'contains_credit_seat',
             'currency',
             'date_placed',
             'dashboard_url',

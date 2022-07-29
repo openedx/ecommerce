@@ -47,6 +47,25 @@ class OrderSerializerTests(TestCase):
             self.assertTrue(mock_receipt_dashboard_url.called)
             logger.check_present(*expected)
 
+    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.order_contains_credit_seat')
+    def test_get_contains_credit_seat(self, mock_contains_credit_seat):
+        mock_contains_credit_seat.side_effect = ValueError()
+        order = factories.create_order(site=self.site, user=self.user)
+        serializer = OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')})
+
+        expected = [
+            (
+                self.LOGGER_NAME,
+                'ERROR',
+                'Failed to retrieve get_contains_credit_seat for [{}]'.format(order)
+            ),
+        ]
+
+        with LogCapture(self.LOGGER_NAME) as logger:
+            serializer.get_contains_credit_seat(order)
+            self.assertTrue(mock_contains_credit_seat)
+            logger.check_present(*expected)
+
     @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.get_payment_method')
     def test_get_payment_method(self, mock_receipt_payment_method):
         mock_receipt_payment_method.side_effect = ValueError()
@@ -57,7 +76,7 @@ class OrderSerializerTests(TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                'Failed to retrieve payment_method for order [{}]'.format(order)
+                'Failed to retrieve get_payment_method for order [{}]'.format(order)
             ),
         ]
 

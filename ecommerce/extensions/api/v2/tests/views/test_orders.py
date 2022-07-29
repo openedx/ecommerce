@@ -180,6 +180,11 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
             # Test for: credit_provider in attr
             self.assertEqual(getattr(line.product.attr, 'credit_provider', None), credit_provider)
 
+        # Test for: contains_credit_seat
+        self.assertIn('contains_credit_seat', content['results'][0])
+        if credit_provider:
+            self.assertEqual(content['results'][0]['contains_credit_seat'], True)
+
         # Test for: basket_discounts
         self.assertIn('basket_discounts', content['results'][0])
         if has_discount:
