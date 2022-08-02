@@ -5,6 +5,7 @@ import json
 import mock
 import responses
 from django.core import mail
+from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from testfixtures import LogCapture
@@ -237,8 +238,11 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 'title': line.product.title,
             }
 
-            if recommendations and line.product.course.id in recommendations['course_keys']:
-                order_line['is_personalized_recommendation'] = recommendations['is_personalized_recommendation']
+            if line.product.course:
+                course_key = CourseKey.from_string(line.product.course.id)
+                course_key = f'{course_key.org}+{course_key.course}'
+                if recommendations and course_key in recommendations['course_keys']:
+                    order_line['is_personalized_recommendation'] = recommendations['is_personalized_recommendation']
             products.append(order_line)
 
         properties = {
@@ -272,7 +276,12 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         return properties
 
     def _get_recommendations_data(self, order):
-        course_keys = [line.product.course.id for line in order.lines.all() if line.product.course]
+        course_keys = []
+        for line in order.lines.all():
+            if line.product.course:
+                course_key = CourseKey.from_string(line.product.course.id)
+                course_key = f'{course_key.org}+{course_key.course}'
+                course_keys.append(course_key)
         return {
             'course_keys': course_keys,
             'is_personalized_recommendation': True
