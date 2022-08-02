@@ -290,7 +290,7 @@ edx-django-release-util==1.2.0
     # via -r requirements/base.txt
 edx-django-sites-extensions==4.0.0
     # via -r requirements/base.txt
-edx-django-utils==4.5.0
+edx-django-utils==5.0.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
