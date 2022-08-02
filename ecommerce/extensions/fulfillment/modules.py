@@ -9,12 +9,14 @@ import abc
 import datetime
 import json
 import logging
+import uuid
 from urllib.parse import urlencode, urljoin
 
 import requests
 import waffle
 from django.conf import settings
 from django.urls import reverse
+from getsmarter_api_clients.geag import GetSmarterEnterpriseApiClient
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError  # pylint: disable=ungrouped-imports
 from requests.exceptions import Timeout
@@ -255,7 +257,7 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
             )
 
     def supports_line(self, line):
-        return line.product.is_seat_product and not line.product.is_executive_education_2u_product
+        return line.product.is_seat_product
 
     def get_supported_lines(self, lines):
         """ Return a list of lines that can be fulfilled through enrollment.
@@ -902,3 +904,162 @@ class CourseEntitlementFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmen
             logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
 
         return False
+
+
+class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
+    """
+    Fulfillment module for fulfilling orders for Executive Education (2U) products.
+    """
+
+    @property
+    def get_smarter_client(self):
+        return GetSmarterEnterpriseApiClient(
+            client_id=settings.GET_SMARTER_OAUTH2_KEY,
+            client_secret=settings.GET_SMARTER_OAUTH2_SECRET,
+            provider_url=settings.GET_SMARTER_OAUTH2_PROVIDER_URL,
+            api_url=settings.GET_SMARTER_API_URL
+        )
+
+    def supports_line(self, line):
+        """
+        Returns True if the given Line has a Executive Education (2U) product.
+        """
+        return line.product.is_executive_education_2u_product
+
+    def get_supported_lines(self, lines):
+        """ Return a list of supported lines.
+
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+
+        Returns:
+            A supported list of lines, unmodified.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def _generate_payment_reference(self):
+        # TODO: ENT-6088 Implement method for generating payment reference
+        return uuid.uuid4().hex[0:20]
+
+    def _create_allocation_payload(
+        self,
+        line,
+        fulfillment_details,
+        currency='USD'
+    ):
+        # A variant_id attribute must exist on the product
+        variant_id = getattr(line.product.attr, 'variant_id')
+        payment_reference = self._generate_payment_reference()
+
+        return {
+            'payment_reference': payment_reference,
+            'currency': currency,
+            'order_items': [
+                {
+                    # productId will be the variant id from product details
+                    'productId': variant_id,
+                    'quantity': 1,
+                    'normalPrice': line.line_price_before_discounts_excl_tax,
+                    'discount': line.line_price_before_discounts_excl_tax - line.line_price_excl_tax,
+                    'finalPrice': line.line_price_excl_tax
+                }
+            ],
+            **fulfillment_details.get('address', {}),
+            **fulfillment_details.get('user_details', {}),
+            'terms_accepted_at': fulfillment_details.get('terms_accepted_at', '')
+        }
+
+    def _get_fulfillment_details(self, order):
+        fulfillment_details_note = order.notes.filter(note_type='Fulfillment Details').first()
+        if not fulfillment_details_note:
+            return None
+
+        try:
+            return json.loads(fulfillment_details_note.message)
+        except ValueError:
+            logger.exception('Error deserializing fulfillment details for order [%s]', order.number)
+            return None
+
+    def fulfill_product(self, order, lines, email_opt_in=False):
+        """ Fulfills the specified lines in the order.
+
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+            email_opt_in (bool): Whether the user should be opted in to emails
+                as part of the fulfillment. Defaults to False.
+
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+
+        """
+
+        lines = [line for line in lines if self.supports_line(line)]
+
+        logger.info('Attempting to fulfill Executive Education (2U) product for order [%s]', order.number)
+
+        # A note with fulfillment details should have been created at the time of order placement
+        fulfillment_details = self._get_fulfillment_details(order)
+        if not fulfillment_details:
+            logger.exception(
+                'Unable to fulfill order [%s] due to missing or malformed fulfillment details.',
+                order.number
+            )
+
+            for line in lines:
+                line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
+            return order, lines
+
+        for line in lines:
+            product = line.product
+
+            allocation_payload = self._create_allocation_payload(
+                line=line,
+                fulfillment_details=fulfillment_details
+            )
+
+            try:
+                self.get_smarter_client.create_allocation(**allocation_payload)
+            except Exception as ex:  # pylint: disable=broad-except
+                reason = ''
+                try:
+                    reason = ex.response.json()
+                except:  # pylint: disable=bare-except
+                    pass
+
+                logger.exception(
+                    'Fulfillment of line [%d] on order [%s] failed. Reason: %s.',
+                    line.id, order.number, reason
+                )
+                line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
+            else:
+                audit_log(
+                    'line_fulfilled',
+                    order_line_id=line.id,
+                    order_number=order.number,
+                    product_class=line.product.get_product_class().name,
+                    course_uuid=getattr(product.attr, 'UUID', ''),
+                    mode=getattr(product.attr, 'certificate_type', ''),
+                    user_id=order.user.id,
+                )
+                line.set_status(LINE.COMPLETE)
+
+        if all([line.status == LINE.COMPLETE for line in lines]):
+            logger.info(
+                'All lines for order [%s] were fulfilled, deleting note with fulfillment details.',
+                order.number
+            )
+            order.notes.filter(note_type='Fulfillment Details').delete()
+
+        return order, lines
+
+    def revoke_line(self, line):
+        """ Revokes the specified line.
+
+        Args:
+            line (Line): Order Line to be revoked.
+
+        Returns:
+            True, if the product is revoked; otherwise, False.
+        """
+        raise NotImplementedError("Revoke method not implemented!")
