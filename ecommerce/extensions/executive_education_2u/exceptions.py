@@ -1,2 +1,2 @@
-class InvalidBasketException(Exception):
-    """ Raised when a user attempts to checkout with invalid products. """
+class EmptyBasketException(Exception):
+    """ Raised when a user attempts to checkout with an empty basket. """

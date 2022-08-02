@@ -29,6 +29,7 @@ from ecommerce.core.constants import (
 )
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.coupons.tests.mixins import CouponMixin
+from ecommerce.courses.constants import CertificateType
 from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_product
@@ -43,7 +44,8 @@ from ecommerce.extensions.fulfillment.modules import (
     CourseEntitlementFulfillmentModule,
     DonationsFromCheckoutTestFulfillmentModule,
     EnrollmentCodeFulfillmentModule,
-    EnrollmentFulfillmentModule
+    EnrollmentFulfillmentModule,
+    ExecutiveEducation2UFulfillmentModule
 )
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
@@ -947,6 +949,24 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscount
         supports_line = CourseEntitlementFulfillmentModule().supports_line(unsupported_line)
         self.assertFalse(supports_line)
 
+    def test_entitlement_supports_line_exec_edu_2u_product(self):
+        """ Test that support_line returns False Executive Education (2U) products. """
+        exec_ed_2u_course_entitlement = create_or_update_course_entitlement(
+            CertificateType.PAID_EXECUTIVE_EDUCATION,
+            100,
+            self.partner,
+            '111-222-333-444',
+            'Executive Education (2U) Course Entitlement'
+        )
+
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(exec_ed_2u_course_entitlement, 1)
+        order = create_order(number=2, basket=basket, user=self.user)
+
+        unsupported_line = order.lines.first()
+        supports_line = CourseEntitlementFulfillmentModule().supports_line(unsupported_line)
+        self.assertFalse(supports_line)
+
     def test_get_entitlement_supported_lines(self):
         """ Test that Course Entitlement products lines are returned. """
         lines = self.order.lines.all()
@@ -1152,3 +1172,156 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscount
                                      code='UUID').delete()
         CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         self.assertEqual(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
+
+
+@ddt.ddt
+class ExecutiveEducation2UFulfillmentModuleTests(
+    FulfillmentTestMixin,
+    EnterpriseDiscountTestMixin,
+    TestCase
+):
+    def setUp(self):
+        super().setUp()
+        self.user = UserFactory()
+
+        self.exec_ed_2u_course_entitlement = create_or_update_course_entitlement(
+            CertificateType.PAID_EXECUTIVE_EDUCATION,
+            100,
+            self.partner,
+            '111-222-333-444',
+            'Executive Education (2U) Course Entitlement'
+        )
+        self.exec_ed_2u_course_entitlement_2 = create_or_update_course_entitlement(
+            CertificateType.PAID_EXECUTIVE_EDUCATION,
+            100,
+            self.partner,
+            '222-333-444-555',
+            'Executive Education (2U) Course Entitlement 2'
+        )
+
+        self.non_exec_ed_2u_course_entitlement = create_or_update_course_entitlement(
+            CertificateType.VERIFIED,
+            100,
+            self.partner,
+            '333-444-555-666',
+            'Regular Course Entitlement'
+        )
+
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(self.exec_ed_2u_course_entitlement, 1)
+        basket.add_product(self.exec_ed_2u_course_entitlement_2, 1)
+        basket.add_product(self.non_exec_ed_2u_course_entitlement, 1)
+        self.order = create_order(number=1, basket=basket, user=self.user)
+
+        order_lines = self.order.lines.all()
+        self.exec_ed_2u_entitlement_line = order_lines[0]
+        self.exec_ed_2u_entitlement_line_2 = order_lines[1]
+        self.non_exec_ed_2u_entitlement_line = order_lines[2]
+
+        self.exec_ed_2u_entitlement_line.product.attr.variant_id = 'variant_id'
+        self.exec_ed_2u_entitlement_line_2.product.attr.variant_id = 'variant_id-2'
+
+        self.fulfillment_details = json.dumps({
+            'address': {
+                'address_line1': '10 Lovely Street',
+                'city': 'Herndon',
+                'postal_code': '35005',
+                'state': 'California',
+                'state_code': 'state_code',
+                'country': 'country',
+                'country_code': 'country_code',
+            },
+            'user_details': {
+                'first_name': 'John',
+                'last_name': 'Smith',
+                'email': 'johnsmith@example.com',
+                'date_of_birth': '2000-01-01',
+                'mobile_phone': '+12015551234',
+            },
+            'terms_accepted_at': '2022-07-25T10:29:56Z',
+        })
+
+        self.mock_settings = {
+            'GET_SMARTER_OAUTH2_PROVIDER_URL': 'https://provider-url.com',
+            'GET_SMARTER_OAUTH2_KEY': 'key',
+            'GET_SMARTER_OAUTH2_SECRET': 'secret',
+            'GET_SMARTER_API_URL': 'https://api-url.com',
+        }
+
+    def test_supports_line(self):
+        self.assertTrue(
+            ExecutiveEducation2UFulfillmentModule().supports_line(self.exec_ed_2u_entitlement_line)
+        )
+        self.assertFalse(
+            ExecutiveEducation2UFulfillmentModule().supports_line(self.non_exec_ed_2u_entitlement_line)
+        )
+
+    def test_get_supported_lines(self):
+        supported_lines = ExecutiveEducation2UFulfillmentModule().get_supported_lines(self.order.lines.all())
+        self.assertEqual(len(supported_lines), 2)
+        self.assertEqual(supported_lines[0], self.exec_ed_2u_entitlement_line)
+        self.assertEqual(supported_lines[1], self.exec_ed_2u_entitlement_line_2)
+
+    @mock.patch('ecommerce.extensions.fulfillment.modules.logger.exception')
+    def test_fulfill_product_no_fulfillment_details(self, mock_logger):
+        self.order.notes.all().delete()
+        self.assertEqual(self.exec_ed_2u_entitlement_line.status, LINE.OPEN)
+        ExecutiveEducation2UFulfillmentModule().fulfill_product(
+            self.exec_ed_2u_entitlement_line.order,
+            [self.exec_ed_2u_entitlement_line]
+        )
+        self.assertEqual(self.exec_ed_2u_entitlement_line.status, LINE.FULFILLMENT_SERVER_ERROR)
+        mock_logger.assert_called_with(
+            'Unable to fulfill order [%s] due to missing or malformed fulfillment details.',
+            self.exec_ed_2u_entitlement_line.order.number
+        )
+
+    @mock.patch('ecommerce.extensions.fulfillment.modules.logger.exception')
+    def test_fulfill_product_maformed_fulfillment_details(self, mock_logger):
+        self.order.notes.create(message='', note_type='Fulfillment Details')
+        self.assertEqual(self.exec_ed_2u_entitlement_line.status, LINE.OPEN)
+        ExecutiveEducation2UFulfillmentModule().fulfill_product(
+            self.exec_ed_2u_entitlement_line.order,
+            [self.exec_ed_2u_entitlement_line]
+        )
+        self.assertEqual(self.exec_ed_2u_entitlement_line.status, LINE.FULFILLMENT_SERVER_ERROR)
+        mock_logger.assert_called_with(
+            'Unable to fulfill order [%s] due to missing or malformed fulfillment details.',
+            self.exec_ed_2u_entitlement_line.order.number
+        )
+
+    @mock.patch('ecommerce.extensions.fulfillment.modules.GetSmarterEnterpriseApiClient')
+    def test_fulfill_product_success(self, mock_geag_client):
+        with self.settings(**self.mock_settings):
+            mock_create_allocation = mock.MagicMock()
+            mock_geag_client.return_value = mock.MagicMock(create_allocation=mock_create_allocation)
+            self.order.notes.create(message=self.fulfillment_details, note_type='Fulfillment Details')
+            ExecutiveEducation2UFulfillmentModule().fulfill_product(
+                self.order,
+                [self.exec_ed_2u_entitlement_line, self.exec_ed_2u_entitlement_line_2]
+            )
+            self.assertEqual(mock_create_allocation.call_count, 2)
+            self.assertEqual(self.exec_ed_2u_entitlement_line.status, LINE.COMPLETE)
+            self.assertEqual(self.exec_ed_2u_entitlement_line_2.status, LINE.COMPLETE)
+            self.assertFalse(self.order.notes.exists())
+
+    @mock.patch('ecommerce.extensions.fulfillment.modules.GetSmarterEnterpriseApiClient')
+    def test_fulfill_product_error(self, mock_geag_client):
+        with self.settings(**self.mock_settings):
+            mock_create_allocation = mock.MagicMock()
+            mock_create_allocation.side_effect = [None, Exception("Uh oh.")]
+            mock_geag_client.return_value = mock.MagicMock(create_allocation=mock_create_allocation)
+            self.order.notes.create(message=self.fulfillment_details, note_type='Fulfillment Details')
+            ExecutiveEducation2UFulfillmentModule().fulfill_product(
+                self.order,
+                [self.exec_ed_2u_entitlement_line, self.exec_ed_2u_entitlement_line_2]
+            )
+            self.assertEqual(mock_create_allocation.call_count, 2)
+            self.assertEqual(self.exec_ed_2u_entitlement_line.status, LINE.COMPLETE)
+            self.assertEqual(self.exec_ed_2u_entitlement_line_2.status, LINE.FULFILLMENT_SERVER_ERROR)
+            self.assertTrue(self.order.notes.exists())
+
+    def test_revoke_line(self):
+        line = self.order.lines.first()
+        with self.assertRaises(NotImplementedError):
+            CouponFulfillmentModule().revoke_line(line)

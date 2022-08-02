@@ -13,10 +13,10 @@ from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
 from ecommerce.extensions.basket.utils import apply_offers_on_basket
-from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.executive_education_2u.constants import ExecutiveEducation2UCheckoutFailureReason
-from ecommerce.extensions.executive_education_2u.exceptions import InvalidBasketException
+from ecommerce.extensions.executive_education_2u.exceptions import EmptyBasketException
+from ecommerce.extensions.executive_education_2u.mixins import ExecutiveEducation2UOrderPlacementMixin
 from ecommerce.extensions.executive_education_2u.serializers import CheckoutActionSerializer
 from ecommerce.extensions.executive_education_2u.utils import (
     get_executive_education_2u_product,
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 
 
-class ExecutiveEducation2UViewSet(viewsets.ViewSet, EdxOrderPlacementMixin):
+class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPlacementMixin):
     permission_classes = (LoginRedirectIfUnauthenticated,)
 
     TERMS_CACHE_TIMEOUT = 60 * 15
@@ -79,6 +79,9 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, EdxOrderPlacementMixin):
     def _prepare_basket(self, request, product):
         """
         Get user's basket, empty it, and add the given product to the basket.
+
+        Raises:
+            EmptyBasketException: If the user has purchased the product previously.
         """
         basket = Basket.get_basket(request.user, request.site)
         basket.flush()
@@ -88,7 +91,7 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, EdxOrderPlacementMixin):
 
         if not basket.lines.exists():
             logger.error("User has an empty basket. User id: [%d].", request.user.id)
-            raise InvalidBasketException
+            raise EmptyBasketException
 
         basket.reset_offer_applications()
         apply_offers_on_basket(request, basket)
@@ -108,11 +111,6 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, EdxOrderPlacementMixin):
         product = get_executive_education_2u_product(partner, sku)
         if not product:
             return HttpResponseNotFound(f'No Executive Education (2U) product found for SKU {sku}.')
-
-        # Redirect user to receipt page if the product has been purchased previously
-        receipt_page_url = self._get_receipt_page_url(self.request, request.user, product)
-        if receipt_page_url:
-            return HttpResponseRedirect(receipt_page_url)
 
         try:
             # Create basket and see if total cost is $0
@@ -140,6 +138,10 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, EdxOrderPlacementMixin):
             learner_portal_url = get_learner_portal_url(request)
             redirect_url = f'{learner_portal_url}?{urlencode(query_params)}'
             return HttpResponseRedirect(redirect_url)
+        except EmptyBasketException:
+            # Redirect user to receipt page since the product has been purchased previously
+            receipt_page_url = self._get_receipt_page_url(self.request, request.user, product)
+            return HttpResponseRedirect(receipt_page_url)
         except Exception as ex:  # pylint: disable=broad-except
             logger.exception(ex)
             return HttpResponseServerError('Something went wrong, please try again later.')
@@ -168,7 +170,14 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, EdxOrderPlacementMixin):
 
                 return Response('Failed to create subsidized order.', status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-            order = self.place_free_order(basket)
+            order = self.place_free_order(
+                basket=basket,
+                address=request.data['address'],
+                user_details={**request.data['user_details'], 'email': request.user.email},
+                terms_accepted_at=request.data['terms_accepted_at'],
+                request=request
+            )
+
             data = {
                 'receipt_page_url': get_receipt_page_url(
                     request,
@@ -177,9 +186,8 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, EdxOrderPlacementMixin):
                     disable_back_button=False
                 )
             }
-
             return Response(data, status=status.HTTP_200_OK)
-        except InvalidBasketException:
+        except EmptyBasketException:
             return Response('User has already purchased the product.', status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except Exception as ex:  # pylint: disable=broad-except
             logger.exception(ex)

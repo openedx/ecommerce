@@ -192,6 +192,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
                 'first_name': 'John',
                 'last_name': 'Smith',
                 'date_of_birth': '2000-01-01',
+                'mobile_phone': '1234567890'
             },
             'terms_accepted_at': '2022-08-05T15:28:46.493Z',
         }
