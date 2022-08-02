@@ -14,7 +14,8 @@ class PaymentProcessorResponseInline(admin.TabularInline):
     model = PaymentProcessorResponse
     extra = 0
     can_delete = False
-    readonly_fields = ('id', 'processor_name', 'transaction_id', 'created', 'response')
+    readonly_fields = ('id', 'processor_name', 'transaction_id', 'original_transaction_id', 'created',
+                       'response')
 
     # TODO: Remove pylint disable after Django 2.2 upgrade
     def has_add_permission(self, request, obj=None):  # pylint: disable=arguments-differ,unused-argument

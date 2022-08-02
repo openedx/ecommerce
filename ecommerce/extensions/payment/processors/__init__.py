@@ -94,7 +94,7 @@ class BasePaymentProcessor(metaclass=abc.ABCMeta):  # pragma: no cover
         """
         return None
 
-    def record_processor_response(self, response, transaction_id=None, basket=None):
+    def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None):
         """
         Save the processor's response to the database for auditing.
 
@@ -103,12 +103,14 @@ class BasePaymentProcessor(metaclass=abc.ABCMeta):  # pragma: no cover
 
         Keyword Arguments:
             transaction_id (string): Identifier for the transaction on the payment processor's servers
+            original_transaction_id (string): Identifier for the transaction for purchase action only
             basket (Basket): Basket associated with the payment event (e.g., being purchased)
 
         Return
             PaymentProcessorResponse
         """
         return PaymentProcessorResponse.objects.create(processor_name=self.NAME, transaction_id=transaction_id,
+                                                       original_transaction_id=original_transaction_id,
                                                        response=response, basket=basket)
 
     @abc.abstractmethod
