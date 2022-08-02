@@ -141,9 +141,9 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
 
         for line in basket.all_lines():
             if line.product.is_course_entitlement_product:
-
-                # Enterprise offers cannot be used to purchase programs
-                if offer.offer_type == ConditionalOffer.SITE:
+                # Enterprise offers cannot be used to purchase entitlements (for programs)
+                # except for Executive Education 2U courses
+                if offer.offer_type == ConditionalOffer.SITE and not line.product.is_executive_education_2u_product:
                     return False
 
                 try:
