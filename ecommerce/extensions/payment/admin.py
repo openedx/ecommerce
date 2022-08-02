@@ -26,8 +26,9 @@ class PaymentProcessorResponseAdmin(admin.ModelAdmin):
     list_filter = ('processor_name',)
     search_fields = ('id', 'processor_name', 'transaction_id',)
     list_display = ('id', 'processor_name', 'transaction_id', 'basket', 'created')
-    fields = ('processor_name', 'transaction_id', 'basket', 'formatted_response')
-    readonly_fields = ('processor_name', 'transaction_id', 'basket', 'formatted_response')
+    fields = ('processor_name', 'transaction_id', 'original_transaction_id', 'basket', 'formatted_response')
+    readonly_fields = ('processor_name', 'transaction_id', 'original_transaction_id', 'basket',
+                       'formatted_response')
     show_full_result_count = False
 
     def formatted_response(self, obj):

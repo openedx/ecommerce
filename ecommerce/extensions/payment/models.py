@@ -25,6 +25,8 @@ class PaymentProcessorResponse(models.Model):
     """
     processor_name = models.CharField(max_length=255, verbose_name=_('Payment Processor'))
     transaction_id = models.CharField(max_length=255, verbose_name=_('Transaction ID'), null=True, blank=True)
+    original_transaction_id = models.CharField(max_length=255, verbose_name=_('Original Transaction ID'), null=True,
+                                               blank=True)
     basket = models.ForeignKey('basket.Basket', verbose_name=_('Basket'), null=True, blank=True,
                                on_delete=models.SET_NULL)
     response = JSONField()
