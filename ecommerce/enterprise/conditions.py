@@ -141,9 +141,10 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
 
         for line in basket.all_lines():
             if line.product.is_course_entitlement_product:
+                certificate_type = getattr(line.product.attr, 'certificate_type', '')
 
                 # Enterprise offers cannot be used to purchase programs
-                if offer.offer_type == ConditionalOffer.SITE:
+                if offer.offer_type == ConditionalOffer.SITE and certificate_type not in ['paid-executive-education']:
                     return False
 
                 try:

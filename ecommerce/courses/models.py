@@ -104,6 +104,13 @@ class Course(models.Model):
             return 'verified'
         if 'verified' in seat_types:
             return 'verified-only'
+
+        if 'paid-executive-education' in seat_types:
+            return 'paid-executive-education'
+
+        if 'unpaid-executive-education' in seat_types:
+            return 'unpaid-executive-education'
+
         return 'audit'
 
     @property
