@@ -12,6 +12,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import HTTPError, Timeout
 
+from ecommerce.courses.constants import CertificateType
 from ecommerce.courses.utils import get_course_info_from_catalog
 from ecommerce.enterprise.api import catalog_contains_course_runs, get_enterprise_id_for_user
 from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
@@ -144,7 +145,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 certificate_type = getattr(line.product.attr, 'certificate_type', '')
 
                 # Enterprise offers cannot be used to purchase programs
-                if offer.offer_type == ConditionalOffer.SITE and certificate_type not in ['paid-executive-education']:
+                if offer.offer_type == ConditionalOffer.SITE and certificate_type not in [CertificateType.PAID_EXECUTIVE_EDUCATION]:
                     return False
 
                 try:

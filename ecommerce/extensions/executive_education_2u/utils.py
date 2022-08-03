@@ -1,6 +1,7 @@
 from django.conf import settings
 from oscar.core.loading import get_model
 
+from ecommerce.courses.constants import CertificateType
 from ecommerce.enterprise.utils import get_enterprise_customer, get_enterprise_id_for_current_request_user_from_jwt
 
 Product = get_model('catalogue', 'Product')
@@ -19,7 +20,7 @@ def get_executive_education_2u_product(partner, sku):
     if product:
         certificate_type = getattr(product.attr, 'certificate_type', '')
 
-        if certificate_type == 'paid-executive-education':
+        if certificate_type == CertificateType.PAID_EXECUTIVE_EDUCATION:
             return product
 
     return None

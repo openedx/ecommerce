@@ -1,6 +1,7 @@
 
 import mock
 
+from ecommerce.courses.constants import CertificateType
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.executive_education_2u.utils import (
     get_executive_education_2u_product,
@@ -15,7 +16,7 @@ class UtilsTests(TestCase):
 
     def test_get_executive_education_2u_product(self):
         exec_ed_2u_product = create_or_update_course_entitlement(
-            'paid-executive-education', 100, self.partner, 'product', 'Entitlement Product'
+            CertificateType.PAID_EXECUTIVE_EDUCATION, 100, self.partner, 'product', 'Entitlement Product'
         )
         non_exec_ed_2u_product = create_or_update_course_entitlement(
             'verified', 100, self.partner, 'product', 'Entitlement Product'

@@ -9,6 +9,7 @@ from rest_framework import status
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
+from ecommerce.courses.constants import CertificateType
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.executive_education_2u.constants import ExecutiveEducation2UCheckoutFailureReason
@@ -80,7 +81,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             self.assertEqual(response.json(), 'Failed to retrieve terms and policies.')
 
     def _create_product(self, is_exec_ed_2u_product=True):
-        certificate_type = 'paid-executive-education' if is_exec_ed_2u_product else 'verified'
+        certificate_type = CertificateType.PAID_EXECUTIVE_EDUCATION if is_exec_ed_2u_product else CertificateType.VERIFIED
         product = create_or_update_course_entitlement(
             certificate_type, 100, self.partner, 'product', 'Entitlement Product'
         )
