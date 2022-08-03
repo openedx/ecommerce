@@ -19,7 +19,7 @@ Voucher = get_model('voucher', 'Voucher')
 
 
 class CouponCodeSerializerTests(CouponMixin, TestCase):
-    """ Test for coupon code serializers. """
+    """ Test for coupon code serializers."""
     LOGGER_NAME = 'ecommerce.extensions.api.serializers'
     TEMPLATE = 'Text {PARAM} is fun'
     SUBJECT = 'Subject '
