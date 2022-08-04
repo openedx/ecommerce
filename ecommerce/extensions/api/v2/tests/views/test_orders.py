@@ -25,14 +25,16 @@ from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.constants import ENABLE_HOIST_ORDER_HISTORY
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
+from ecommerce.extensions.checkout.views import ReceiptResponseView
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
-from ecommerce.extensions.test.factories import create_order
+from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.tests.factories import SiteConfigurationFactory
-from ecommerce.tests.mixins import ThrottlingMixin
+from ecommerce.tests.mixins import Applicator, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
+Benefit = get_model('offer', 'Benefit')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ShippingEventType = get_model('order', 'ShippingEventType')
@@ -112,6 +114,116 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
             content = json.loads(response.content.decode('utf-8'))
 
             self.assertEqual(content['results'][0]['enable_hoist_order_history'], enable_hoist_order_history_flag)
+
+    @ddt.data(
+        # certificate_type, has_discount, percent_benefit, credit_provider, credit_hours, create_enrollment_code, sku
+        ('credit', False, 0, 'Harvard', 1, False, '123'),
+        ('credit', True, 15, 'Harvard', 1, False, '456'),
+        ('verified', True, 15, None, 0, False, '789'),
+        ('audit', False, 0, None, 0, False, '124'),
+    )
+    @ddt.unpack
+    def test_orders_api_attributes_for_receipt_mfe(
+        self, certificate_type, has_discount, percent_benefit,
+        credit_provider, credit_hours, create_enrollment_code, sku
+    ):
+        """
+        Verify that orders have the values added in the Orders API serializer
+        to be utilized in the receipt page in ecommerce MFE.
+        """
+        with mock.patch(
+                'ecommerce.extensions.checkout.views.ReceiptResponseView.add_message_if_enterprise_user'
+        ) as mock_learner_portal_url:
+            test_learner_portal_url = 'http://fake-learner-portal-url.org'
+            mock_learner_portal_url.return_value = test_learner_portal_url
+            price = 100.00
+            currency = 'USD'
+            course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
+            product = factories.ProductFactory(
+                categories=[],
+                stockrecords__price_excl_tax=price,
+                stockrecords__price_currency=currency
+            )
+            basket = factories.BasketFactory(owner=self.user, site=self.site)
+            product = course.create_or_update_seat(
+                certificate_type,
+                True,
+                price,
+                credit_provider=credit_provider,
+                credit_hours=credit_hours,
+                create_enrollment_code=create_enrollment_code,
+                sku=sku,
+            )
+
+            if has_discount:
+                voucher, product = prepare_voucher(
+                    _range=factories.RangeFactory(products=[product]),
+                    benefit_value=percent_benefit,
+                    benefit_type=Benefit.PERCENTAGE
+                )
+                basket.vouchers.add(voucher)
+
+            basket.add_product(product)
+            Applicator().apply(basket, user=basket.owner, request=self.request)
+            order = factories.create_order(basket=basket, user=self.user)
+
+            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+            self.assertEqual(response.status_code, 200)
+
+            content = json.loads(response.content.decode('utf-8'))
+            payment_method = ReceiptResponseView().get_payment_method(order)
+
+        for line in order.lines.all():
+            # Test for: is_enrollment_code_product
+            self.assertEqual(create_enrollment_code, line.product.is_enrollment_code_product)
+
+            # Test for: credit_provider in attr
+            self.assertEqual(getattr(line.product.attr, 'credit_provider', None), credit_provider)
+
+        # Test for: contains_credit_seat
+        self.assertIn('contains_credit_seat', content['results'][0])
+        if credit_provider:
+            self.assertEqual(content['results'][0]['contains_credit_seat'], True)
+
+        # Test for: basket_discounts
+        self.assertIn('basket_discounts', content['results'][0])
+        if has_discount:
+            self.assertEqual(
+                float(percent_benefit),
+                content['results'][0]['basket_discounts'][0]['benefit_value']
+            )
+            self.assertEqual(
+                currency,
+                content['results'][0]['basket_discounts'][0]['currency']
+            )
+
+        # Test for: payment_method
+        self.assertEqual(payment_method, content['results'][0]['payment_method'])
+
+        # Test for: discount
+        if has_discount:
+            self.assertEqual(float(percent_benefit), float(content['results'][0]['discount']))
+        else:
+            self.assertEqual('0', content['results'][0]['discount'])
+
+        # Test for: total_before_discounts_incl_tax
+        self.assertEqual(float(price), float(content['results'][0]['total_before_discounts_incl_tax']))
+
+        # Test for: dashboard_url
+        self.assertIn('dashboard_url', content['results'][0])
+
+        # Test for: enterprise_customer
+        self.assertIn('enterprise_learner_portal_url', content['results'][0])
+        if has_discount:
+            self.assertEqual(
+                test_learner_portal_url,
+                content['results'][0]['enterprise_learner_portal_url']
+            )
+
+        # Test for: order_product_ids
+        self.assertIn('order_product_ids', content['results'][0])
+        expected_order_product_ids = ','.join(map(str, order.lines.values_list('product_id', flat=True)))
+        self.assertEqual(expected_order_product_ids, content['results'][0]['order_product_ids'])
 
     def test_with_other_users_orders(self):
         """ The view should only return orders for the authenticated users. """

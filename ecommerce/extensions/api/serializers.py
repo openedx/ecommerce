@@ -49,6 +49,7 @@ from ecommerce.extensions.api.v2.constants import (
     REFUND_ORDER_EMAIL_SUBJECT
 )
 from ecommerce.extensions.catalogue.utils import attach_vouchers_to_coupon_product
+from ecommerce.extensions.checkout.views import ReceiptResponseView
 from ecommerce.extensions.offer.constants import (
     ASSIGN,
     AUTOMATIC_EMAIL,
@@ -339,6 +340,7 @@ class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSer
     attribute_values = serializers.SerializerMethodField()
     product_class = serializers.SerializerMethodField()
     is_available_to_buy = serializers.SerializerMethodField()
+    is_enrollment_code_product = serializers.SerializerMethodField()
     stockrecords = StockRecordSerializer(many=True, read_only=True)
 
     def get_attribute_values(self, product):
@@ -358,10 +360,15 @@ class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSer
         info = self._get_info(product)
         return info.availability.is_available_to_buy
 
+    def get_is_enrollment_code_product(self, product):
+        return product.is_enrollment_code_product
+
     class Meta:
         model = Product
-        fields = ('id', 'url', 'structure', 'product_class', 'title', 'price', 'expires', 'attribute_values',
-                  'is_available_to_buy', 'stockrecords',)
+        fields = (
+            'id', 'url', 'structure', 'product_class', 'title', 'price', 'expires', 'attribute_values',
+            'is_available_to_buy', 'is_enrollment_code_product', 'stockrecords'
+        )
         extra_kwargs = {
             'url': {'view_name': PRODUCT_DETAIL_VIEW},
         }
@@ -378,7 +385,10 @@ class LineSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     """Serializer for parsing order data."""
+    basket_discounts = serializers.SerializerMethodField()
     billing_address = BillingAddressSerializer(allow_null=True)
+    contains_credit_seat = serializers.SerializerMethodField()
+    dashboard_url = serializers.SerializerMethodField()
     date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
     discount = serializers.SerializerMethodField()
     lines = LineSerializer(many=True)
@@ -386,6 +396,34 @@ class OrderSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     vouchers = serializers.SerializerMethodField()
     enable_hoist_order_history = serializers.SerializerMethodField()
+    payment_method = serializers.SerializerMethodField()
+    enterprise_learner_portal_url = serializers.SerializerMethodField()
+    total_before_discounts_incl_tax = serializers.SerializerMethodField()
+    order_product_ids = serializers.SerializerMethodField()
+
+    def get_basket_discounts(self, obj):
+        basket_discounts = []
+        try:
+            discounts = obj.basket_discounts
+            if discounts:
+                for discount in discounts:
+                    basket_discount = {
+                        'amount': discount.amount,
+                        'benefit_value': discount.voucher.benefit.value,
+                        'code': discount.voucher_code,
+                        'condition_name': discount.offer.condition.name,
+                        'contains_offer': bool(discount.offer),
+                        'currency': obj.currency,
+                        'enterprise_customer_name': discount.offer.condition.enterprise_customer_name,
+                        'offer_type': discount.offer.offer_type,
+                    }
+                    basket_discounts.append(basket_discount)
+        except (AttributeError, TypeError, ValueError):
+            logger.exception(
+                'Failed to retrieve get_basket_discounts for [%s]',
+                obj
+            )
+        return basket_discounts
 
     def get_vouchers(self, obj):
         try:
@@ -402,6 +440,16 @@ class OrderSerializer(serializers.ModelSerializer):
         except IndexError:
             return None
 
+    def get_dashboard_url(self, obj):
+        try:
+            return ReceiptResponseView.get_order_dashboard_url(self, obj)
+        except ValueError:
+            logger.exception(
+                'Failed to retrieve get_dashboard_url for [%s]',
+                obj
+            )
+            return None
+
     def get_discount(self, obj):
         try:
             discount = obj.discounts.all()[0]
@@ -409,30 +457,83 @@ class OrderSerializer(serializers.ModelSerializer):
         except IndexError:
             return '0'
 
+    def get_contains_credit_seat(self, obj):
+        try:
+            return ReceiptResponseView().order_contains_credit_seat(obj)
+        except ValueError:
+            logger.exception(
+                'Failed to retrieve get_contains_credit_seat for [%s]',
+                obj
+            )
+            return None
+
     def get_enable_hoist_order_history(self, obj):
         try:
             request = self.context.get('request')
-            order_history_enabled = waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
-            obj.enable_hoist_order_history = order_history_enabled
-        except (AttributeError, ValueError) as error:
+            return waffle.flag_is_active(request, ENABLE_HOIST_ORDER_HISTORY)
+        except ValueError:
             logger.exception(
-                'An error occurred while attempting to set ENABLE_HOIST_ORDER_HISTORY flag, error: [%s]',
-                error
+                'An error occurred while attempting to get ENABLE_HOIST_ORDER_HISTORY flag for order [%s]',
+                obj
             )
-        return obj.enable_hoist_order_history
+            return None
+
+    def get_payment_method(self, obj):
+        payment_method = None
+        try:
+            payment_method = ReceiptResponseView().get_payment_method(obj)
+        except ValueError:
+            logger.exception(
+                'Failed to retrieve get_payment_method for order [%s]',
+                obj
+            )
+        return payment_method
+
+    def get_enterprise_learner_portal_url(self, obj):
+        try:
+            return ReceiptResponseView().add_message_if_enterprise_user(obj)
+        except (AttributeError, ValueError):
+            logger.exception(
+                'Failed to retrieve get_enterprise_learner_portal_url for order [%s]',
+                obj
+            )
+            return None
+
+    def get_total_before_discounts_incl_tax(self, obj):
+        try:
+            return str(obj.total_before_discounts_incl_tax)
+        except ValueError:
+            return None
+
+    def get_order_product_ids(self, obj):
+        try:
+            return ','.join(map(str, obj.lines.values_list('product_id', flat=True)))
+        except (AttributeError, ValueError):
+            logger.exception(
+                'Failed to retrieve get_order_product_ids for order [%s]',
+                obj
+            )
+            return None
 
     class Meta:
         model = Order
         fields = (
+            'basket_discounts',
             'billing_address',
+            'contains_credit_seat',
             'currency',
             'date_placed',
+            'dashboard_url',
             'discount',
             'enable_hoist_order_history',
+            'enterprise_learner_portal_url',
             'lines',
             'number',
+            'order_product_ids',
             'payment_processor',
+            'payment_method',
             'status',
+            'total_before_discounts_incl_tax',
             'total_excl_tax',
             'user',
             'vouchers',
@@ -578,13 +679,16 @@ class EntitlementProductHelper:
         id_verified_default = certificate_type == 'professional'
         id_verification_required = attrs.get('id_verification_required', id_verified_default)
 
+        credit_provider = attrs.get('credit_provider')
+
         entitlement = create_or_update_course_entitlement(
             certificate_type,
             price,
             partner,
             uuid,
             course.name,
-            id_verification_required=id_verification_required
+            id_verification_required=id_verification_required,
+            credit_provider=credit_provider
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.

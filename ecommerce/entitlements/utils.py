@@ -55,7 +55,9 @@ def get_entitlement(uuid, certificate_type):
     return Product.objects.filter(uuid_query).get(certificate_type_query)
 
 
-def create_or_update_course_entitlement(certificate_type, price, partner, UUID, title, id_verification_required=False):
+def create_or_update_course_entitlement(
+    certificate_type, price, partner, UUID, title, id_verification_required=False, credit_provider=False
+):
     """ Create or Update Course Entitlement Products """
     certificate_type = certificate_type.lower()
     UUID = str(UUID)
@@ -72,6 +74,7 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     course_entitlement.attr.certificate_type = certificate_type
     course_entitlement.attr.UUID = UUID
     course_entitlement.attr.id_verification_required = id_verification_required
+    course_entitlement.attr.credit_provider = credit_provider
     course_entitlement.parent = parent_entitlement
     course_entitlement.save()
 
