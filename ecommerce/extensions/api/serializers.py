@@ -492,7 +492,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_enterprise_learner_portal_url(self, obj):
         try:
-            return ReceiptResponseView().add_message_if_enterprise_user(obj)
+            request = self.context['request']
+            return ReceiptResponseView().add_message_if_enterprise_user(request)
         except (AttributeError, ValueError):
             logger.exception(
                 'Failed to retrieve get_enterprise_learner_portal_url for order [%s]',
