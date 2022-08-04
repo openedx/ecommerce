@@ -409,13 +409,14 @@ class OrderSerializer(serializers.ModelSerializer):
                 for discount in discounts:
                     basket_discount = {
                         'amount': discount.amount,
-                        'benefit_value': discount.voucher.benefit.value,
+                        'benefit_value': discount.voucher.benefit.value if discount.voucher else None,
                         'code': discount.voucher_code,
-                        'condition_name': discount.offer.condition.name,
+                        'condition_name': discount.offer.condition.name if discount.offer else None,
                         'contains_offer': bool(discount.offer),
                         'currency': obj.currency,
-                        'enterprise_customer_name': discount.offer.condition.enterprise_customer_name,
-                        'offer_type': discount.offer.offer_type,
+                        'enterprise_customer_name':
+                            discount.offer.condition.enterprise_customer_name if discount.offer else None,
+                        'offer_type': discount.offer.offer_type if discount.offer else None,
                     }
                     basket_discounts.append(basket_discount)
         except (AttributeError, TypeError, ValueError):
@@ -491,7 +492,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_enterprise_learner_portal_url(self, obj):
         try:
-            return ReceiptResponseView().add_message_if_enterprise_user(obj)
+            request = self.context['request']
+            return ReceiptResponseView().add_message_if_enterprise_user(request)
         except (AttributeError, ValueError):
             logger.exception(
                 'Failed to retrieve get_enterprise_learner_portal_url for order [%s]',
