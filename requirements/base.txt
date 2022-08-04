@@ -92,7 +92,7 @@ defusedxml==0.7.1
     #   social-auth-core
 deprecated==1.2.13
     # via redis
-django==3.2.13
+django==3.2.15
     # via
     #   -r requirements/base.in
     #   django-appconf
