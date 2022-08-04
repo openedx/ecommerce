@@ -409,13 +409,14 @@ class OrderSerializer(serializers.ModelSerializer):
                 for discount in discounts:
                     basket_discount = {
                         'amount': discount.amount,
-                        'benefit_value': discount.voucher.benefit.value,
+                        'benefit_value': discount.voucher.benefit.value if discount.voucher else None,
                         'code': discount.voucher_code,
-                        'condition_name': discount.offer.condition.name,
+                        'condition_name': discount.offer.condition.name if discount.offer else None,
                         'contains_offer': bool(discount.offer),
                         'currency': obj.currency,
-                        'enterprise_customer_name': discount.offer.condition.enterprise_customer_name,
-                        'offer_type': discount.offer.offer_type,
+                        'enterprise_customer_name':
+                            discount.offer.condition.enterprise_customer_name if discount.offer else None,
+                        'offer_type': discount.offer.offer_type if discount.offer else None,
                     }
                     basket_discounts.append(basket_discount)
         except (AttributeError, TypeError, ValueError):
