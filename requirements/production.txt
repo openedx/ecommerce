@@ -95,7 +95,7 @@ defusedxml==0.7.1
     #   social-auth-core
 deprecated==1.2.13
     # via redis
-django==3.2.12
+django==3.2.15
     # via
     #   -r requirements/base.in
     #   django-appconf
@@ -213,6 +213,7 @@ edx-django-utils==5.0.0
     #   django-config-models
     #   edx-drf-extensions
     #   edx-rest-api-client
+    #   getsmarter-api-clients
 edx-drf-extensions==6.6.0
     # via
     #   -c requirements/pins.txt
@@ -251,6 +252,8 @@ future==0.18.2
     # via
     #   django-ses
     #   pyjwkest
+getsmarter-api-clients==0.1.0
+    # via -r requirements/base.in
 gunicorn==19.7.1
     # via -r requirements/production.in
 idna==2.7
@@ -321,6 +324,7 @@ nose==1.3.7
     # via cybersource-rest-client-python
 oauthlib==3.2.0
     # via
+    #   getsmarter-api-clients
     #   requests-oauthlib
     #   social-auth-core
 packaging==21.3
@@ -430,6 +434,7 @@ pytz==2016.10
     #   django-ses
     #   djangorestframework
     #   djangorestframework-datatables
+    #   getsmarter-api-clients
     #   zeep
 pyyaml==6.0
     # via

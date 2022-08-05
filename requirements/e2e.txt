@@ -28,7 +28,7 @@ cryptography==36.0.1
     # via
     #   -c requirements/base.txt
     #   pyjwt
-django==3.2.12
+django==3.2.15
     # via
     #   -c requirements/base.txt
     #   django-crum

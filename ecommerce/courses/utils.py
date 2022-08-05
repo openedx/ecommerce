@@ -162,7 +162,9 @@ def get_is_personalized_recommendation(course, request):
         recommendations = request.COOKIES.get('edx-user-personalized-recommendation', None)
         if recommendations:
             recommendations = json.loads(unquote(recommendations))
-            if course.id in recommendations['course_keys']:
+            course_key = CourseKey.from_string(course.id)
+            course_key = f'{course_key.org}+{course_key.course}'
+            if course_key in recommendations['course_keys']:
                 return recommendations['is_personalized_recommendation']
 
     return None
