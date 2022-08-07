@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-31 20:12+0000\n"
+"POT-Creation-Date: 2022-08-07 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: Somaye Joolaee, 2022\n"
 "Language-Team: Persian (Iran) (http://www.transifex.com/open-edx/edx-platform/language/fa_IR/)\n"
@@ -57,19 +57,19 @@ msgstr ""
 
 #: ecommerce/core/models.py:41
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
-msgstr ""
+msgstr "نشانی اینترنتی ریشه این وبگاه آموزشی مجازی: (مثلا: https://courses.stage.edx.org)"
 
 #: ecommerce/core/models.py:46
 msgid "Path to custom site theme"
-msgstr ""
+msgstr "مسیر به طرح سفارشی وبگاه"
 
 #: ecommerce/core/models.py:53
 msgid "Payment processors"
-msgstr ""
+msgstr "پردازشگرهای پرداخت"
 
 #: ecommerce/core/models.py:54
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
-msgstr ""
+msgstr "فهرست نام‌های پردازنده تفکیک‌شده با کاما: «cybersource,paypal»"
 
 #: ecommerce/core/models.py:60
 msgid "Client-side payment processor"
@@ -272,7 +272,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:54
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
-msgstr ""
+msgstr "نام"
 
 #: ecommerce/core/models.py:704 ecommerce/extensions/offer/models.py:581
 msgid "EnterpriseCustomer UUID"
@@ -299,7 +299,7 @@ msgstr ""
 #: ecommerce/coupons/views.py:91
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
-msgstr ""
+msgstr "محصول [{product}]  برای خرید در دسترس نیست."
 
 #: ecommerce/coupons/views.py:96
 msgid "This coupon code is no longer available."
@@ -307,7 +307,7 @@ msgstr ""
 
 #: ecommerce/coupons/views.py:116
 msgid "This coupon code is invalid."
-msgstr ""
+msgstr "این کد کوپن معتبر نیست."
 
 #: ecommerce/coupons/views.py:123
 msgid "The voucher is not applicable to your current basket."
@@ -374,7 +374,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
 msgid "Site"
-msgstr ""
+msgstr "وبگاه"
 
 #: ecommerce/courses/models.py:39
 msgid ""
@@ -384,7 +384,7 @@ msgstr "آخرین تاریخ قابل قبول برای تایید این مح�
 #: ecommerce/courses/publishers.py:62
 #, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
-msgstr ""
+msgstr "داده‌های تجاری {course_id} در سامانه آموزش مجازی منتشر نشد."
 
 #: ecommerce/courses/utils.py:139
 msgid "Audit"
@@ -430,7 +430,7 @@ msgstr ""
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
 " credit. Try the transaction again."
-msgstr ""
+msgstr "خطایی رخ داده است. ما نتوانستیم تأیید کنیم که شما واجد شرایط دریافت اعتبار دوره آموزشی هستید. این تراکنش را دوباره امتحان کنید."
 
 #: ecommerce/credit/views.py:61
 #, python-brace-format
@@ -445,7 +445,7 @@ msgstr ""
 msgid ""
 "An error has occurred. We could not confirm that the institution you "
 "selected offers this course credit. Try the transaction again."
-msgstr ""
+msgstr "خطایی رخ داده است. ما نتوانستیم تأیید کنیم که موسسه‌ای که انتخاب کردید این اعتبار دوره را ارائه می دهد. این تراکنش را دوباره امتحان کنید."
 
 #: ecommerce/enterprise/benefits.py:24
 #, python-format
@@ -797,71 +797,71 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:254
+#: ecommerce/extensions/api/serializers.py:255
 msgid "EXPIRED"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:256
+#: ecommerce/extensions/api/serializers.py:257
 msgid "INACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:257
+#: ecommerce/extensions/api/serializers.py:258
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:561
+#: ecommerce/extensions/api/serializers.py:664
 msgid "Products must have a certificate type."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:564
-#: ecommerce/extensions/api/serializers.py:604
+#: ecommerce/extensions/api/serializers.py:667
+#: ecommerce/extensions/api/serializers.py:710
 msgid "Products must have a price."
 msgstr "محصولات باید قیمت داشته باشند."
 
-#: ecommerce/extensions/api/serializers.py:571
+#: ecommerce/extensions/api/serializers.py:674
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:600
+#: ecommerce/extensions/api/serializers.py:706
 msgid "Products must indicate whether ID verification is required."
 msgstr "محصولات باید مشخص کنند رمز شناسایی ضروری است."
 
-#: ecommerce/extensions/api/serializers.py:671
+#: ecommerce/extensions/api/serializers.py:777
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "کلاس محصول [{product_class}] درخواستی معتبر نیست."
 
-#: ecommerce/extensions/api/serializers.py:703
+#: ecommerce/extensions/api/serializers.py:809
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
 "[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
 " been saved."
-msgstr ""
+msgstr "دوره آموزشی [{course_id}] در سامانه آموزش مجازی منتشر نشده است زیرا سوئیچ [publish_course_modes_to_lms]  غیرفعال است. برای ممانعت از SKUهای غیرواقعی، داده‌ها ذخیره نشده است."
 
-#: ecommerce/extensions/api/serializers.py:1373
+#: ecommerce/extensions/api/serializers.py:1479
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1374
+#: ecommerce/extensions/api/serializers.py:1480
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1841
+#: ecommerce/extensions/api/serializers.py:1947
 msgid "Invalid order number or order {} does not exists."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1896
+#: ecommerce/extensions/api/serializers.py:2002
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1914
+#: ecommerce/extensions/api/serializers.py:2020
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1945
+#: ecommerce/extensions/api/serializers.py:2051
 msgid "Could note create new voucher for the order: {}"
 msgstr ""
 
@@ -893,7 +893,7 @@ msgstr ""
 #: ecommerce/extensions/basket/models.py:119
 #, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
-msgstr ""
+msgstr "{id} - {status}  بسته (owner: {owner}, خطوط: {num_lines})"
 
 #: ecommerce/extensions/basket/models.py:142
 #: ecommerce/extensions/payment/models.py:28
@@ -1244,13 +1244,13 @@ msgstr ""
 
 #: ecommerce/extensions/partner/admin.py:28
 msgid "Click 'Save and Continue Editing' to add stock records"
-msgstr ""
+msgstr "برای افزودن سوابق سهمیه روی دکمه «ذخیره و ادامه ویرایش» کلیک کنید"
 
 #: ecommerce/extensions/partner/models.py:22
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:193
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:74
 msgid "Partner"
-msgstr ""
+msgstr "همکار"
 
 #: ecommerce/extensions/partner/models.py:23 ecommerce/settings/_oscar.py:258
 msgid "Partners"
@@ -1505,7 +1505,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/utils.py:165
 #, python-brace-format
 msgid "{percentage} %"
-msgstr ""
+msgstr "{percentage} %"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:544
 #: ecommerce/extensions/voucher/utils.py:78
@@ -1543,7 +1543,7 @@ msgstr "فعال"
 #: ecommerce/extensions/voucher/utils.py:219
 #: ecommerce/extensions/voucher/utils.py:263
 msgid "Code"
-msgstr ""
+msgstr "رمز"
 
 #: ecommerce/extensions/voucher/utils.py:171
 msgid "This row applies to all vouchers"
@@ -1650,7 +1650,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/utils.py:223
 #: ecommerce/extensions/voucher/utils.py:268
 msgid "URL"
-msgstr ""
+msgstr "نشانی اینترنتی"
 
 #: ecommerce/extensions/voucher/utils.py:274
 #: ecommerce/extensions/voucher/utils.py:297
@@ -1678,7 +1678,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/views.py:31
 #, python-brace-format
 msgid "Coupon Report for {coupon_name}"
-msgstr ""
+msgstr "گزارش کوپن برای {coupon_name}"
 
 #: ecommerce/extensions/voucher/views.py:40
 msgid ""
@@ -1687,11 +1687,11 @@ msgstr ""
 
 #: ecommerce/invoice/models.py:13
 msgid "Not Paid"
-msgstr ""
+msgstr "پرداخت‌نشده"
 
 #: ecommerce/invoice/models.py:14
 msgid "Paid"
-msgstr ""
+msgstr "پرداخت‌شده"
 
 #: ecommerce/invoice/models.py:18
 msgid "Prepaid"
@@ -1904,11 +1904,11 @@ msgstr "درخواست‌های هشدار سهام"
 #: ecommerce/settings/_oscar.py:282 ecommerce/settings/_oscar.py:286
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:15
 msgid "Offers"
-msgstr ""
+msgstr "ارائه می‌دهد"
 
 #: ecommerce/settings/_oscar.py:290
 msgid "Vouchers"
-msgstr ""
+msgstr "کوپن‌ها"
 
 #: ecommerce/settings/_oscar.py:296
 msgid "Reports"
@@ -1942,7 +1942,7 @@ msgstr ""
 
 #: ecommerce/templates/coupons/coupon_app.html:5
 msgid "Coupon Codes"
-msgstr ""
+msgstr "رمزهای کوپن"
 
 #: ecommerce/templates/coupons/offer.html:18
 msgid ""
@@ -2153,15 +2153,15 @@ msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:8
 msgid "Select"
-msgstr ""
+msgstr "انتخاب"
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:16
 msgid "Credits: "
-msgstr ""
+msgstr "اعتبارات:"
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:17
 msgid "Price: "
-msgstr ""
+msgstr "قیمت:"
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:27
 #, python-format
@@ -2182,7 +2182,7 @@ msgstr ""
 #: ecommerce/templates/edx/credit/checkout.html:9
 #, python-format
 msgid "Purchase Credit for %(course_name)s"
-msgstr ""
+msgstr "خرید اعتبار برای %(course_name)s"
 
 #: ecommerce/templates/edx/credit/checkout.html:27
 #, python-format
@@ -2217,7 +2217,7 @@ msgstr "جمع:"
 
 #: ecommerce/templates/edx/credit/checkout.html:89
 msgid "You deserve it."
-msgstr ""
+msgstr "شما شایسته آن هستید."
 
 #: ecommerce/templates/edx/credit/checkout.html:92
 msgid ""
@@ -2280,7 +2280,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/error.html:17
 msgid "If you need assistance, contact edX support."
-msgstr ""
+msgstr "اگر نیاز به راهنمایی دارید، با پشتیبانی ادکس تماس بگیرید."
 
 #: ecommerce/templates/edx/partials/_administration_menu.html:6
 msgid "Coupons"
@@ -2652,7 +2652,7 @@ msgstr ""
 #: ecommerce/templates/oscar/customer/email_base.html:189
 #, python-format
 msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
-msgstr ""
+msgstr "حق تألیف©%(year)s%(platform_name)s. همه حقوق محفوظ است."
 
 #: ecommerce/templates/oscar/communication/emails/commtype_course_purchased_body.html:9
 #: ecommerce/templates/oscar/communication/emails/commtype_course_purchased_body.txt:4
@@ -2687,7 +2687,7 @@ msgstr "برای کشف سایر دوره‌های آموزشی عالی ما، 
 #: ecommerce/templates/oscar/communication/emails/commtype_course_purchased_body.html:17
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:43
 msgid "View Payment Information"
-msgstr ""
+msgstr "مشاهده اطلاعات پرداخت"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_course_purchased_body.html:20
 #: ecommerce/templates/oscar/communication/emails/commtype_course_purchased_body.txt:14
@@ -2713,7 +2713,7 @@ msgstr "تایید رسید برای:"
 #: ecommerce/templates/oscar/communication/emails/commtype_course_purchased_body.txt:11
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:12
 msgid "To view your payment information, visit the following website."
-msgstr ""
+msgstr "برای مشاهده اطلاعات پرداخت خود، از این وبگاه بازدید کنید."
 
 #: ecommerce/templates/oscar/communication/emails/commtype_course_purchased_body.txt:16
 #, python-format
@@ -2730,11 +2730,11 @@ msgstr "سفارش ثبت شد"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:13
 msgid "Payment Confirmation"
-msgstr ""
+msgstr "تایید پرداخت"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:27
 msgid "Payment confirmation for:"
-msgstr ""
+msgstr "تایید پرداخت برای:"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:55
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:4
@@ -2742,7 +2742,7 @@ msgstr ""
 #: ecommerce/templates/oscar/communication/emails/commtype_order_with_csv_body.txt:5
 #, python-format
 msgid "Dear %(full_name)s,"
-msgstr ""
+msgstr "%(full_name)s عزیز،"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:60
 #, python-format
@@ -2750,7 +2750,7 @@ msgid ""
 "\n"
 "                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
 "                        "
-msgstr ""
+msgstr "\nاز خرید شما متشکریم %(credit_hours)s ساعت اعتبار از %(credit_provider)s برای %(course_title)s. این میزان شارژ در قسمت اعتبار یا در وضعیت کارت نقدی تحت نام سازمانی %(platform_name)s ظاهر خواهد شد."
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:67
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:8
@@ -2760,7 +2760,7 @@ msgid ""
 "%(credit_provider)s website. For a link to request credit from "
 "%(credit_provider)s, or to see the status of your credit request, go to your"
 " %(platform_name)s dashboard."
-msgstr ""
+msgstr "برای دریافت دوره آموزشی اعتباری، باید درخواست اعتبار خود را به وبگاه %(credit_provider)s ارائه دهید. برای مشاهده پیوند با هدف درخواست اعتبار از %(credit_provider)s، یا مشاهده وضعیت درخواست اعتبارتان، به پیشخوان %(platform_name)s خود بروید."
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:71
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:10
@@ -2768,18 +2768,18 @@ msgstr ""
 msgid ""
 "To explore other credit-eligible courses, visit the %(platform_name)s "
 "website. We add new courses frequently!"
-msgstr ""
+msgstr "برای مشاهده سایر دوره های اعتباری، وبگاه %(platform_name)sرا مشاهده کنید. مرتبا داریم دوره‌های آموزشی جدید می افزاییم!"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:74
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:15
 msgid "Thank you. We hope you enjoyed your course!"
-msgstr ""
+msgstr "سپاس. امیدواریم از گذراندن این دوره لذت ببرید"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:75
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:16
 #, python-format
 msgid "The %(platform_name)s team"
-msgstr ""
+msgstr "تیم %(platform_name)s"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.html:88
 #, python-format
@@ -2787,11 +2787,11 @@ msgid ""
 "\n"
 "                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
 "                        "
-msgstr ""
+msgstr "\nشما به دلیل خرید ساعات اعتباری برای %(course_title)s، یک دوره آموزشی%(platform_name)s این پیام را دریافت کرده‌اید."
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:2
 msgid "Payment confirmation for: "
-msgstr ""
+msgstr "تایید پرداخت برای:"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:6
 #, python-format
@@ -2799,14 +2799,14 @@ msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
 "%(credit_provider)s for %(course_title)s. A charge will appear on your "
 "credit or debit card statement with a company name of \"%(platform_name)s\"."
-msgstr ""
+msgstr "متشکریم برای خرید ساعات اعتباری %(credit_hours)s از %(credit_provider)s برای %(course_title)s. شارژ مورد نظر در وضعیت نقدی یا اعتباری شما تحت نام سازمانی %(platform_name)s ظاهر خواهد شد."
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_body.txt:18
 #, python-format
 msgid ""
 "You received this message because you purchased credit hours for "
 "%(course_title)s, an %(platform_name)s course."
-msgstr ""
+msgstr "شما این پیام را به دلیل خرید ساعات اعتباری برای %(course_title)s مشاهده می‌کنید، یک دوره آموزشی %(platform_name)s."
 
 #: ecommerce/templates/oscar/communication/emails/commtype_credit_receipt_subject.txt:2
 msgid "Order Receipt"
