@@ -20,6 +20,7 @@
 # Elias Estay <eestay@u.uchile.cl>, 2015
 # Ernesto Franz Achá Mamani <fachaa2@hotmail.com>, 2015
 # cd9286f57f670f958e9ca68dc8932c77_3ee8733 <1bb171e43a612ed0554a26201b02c19f_497214>, 2016
+# Jesica Greco, 2022
 # Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2015-2018,2020-2021
 # Laura Silva <lingison@edx.org>, 2016
 # Luis Manuel Moreno <luis.moreno@edunext.co>, 2019
@@ -32,9 +33,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-31 20:12+0000\n"
+"POT-Creation-Date: 2022-08-07 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
-"Last-Translator: Carolina De Mares <carolina.demares@edunext.co>, 2021\n"
+"Last-Translator: Jesica Greco, 2022\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -271,7 +272,7 @@ msgstr "Apellido"
 
 #: ecommerce/core/models.py:441
 msgid "first name"
-msgstr ""
+msgstr "primer nombre"
 
 #: ecommerce/core/models.py:442
 msgid "Full Name"
@@ -425,19 +426,19 @@ msgstr "Formación ejecutiva"
 
 #: ecommerce/courses/utils.py:145
 msgid "Paid Executive Education"
-msgstr ""
+msgstr "Educación ejecutiva remunerada"
 
 #: ecommerce/courses/utils.py:146
 msgid "Unpaid Executive Education"
-msgstr ""
+msgstr "Educación ejecutiva no remunerada"
 
 #: ecommerce/courses/utils.py:147
 msgid "Paid Bootcamp"
-msgstr ""
+msgstr "Bootcamp pago"
 
 #: ecommerce/courses/utils.py:148
 msgid "Unpaid Bootcamp"
-msgstr ""
+msgstr "Bootcamp no remunerado"
 
 #: ecommerce/credit/views.py:40
 msgid ""
@@ -597,7 +598,7 @@ msgstr "Asegúrese de que el nuevo valor sea mayor o igual al valor consumido ({
 msgid ""
 "Salesforce Opportunity ID must be 18 alphanumeric characters and begin with "
 "006."
-msgstr ""
+msgstr "El ID de oportunidad de Salesforce debe tener 18 caracteres alfanuméricos y comenzar con 006."
 
 #: ecommerce/enterprise/forms.py:168 ecommerce/enterprise/forms.py:216
 msgid "Ensure this value is greater than or equal to 0."
@@ -810,41 +811,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr "No pudimos encontrar suficiente información sobre usted para realizar el cálculo."
 
-#: ecommerce/extensions/api/serializers.py:254
+#: ecommerce/extensions/api/serializers.py:255
 msgid "EXPIRED"
 msgstr "CADUCADA"
 
-#: ecommerce/extensions/api/serializers.py:256
+#: ecommerce/extensions/api/serializers.py:257
 msgid "INACTIVE"
 msgstr "INACTIVO"
 
-#: ecommerce/extensions/api/serializers.py:257
+#: ecommerce/extensions/api/serializers.py:258
 msgid "ACTIVE"
 msgstr "ACTIVO"
 
-#: ecommerce/extensions/api/serializers.py:561
+#: ecommerce/extensions/api/serializers.py:664
 msgid "Products must have a certificate type."
 msgstr "Los productos deben tener algún tipo de certificado."
 
-#: ecommerce/extensions/api/serializers.py:564
-#: ecommerce/extensions/api/serializers.py:604
+#: ecommerce/extensions/api/serializers.py:667
+#: ecommerce/extensions/api/serializers.py:710
 msgid "Products must have a price."
 msgstr "Los productos deben tener un precio"
 
-#: ecommerce/extensions/api/serializers.py:571
+#: ecommerce/extensions/api/serializers.py:674
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "Necesitas proporcionar una UUID de curso para crear derechos de curso."
 
-#: ecommerce/extensions/api/serializers.py:600
+#: ecommerce/extensions/api/serializers.py:706
 msgid "Products must indicate whether ID verification is required."
 msgstr "Los productos deben indicar si el ID de verificación en requerido"
 
-#: ecommerce/extensions/api/serializers.py:671
+#: ecommerce/extensions/api/serializers.py:777
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Clase de producto inválida [{product_class}] requerida."
 
-#: ecommerce/extensions/api/serializers.py:703
+#: ecommerce/extensions/api/serializers.py:809
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -852,29 +853,29 @@ msgid ""
 " been saved."
 msgstr "El curso [{course_id}] no fué publicado hacia el LMS porque el selector [publish_course_modes_to_lms] está desactivado. Para evitar crear SKUs fantasmas, no se ha guardado ninguna información. "
 
-#: ecommerce/extensions/api/serializers.py:1373
+#: ecommerce/extensions/api/serializers.py:1479
 msgid "Enrollment code"
 msgstr "Código de inscripión"
 
-#: ecommerce/extensions/api/serializers.py:1374
+#: ecommerce/extensions/api/serializers.py:1480
 msgid "Discount code"
 msgstr "Cupón de descuento"
 
-#: ecommerce/extensions/api/serializers.py:1841
+#: ecommerce/extensions/api/serializers.py:1947
 msgid "Invalid order number or order {} does not exists."
 msgstr "Número de orden inválido u orden {} no existe."
 
-#: ecommerce/extensions/api/serializers.py:1896
+#: ecommerce/extensions/api/serializers.py:2002
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr "Nueva falla de asignación de váucher de cupón. Error: {}"
 
-#: ecommerce/extensions/api/serializers.py:1914
+#: ecommerce/extensions/api/serializers.py:2020
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr "Tu orden {} no puede ser reembolsada como '{}' cupones no se encuentran soportados para el reembolso."
 
-#: ecommerce/extensions/api/serializers.py:1945
+#: ecommerce/extensions/api/serializers.py:2051
 msgid "Could note create new voucher for the order: {}"
 msgstr "No pudo crear un nuevo váucher para la orden: {}"
 
@@ -2043,7 +2044,7 @@ msgstr "Su orden está completa. Recibirá un mensaje de confirmación y su cód
 #: ecommerce/templates/edx/checkout/receipt.html:59
 msgid ""
 "Your order is complete. If you need a receipt, you can print this page."
-msgstr ""
+msgstr "Se completó su pedido. Si necesita un recibo, puede imprimir esta página."
 
 #: ecommerce/templates/edx/checkout/receipt.html:77
 msgid "Order Number:"
