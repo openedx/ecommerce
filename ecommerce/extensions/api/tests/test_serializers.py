@@ -104,6 +104,27 @@ class OrderSerializerTests(TestCase):
             self.assertTrue(mock_learner_portal_url)
             logger.check_present(*expected)
 
+    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.add_product_tracking')
+    def test_get_product_tracking(self, mock_receipt_product_tracking):
+        with self.settings(AWIN_ADVERTISER_ID=1234):
+            mock_receipt_product_tracking.side_effect = ValueError()
+            order = factories.create_order(site=self.site, user=self.user)
+            serializer = OrderSerializer(
+                order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')}
+            )
+
+            expected = [
+                (
+                    self.LOGGER_NAME,
+                    'ERROR',
+                    'Failed to retrieve get_product_tracking for order [{}]'.format(order)
+                ),
+            ]
+
+            with LogCapture(self.LOGGER_NAME) as logger:
+                serializer.get_product_tracking(order)
+                logger.check_present(*expected)
+
 
 class CouponCodeSerializerTests(CouponMixin, TestCase):
     """ Test for coupon code serializers. """

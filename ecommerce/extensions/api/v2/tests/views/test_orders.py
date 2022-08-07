@@ -225,6 +225,10 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         expected_order_product_ids = ','.join(map(str, order.lines.values_list('product_id', flat=True)))
         self.assertEqual(expected_order_product_ids, content['results'][0]['order_product_ids'])
 
+        # Test for: product_tracking
+        with self.settings(AWIN_ADVERTISER_ID=1234):
+            self.assertTrue(content['results'][0]['product_tracking'])
+
     def test_with_other_users_orders(self):
         """ The view should only return orders for the authenticated users. """
         other_user = self.create_user()

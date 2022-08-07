@@ -393,6 +393,7 @@ class OrderSerializer(serializers.ModelSerializer):
     discount = serializers.SerializerMethodField()
     lines = LineSerializer(many=True)
     payment_processor = serializers.SerializerMethodField()
+    product_tracking = serializers.SerializerMethodField()
     user = UserSerializer()
     vouchers = serializers.SerializerMethodField()
     enable_hoist_order_history = serializers.SerializerMethodField()
@@ -517,6 +518,17 @@ class OrderSerializer(serializers.ModelSerializer):
             )
             return None
 
+    def get_product_tracking(self, obj):
+        try:
+            if settings.AWIN_ADVERTISER_ID and obj.lines:
+                return ReceiptResponseView.add_product_tracking(self, obj)
+        except (AttributeError, ValueError):
+            logger.exception(
+                'Failed to retrieve get_product_tracking for order [%s]',
+                obj
+            )
+        return None
+
     class Meta:
         model = Order
         fields = (
@@ -534,6 +546,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'order_product_ids',
             'payment_processor',
             'payment_method',
+            'product_tracking',
             'status',
             'total_before_discounts_incl_tax',
             'total_excl_tax',
