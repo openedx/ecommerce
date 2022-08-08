@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
+from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
@@ -138,7 +139,8 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
             mock_learner_portal_url.return_value = test_learner_portal_url
             price = 100.00
             currency = 'USD'
-            course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
+            course_id = 'a/b/c'
+            course = CourseFactory(id=course_id, name='Test Course', partner=self.partner)
             product = factories.ProductFactory(
                 categories=[],
                 stockrecords__price_excl_tax=price,
@@ -228,6 +230,10 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         # Test for: product_tracking
         with self.settings(AWIN_ADVERTISER_ID=1234):
             self.assertTrue(content['results'][0]['product_tracking'])
+
+        # Test for: course_organization
+        self.assertIn('course_organization', content['results'][0]['lines'][0])
+        self.assertEqual(CourseKey.from_string(course_id).org, content['results'][0]['lines'][0]['course_organization'])
 
     def test_with_other_users_orders(self):
         """ The view should only return orders for the authenticated users. """
