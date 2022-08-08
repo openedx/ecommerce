@@ -38,7 +38,7 @@ class OrderSerializerTests(TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                'Failed to retrieve get_dashboard_url for [{}]'.format(order)
+                '[Receipt MFE] Failed to retrieve dashboard URL for [{}]'.format(order)
             ),
         ]
 
@@ -57,7 +57,7 @@ class OrderSerializerTests(TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                'Failed to retrieve get_contains_credit_seat for [{}]'.format(order)
+                '[Receipt MFE] Failed to retrieve credit seat value for [{}]'.format(order)
             ),
         ]
 
@@ -76,7 +76,7 @@ class OrderSerializerTests(TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                'Failed to retrieve get_payment_method for order [{}]'.format(order)
+                '[Receipt MFE] Failed to retrieve payment method for order [{}]'.format(order)
             ),
         ]
 
@@ -95,7 +95,7 @@ class OrderSerializerTests(TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                'Failed to retrieve get_enterprise_learner_portal_url for order [{}]'.format(order)
+                '[Receipt MFE] Failed to retrieve enterprise learner portal URL for order [{}]'.format(order)
             ),
         ]
 
@@ -117,7 +117,7 @@ class OrderSerializerTests(TestCase):
                 (
                     self.LOGGER_NAME,
                     'ERROR',
-                    'Failed to retrieve get_product_tracking for order [{}]'.format(order)
+                    '[Receipt MFE] Failed to retrieve AWIN product tracking for order [{}]'.format(order)
                 ),
             ]
 

@@ -386,7 +386,7 @@ class LineSerializer(serializers.ModelSerializer):
                 return CourseKey.from_string(line.product.course.id).org
         except (AttributeError, TypeError, ValueError):
             logger.exception(
-                'Failed to retrieve get_course_organization for line [%s]',
+                '[Receipt MFE] Failed to retrieve course organization for line [%s]',
                 line
             )
         return None
@@ -438,7 +438,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     basket_discounts.append(basket_discount)
         except (AttributeError, TypeError, ValueError):
             logger.exception(
-                'Failed to retrieve get_basket_discounts for [%s]',
+                '[Receipt MFE] Failed to retrieve basket discounts for [%s]',
                 obj
             )
         return basket_discounts
@@ -463,7 +463,7 @@ class OrderSerializer(serializers.ModelSerializer):
             return ReceiptResponseView.get_order_dashboard_url(self, obj)
         except ValueError:
             logger.exception(
-                'Failed to retrieve get_dashboard_url for [%s]',
+                '[Receipt MFE] Failed to retrieve dashboard URL for [%s]',
                 obj
             )
             return None
@@ -480,7 +480,7 @@ class OrderSerializer(serializers.ModelSerializer):
             return ReceiptResponseView().order_contains_credit_seat(obj)
         except ValueError:
             logger.exception(
-                'Failed to retrieve get_contains_credit_seat for [%s]',
+                '[Receipt MFE] Failed to retrieve credit seat value for [%s]',
                 obj
             )
             return None
@@ -502,7 +502,7 @@ class OrderSerializer(serializers.ModelSerializer):
             payment_method = ReceiptResponseView().get_payment_method(obj)
         except ValueError:
             logger.exception(
-                'Failed to retrieve get_payment_method for order [%s]',
+                '[Receipt MFE] Failed to retrieve payment method for order [%s]',
                 obj
             )
         return payment_method
@@ -513,7 +513,7 @@ class OrderSerializer(serializers.ModelSerializer):
             return ReceiptResponseView().add_message_if_enterprise_user(request)
         except (AttributeError, ValueError):
             logger.exception(
-                'Failed to retrieve get_enterprise_learner_portal_url for order [%s]',
+                '[Receipt MFE] Failed to retrieve enterprise learner portal URL for order [%s]',
                 obj
             )
             return None
@@ -529,7 +529,7 @@ class OrderSerializer(serializers.ModelSerializer):
             return ','.join(map(str, obj.lines.values_list('product_id', flat=True)))
         except (AttributeError, ValueError):
             logger.exception(
-                'Failed to retrieve get_order_product_ids for order [%s]',
+                '[Receipt MFE] Failed to retrieve order product IDs for order [%s]',
                 obj
             )
             return None
@@ -540,7 +540,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 return ReceiptResponseView.add_product_tracking(self, obj)
         except (AttributeError, ValueError):
             logger.exception(
-                'Failed to retrieve get_product_tracking for order [%s]',
+                '[Receipt MFE] Failed to retrieve AWIN product tracking for order [%s]',
                 obj
             )
         return None
