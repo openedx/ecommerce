@@ -8,11 +8,10 @@ from ecommerce.core.constants import COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
 
 def create_product_attribute(apps, schema_editor):
     """ Create a product attribute for course entitlement product class"""
-    Category = apps.get_model("catalogue", "Category")
     ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
     ProductClass = apps.get_model("catalogue", "ProductClass")
 
-    for klass in (Category, ProductAttribute, ProductClass):
+    for klass in (ProductAttribute, ProductClass):
         klass.skip_history_when_saving = True
 
     course_entitlement = ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
@@ -31,6 +30,7 @@ def create_product_attribute(apps, schema_editor):
 def remove_product_attribute(apps, schema_editor):
     """ Reverse function. """
     ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
+    ProductAttribute.skip_history_when_saving = True
     ProductAttribute.objects.filter(name='variant_id').delete()
 
 
