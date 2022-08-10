@@ -1,4 +1,4 @@
--c pins.txt
+-c constraints.txt
 
 analytics-python
 bleach

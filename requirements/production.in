@@ -1,4 +1,5 @@
 # Packages required in a production environment
+-c constraints.txt
 -r base.in
 
 django-ses

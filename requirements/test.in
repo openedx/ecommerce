@@ -1,4 +1,4 @@
--c pins.txt
+-c constraints.txt
 -r base.txt
 -r e2e.txt                  # required for quality
 -r tox.txt

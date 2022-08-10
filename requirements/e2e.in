@@ -1,5 +1,5 @@
 -c base.txt
--c pins.txt
+-c constraints.txt
 
 # Packages required to run e2e tests
 edx-rest-api-client

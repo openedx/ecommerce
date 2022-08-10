@@ -148,10 +148,18 @@ validate_translations: requirements.tox
 check_keywords: requirements.tox
 	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-check_keywords
 
-export CUSTOM_COMPILE_COMMAND = make upgrade
-upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
+COMMON_CONSTRAINTS_TXT=requirements/common_constraints.txt
+.PHONY: $(COMMON_CONSTRAINTS_TXT)
+$(COMMON_CONSTRAINTS_TXT):
+	wget -O "$(@)" https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt || touch "$(@)"
+
+upgrade: export CUSTOM_COMPILE_COMMAND=make upgrade
+upgrade: $(COMMON_CONSTRAINTS_TXT)
 	pip install -q -r requirements/pip_tools.txt
+	pip-compile --rebuild --upgrade --allow-unsafe -o requirements/pip.txt requirements/pip.in
 	pip-compile --rebuild --upgrade -o requirements/pip_tools.txt requirements/pip_tools.in
+	pip install -qr requirements/pip.txt
+	pip install -qr requirements/pip_tools.txt
 	pip-compile --upgrade -o requirements/tox.txt requirements/tox.in
 	pip-compile --upgrade -o requirements/base.txt requirements/base.in
 	pip-compile --upgrade -o requirements/docs.txt requirements/docs.in
