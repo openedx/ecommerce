@@ -562,8 +562,10 @@ webencodings==0.5.1
     # via bleach
 wheel==0.37.1
     # via cybersource-rest-client-python
-wrapt==1.14.1
-    # via deprecated
+wrapt==1.13.3
+    # via
+    #   -c requirements/constraints.txt
+    #   deprecated
 x509==0.1
     # via cybersource-rest-client-python
 xss-utils==0.4.0

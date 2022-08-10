@@ -19,7 +19,7 @@ asn1crypto==1.5.1
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-astroid==2.11.7
+astroid==2.9.3
     # via pylint
 async-timeout==4.0.2
     # via
@@ -148,7 +148,7 @@ datetime==4.5
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-ddt==1.5.0
+ddt==1.6.0
     # via -r requirements/test.in
 defusedxml==0.7.1
     # via
@@ -161,8 +161,6 @@ deprecated==1.2.13
     #   redis
 diff-cover==6.5.1
     # via -r requirements/test.in
-dill==0.3.5.1
-    # via pylint
     # via
     #   -c requirements/common_constraints.txt
     #   -r requirements/base.txt
@@ -463,8 +461,10 @@ markupsafe==2.1.1
     # via
     #   -r requirements/base.txt
     #   jinja2
-mccabe==0.7.0
-    # via pylint
+mccabe==0.6.1
+    # via
+    #   -c requirements/constraints.txt
+    #   pylint
 mock==4.0.3
     # via -r requirements/test.in
 monotonic==1.6
@@ -573,7 +573,7 @@ pyasn1==0.4.8
     #   ndg-httpsclient
     #   rsa
     #   x509
-pycodestyle===2.8.0
+pycodestyle==2.9.1
     # via -r requirements/test.in
 pycountry==17.1.8
     # via -r requirements/base.txt
@@ -610,7 +610,9 @@ pyjwt[crypto]==1.7.1
     #   edx-rest-api-client
     #   social-auth-core
 pylint==2.12.2
-    # via -r requirements/test.in
+    # via
+    #   -c requirements/constraints.txt
+    #   -r requirements/test.in
 pymongo==3.12.3
     # via
     #   -r requirements/base.txt
@@ -896,14 +898,11 @@ toml==0.10.2
     # via
     #   -r requirements/e2e.txt
     #   -r requirements/tox.txt
+    #   pylint
     #   pytest
     #   tox
 tomli==2.0.1
-    # via
-    #   coverage
-    #   pylint
-tomlkit==0.11.3
-    # via pylint
+    # via coverage
 tox==3.14.6
     # via
     #   -c requirements/constraints.txt
@@ -966,8 +965,9 @@ wheel==0.37.1
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-wrapt==1.14.1
+wrapt==1.13.3
     # via
+    #   -c requirements/constraints.txt
     #   -r requirements/base.txt
     #   astroid
     #   deprecated

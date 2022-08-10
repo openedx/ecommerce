@@ -52,3 +52,10 @@ social-auth-app-django<5.0.0  # version 5.0.0 requires social-auth-core>=4.1.0
 
 # bok-choy 1.1.1 requires <4 (can remove once we have a version without that requirement)
 selenium<4.0.0
+
+# pylint>2.12.2 requires a lot of quality fixes. Can be resolved later on.
+pylint==2.12.2
+# pylint==2.12.2 requires mccabe<0.7.0
+mccabe<0.7
+# pylint==2.12.2 requires wrapt<1.14
+wrapt<1.14
