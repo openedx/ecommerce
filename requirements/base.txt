@@ -164,7 +164,7 @@ django==2.2.23
     #   edx-django-utils
     #   edx-drf-extensions
     #   edx-rbac
-    #   jsonfield2
+    #   jsonfield
     #   rest-condition
     #   xss-utils
 djangorestframework-csv==2.1.1
@@ -246,7 +246,7 @@ itypes==1.2.0
     # via coreapi
 jinja2==3.0.1
     # via coreschema
-jsonfield2==3.0.3
+jsonfield==3.1.0
     # via
     #   -c requirements/pins.txt
     #   -r requirements/base.in
