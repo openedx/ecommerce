@@ -122,7 +122,7 @@ django==3.2.15
     #   edx-django-utils
     #   edx-drf-extensions
     #   edx-rbac
-    #   jsonfield2
+    #   jsonfield
     #   rest-condition
     #   xss-utils
 django-appconf==1.0.5
@@ -277,7 +277,7 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-jsonfield2==3.0.3
+jsonfield==3.1.0
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in

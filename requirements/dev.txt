@@ -190,7 +190,7 @@ django==3.2.15
     #   edx-drf-extensions
     #   edx-i18n-tools
     #   edx-rbac
-    #   jsonfield2
+    #   jsonfield
     #   rest-condition
     #   xss-utils
 django-appconf==1.0.5
@@ -426,7 +426,7 @@ jmespath==1.0.1
     #   -r requirements/test.txt
     #   boto3
     #   botocore
-jsonfield2==3.0.3
+jsonfield==3.1.0
     # via -r requirements/test.txt
 jsonschema==4.9.1
     # via
