@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 import waffle
 
 from django.urls import reverse
+from django.db.models import Q
 
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
@@ -111,7 +112,10 @@ class BaseIAP(BasePaymentProcessor):
             original_transaction_id = validation_response.get('receipt', {}).get('in_app', [{}])[0].get(
                 'original_transaction_id')
         if original_transaction_id and self.NAME == 'ios-iap':
-            if PaymentProcessorResponse.objects.filter(original_transaction_id=original_transaction_id).exists():
+            if PaymentProcessorResponse.objects.filter(
+                    ~Q(basket__owner=basket.owner),
+                    original_transaction_id=original_transaction_id,
+            ).exists():
                 raise RedundantPaymentNotificationError
 
         transaction_id = response.get('transactionId')
