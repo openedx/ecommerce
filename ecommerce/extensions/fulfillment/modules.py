@@ -255,7 +255,7 @@ class EnrollmentFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmentModule
             )
 
     def supports_line(self, line):
-        return line.product.is_seat_product
+        return line.product.is_seat_product and not line.product.is_executive_education_2u_product
 
     def get_supported_lines(self, lines):
         """ Return a list of lines that can be fulfilled through enrollment.
@@ -763,7 +763,7 @@ class CourseEntitlementFulfillmentModule(EnterpriseDiscountMixin, BaseFulfillmen
     """
 
     def supports_line(self, line):
-        return line.product.is_course_entitlement_product
+        return line.product.is_course_entitlement_product and not line.product.is_executive_education_2u_product
 
     def get_supported_lines(self, lines):
         """ Return a list of lines that can be fulfilled.

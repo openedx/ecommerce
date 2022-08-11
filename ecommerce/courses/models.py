@@ -15,6 +15,7 @@ from ecommerce.core.constants import (
     ENROLLMENT_CODE_SEAT_TYPES,
     SEAT_PRODUCT_CLASS_NAME
 )
+from ecommerce.courses.constants import CertificateType
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.utils import generate_sku
 
@@ -94,17 +95,24 @@ class Course(models.Model):
     def type(self):
         """ Returns the type of the course (based on the available seat types). """
         seat_types = [getattr(seat.attr, 'certificate_type', '').lower() for seat in self.seat_products]
-        if 'credit' in seat_types:
+        if CertificateType.CREDIT in seat_types:
             return 'credit'
-        if 'professional' in seat_types or 'no-id-professional' in seat_types:
+        if CertificateType.PROFESSIONAL in seat_types or CertificateType.NO_ID_PROFESSIONAL in seat_types:
             return 'professional'
         # This is checking for the Verified and Audit case, but Audit has no certificate type
         # so it is returned as the empty string.
-        if 'verified' in seat_types and ('' in seat_types or 'honor' in seat_types):
+        if CertificateType.VERIFIED in seat_types and ('' in seat_types or CertificateType.HONOR in seat_types):
             return 'verified'
-        if 'verified' in seat_types:
+        if CertificateType.VERIFIED in seat_types:
             return 'verified-only'
-        return 'audit'
+
+        if CertificateType.PAID_EXECUTIVE_EDUCATION in seat_types:
+            return 'paid-executive-education'
+
+        if CertificateType.UNPAID_EXECUTIVE_EDUCATION in seat_types:
+            return 'unpaid-executive-education'
+
+        return CertificateType.AUDIT
 
     @property
     def parent_seat_product(self):
