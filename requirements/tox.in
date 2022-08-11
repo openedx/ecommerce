@@ -1,4 +1,4 @@
--c pins.txt
+-c constraints.txt
 
 tox
 tox-battery

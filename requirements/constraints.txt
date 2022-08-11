@@ -8,6 +8,9 @@
 # pin when possible.  Writing an issue against the offending project and
 # linking to it here is good.
 
+# This file contains all common constraints for edx-repos
+-c common_constraints.txt
+
 # Tests failing in test_cybersouce.py on version 0.0.23
 cybersource-rest-client-python==0.0.21
 
@@ -19,6 +22,8 @@ jsonfield2<=3.0.3
 
 # Pinned to preserve the status quo
 pytz==2016.10
+# drf-yasg>=1.20.3 requires pytz>2021.10 so pinning the version untill pytz is upgraded
+drf-yasg<1.20.3
 
 # Pinned because transifex-client==0.13.6 pins it
 urllib3>=1.24.2,<2.0.0
@@ -47,3 +52,10 @@ social-auth-app-django<5.0.0  # version 5.0.0 requires social-auth-core>=4.1.0
 
 # bok-choy 1.1.1 requires <4 (can remove once we have a version without that requirement)
 selenium<4.0.0
+
+# pylint>2.12.2 requires a lot of quality fixes. Can be resolved later on.
+pylint==2.12.2
+# pylint==2.12.2 requires mccabe<0.7.0
+mccabe<0.7
+# pylint==2.12.2 requires wrapt<1.14
+wrapt<1.14

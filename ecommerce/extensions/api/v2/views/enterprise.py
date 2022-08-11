@@ -1075,7 +1075,7 @@ class OfferAssignmentEmailTemplatesViewSet(PermissionRequiredMixin, ModelViewSet
     permission_classes = (IsAuthenticated,)
     permission_required = 'enterprise.can_assign_coupon'
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_fields = ('email_type', 'active')
+    filterset_fields = ('email_type', 'active')
 
     http_method_names = ['get', 'head', 'options', 'post', 'put', 'delete']
 
