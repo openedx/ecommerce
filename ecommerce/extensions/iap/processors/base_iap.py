@@ -5,10 +5,13 @@ from urllib.parse import urljoin
 import waffle
 
 from django.urls import reverse
+from django.db.models import Q
 
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
+from ecommerce.extensions.payment.models import PaymentProcessorResponse
+from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 
 
 logger = logging.getLogger(__name__)
@@ -104,10 +107,22 @@ class BaseIAP(BasePaymentProcessor):
                 )
                 raise GatewayError(validation_response)
 
+        original_transaction_id = response.get('originalTransactionId')
+        if not original_transaction_id:
+            original_transaction_id = validation_response.get('receipt', {}).get('in_app', [{}])[0].get(
+                'original_transaction_id')
+        if original_transaction_id and self.NAME == 'ios-iap':
+            if PaymentProcessorResponse.objects.filter(
+                    ~Q(basket__owner=basket.owner),
+                    original_transaction_id=original_transaction_id,
+            ).exists():
+                raise RedundantPaymentNotificationError
+
         transaction_id = response.get('transactionId')
         if not transaction_id:
             transaction_id = validation_response.get('receipt', {}).get('in_app', [{}])[0].get('transaction_id')
-        self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket)
+        self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket,
+                                       original_transaction_id=original_transaction_id)
         logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
 
         currency = basket.currency
