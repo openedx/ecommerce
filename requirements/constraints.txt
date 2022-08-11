@@ -17,9 +17,6 @@ cybersource-rest-client-python==0.0.21
 # Django 3.2 support is added in version 2.2 so pinning it to 2.2
 django-oscar==2.2
 
-# jsonfield2 > 3.0.3 dropped support for python 3.5
-jsonfield2<=3.0.3
-
 # Pinned to preserve the status quo
 pytz==2016.10
 # drf-yasg>=1.20.3 requires pytz>2021.10 so pinning the version untill pytz is upgraded
