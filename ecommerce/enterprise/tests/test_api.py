@@ -1,6 +1,11 @@
 
 
+import json
+from unittest.mock import MagicMock
+from urllib.parse import urlencode
+
 import ddt
+import requests
 import responses
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
@@ -160,6 +165,76 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
 
         with self.assertRaises(ReqConnectionError):
             self._assert_contains_course_runs(False, [self.course_run.id], 'fake-uuid', 'fake-uuid')
+
+    @responses.activate
+    def test_fetch_enterprise_catalogs_for_content_items(self):
+        mock_enterprise_id = 'fake-uuid'
+        mock_catalog_list = ['fake-catalog-uuid']
+        query_params = {
+            'course_run_ids': self.course_run.id,
+            'get_catalogs_containing_specified_content_ids': True
+        }
+
+        self.mock_access_token_response()
+        responses.add(
+            method=responses.GET,
+            url='{api_url}{enterprise_customer_uuid}/contains_content_items/?{query_params}'.format(
+                api_url=self.ENTERPRISE_CATALOG_URL_CUSTOMER_RESOURCE,
+                enterprise_customer_uuid=mock_enterprise_id,
+                query_params=urlencode(query_params)
+            ),
+            body=json.dumps({'contains_content_items': True, 'catalog_list': mock_catalog_list}),
+            content_type='application/json'
+        )
+        catalog_list = enterprise_api.fetch_enterprise_catalogs_for_content_items(
+            self.site,
+            self.course_run.id,
+            mock_enterprise_id,
+        )
+        self.assertEqual(catalog_list, mock_catalog_list)
+
+    def test_fetch_enterprise_catalogs_for_content_items_cache_hit(self):
+        with patch.object(
+            TieredCache,
+            'get_cached_response',
+            wraps=TieredCache.get_cached_response
+        ) as mock_get_cached_response:
+            mock_catalog_list = ['fake-catalog-uuid']
+            mock_get_cached_response.return_value = MagicMock(is_found=True, value=mock_catalog_list)
+            catalog_list = enterprise_api.fetch_enterprise_catalogs_for_content_items(
+                self.site,
+                self.course_run.id,
+                'fake-uuid',
+            )
+            self.assertEqual(len(responses.calls), 0)
+            self.assertEqual(catalog_list, mock_catalog_list)
+
+    @responses.activate
+    def test_fetch_enterprise_catalogs_for_content_items_with_api_exception(self):
+        mock_enterprise_id = 'fake-uuid'
+        query_params = {
+            'course_run_ids': self.course_run.id,
+            'get_catalogs_containing_specified_content_ids': True
+        }
+
+        self.mock_access_token_response()
+        responses.add(
+            method=responses.GET,
+            url='{api_url}{enterprise_customer_uuid}/contains_content_items/?{query_params}'.format(
+                api_url=self.ENTERPRISE_CATALOG_URL_CUSTOMER_RESOURCE,
+                enterprise_customer_uuid=mock_enterprise_id,
+                query_params=urlencode(query_params)
+            ),
+            body=requests.Timeout('Connection timed out.'),
+            content_type='application/json'
+        )
+
+        with self.assertRaises(ReqConnectionError):
+            enterprise_api.fetch_enterprise_catalogs_for_content_items(
+                self.site,
+                self.course_run.id,
+                mock_enterprise_id,
+            )
 
     @patch('ecommerce.enterprise.api.fetch_enterprise_learner_data')
     @patch('ecommerce.enterprise.api.get_enterprise_id_for_current_request_user_from_jwt')

@@ -33,6 +33,9 @@ def get_previous_order_for_user(user, product):
 
 
 def get_learner_portal_url(request):
+    """
+    Return the learner portal url for user in the request.
+    """
     enterprise_id = get_enterprise_id_for_user(request.site, request.user)
     enterprise_customer = get_enterprise_customer(request.site, enterprise_id)
     slug = enterprise_customer['slug']
@@ -42,3 +45,16 @@ def get_learner_portal_url(request):
         hostname=settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME,
         slug=slug,
     )
+
+
+def get_enterprise_offers_for_catalogs(enterprise_id, catalog_list):
+    """
+    Return enterprise offers filtered by the user's enterprise.
+    """
+    ConditionalOffer = get_model('offer', 'ConditionalOffer')
+    offers = ConditionalOffer.active.filter(
+        offer_type=ConditionalOffer.SITE,
+        condition__enterprise_customer_catalog_uuid__in=catalog_list,
+        condition__enterprise_customer_uuid=enterprise_id,
+    )
+    return offers.select_related('condition', 'benefit')
