@@ -148,8 +148,41 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
     response.raise_for_status()
     contains_content = response.json()['contains_content_items']
     TieredCache.set_all_tiers(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
-
     return contains_content
+
+
+def fetch_enterprise_catalogs_for_content_items(site, content_ids, enterprise_customer_uuid):
+    query_params = {
+        'course_run_ids': content_ids,
+        'get_catalogs_containing_specified_content_ids': True
+    }
+    api_client = site.siteconfiguration.oauth_api_client
+
+    api_resource_name = 'enterprise-customer'
+    api_resource_id = enterprise_customer_uuid
+
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        resource='{resource}-{resource_id}-catalogs_for_content_items'.format(
+            resource=api_resource_name,
+            resource_id=api_resource_id,
+        ),
+        query_params=urlencode(query_params, True)
+    )
+
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_found:
+        return cached_response.value
+
+    api_url = urljoin(
+        f"{site.siteconfiguration.enterprise_catalog_api_url}/",
+        f"{api_resource_name}/{api_resource_id}/contains_content_items/"
+    )
+    response = api_client.get(api_url, params=query_params)
+    response.raise_for_status()
+    catalog_list = response.json()['catalog_list']
+    TieredCache.set_all_tiers(cache_key, catalog_list, settings.ENTERPRISE_API_CACHE_TIMEOUT)
+    return catalog_list
 
 
 def get_enterprise_id_for_user(site, user):

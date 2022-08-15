@@ -12,6 +12,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
+from ecommerce.courses.utils import get_course_info_from_catalog
+from ecommerce.enterprise.api import fetch_enterprise_catalogs_for_content_items, get_enterprise_id_for_user
+from ecommerce.enterprise.conditions import is_offer_max_discount_available, is_offer_max_user_discount_available
 from ecommerce.extensions.basket.utils import apply_offers_on_basket
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.executive_education_2u.constants import ExecutiveEducation2UCheckoutFailureReason
@@ -19,6 +22,7 @@ from ecommerce.extensions.executive_education_2u.exceptions import EmptyBasketEx
 from ecommerce.extensions.executive_education_2u.mixins import ExecutiveEducation2UOrderPlacementMixin
 from ecommerce.extensions.executive_education_2u.serializers import CheckoutActionSerializer
 from ecommerce.extensions.executive_education_2u.utils import (
+    get_enterprise_offers_for_catalogs,
     get_executive_education_2u_product,
     get_learner_portal_url,
     get_previous_order_for_user
@@ -97,6 +101,46 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
         apply_offers_on_basket(request, basket)
         return basket
 
+    def _get_checkout_failure_reason(self, request, basket, product):
+        try:
+            enterprise_id = get_enterprise_id_for_user(request.site, request.user)
+            course_info = get_course_info_from_catalog(request.site, product)
+            course_key = course_info['key']
+
+            catalog_list = fetch_enterprise_catalogs_for_content_items(
+                request.site,
+                course_key,
+                enterprise_id
+            )
+
+            enterprise_offers = get_enterprise_offers_for_catalogs(enterprise_id, catalog_list)
+            if not enterprise_offers:
+                return ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_AVAILABLE
+
+            offers_with_remaining_balance = [
+                offer for offer in enterprise_offers
+                if is_offer_max_discount_available(
+                    basket, offer
+                )
+            ]
+            if not offers_with_remaining_balance:
+                return ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_ENOUGH_BALANCE
+
+            offers_with_remaining_user_balance = [
+                offer for offer in offers_with_remaining_balance
+                if is_offer_max_user_discount_available(
+                    basket, offer
+                )
+            ]
+
+            if not offers_with_remaining_user_balance:
+                return ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_ENOUGH_USER_BALANCE
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.exception(ex)
+
+        # We could end up here if there was an error calling discovery/enterprise-catalog
+        return ExecutiveEducation2UCheckoutFailureReason.SYSTEM_ERROR
+
     @action(detail=False, methods=['get'], url_path='checkout')
     def begin_checkout(self, request):
         """
@@ -129,8 +173,9 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # Users cannot purchase Exec Ed 2U products directly
             if basket.total_excl_tax != 0:
+                failure_reason = self._get_checkout_failure_reason(request, basket, product)
                 query_params.update({
-                    'failure_reason': ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_AVAILABLE
+                    'failure_reason': failure_reason
                 })
                 basket.flush()
 
