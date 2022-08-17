@@ -109,18 +109,15 @@ class BaseIAP(BasePaymentProcessor):
 
         original_transaction_id = response.get('originalTransactionId')
         if not original_transaction_id:
-            original_transaction_id = validation_response.get('receipt', {}).get('in_app', [{}])[0].get(
-                'original_transaction_id')
+            original_transaction_id = self._get_attribute_from_receipt(validation_response, 'original_transaction_id')
         if original_transaction_id and self.NAME == 'ios-iap':
             if PaymentProcessorResponse.objects.filter(
-                    ~Q(basket__owner=basket.owner),
-                    original_transaction_id=original_transaction_id,
-            ).exists():
+                    ~Q(basket__owner=basket.owner), original_transaction_id=original_transaction_id,).exists():
                 raise RedundantPaymentNotificationError
 
         transaction_id = response.get('transactionId')
         if not transaction_id:
-            transaction_id = validation_response.get('receipt', {}).get('in_app', [{}])[0].get('transaction_id')
+            transaction_id = self._get_attribute_from_receipt(validation_response,'transaction_id')
         self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket,
                                        original_transaction_id=original_transaction_id)
         logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
@@ -140,3 +137,6 @@ class BaseIAP(BasePaymentProcessor):
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         raise NotImplementedError('The [%s] payment processor does not support credit issuance.', self.NAME)
+
+    def _get_attribute_from_receipt(self, validated_receipt, attribute):
+        return validated_receipt.get('receipt', {}).get('in_app', [{}])[0].get(attribute)
