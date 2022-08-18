@@ -30,11 +30,11 @@ billiard==3.6.4.0
     # via celery
 bleach==5.0.1
     # via -r requirements/base.in
-boto3==1.24.49
+boto3==1.24.54
     # via
     #   -r requirements/base.in
     #   django-ses
-botocore==1.27.49
+botocore==1.27.54
     # via
     #   boto3
     #   s3transfer
@@ -70,7 +70,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-coverage==6.4.3
+coverage==6.4.4
     # via cybersource-rest-client-python
 crypto==1.4.1
     # via cybersource-rest-client-python
@@ -162,7 +162,7 @@ django-oscar==2.2
     #   -r requirements/base.in
 django-phonenumber-field==5.0.0
     # via django-oscar
-django-ses==3.1.0
+django-ses==3.1.2
     # via -r requirements/production.in
 django-simple-history==3.0.0
     # via
@@ -249,7 +249,7 @@ extras==1.0.0
     #   testtools
 factory-boy==2.12.0
     # via django-oscar
-faker==13.15.1
+faker==14.1.0
     # via factory-boy
 fixtures==4.0.1
     # via
@@ -286,7 +286,7 @@ jmespath==1.0.1
     #   botocore
 jsonfield==3.1.0
     # via -r requirements/base.in
-jsonschema==4.9.1
+jsonschema==4.10.2
     # via cybersource-rest-client-python
 kombu==4.6.11
     # via celery
@@ -342,7 +342,7 @@ path-py==7.2
     # via -r requirements/base.in
 paypalrestsdk==1.13.1
     # via -r requirements/base.in
-pbr==5.9.0
+pbr==5.10.0
     # via
     #   cybersource-rest-client-python
     #   fixtures
@@ -380,7 +380,7 @@ pycryptodomex==3.15.0
     # via
     #   cybersource-rest-client-python
     #   pyjwkest
-pygments==2.12.0
+pygments==2.13.0
     # via -r requirements/base.in
 pyjwkest==1.4.2
     # via edx-drf-extensions
