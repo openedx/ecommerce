@@ -217,7 +217,7 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             order = self.place_free_order(
                 basket=basket,
-                address=request.data['address'],
+                address=request.data.get('address', {}),
                 user_details={**request.data['user_details'], 'email': request.user.email},
                 terms_accepted_at=request.data['terms_accepted_at'],
                 request=request
