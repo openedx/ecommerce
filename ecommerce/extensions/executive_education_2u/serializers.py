@@ -11,18 +11,18 @@ class UserDetailsSerializer(serializers.Serializer):  # pylint: disable=abstract
 
 
 class AddressSerializer(serializers.Serializer):  # pylint: disable=abstract-method
-    address_line1 = serializers.CharField()
+    address_line1 = serializers.CharField(required=False)
     address_line2 = serializers.CharField(required=False)
-    city = serializers.CharField()
-    postal_code = serializers.CharField()
-    state = serializers.CharField()
-    state_code = serializers.CharField()
-    country = serializers.CharField()
-    country_code = serializers.CharField()
+    city = serializers.CharField(required=False)
+    postal_code = serializers.CharField(required=False)
+    state = serializers.CharField(required=False)
+    state_code = serializers.CharField(required=False)
+    country = serializers.CharField(required=False)
+    country_code = serializers.CharField(required=False)
 
 
 class CheckoutActionSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     sku = serializers.CharField()
-    address = AddressSerializer()
+    address = AddressSerializer(required=False)
     user_details = UserDetailsSerializer()
     terms_accepted_at = serializers.CharField()
