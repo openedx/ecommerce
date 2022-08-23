@@ -56,7 +56,8 @@ def get_entitlement(uuid, certificate_type):
 
 
 def create_or_update_course_entitlement(
-    certificate_type, price, partner, UUID, title, id_verification_required=False, credit_provider=False, variant_id=None
+    certificate_type, price, partner, UUID, title, id_verification_required=False,credit_provider=False,
+    variant_id=None,
 ):
     """ Create or Update Course Entitlement Products """
     certificate_type = certificate_type.lower()
