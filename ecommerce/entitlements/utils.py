@@ -77,7 +77,7 @@ def create_or_update_course_entitlement(
     course_entitlement.attr.id_verification_required = id_verification_required
     course_entitlement.attr.credit_provider = credit_provider
     course_entitlement.parent = parent_entitlement
-    if variant_id is not None:
+    if variant_id:
         course_entitlement.attr.variant_id = variant_id
     course_entitlement.save()
 
