@@ -30,8 +30,13 @@ class TestCourseEntitlementProductCreation(TestCase):
         self.assertEqual(stock_record.price_excl_tax, 100)
         self.assertEqual(product.title, 'Course Foo Bar Entitlement')
 
+        variant_id = '00000000-0000-0000-0000-000000000000'
         product = create_or_update_course_entitlement(
-            'verified', 200, self.partner, 'foo-bar', 'Foo Bar Entitlement')
+            'verified', 200, self.partner, 'foo-bar', 'Foo Bar Entitlement', variant_id=variant_id)
 
         stock_record = StockRecord.objects.get(product=product, partner=self.partner)
         self.assertEqual(stock_record.price_excl_tax, 200)
+        self.assertEqual(stock_record.price_excl_tax, 200)
+
+        product.refresh_from_db()
+        assert product.attr.variant_id == '00000000-0000-0000-0000-000000000000'
