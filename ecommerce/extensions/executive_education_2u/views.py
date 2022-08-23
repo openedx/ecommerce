@@ -15,9 +15,13 @@ from rest_framework_extensions.cache.decorators import cache_response
 from ecommerce.courses.utils import get_course_info_from_catalog
 from ecommerce.enterprise.api import fetch_enterprise_catalogs_for_content_items, get_enterprise_id_for_user
 from ecommerce.enterprise.conditions import is_offer_max_discount_available, is_offer_max_user_discount_available
+from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.basket.utils import apply_offers_on_basket
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.executive_education_2u.constants import ExecutiveEducation2UCheckoutFailureReason
+from ecommerce.extensions.executive_education_2u.constants import (
+    ExecutiveEducation2UCheckoutFailureReason,
+    ExecutiveEducation2UCheckoutSegmentEvents
+)
 from ecommerce.extensions.executive_education_2u.exceptions import EmptyBasketException
 from ecommerce.extensions.executive_education_2u.mixins import ExecutiveEducation2UOrderPlacementMixin
 from ecommerce.extensions.executive_education_2u.serializers import CheckoutActionSerializer
@@ -171,6 +175,7 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
             if referer:
                 query_params.update({'http_referer': referer})
 
+            failure_reason = None
             # Users cannot purchase Exec Ed 2U products directly
             if basket.total_excl_tax != 0:
                 failure_reason = self._get_checkout_failure_reason(request, basket, product)
@@ -182,10 +187,30 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
             # Redirect users to learner portals for terms & policies or error display
             learner_portal_url = get_learner_portal_url(request)
             redirect_url = f'{learner_portal_url}?{urlencode(query_params)}'
+
+            if failure_reason:
+                track_segment_event(
+                    request.site,
+                    request.user,
+                    ExecutiveEducation2UCheckoutSegmentEvents.REDIRECTED_TO_LP_WITH_ERROR,
+                    {'failure_reason': failure_reason}
+                )
+            else:
+                track_segment_event(
+                    request.site,
+                    request.user,
+                    ExecutiveEducation2UCheckoutSegmentEvents.REDIRECTED_TO_LP, {}
+                )
+
             return HttpResponseRedirect(redirect_url)
         except EmptyBasketException:
             # Redirect user to receipt page since the product has been purchased previously
             receipt_page_url = self._get_receipt_page_url(self.request, request.user, product)
+            track_segment_event(
+                request.site,
+                request.user,
+                ExecutiveEducation2UCheckoutSegmentEvents.REDIRECTED_TO_RECEIPT_PAGE, {}
+            )
             return HttpResponseRedirect(receipt_page_url)
         except Exception as ex:  # pylint: disable=broad-except
             logger.exception(ex)
@@ -222,6 +247,10 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
                 terms_accepted_at=request.data['terms_accepted_at'],
                 request=request
             )
+
+            track_segment_event(request.site, request.user, ExecutiveEducation2UCheckoutSegmentEvents.ORDER_CREATED, {
+                'order_number': order.number
+            })
 
             data = {
                 'receipt_page_url': get_receipt_page_url(

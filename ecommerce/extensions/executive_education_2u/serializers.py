@@ -5,7 +5,7 @@ class UserDetailsSerializer(serializers.Serializer):  # pylint: disable=abstract
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     date_of_birth = serializers.CharField()
-    mobile_phone = serializers.CharField()
+    mobile_phone = serializers.CharField(required=False)
     work_experience = serializers.CharField(required=False)
     education_highest_level = serializers.CharField(required=False)
 
