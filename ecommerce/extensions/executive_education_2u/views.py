@@ -3,12 +3,14 @@ from functools import cached_property
 from urllib.parse import urlencode
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect, HttpResponseServerError
-from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
+from django.utils.decorators import method_decorator
 from getsmarter_api_clients.geag import GetSmarterEnterpriseApiClient
 from oscar.core.loading import get_model
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
@@ -38,10 +40,17 @@ Basket = get_model('basket', 'Basket')
 
 
 class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPlacementMixin):
-    permission_classes = (LoginRedirectIfUnauthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     TERMS_CACHE_TIMEOUT = 60 * 15
     TERMS_CACHE_KEY = 'executive-education-terms'
+
+    def get_permissions(self):
+        # login_required does not play well with permission_classes, this is a work around for now
+        if self.action == 'begin_checkout':
+            return []
+
+        return [permission() for permission in self.permission_classes]
 
     @cached_property
     def get_smarter_client(self):
@@ -145,6 +154,7 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
         # We could end up here if there was an error calling discovery/enterprise-catalog
         return ExecutiveEducation2UCheckoutFailureReason.SYSTEM_ERROR
 
+    @method_decorator(login_required)
     @action(detail=False, methods=['get'], url_path='checkout')
     def begin_checkout(self, request):
         """
