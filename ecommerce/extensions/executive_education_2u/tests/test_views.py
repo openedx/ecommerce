@@ -156,7 +156,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             'course_uuid': product.attr.UUID,
             'sku': sku
         }
-        expected_redirect_url = f'{self.learner_portal_url}?{urlencode(expected_query_params)}'
+        expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
         self.assertEqual(response.headers['Location'], expected_redirect_url)
 
     @mock.patch('ecommerce.extensions.executive_education_2u.views.fetch_enterprise_catalogs_for_content_items')
@@ -184,7 +184,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             'sku': sku,
             'failure_reason': ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_AVAILABLE
         }
-        expected_redirect_url = f'{self.learner_portal_url}?{urlencode(expected_query_params)}'
+        expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
         self.assertEqual(response.headers['Location'], expected_redirect_url)
 
     @mock.patch('ecommerce.extensions.executive_education_2u.views.fetch_enterprise_catalogs_for_content_items')
@@ -215,7 +215,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             'sku': sku,
             'failure_reason': ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_ENOUGH_BALANCE
         }
-        expected_redirect_url = f'{self.learner_portal_url}?{urlencode(expected_query_params)}'
+        expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
         self.assertEqual(response.headers['Location'], expected_redirect_url)
 
     @mock.patch('ecommerce.extensions.executive_education_2u.views.fetch_enterprise_catalogs_for_content_items')
@@ -250,7 +250,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             'sku': sku,
             'failure_reason': ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_ENOUGH_USER_BALANCE
         }
-        expected_redirect_url = f'{self.learner_portal_url}?{urlencode(expected_query_params)}'
+        expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
         self.assertEqual(response.headers['Location'], expected_redirect_url)
 
     @mock.patch('ecommerce.extensions.executive_education_2u.views.get_course_info_from_catalog')
@@ -273,7 +273,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             'sku': sku,
             'failure_reason': ExecutiveEducation2UCheckoutFailureReason.SYSTEM_ERROR
         }
-        expected_redirect_url = f'{self.learner_portal_url}?{urlencode(expected_query_params)}'
+        expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
         self.assertEqual(response.headers['Location'], expected_redirect_url)
 
     def _create_finish_checkout_payload(self, sku):

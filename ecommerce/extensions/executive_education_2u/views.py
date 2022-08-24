@@ -186,7 +186,7 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # Redirect users to learner portals for terms & policies or error display
             learner_portal_url = get_learner_portal_url(request)
-            redirect_url = f'{learner_portal_url}?{urlencode(query_params)}'
+            redirect_url = f'{learner_portal_url}/executive-education-2u?{urlencode(query_params)}'
 
             if failure_reason:
                 track_segment_event(
