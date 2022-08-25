@@ -137,7 +137,7 @@
                       {% endwith %}
                     {% else %}
                         <span class="discount">
-                            {% if offer.condition.enterprise_customer_name %}
+                            {% if discount.offer.condition.enterprise_customer_name %}
                               {% filter force_escape %}
                                 {% blocktrans trimmed with type=discount.offer.offer_type enterprise_name=discount.offer.condition.enterprise_customer_name %}
                                     Discount of type {{ type }} provided by {{ enterprise_name }}
