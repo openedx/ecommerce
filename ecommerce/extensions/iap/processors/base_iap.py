@@ -107,13 +107,14 @@ class BaseIAP(BasePaymentProcessor):
                 )
                 raise GatewayError(validation_response)
 
+        # original_transaction_id expected in case if iOS only
         original_transaction_id = response.get('originalTransactionId')
         if not original_transaction_id:
             original_transaction_id = self._get_attribute_from_receipt(validation_response, 'original_transaction_id')
         if original_transaction_id and self.NAME == 'ios-iap':
             if PaymentProcessorResponse.objects.filter(
                     ~Q(basket__owner=basket.owner), original_transaction_id=original_transaction_id,).exists():
-                raise RedundantPaymentNotificationError
+                raise RedundantPaymentNotificationError()
 
         transaction_id = response.get('transactionId')
         if not transaction_id:

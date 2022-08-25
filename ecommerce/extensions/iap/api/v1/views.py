@@ -28,6 +28,7 @@ from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.iap.api.v1.serializers import OrderSerializer
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
+from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 
 Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -175,8 +176,8 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
             with transaction.atomic():
                 try:
                     self.handle_payment(receipt, basket)
-                except PaymentError:
-                    return JsonResponse({'error': repr(PaymentError)}, status=400)
+                except (PaymentError, RedundantPaymentNotificationError) as ex:
+                    return JsonResponse({'error': repr(ex)}, status=400)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return JsonResponse({'error': 'An error occured during handling payment.'}, status=400)
