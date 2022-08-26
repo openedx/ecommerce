@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0032_paymentprocessorresponse_original_transaction_id'),
+        ('payment', '0031_sdnfallbackdata'),
         ('iap', '0001_initial'),
     ]
 
