@@ -1,6 +1,6 @@
 import logging
 
-from oscar.apps.payment.exceptions import GatewayError
+from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from urllib.parse import urljoin
 import waffle
 
@@ -9,6 +9,7 @@ from django.db.models import Q
 
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.iap.models import PaymentProcessorResponseExtension
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
@@ -67,6 +68,9 @@ class BaseIAP(BasePaymentProcessor):
         Raises:
             GatewayError: Indicates a general error or unexpected behavior on the part of IAP system which prevented
                 an approved payment from being executed.
+            PaymentError: Indicates a general error in processing payment details
+            RedundantPaymentNotificationError: Indicates that a similar payment was initialized before from a different
+                account.
 
         Returns:
             HandledProcessorResponse
@@ -107,20 +111,23 @@ class BaseIAP(BasePaymentProcessor):
                 )
                 raise GatewayError(validation_response)
 
-        # original_transaction_id expected in case if iOS only
-        original_transaction_id = response.get('originalTransactionId')
-        if not original_transaction_id:
-            original_transaction_id = self._get_attribute_from_receipt(validation_response, 'original_transaction_id')
-        if original_transaction_id and self.NAME == 'ios-iap':
-            if PaymentProcessorResponse.objects.filter(
-                    ~Q(basket__owner=basket.owner), original_transaction_id=original_transaction_id,).exists():
-                raise RedundantPaymentNotificationError()
-
         transaction_id = response.get('transactionId')
         if not transaction_id:
-            transaction_id = self._get_attribute_from_receipt(validation_response,'transaction_id')
-        self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket,
-                                       original_transaction_id=original_transaction_id)
+            transaction_id = self._get_attribute_from_receipt(validation_response, 'transaction_id')
+
+        if self.NAME == 'ios-iap':
+            original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
+                validation_response, 'original_transaction_id'))
+            if not original_transaction_id:
+                raise PaymentError(response)
+            if PaymentProcessorResponse.objects.filter(~Q(basket__owner=basket.owner),
+                    extension__original_transaction_id=original_transaction_id).exists():
+                raise RedundantPaymentNotificationError(response)
+            self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket,
+                                           original_transaction_id=original_transaction_id)
+        else:
+            self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket)
+
         logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
 
         currency = basket.currency
@@ -135,6 +142,28 @@ class BaseIAP(BasePaymentProcessor):
             card_number=label,
             card_type=None
         )
+
+    def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None):
+        """
+        Save the processor's response to the database for auditing.
+
+        Arguments:
+            response (dict): Response received from the payment processor
+
+        Keyword Arguments:
+            transaction_id (string): Identifier for the transaction on the payment processor's servers
+            original_transaction_id (string): Identifier for the transaction for purchase action only
+            basket (Basket): Basket associated with the payment event (e.g., being purchased)
+
+        Return
+            PaymentProcessorResponse
+        """
+        processor_response = super(BaseIAP, self).record_processor_response(response, transaction_id=transaction_id,
+                                                                            basket=basket)
+        if original_transaction_id:
+            PaymentProcessorResponseExtension.objects.create(processor_response=processor_response,
+                                                             original_transaction_id=original_transaction_id)
+        return processor_response
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         raise NotImplementedError('The [%s] payment processor does not support credit issuance.', self.NAME)
