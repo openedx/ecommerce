@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-08-28 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Somaye Joolaee, 2022\n"
 "Language-Team: Persian (Iran) (http://www.transifex.com/open-edx/edx-platform/language/fa_IR/)\n"
@@ -29,17 +29,17 @@ msgstr ""
 #: ecommerce/static/js/models/coupon_model.js:33
 #: ecommerce/static/js/models/enterprise_coupon_model.js:15
 msgid "This field is required."
-msgstr ""
+msgstr "پرکردن این قسمت ضروری است."
 
 #: ecommerce/static/js/models/coupon_model.js:34
 #: ecommerce/static/js/models/enterprise_coupon_model.js:16
 msgid "This value must be a number."
-msgstr ""
+msgstr "این مقدار باید عددی باشد."
 
 #: ecommerce/static/js/models/coupon_model.js:35
 #: ecommerce/static/js/models/enterprise_coupon_model.js:17
 msgid "This value must be a date."
-msgstr ""
+msgstr "این مقدار باید تاریخ باشد."
 
 #: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
@@ -159,7 +159,7 @@ msgstr "گواهی افتخاری"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "هیچ گواهی نیست"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
