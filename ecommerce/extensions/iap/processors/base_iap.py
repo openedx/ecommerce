@@ -4,8 +4,8 @@ from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from urllib.parse import urljoin
 import waffle
 
-from django.urls import reverse
 from django.db.models import Q
+from django.urls import reverse
 
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
@@ -116,13 +116,18 @@ class BaseIAP(BasePaymentProcessor):
             transaction_id = self._get_attribute_from_receipt(validation_response, 'transaction_id')
 
         if self.NAME == 'ios-iap':
+            # original_transaction_id is primary identifier for a purchase on iOS
             original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
                 validation_response, 'original_transaction_id'))
             if not original_transaction_id:
                 raise PaymentError(response)
-            if PaymentProcessorResponse.objects.filter(~Q(basket__owner=basket.owner),
-                    extension__original_transaction_id=original_transaction_id).exists():
+
+            # Check for multiple edx users using same iOS device/iOS account for purchase
+            is_redundant_payment = PaymentProcessorResponse.objects.filter(
+                ~Q(basket__owner=basket.owner), extension__original_transaction_id=original_transaction_id).exists()
+            if is_redundant_payment:
                 raise RedundantPaymentNotificationError(response)
+
             self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket,
                                            original_transaction_id=original_transaction_id)
         else:
