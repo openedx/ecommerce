@@ -50,7 +50,11 @@ from ecommerce.extensions.fulfillment.modules import (
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
-from ecommerce.extensions.test.factories import create_order
+from ecommerce.extensions.test.factories import (
+    EnterpriseOfferFactory,
+    EnterprisePercentageDiscountBenefitFactory,
+    create_order
+)
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -1212,7 +1216,16 @@ class ExecutiveEducation2UFulfillmentModuleTests(
         basket.add_product(self.exec_ed_2u_course_entitlement_2, 1)
         basket.add_product(self.non_exec_ed_2u_course_entitlement, 1)
         self.order = create_order(number=1, basket=basket, user=self.user)
-
+        # Create enterprise offer for order
+        offer = EnterpriseOfferFactory(
+            partner=self.partner,
+            benefit=EnterprisePercentageDiscountBenefitFactory(value=100)
+        )
+        factories.OrderDiscountFactory(
+            order=self.order,
+            offer_id=offer.id,
+            amount=100
+        )
         order_lines = self.order.lines.all()
         self.exec_ed_2u_entitlement_line = order_lines[0]
         self.exec_ed_2u_entitlement_line_2 = order_lines[1]
