@@ -17,3 +17,13 @@ class IAPProcessorConfiguration(SingletonModel):
 
     class Meta:
         verbose_name = "IAP Processor Configuration"
+
+
+class PaymentProcessorResponseExtension(models.Model):
+    """
+    This extends extensions.payments.models.PaymentProcessorResponse
+    """
+    processor_response = models.OneToOneField('payment.PaymentProcessorResponse', on_delete=models.CASCADE,
+                                              related_name='extension')
+    original_transaction_id = models.CharField(max_length=255, verbose_name=_('Original Transaction ID'), null=True,
+                                               blank=True)
