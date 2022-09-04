@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-28 20:12+0000\n"
+"POT-Creation-Date: 2022-09-04 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: Somaye Joolaee, 2022\n"
 "Language-Team: Persian (Iran) (http://www.transifex.com/open-edx/edx-platform/language/fa_IR/)\n"
@@ -254,11 +254,11 @@ msgstr ""
 
 #: ecommerce/core/models.py:438
 msgid "last name"
-msgstr ""
+msgstr "نام خانوادگی"
 
 #: ecommerce/core/models.py:441
 msgid "first name"
-msgstr ""
+msgstr "نام"
 
 #: ecommerce/core/models.py:442
 msgid "Full Name"
@@ -412,19 +412,19 @@ msgstr "آموزش اجرایی"
 
 #: ecommerce/courses/utils.py:145
 msgid "Paid Executive Education"
-msgstr ""
+msgstr "آموزش اجرایی با حقوق"
 
 #: ecommerce/courses/utils.py:146
 msgid "Unpaid Executive Education"
-msgstr ""
+msgstr "آموزش اجرایی بدون حقوق"
 
 #: ecommerce/courses/utils.py:147
 msgid "Paid Bootcamp"
-msgstr ""
+msgstr "Bootcamp پرداخت شده"
 
 #: ecommerce/courses/utils.py:148
 msgid "Unpaid Bootcamp"
-msgstr ""
+msgstr "Bootcamp پرداخت نشده"
 
 #: ecommerce/credit/views.py:40
 msgid ""
@@ -520,7 +520,7 @@ msgstr ""
 
 #: ecommerce/enterprise/forms.py:53
 msgid "Emails Addresses"
-msgstr ""
+msgstr "نشانی‌های رایانامه"
 
 #: ecommerce/enterprise/forms.py:54
 msgid "Comma separated emails which will receive the offer usage alerts"
@@ -532,7 +532,7 @@ msgstr ""
 
 #: ecommerce/enterprise/forms.py:73
 msgid "The maximum number of enrollments that can redeem this offer."
-msgstr ""
+msgstr "حداکثر تعداد ثبت‌نام‌هایی که می‌توانند از این پیشنهاد استفاده کنند."
 
 #: ecommerce/enterprise/forms.py:74
 msgid "The maximum USD dollar amount that can be redeemed by this offer."
@@ -559,7 +559,7 @@ msgstr ""
 
 #: ecommerce/enterprise/forms.py:81
 msgid "Enrollment Limit"
-msgstr ""
+msgstr "محدودیت ثبت‌نام"
 
 #: ecommerce/enterprise/forms.py:82
 msgid "Bookings Limit"
@@ -578,17 +578,17 @@ msgstr ""
 msgid ""
 "Ensure new value must be greater than or equal to "
 "consumed({offer_enrollments}) value."
-msgstr ""
+msgstr "اطمینان حاصل کنید که مقدار جدید، بزرگتر یا مساوی با مقدار مصرف‌شده ({offer_enrollments}) باشد."
 
 #: ecommerce/enterprise/forms.py:160
 msgid ""
 "Salesforce Opportunity ID must be 18 alphanumeric characters and begin with "
 "006."
-msgstr ""
+msgstr "شناسه فرصت Salesforce باید 18 نویسه الفبایی عددی داشته باشد و با 006 شروع شود."
 
 #: ecommerce/enterprise/forms.py:168 ecommerce/enterprise/forms.py:216
 msgid "Ensure this value is greater than or equal to 0."
-msgstr ""
+msgstr "اطمینان حاصل کنید که این مقدار بزرگتر یا مساوی 0 باشد."
 
 #: ecommerce/enterprise/forms.py:175 ecommerce/enterprise/forms.py:232
 #, python-brace-format
@@ -849,7 +849,7 @@ msgstr "کد تخفیف"
 
 #: ecommerce/extensions/api/serializers.py:1978
 msgid "Invalid order number or order {} does not exists."
-msgstr ""
+msgstr "شماره سفارش یا سفارش {} معتبر نیست."
 
 #: ecommerce/extensions/api/serializers.py:2033
 msgid "New coupon voucher assignment Failure. Error: {}"
@@ -1129,7 +1129,7 @@ msgstr ""
 
 #: ecommerce/extensions/offer/constants.py:40
 msgid "Assign"
-msgstr ""
+msgstr "تخصیص"
 
 #: ecommerce/extensions/offer/constants.py:41
 msgid "Remind"
@@ -1711,7 +1711,7 @@ msgstr "قابل اجرا نیست"
 
 #: ecommerce/invoice/models.py:26
 msgid "Fixed"
-msgstr ""
+msgstr "اصلاح شد"
 
 #: ecommerce/management/templates/management/index.html:7
 msgid "Management View"
@@ -1795,7 +1795,7 @@ msgstr ""
 
 #: ecommerce/referrals/models.py:26
 msgid "Affiliate ID"
-msgstr ""
+msgstr "شناسه وابسته"
 
 #: ecommerce/referrals/models.py:27
 msgid "UTM Source"
@@ -1948,11 +1948,11 @@ msgstr "رمزهای کوپن"
 msgid ""
 "Earn a verified certificate in one of our popular courses to advance your "
 "career, showcase your accomplishments or enhance your college application."
-msgstr ""
+msgstr "در یکی از دوره‌های آموزشی محبوب ما برای ارتقا شغلی، نمایش دستاوردهای خود یا ارتقای درخواست خود برای ورود به کالج، گواهی تاییدشده دریافت کنید."
 
 #: ecommerce/templates/coupons/offer.html:22
 msgid "Why buy a verified certificate?"
-msgstr ""
+msgstr "چرا گواهی تاییدشده را بخرم؟"
 
 #: ecommerce/templates/coupons/offer.html:27
 msgid ""
@@ -1961,25 +1961,25 @@ msgid ""
 "university's logo, as well as signatures from faculty members involved with "
 "the course. There is also a URL that can be used to verify the authenticity "
 "of the certificate."
-msgstr ""
+msgstr "گواهی تاییدشده (دیجیتال) که تایید می‌کند کاربر دوره آموزشی را در تاریخ مشخصی به پایان رسانده است. این گواهی شامل نشان تجاری edX و  نشان تجاری دانشگاه در کنار امضای اعضای هیئت علمی مرتبط با دوره آموزشی است. همچنین نشانی اینترنتی وجود دارد که می‌توان از آن برای تأیید صحت گواهی استفاده نمود."
 
 #: ecommerce/templates/coupons/offer.html:30
 msgid ""
 "A verified certificate demonstrates to future employers that you've mastered"
 " the course material."
-msgstr ""
+msgstr "یک گواهی تاییدشده به کارفرمایان آینده شما نشان می‌دهد که شما بر مطالب دوره آموزشی کاملا مسلط بوده‌اید."
 
 #: ecommerce/templates/coupons/offer.html:32
 msgid ""
 "The certificate is officially signed and stamped by the institution that "
 "offers the course."
-msgstr ""
+msgstr "این گواهی به‌طور رسمی توسط موسسه ارائه‌دهنده دوره آموزشی امضا و مهر شده‌است."
 
 #: ecommerce/templates/coupons/offer.html:34
 msgid ""
 "You're twelve times more likely to complete the course if you're working "
 "toward a verified certificate."
-msgstr ""
+msgstr "اگر در حال تلاش برای دریافت گواهی تاییدشده هستید، دوازده برابر بیشتر احتمال دارد این دوره آموزشی را تکمیل کنید."
 
 #: ecommerce/templates/courses/course_app.html:5
 #: ecommerce/templates/edx/partials/_administration_menu.html:5
@@ -2030,7 +2030,7 @@ msgstr ""
 #: ecommerce/templates/edx/checkout/receipt.html:59
 msgid ""
 "Your order is complete. If you need a receipt, you can print this page."
-msgstr ""
+msgstr "سفارش شما تکمیل شد. در صورت نیاز به رسید، می‌توانید این صفحه را چاپ کنید."
 
 #: ecommerce/templates/edx/checkout/receipt.html:77
 msgid "Order Number:"
@@ -2284,7 +2284,7 @@ msgstr "اگر نیاز به راهنمایی دارید، با پشتیبانی
 
 #: ecommerce/templates/edx/partials/_administration_menu.html:6
 msgid "Coupons"
-msgstr ""
+msgstr "کوپن‌ها"
 
 #: ecommerce/templates/edx/partials/_administration_menu.html:8
 msgid "Enterprise Coupons"
@@ -2504,11 +2504,11 @@ msgstr ""
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:274
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:152
 msgid "Place Order"
-msgstr ""
+msgstr "ثبت سفارش"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:23
 msgid "Earn a valuable certificate to showcase the skills you learn in"
-msgstr ""
+msgstr "برای نمایش مهارت‌هایی که در دوره آموزشی فرا می‌گیرید، گواهی ارزشمندی کسب کنید"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:70
 #, python-format
@@ -2554,7 +2554,7 @@ msgstr "سوالی دارید؟"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:186
 msgid "Please read our FAQs to view common questions about our certificates."
-msgstr ""
+msgstr "لطفاً سؤالات متداول را بخوانید تا سؤالات رایج درباره گواهی‌های ما را مشاهده کنید."
 
 #: ecommerce/templates/oscar/basket/partials/seat_type.html:6
 #, python-format
@@ -2910,7 +2910,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/communication/emails/commtype_order_with_csv_body.txt:2
 msgid "Order confirmation for: "
-msgstr ""
+msgstr "تایید سفارش برای:"
 
 #: ecommerce/templates/oscar/communication/emails/commtype_order_with_csv_body.txt:8
 #, python-format
@@ -2933,7 +2933,7 @@ msgstr ""
 #: ecommerce/templates/oscar/communication/emails/commtype_order_with_csv_subject.txt:2
 #, python-format
 msgid "%(partner_name)s: Order Confirmation: [%(order_number)s]"
-msgstr ""
+msgstr "%(partner_name)s: تایید سفارش: [%(order_number)s]"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:6
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:6
@@ -2950,11 +2950,11 @@ msgstr "ویرایش دسته‌بندی"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:17
 msgid "Add child category"
-msgstr ""
+msgstr "افزودن زیردسته "
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:22
 msgid "Edit children"
-msgstr ""
+msgstr "ویرایش زیردسته‌ها"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:27
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:14
@@ -3013,7 +3013,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:60
 msgid "Edit again"
-msgstr ""
+msgstr "ویرایش دوباره"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:45
 #, python-brace-format
@@ -3032,13 +3032,13 @@ msgstr "بخش‌ها"
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:103
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:34
 msgid "Product details"
-msgstr ""
+msgstr "جزییات محصول"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:78
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:146
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:257
 msgid "Attributes"
-msgstr ""
+msgstr "ویژگی‌ها"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:81
 msgid "Images"
@@ -3047,24 +3047,24 @@ msgstr "تصاویر"
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:84
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:188
 msgid "Stock and pricing"
-msgstr ""
+msgstr "سهام و قیمت‌گذاری"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:87
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:248
 msgid "Variants"
-msgstr ""
+msgstr "انواع"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:90
 msgid "Upselling"
-msgstr ""
+msgstr "پرفروش"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:148
 msgid "Product Type:"
-msgstr ""
+msgstr "نوع محصول:"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:169
 msgid "Upload, change or remove images"
-msgstr ""
+msgstr "بارگذاری، تغییر یا حذف تصاویر"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:194
 msgid "SKU"
@@ -3072,39 +3072,39 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:196
 msgid "Num in stock"
-msgstr ""
+msgstr "تعداد موجود در انبار"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:197
 msgid "Num allocated"
-msgstr ""
+msgstr "تعداد اختصاص داده‌شده"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:198
 msgid "Low stock threshold"
-msgstr ""
+msgstr "آستانه سهام پایین"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:201
 msgid "Cost price"
-msgstr ""
+msgstr "قیمت هزینه"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:202
 msgid "Price (excl tax)"
-msgstr ""
+msgstr "قیمت (بدون احتساب مالیات)"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:203
 msgid "Retail price"
-msgstr ""
+msgstr "قیمت خرده‌فروشی"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:204
 msgid "Delete?"
-msgstr ""
+msgstr "حذف شود؟"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:249
 msgid "Adding..."
-msgstr ""
+msgstr "در حال افزودن"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:251
 msgid "Add variant"
-msgstr ""
+msgstr "افزودن گونه"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:256
 msgid "Title"
@@ -3112,23 +3112,23 @@ msgstr "عنوان"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:258
 msgid "Stock records"
-msgstr ""
+msgstr "سوابق سهام"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:280
 msgid "This product does not have any variants."
-msgstr ""
+msgstr "این محصول هیچ گونه‌ای ندارد."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:282
 msgid "One can't add variants to this product at this point."
-msgstr ""
+msgstr "در حال حاضر نمی‌توان گونه‌ای را به این محصول افزود."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:284
 msgid "This is likely because this product still has stock records."
-msgstr ""
+msgstr "این احتمالاً به این دلیل است که این محصول هنوز دارای سوابق موجودی است."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:300
 msgid "Recommended products"
-msgstr ""
+msgstr "محصولات پیشنهادی"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:325
 msgid "or"
@@ -3142,11 +3142,11 @@ msgstr "در حال ذخیره ..."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:328
 msgid "Save and add another variant"
-msgstr ""
+msgstr "ذخیره کنید و گونه‌ای دیگر بیفزایید"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:332
 msgid "Save and continue editing"
-msgstr ""
+msgstr "ذخیره کنید و به ویرایش ادامه دهید"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:335
 msgid "Save"
@@ -3289,17 +3289,17 @@ msgid ""
 "\n"
 "        Order %(number)s - Line #%(id)s\n"
 "    "
-msgstr ""
+msgstr "\nسفارش%(number)s- خط #%(id)s"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:22
 #, python-format
 msgid "Line #%(id)s"
-msgstr ""
+msgstr "خط #%(id)s"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:27
 #, python-format
 msgid "Order #%(number)s - Line #%(id)s"
-msgstr ""
+msgstr "سفارش #%(number)s- خط #%(id)s"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:38
 msgctxt "Product title"
@@ -3308,7 +3308,7 @@ msgstr "عنوان"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:44
 msgid "Product Type"
-msgstr ""
+msgstr "نوع محصول"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:47
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:140
@@ -3318,11 +3318,11 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:54
 msgid "Product Options"
-msgstr ""
+msgstr "گزینه‌های محصول"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:67
 msgid "Partner details"
-msgstr ""
+msgstr "مشخصات همکار"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:77
 msgid "Partner SKU"
@@ -3330,23 +3330,23 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:83
 msgid "Shipping details"
-msgstr ""
+msgstr "جزئیات حمل‌ونقل"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:87
 msgid "Partner reference number"
-msgstr ""
+msgstr "شماره مرجع همکار"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:90
 msgid "Partner notes"
-msgstr ""
+msgstr "یادداشت‌های همکار"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:93
 msgid "Estimate dispatch date"
-msgstr ""
+msgstr "برآورد تاریخ ارسال"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:102
 msgid "Shipping status"
-msgstr ""
+msgstr "وضعیت ارسال"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:107
 msgid "State"
@@ -3355,11 +3355,11 @@ msgstr "ایالت"
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:119
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:150
 msgid "No shipping events have occurred."
-msgstr ""
+msgstr "هنوز ارسال صورت نگرفته است."
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:127
 msgid "Shipping events"
-msgstr ""
+msgstr "رویدادهای مربوط به حمل‌ونقل"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:132
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:163
@@ -3390,11 +3390,11 @@ msgstr "تاریخ "
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:158
 msgid "Payment events"
-msgstr ""
+msgstr "رویدادهای پرداخت"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:179
 msgid "No payment events have occurred."
-msgstr ""
+msgstr "هیچ رویداد پرداختی رخ نداده است."
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:10
 #, python-format
@@ -3798,13 +3798,13 @@ msgstr "تأیید پردازش بازپرداخت"
 msgid ""
 "Are you sure you want to issue a full refund and revoke student's "
 "enrollment?"
-msgstr ""
+msgstr "آیا مطمئن هستید که می‌خواهید بازپرداخت کامل کرده و ثبت‌نام افراد را لغو کنید؟"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:14
 msgid ""
 "Are you sure you want to issue a full refund without revoking student's "
 "enrollment?"
-msgstr ""
+msgstr "آیا مطمئن هستید که مایلید بدون لغو ثبت‌نام فرد، بازپرداخت کامل را صادر کنید؟"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:17
 msgid "Are you sure you want to deny this refund request?"
@@ -3816,11 +3816,11 @@ msgstr "تایید"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:5
 msgid "Approve Credit and Revoke"
-msgstr ""
+msgstr "تایید اعتبار و ابطال"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:8
 msgid "Approve Credit Only"
-msgstr ""
+msgstr "فقط اعتبار را تأیید کنید"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:14
 msgid "Deny"
