@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-aiohttp==3.7.4.post0
+aiohttp==3.8.0
     # via inapppy
 amqp==2.6.1
     # via kombu
@@ -151,7 +151,7 @@ django-extra-views==0.13.0
     # via django-oscar
 django-filter==22.1
     # via -r requirements/base.in
-django-haystack==3.2.1
+django-haystack==3.1.1
     # via django-oscar
 django-libsass==0.9
     # via -r requirements/base.in
@@ -250,7 +250,7 @@ factory-boy==2.12.0
     # via django-oscar
 faker==14.2.0
     # via factory-boy
-fixtures==4.0.1
+fixtures==3.0.0
     # via
     #   cybersource-rest-client-python
     #   testtools
@@ -384,7 +384,6 @@ protobuf==3.17.3
     # via
     #   google-api-core
     #   googleapis-common-protos
-psutil==5.8.0
 purl==1.6
     # via django-oscar
 pyasn1-modules==0.2.8

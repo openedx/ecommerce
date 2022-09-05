@@ -17,6 +17,7 @@ from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
 
+from ecommerce.extensions.api.v2.views.checkout import CheckoutView
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException
@@ -176,7 +177,9 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
             with transaction.atomic():
                 try:
                     self.handle_payment(receipt, basket)
-                except (PaymentError, RedundantPaymentNotificationError) as ex:
+                except RedundantPaymentNotificationError:
+                    return  JsonResponse({'error': 'The course has already been paid for on this device by the associated Apple ID.'}, status=409)
+                except PaymentError as ex:
                     return JsonResponse({'error': repr(ex)}, status=400)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
@@ -196,3 +199,14 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
             return JsonResponse({'error': 'An error occured during post order operations.'}, status=200)
 
         return JsonResponse({'order_data': OrderSerializer(order, context={'request': request}).data}, status=200)
+
+
+class MobileCheckoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        response = CheckoutView.as_view()(request._request)
+        if response.status_code != 200:
+            return JsonResponse({'error': response.content.decode()}, status=response.status_code)
+
+        return response
