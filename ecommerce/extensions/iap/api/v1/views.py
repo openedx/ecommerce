@@ -176,7 +176,9 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
             with transaction.atomic():
                 try:
                     self.handle_payment(receipt, basket)
-                except (PaymentError, RedundantPaymentNotificationError) as ex:
+                except RedundantPaymentNotificationError:
+                    return  JsonResponse({'error': 'The course has already been paid for on this device by the associated Apple ID.'}, status=409)
+                except PaymentError as ex:
                     return JsonResponse({'error': repr(ex)}, status=400)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
