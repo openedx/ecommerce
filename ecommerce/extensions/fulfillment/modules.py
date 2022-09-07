@@ -9,7 +9,6 @@ import abc
 import datetime
 import json
 import logging
-import uuid
 from urllib.parse import urlencode, urljoin
 
 import requests
@@ -937,22 +936,18 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
         """
         return [line for line in lines if self.supports_line(line)]
 
-    def _generate_payment_reference(self):
-        # TODO: ENT-6088 Implement method for generating payment reference
-        return uuid.uuid4().hex[0:20]
-
     def _create_allocation_payload(
         self,
+        order,
         line,
         fulfillment_details,
         currency='USD'
     ):
         # A variant_id attribute must exist on the product
         variant_id = getattr(line.product.attr, 'variant_id')
-        payment_reference = self._generate_payment_reference()
 
         return {
-            'payment_reference': payment_reference,
+            'payment_reference': order.number,
             'currency': currency,
             'order_items': [
                 {
@@ -1014,6 +1009,7 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
             product = line.product
 
             allocation_payload = self._create_allocation_payload(
+                order=order,
                 line=line,
                 fulfillment_details=fulfillment_details
             )

@@ -56,7 +56,8 @@ def get_entitlement(uuid, certificate_type):
 
 
 def create_or_update_course_entitlement(
-    certificate_type, price, partner, UUID, title, id_verification_required=False, credit_provider=False
+    certificate_type, price, partner, UUID, title, id_verification_required=False, credit_provider=False,
+    variant_id=None,
 ):
     """ Create or Update Course Entitlement Products """
     certificate_type = certificate_type.lower()
@@ -76,6 +77,8 @@ def create_or_update_course_entitlement(
     course_entitlement.attr.id_verification_required = id_verification_required
     course_entitlement.attr.credit_provider = credit_provider
     course_entitlement.parent = parent_entitlement
+    if variant_id:
+        course_entitlement.attr.variant_id = variant_id
     course_entitlement.save()
 
     __, created = StockRecord.objects.update_or_create(

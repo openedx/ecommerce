@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-09-04 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Somaye Joolaee, 2022\n"
 "Language-Team: Persian (Iran) (http://www.transifex.com/open-edx/edx-platform/language/fa_IR/)\n"
@@ -29,21 +29,21 @@ msgstr ""
 #: ecommerce/static/js/models/coupon_model.js:33
 #: ecommerce/static/js/models/enterprise_coupon_model.js:15
 msgid "This field is required."
-msgstr ""
+msgstr "پرکردن این قسمت ضروری است."
 
 #: ecommerce/static/js/models/coupon_model.js:34
 #: ecommerce/static/js/models/enterprise_coupon_model.js:16
 msgid "This value must be a number."
-msgstr ""
+msgstr "این مقدار باید عددی باشد."
 
 #: ecommerce/static/js/models/coupon_model.js:35
 #: ecommerce/static/js/models/enterprise_coupon_model.js:17
 msgid "This value must be a date."
-msgstr ""
+msgstr "این مقدار باید تاریخ باشد."
 
 #: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
-msgstr ""
+msgstr "حداقل یک نوع جایگاه باید انتخاب شود."
 
 #: ecommerce/static/js/models/coupon_model.js:72
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
@@ -159,7 +159,7 @@ msgstr "گواهی افتخاری"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "هیچ گواهی نیست"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
@@ -167,7 +167,7 @@ msgstr "همه صندلی‌های اعتباری باید فراهم‌آورن
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:30
 msgid "Please select a valid credit provider."
-msgstr ""
+msgstr "لطفاً یک ارائه‌دهنده اعتبار معتبر انتخاب کنید."
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:39
 msgid "All credit seats must designate a number of credit hours."
@@ -409,7 +409,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid "Verified Only"
-msgstr ""
+msgstr "فقط تأییدشده"
 
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Professional Education"
@@ -457,7 +457,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:78
 msgid "Seat type"
-msgstr ""
+msgstr "نوع جایگاه"
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
@@ -482,7 +482,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/form_view.js:71
 msgid "A course with the specified ID already exists."
-msgstr ""
+msgstr "دوره‌ای با شناسه مشخص شده از قبل وجود دارد."
 
 #: ecommerce/static/js/views/form_view.js:81
 #: ecommerce/static/js/views/form_view.js:174
@@ -503,11 +503,11 @@ msgstr "در هنگام ذخیره داده‌ها خطایی رخ داد."
 
 #: ecommerce/static/js/views/offer_view.js:198
 msgid "Ellipsis"
-msgstr ""
+msgstr "بیضی"
 
 #: ecommerce/static/js/views/offer_view.js:205
 msgid "Load the records for page "
-msgstr ""
+msgstr "بارگیری تاریخچه صفحه"
 
 #: ecommerce/static/js/views/offer_view.js:212
 msgid "Load the records for the next page"
