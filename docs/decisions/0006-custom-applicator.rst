@@ -33,5 +33,5 @@ We noticed some bugs in which learners were seeing different prices and discount
 
 
 .. _default behaviour of Oscar Applicator: https://github.com/django-oscar/django-oscar/blob/40a4cacc27223ac675f5e859e7568b632e3f304c/src/oscar/apps/offer/applicator.py#L46-L61
-.. _custom applicator: https://github.com/edx/ecommerce/blob/master/ecommerce/extensions/offer/applicator.py
+.. _custom applicator: https://github.com/openedx/ecommerce/blob/master/ecommerce/extensions/offer/applicator.py
 .. _get_site_offers(): https://github.com/django-oscar/django-oscar/blob/40a4cacc27223ac675f5e859e7568b632e3f304c/src/oscar/apps/offer/applicator.py#L63-L72

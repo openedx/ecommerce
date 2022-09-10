@@ -95,7 +95,7 @@ class AutoAuthTests(TestCase):
 
 
 class LogoutViewTests(TestCase):
-    """ Taken from https://github.com/edx/auth-backends/blob/master/auth_backends/tests/mixins.py """
+    """ Taken from https://github.com/openedx/auth-backends/blob/master/auth_backends/tests/mixins.py """
     PASSWORD = 'test'
 
     def _create_user(self):

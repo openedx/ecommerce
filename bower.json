@@ -1,6 +1,6 @@
 {
   "name": "edx-ecommerce",
-  "homepage": "https://github.com/edx/ecommerce",
+  "homepage": "https://github.com/openedx/ecommerce",
   "private": true,
   "ignore": [
     "**/.*",

@@ -239,7 +239,7 @@ class ConditionalOffer(AbstractConditionalOffer):
     partner = models.ForeignKey('partner.Partner', null=True, blank=True, on_delete=models.CASCADE)
 
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
-    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    # django-simple-history.  Background: https://github.com/openedx/course-discovery/pull/332
     history = HistoricalRecords(excluded_fields=['slug'])
     enterprise_contract_metadata = models.OneToOneField(
         'payment.EnterpriseContractMetadata',
@@ -466,7 +466,7 @@ class Range(AbstractRange):
     )
 
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
-    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    # django-simple-history.  Background: https://github.com/openedx/course-discovery/pull/332
     history = HistoricalRecords(excluded_fields=['slug'])
 
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ

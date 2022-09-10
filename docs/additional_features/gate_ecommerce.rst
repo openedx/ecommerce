@@ -62,7 +62,7 @@ Waffle offers the following feature gates.
    * - allow_missing_lms_user_id
      - Switch
      - Allow a missing LMS user id without raising a MissingLmsUserIdException. For background, see
-       `0004-unique-identifier-for-users <https://github.com/edx/ecommerce/blob/master/docs/decisions/0004-unique-identifier-for-users.rst>`_
+       `0004-unique-identifier-for-users <https://github.com/openedx/ecommerce/blob/master/docs/decisions/0004-unique-identifier-for-users.rst>`_
 
 **********************************
 Enable a Feature Permanently

@@ -62,7 +62,7 @@ A set of backend-for-frontend (BFF) APIs were introduced which are specifically 
 * The new BFF endpoints were implemented sharing as much code as possible with the original server-side templates.
 
 .. _ARCH-1073: https://openedx.atlassian.net/browse/ARCH-1073
-.. _message_utils.py: https://github.com/edx/ecommerce/blob/438085a194729fc0843c2791e85d649bc9bdafb4/ecommerce/extensions/basket/message_utils.py
+.. _message_utils.py: https://github.com/openedx/ecommerce/blob/438085a194729fc0843c2791e85d649bc9bdafb4/ecommerce/extensions/basket/message_utils.py
 
 Other API Updates Supporting the Payment MFE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,5 +108,5 @@ References
 .. _edX REST API Conventions: https://openedx.atlassian.net/wiki/spaces/AC/pages/18350757/edX+REST+API+Conventions#edXRESTAPIConventions-5.Errors
 .. _edX REST API Trichotomy: https://openedx.atlassian.net/wiki/spaces/AC/pages/790036554/REST+API+Trichotomy+Proposal
 .. _edX's Feature-driven APIs: https://openedx.atlassian.net/wiki/spaces/AC/pages/790036554/REST+API+Trichotomy+Proposal
-.. _frontend-app-payment documentation: https://github.com/edx/frontend-app-payment/blob/master/README.rst
-.. _absolute_redirect method: https://github.com/edx/ecommerce/blob/1b102573c86027a713d216702add61d5c63b8a40/ecommerce/core/url_utils.py#L122-L123
+.. _frontend-app-payment documentation: https://github.com/openedx/frontend-app-payment/blob/master/README.rst
+.. _absolute_redirect method: https://github.com/openedx/ecommerce/blob/1b102573c86027a713d216702add61d5c63b8a40/ecommerce/core/url_utils.py#L122-L123
