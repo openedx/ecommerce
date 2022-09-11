@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-04 20:12+0000\n"
+"POT-Creation-Date: 2022-09-11 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Somaye Joolaee, 2022\n"
 "Language-Team: Persian (Iran) (http://www.transifex.com/open-edx/edx-platform/language/fa_IR/)\n"
@@ -60,7 +60,7 @@ msgstr "باید پس از تاریخ آغاز انجام شود"
 
 #: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
-msgstr ""
+msgstr "حداکثر استفاده برای کوپن‌های چندمنظوره باید بیش از 2 باشد."
 
 #: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
@@ -175,7 +175,7 @@ msgstr "برای همه صندلی‌های اعتباری باید تعدادی
 
 #: ecommerce/static/js/models/enterprise_coupon_model.js:18
 msgid "This value must be a valid email."
-msgstr ""
+msgstr "این مقدار باید نشانی رایانامه‌ای معتبر باشد."
 
 #: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
@@ -183,15 +183,15 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
-msgstr ""
+msgstr "این قسمت الزامی است"
 
 #: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid card number"
-msgstr ""
+msgstr "شماره کارت معتبر نیست"
 
 #: ecommerce/static/js/pages/basket_page.js:147
 msgid "Unsupported card type"
-msgstr ""
+msgstr "نوع کارت پشتیبانی نمی‌شود"
 
 #: ecommerce/static/js/pages/basket_page.js:149
 msgid "Invalid security number"
@@ -207,7 +207,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:158
 msgid "Card expired"
-msgstr ""
+msgstr "کارت منقضی شد"
 
 #: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
@@ -215,7 +215,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
-msgstr ""
+msgstr "ایالت/استان (الزامی)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 #: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
@@ -254,7 +254,7 @@ msgstr "دوره‌های آموزشی"
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
-msgstr ""
+msgstr "کد کوپن‌های سازمانی"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
@@ -270,7 +270,7 @@ msgstr ""
 #: ecommerce/static/js/payment_processors/cybersource.js:225
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "اکنون Apple Pay در دسترس نیست. لطفاً روش پرداخت دیگری را امتحان کنید."
 
 #: ecommerce/static/js/payment_processors/cybersource.js:255
 msgid ""
@@ -338,16 +338,16 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:49
 msgid "Custom Code"
-msgstr ""
+msgstr "کدسفارشی"
 
 #: ecommerce/static/js/views/coupon_list_view.js:55
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:44
 msgid "Client"
-msgstr ""
+msgstr "مشتری"
 
 #: ecommerce/static/js/views/coupon_list_view.js:61
 msgid "Category"
-msgstr ""
+msgstr "دسته‌بندی"
 
 #: ecommerce/static/js/views/coupon_list_view.js:67
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
@@ -395,13 +395,13 @@ msgstr "مسیر حسابرسی رایگان. بدون گواهی"
 
 #: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified and Audit"
-msgstr ""
+msgstr "تایید و حسابرسی"
 
 #: ecommerce/static/js/views/course_form_view.js:61
 #: ecommerce/static/js/views/course_form_view.js:67
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate."
-msgstr ""
+msgstr "مسیر گواهی پولی با تأیید اولیه و گواهی تأییدشده."
 
 #: ecommerce/static/js/views/course_form_view.js:62
 msgid "Also includes the free audit track."
@@ -453,7 +453,7 @@ msgstr "آخرین ویرایش"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
-msgstr ""
+msgstr "عنوان جایگاه"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:78
 msgid "Seat type"
@@ -462,19 +462,19 @@ msgstr "نوع جایگاه"
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
-msgstr ""
+msgstr "امکان استفاده چندین باره از آن برای یک مشتری فراهم است"
 
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
 msgid "Create and Add More"
-msgstr ""
+msgstr "ایجاد و افزودن موارد بیشتر"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "وضعیت"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
-msgstr ""
+msgstr "مشتری سازمانی"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:56
 msgid "Enterprise Customer Catalog"
@@ -495,7 +495,7 @@ msgstr "در حال ذخیره..."
 
 #: ecommerce/static/js/views/form_view.js:136
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "لطفا همه قسمت‌های الزامی را تکمیل کنید."
 
 #: ecommerce/static/js/views/form_view.js:161
 msgid "An error occurred while saving the data."

@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-21 20:12+0000\n"
+"POT-Creation-Date: 2022-09-11 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: trendspotter <jirka.p@volny.cz>, 2022\n"
 "Language-Team: Czech (http://www.transifex.com/open-edx/edx-platform/language/cs/)\n"
@@ -810,7 +810,7 @@ msgid "Products must have a certificate type."
 msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:696
-#: ecommerce/extensions/api/serializers.py:739
+#: ecommerce/extensions/api/serializers.py:741
 msgid "Products must have a price."
 msgstr ""
 
@@ -818,16 +818,16 @@ msgstr ""
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:735
+#: ecommerce/extensions/api/serializers.py:737
 msgid "Products must indicate whether ID verification is required."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:806
+#: ecommerce/extensions/api/serializers.py:808
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:838
+#: ecommerce/extensions/api/serializers.py:840
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -835,29 +835,29 @@ msgid ""
 " been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1508
+#: ecommerce/extensions/api/serializers.py:1510
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1509
+#: ecommerce/extensions/api/serializers.py:1511
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1976
+#: ecommerce/extensions/api/serializers.py:1978
 msgid "Invalid order number or order {} does not exists."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:2031
+#: ecommerce/extensions/api/serializers.py:2033
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:2049
+#: ecommerce/extensions/api/serializers.py:2051
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:2080
+#: ecommerce/extensions/api/serializers.py:2082
 msgid "Could note create new voucher for the order: {}"
 msgstr ""
 
