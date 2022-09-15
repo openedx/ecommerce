@@ -259,7 +259,7 @@ funcsigs==1.0.2
     # via cybersource-rest-client-python
 future==0.18.2
     # via pyjwkest
-getsmarter-api-clients==0.3.1
+getsmarter-api-clients==0.4.0
     # via -r requirements/base.in
 gunicorn==19.7.1
     # via -r requirements/production.in
