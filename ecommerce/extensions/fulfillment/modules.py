@@ -946,8 +946,13 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
         # A variant_id attribute must exist on the product
         variant_id = getattr(line.product.attr, 'variant_id')
 
+        # This will be the offer that was applied. We will let an error be thrown if this doesn't exist.
+        discount = order.discounts.first()
+        enterprise_customer_uuid = str(discount.offer.condition.enterprise_customer_uuid)
+
         return {
             'payment_reference': order.number,
+            'enterprise_customer_uuid': enterprise_customer_uuid,
             'currency': currency,
             'order_items': [
                 {
