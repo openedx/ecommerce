@@ -33,7 +33,7 @@ from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import construct_enterprise_course_consent_url
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
-from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.basket.utils import _set_basket_bundle_status, apply_voucher_on_basket_and_check_discount
@@ -403,6 +403,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
     def assert_expected_response(
             self,
             basket,
+            enable_stripe_payment_processor=False,
             url=None,
             response=None,
             status_code=200,
@@ -456,6 +457,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
         expected_response = {
             'basket_id': basket.id,
             'currency': currency,
+            'enable_stripe_payment_processor': enable_stripe_payment_processor,
             'offers': offers,
             'coupons': coupons,
             'messages': messages if messages else [],
@@ -697,6 +699,18 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
             discount_type=Benefit.PERCENTAGE,
             voucher=voucher,
         )
+
+    @ddt.data(True, False)
+    def test_enable_stripe_payment_processor_flag(self, enable_stripe_payment_processor):
+        with override_flag(ENABLE_STRIPE_PAYMENT_PROCESSOR, active=enable_stripe_payment_processor):
+            seat = self.create_seat(self.course)
+            basket = self.create_basket_and_add_product(seat)
+            response = self.client.get(self.path)
+            self.assert_expected_response(
+                basket,
+                response=response,
+                enable_stripe_payment_processor=enable_stripe_payment_processor,
+            )
 
     @responses.activate
     def test_enterprise_free_basket_redirect(self):
