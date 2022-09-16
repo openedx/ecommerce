@@ -40,7 +40,7 @@ backoff==1.10.0
     # via
     #   -r requirements/base.txt
     #   analytics-python
-bcrypt==3.2.2
+bcrypt==4.0.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
@@ -55,9 +55,9 @@ bleach==5.0.1
     # via -r requirements/base.txt
 bok-choy==1.1.1
     # via -r requirements/test.in
-boto3==1.24.49
+boto3==1.24.73
     # via -r requirements/base.txt
-botocore==1.27.49
+botocore==1.27.73
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -71,7 +71,7 @@ celery==4.4.7
     #   -c requirements/constraints.txt
     #   -r requirements/base.txt
     #   edx-ecommerce-worker
-certifi==2022.6.15
+certifi==2022.9.14
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -81,7 +81,6 @@ cffi==1.15.1
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
-    #   bcrypt
     #   cryptography
     #   cybersource-rest-client-python
     #   pynacl
@@ -90,7 +89,7 @@ chardet==5.0.0
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
     #   diff-cover
-charset-normalizer==2.1.0
+charset-normalizer==2.1.1
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -100,7 +99,7 @@ click==8.1.3
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
     #   edx-django-utils
-configparser==5.2.0
+configparser==5.3.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
@@ -113,7 +112,7 @@ coreschema==0.0.4
     #   -r requirements/base.txt
     #   coreapi
     #   drf-yasg
-coverage[toml]==6.4.3
+coverage[toml]==6.4.4
     # via
     #   -r requirements/base.txt
     #   -r requirements/test.in
@@ -123,7 +122,7 @@ crypto==1.4.1
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-cryptography==37.0.4
+cryptography==38.0.1
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -136,7 +135,7 @@ cssselect==1.1.0
     # via
     #   -r requirements/base.txt
     #   premailer
-cssutils==2.5.1
+cssutils==2.6.0
     # via
     #   -r requirements/base.txt
     #   premailer
@@ -144,7 +143,7 @@ cybersource-rest-client-python==0.0.21
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.txt
-datetime==4.5
+datetime==4.7
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
@@ -212,7 +211,7 @@ django-crum==0.7.9
     #   -r requirements/e2e.txt
     #   edx-django-utils
     #   edx-rbac
-django-extensions==3.2.0
+django-extensions==3.2.1
     # via -r requirements/base.txt
 django-extra-views==0.13.0
     # via
@@ -254,7 +253,7 @@ django-treebeard==4.4
     # via
     #   -r requirements/base.txt
     #   django-oscar
-django-waffle==2.6.0
+django-waffle==3.0.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -303,7 +302,7 @@ edx-django-release-util==1.2.0
     # via -r requirements/base.txt
 edx-django-sites-extensions==4.0.0
     # via -r requirements/base.txt
-edx-django-utils==5.0.0
+edx-django-utils==5.0.1
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -346,7 +345,7 @@ factory-boy==2.12.0
     #   -r requirements/base.txt
     #   -r requirements/test.in
     #   django-oscar
-faker==13.15.1
+faker==14.2.0
     # via
     #   -r requirements/base.txt
     #   factory-boy
@@ -359,7 +358,7 @@ fixtures==4.0.1
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
     #   testtools
-freezegun==1.2.1
+freezegun==1.2.2
     # via -r requirements/test.in
 funcsigs==1.0.2
     # via
@@ -422,7 +421,7 @@ jmespath==1.0.1
     #   botocore
 jsonfield==3.1.0
     # via -r requirements/base.txt
-jsonschema==4.9.1
+jsonschema==4.16.0
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
@@ -478,7 +477,7 @@ naked==0.1.31
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.txt
-newrelic==7.16.0.178
+newrelic==8.1.0.180
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -487,7 +486,7 @@ nose==1.3.7
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-oauthlib==3.2.0
+oauthlib==3.2.1
     # via
     #   -r requirements/base.txt
     #   getsmarter-api-clients
@@ -512,7 +511,7 @@ path-py==7.2
     # via -r requirements/base.txt
 paypalrestsdk==1.13.1
     # via -r requirements/base.txt
-pbr==5.9.0
+pbr==5.10.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -520,7 +519,7 @@ pbr==5.9.0
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.12.53
+phonenumbers==8.12.55
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -549,7 +548,7 @@ polib==1.1.1
     # via edx-i18n-tools
 premailer==2.9.2
     # via -r requirements/base.txt
-psutil==5.9.1
+psutil==5.9.2
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -590,7 +589,7 @@ pycryptodomex==3.15.0
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
     #   pyjwkest
-pygments==2.12.0
+pygments==2.13.0
     # via
     #   -r requirements/base.txt
     #   diff-cover
@@ -689,7 +688,7 @@ python-dateutil==2.8.2
     #   edx-drf-extensions
     #   faker
     #   freezegun
-python-dotenv==0.20.0
+python-dotenv==0.21.0
     # via -r requirements/e2e.txt
 python-memcached==1.59
     # via -r requirements/test.in
@@ -864,7 +863,7 @@ social-auth-core==4.0.2
     #   -r requirements/base.txt
     #   edx-auth-backends
     #   social-auth-app-django
-sorl-thumbnail==12.8.0
+sorl-thumbnail==12.9.0
     # via -r requirements/base.txt
 soupsieve==2.3.2.post1
     # via beautifulsoup4
@@ -879,7 +878,7 @@ stevedore==4.0.0
     #   -r requirements/e2e.txt
     #   edx-django-utils
     #   edx-opaque-keys
-stripe==1.70.0
+stripe==4.1.0
     # via -r requirements/base.txt
 tenacity==6.3.1
     # via
@@ -929,7 +928,7 @@ uritemplate==4.1.1
     #   -r requirements/base.txt
     #   coreapi
     #   drf-yasg
-urllib3==1.26.11
+urllib3==1.26.12
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.txt
