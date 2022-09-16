@@ -38,11 +38,26 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         """
         super(Stripe, self).__init__(site)
         configuration = self.configuration
+
+        # Stripe API version to use. Will use latest allowed in Stripe Dashboard if None.
+        self.api_version = configuration['api_version']
+        # Send anonymous latency metrics to Stripe.
+        self.enable_telemetry = configuration['enable_telemetry']
+        # Stripe client logging level. None will default to INFO.
+        self.log_level = configuration['log_level']
+        # How many times to automatically retry requests. None means no retries.
+        self.max_network_retries = configuration['max_network_retries']
+        # Send requests somewhere else instead of Stripe. May be useful for testing.
+        self.proxy = configuration['proxy']
+        # The key visible on the frontend to identify our Stripe account. Public.
         self.publishable_key = configuration['publishable_key']
+        # The secret API key used by the backend to communicate with Stripe. Private/secret.
         self.secret_key = configuration['secret_key']
-        self.country = configuration['country']
 
         stripe.api_key = self.secret_key
+        stripe.log = self.log_level
+        stripe.max_network_retries = self.max_network_retries
+        stripe.proxy = self.proxy
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
         raise NotImplementedError('The Stripe payment processor does not support transaction parameters.')
