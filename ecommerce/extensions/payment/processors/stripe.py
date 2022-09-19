@@ -73,10 +73,14 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             'currency': currency,
             'description': order_number,
             'metadata': {'order_number': order_number},
-            # put the order number on statements
-            'statement_descriptor': order_number,
-            'statement_descriptor_suffix': order_number,
         }
+
+    def _generate_basket_pi_idempotency_key(self, basket):
+        """
+        Generate an idempotency key for creating a PaymentIntent for a Basket.
+        Using a version number in they key to aid in future development.
+        """
+        return f'basket_pi_create_v1_{basket.order_number}'
 
     def get_capture_context(self, request):
         # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
@@ -88,7 +92,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             # only allow backend to submit payments
             confirmation_method='manual',
             # don't create a new intent for the same basket
-            idempotency_key=basket.order_number,
+            idempotency_key=self._generate_basket_pi_idempotency_key(basket),
         )
 
         transaction_id = create_api_response['id']
