@@ -623,7 +623,7 @@ class CaptureContextApiLogicMixin:  # pragma: no cover
             return
 
         try:
-            response['capture_context'] = payment_processor.get_capture_context(self.request.session)
+            response['capture_context'] = payment_processor.get_capture_context(self.request)
         except:  # pylint: disable=bare-except
             logger.exception("Error generating capture_context")
             return
