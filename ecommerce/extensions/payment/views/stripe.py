@@ -42,16 +42,6 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         basket_add_organization_attribute(basket, self.request.POST)
 
         try:
-            billing_address = self.payment_processor.get_address_from_token(token)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(
-                'An error occurred while parsing the billing address for basket [%d]. No billing address will be '
-                'stored for the resulting order [%s].',
-                basket.id,
-                order_number)
-            billing_address = None
-
-        try:
             self.handle_payment(token, basket)
         except Exception:  # pylint: disable=broad-except
             logger.exception('An error occurred while processing the Stripe payment for basket [%d].', basket.id)
