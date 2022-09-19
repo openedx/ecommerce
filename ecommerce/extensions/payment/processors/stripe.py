@@ -127,7 +127,11 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
             self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
 
-            logger.info('Successfully confirmed Stripe payment intent [%s] for basket [%d].', payment_intent_id, basket.id)
+            logger.info(
+                'Successfully confirmed Stripe payment intent [%s] for basket [%d].',
+                payment_intent_id,
+                basket.id
+            )
 
         except stripe.error.CardError as ex:
             base_message = "Stripe payment for basket [%d] declined with HTTP status [%d]"

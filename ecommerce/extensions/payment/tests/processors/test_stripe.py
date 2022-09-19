@@ -77,7 +77,12 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
         assert actual.total == self.basket.total_incl_tax
         assert actual.currency == self.basket.currency
 
-        self.assert_processor_response_recorded(self.processor_name, payment_intent_2.id, payment_intent_2, basket=self.basket)
+        self.assert_processor_response_recorded(
+            self.processor_name,
+            payment_intent_2.id,
+            payment_intent_2,
+            basket=self.basket
+        )
 
     def test_handle_processor_response_error(self):
         payment_intent_1 = stripe.PaymentIntent.construct_from({
@@ -91,7 +96,12 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
             charge_mock.side_effect = stripe.error.CardError(
                 'fake-msg', 'fake-param', 'fake-code', http_body='fake-body', http_status=500
             )
-            self.assertRaises(TransactionDeclined, self.processor.handle_processor_response, payment_intent_1, self.basket)
+            self.assertRaises(
+                TransactionDeclined,
+                self.processor.handle_processor_response,
+                payment_intent_1,
+                self.basket
+            )
 
     def test_issue_credit(self):
         charge_reference_number = '9436'

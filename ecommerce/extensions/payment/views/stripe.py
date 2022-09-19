@@ -48,7 +48,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             return JsonResponse({}, status=400)
 
         try:
-            order = self.create_order(self.request, basket, billing_address=billing_address)
+            order = self.create_order(self.request, basket)
         except Exception:  # pylint: disable=broad-except
             logger.exception('An error occurred while processing the Stripe payment for basket [%d].', basket.id)
             return JsonResponse({}, status=400)
