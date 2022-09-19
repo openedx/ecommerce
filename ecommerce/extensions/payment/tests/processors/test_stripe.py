@@ -45,25 +45,25 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
             "charges": {
                 "object": "list",
                 "data": [
-                            {
-                            "id": "ch_testtesttest",
-                            "object": "charge",
-                            "status": "succeeded",
-                            "payment_method_details": {
-                                "card": {
-                                    "brand": "visa",
-                                    "country": "US",
-                                    "exp_month": 5,
-                                    "exp_year": 2020,
-                                    "fingerprint": "Xt5EWLLDS7FJjR1c",
-                                    "funding": "credit",
-                                    "last4": "4242",
-                                    "network": "visa",
-                                },
-                                "type": "card"
-                                },
-                            }
-                        ]
+                    {
+                        "id": "ch_testtesttest",
+                        "object": "charge",
+                        "status": "succeeded",
+                        "payment_method_details": {
+                            "card": {
+                                "brand": "visa",
+                                "country": "US",
+                                "exp_month": 5,
+                                "exp_year": 2020,
+                                "fingerprint": "Xt5EWLLDS7FJjR1c",
+                                "funding": "credit",
+                                "last4": "4242",
+                                "network": "visa",
+                            },
+                            "type": "card"
+                        },
+                    }
+                ]
             }
         }, 'fake-key')
 
