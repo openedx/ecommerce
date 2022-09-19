@@ -7,6 +7,7 @@ import stripe
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
 
+from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors import (
     ApplePayMixin,
@@ -59,11 +60,44 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         stripe.max_network_retries = self.max_network_retries
         stripe.proxy = self.proxy
 
+    def _get_basket_amount(self, basket):
+        """Convert to stripe amount, which is in cents."""
+        return str((basket.total_incl_tax * 100).to_integral_value())
+
+    def _build_payment_intent_parameters(self, basket):
+        order_number = basket.order_number
+        amount = self._get_basket_amount(basket)
+        currency = basket.currency
+        return {
+            'amount': amount,
+            'currency': currency,
+            'description': order_number,
+            'metadata': {'order_number': order_number},
+            # put the order number on statements
+            'statement_descriptor': order_number,
+            'statement_descriptor_suffix': order_number,
+        }
+
+    def get_capture_context(self, request):
+        # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
+        basket = Basket.get_basket(request.user, request.site)
+
+        # TODO: handle stripe.error.IdempotencyError when basket was already created, but with different amount
+        create_api_response = stripe.PaymentIntent.create(
+            **self._build_payment_intent_parameters(basket),
+            # only allow backend to submit payments
+            confirmation_method='manual',
+            # don't create a new intent for the same basket
+            idempotency_key=basket.order_number,
+        )
+
+        transaction_id = create_api_response['id']
+        self.record_processor_response(create_api_response, transaction_id)
+        new_capture_context = {'key_id': create_api_response['client_secret']}
+        return new_capture_context
+
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
         raise NotImplementedError('The Stripe payment processor does not support transaction parameters.')
-
-    def _get_basket_amount(self, basket):
-        return str((basket.total_incl_tax * 100).to_integral_value())
 
     def handle_processor_response(self, response, basket=None):
         token = response
