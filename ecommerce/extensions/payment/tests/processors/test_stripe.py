@@ -27,79 +27,71 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
         assert 'payment_page_url' in transaction_params.keys()
 
     def test_handle_processor_response(self):
-        assert True
+        payment_intent_1 = stripe.PaymentIntent.construct_from({
+            'id': 'pi_testtesttest',
+            'source': {
+                'brand': 'visa',
+                'last4': '4242',
+            },
+        }, 'fake-key')
 
-    # def test_handle_processor_response(self):
-    #     token = 'abc123'
-    #     payment_intent_1 = stripe.PaymentIntent.construct_from({
-    #         'id': 'pi_testtesttest',
-    #         'source': {
-    #             'brand': 'visa',
-    #             'last4': '4242',
-    #         },
-    #     }, 'fake-key')
+        payment_intent_2 = stripe.PaymentIntent.construct_from({
+            'id': 'pi_testtesttest',
+            'source': {
+                'brand': 'visa',
+                'last4': '4242',
+            },
+            'status': 'succeeded',
+            "charges": {
+                "object": "list",
+                "data": [
+                            {
+                            "id": "ch_testtesttest",
+                            "object": "charge",
+                            "status": "succeeded",
+                            "payment_method_details": {
+                                "card": {
+                                    "brand": "visa",
+                                    "country": "US",
+                                    "exp_month": 5,
+                                    "exp_year": 2020,
+                                    "fingerprint": "Xt5EWLLDS7FJjR1c",
+                                    "funding": "credit",
+                                    "last4": "4242",
+                                    "network": "visa",
+                                },
+                                "type": "card"
+                                },
+                            }
+                        ]
+            }
+        }, 'fake-key')
 
-    #     payment_intent_2 = stripe.PaymentIntent.construct_from({
-    #         'id': 'pi_testtesttest',
-    #         'source': {
-    #             'brand': 'visa',
-    #             'last4': '4242',
-    #         },
-    #         'status': 'succeeded',
-    #         "charges": {
-    #             "object": "list",
-    #             "data": [
-    #                         {
-    #                         "id": "ch_testtesttest",
-    #                         "object": "charge",
-    #                         "status": "succeeded",
-    #                         "payment_method_details": {
-    #                             "card": {
-    #                                 "brand": "visa",
-    #                                 "country": "US",
-    #                                 "exp_month": 5,
-    #                                 "exp_year": 2020,
-    #                                 "fingerprint": "Xt5EWLLDS7FJjR1c",
-    #                                 "funding": "credit",
-    #                                 "last4": "4242",
-    #                                 "network": "visa",
-    #                             },
-    #                             "type": "card"
-    #                             },
-    #                         }
-    #                     ]
-    #         }
-    #     }, 'fake-key')
+        with mock.patch('stripe.PaymentIntent.modify') as payment_intent_modify_mock:
+            with mock.patch('stripe.PaymentIntent.confirm') as payment_intent_confirm_mock:
+                payment_intent_modify_mock.return_value = payment_intent_1
+                payment_intent_confirm_mock.return_value = payment_intent_2
+                actual = self.processor.handle_processor_response(payment_intent_1, self.basket)
 
-    #     with mock.patch('stripe.PaymentIntent.modify') as payment_intent_modify_mock:
-    #         with mock.patch('stripe.PaymentIntent.confirm') as payment_intent_confirm_mock:
-    #             payment_intent_modify_mock.return_value = payment_intent_1
-    #             payment_intent_confirm_mock.return_value = payment_intent_2
+        assert actual.transaction_id == payment_intent_1.id
+        assert actual.total == self.basket.total_incl_tax
+        assert actual.currency == self.basket.currency
 
-    #             actual = self.processor.handle_processor_response(token, self.basket)
-
-    #             payment_intent_modify_mock.assert_called_once_with(
-    #                 token,
-    #                 amount=str((self.basket.total_incl_tax * 100).to_integral_value()),
-    #                 currency=self.basket.currency,
-    #                 description=self.basket.order_number,
-    #                 metadata={'order_number': self.basket.order_number}
-    #             )
-
-    #     assert actual.transaction_id == payment_intent_1.id
-    #     assert actual.total == self.basket.total_incl_tax
-    #     assert actual.currency == self.basket.currency
-    #     # assert actual.card_number == payment_intent.source.last4
-    #     # assert actual.card_type == 'visa'
-
-    #     self.assert_processor_response_recorded(self.processor_name, payment_intent_2.id, payment_intent_2, basket=self.basket)
+        self.assert_processor_response_recorded(self.processor_name, payment_intent_2.id, payment_intent_2, basket=self.basket)
 
     def test_handle_processor_response_error(self):
+        payment_intent_1 = stripe.PaymentIntent.construct_from({
+            'id': 'pi_testtesttest',
+            'source': {
+                'brand': 'visa',
+                'last4': '4242',
+            },
+        }, 'fake-key')
         with mock.patch('stripe.PaymentIntent.modify') as charge_mock:
             charge_mock.side_effect = stripe.error.CardError(
                 'fake-msg', 'fake-param', 'fake-code', http_body='fake-body', http_status=500
             )
-            self.assertRaises(TransactionDeclined, self.processor.handle_processor_response, 'fake-token', self.basket)
+            self.assertRaises(TransactionDeclined, self.processor.handle_processor_response, payment_intent_1, self.basket)
 
     def test_issue_credit(self):
         charge_reference_number = '9436'

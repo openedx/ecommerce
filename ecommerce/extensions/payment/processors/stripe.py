@@ -104,7 +104,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         return {'payment_page_url': self.client_side_payment_url}
 
     def handle_processor_response(self, response, basket=None):
-        payment_intent_id = response
+        payment_intent = response
+        payment_intent_id = payment_intent.id
 
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
         try:
