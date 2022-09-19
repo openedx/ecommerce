@@ -286,22 +286,38 @@ disable =
 	illegal-waffle-usage,
 	
 	logging-fstring-interpolation,
-	import-error,
-	missing-timeout,
-	no-name-in-module,
-	undefined-variable,
-	unused-argument,
-	attribute-defined-outside-init,
-	unsupported-binary-operation,
-	unneeded-not,
-	django-not-configured,
+	arguments-renamed,
+	astroid-error,
 	annotation-missing-token,
-	redefined-outer-name,
-	wildcard-import,
+	attribute-defined-outside-init,
+	consider-iterating-dictionary,
+	consider-using-generator,
+	django-not-configured,
+	format-string-without-interpolation,
+	import-error,
 	invalid-django-waffle-import,
+	literal-used-as-attribute,
 	missing-module-docstring,
 	missing-class-docstring,
-	missing-function-docstring
+	missing-function-docstring,
+	missing-timeout,
+	no-self-use,
+	no-member,
+	no-name-in-module,
+	redefined-outer-name,
+	redundant-u-string-prefix,
+	super-with-arguments,
+	translation-of-non-string,
+	undefined-variable,
+	unused-argument,
+	unsupported-binary-operation,
+	unneeded-not,
+	useless-suppression,
+	use-a-generator,
+	use-list-literal,
+	wildcard-import,
+	wrong-import-order,
+	wrong-import-position
 
 [REPORTS]
 output-format = text
@@ -398,4 +414,4 @@ int-import-graph =
 [EXCEPTIONS]
 overgeneral-exceptions = Exception
 
-# 7c3f2de598e94da5cc054c186c5da250b3358ad5
+# bed48ed212c8bfd62d373e45f2977f4811ad1a1c
