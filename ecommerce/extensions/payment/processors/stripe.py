@@ -97,7 +97,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         return new_capture_context
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
-        raise NotImplementedError('The Stripe payment processor does not support transaction parameters.')
+        return {'payment_page_url': self.client_side_payment_url}
 
     def handle_processor_response(self, response, basket=None):
         token = response
