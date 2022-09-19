@@ -100,25 +100,30 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         return {'payment_page_url': self.client_side_payment_url}
 
     def handle_processor_response(self, response, basket=None):
-        token = response
-        order_number = basket.order_number
-        currency = basket.currency
+        payment_intent_id = response
 
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
         try:
-            charge = stripe.Charge.create(
-                amount=self._get_basket_amount(basket),
-                currency=currency,
-                source=token,
-                description=order_number,
-                metadata={'order_number': order_number}
+            modify_api_response = stripe.PaymentIntent.modify(
+                payment_intent_id,
+                **self._build_payment_intent_parameters(basket),
             )
-            transaction_id = charge.id
 
-            # NOTE: Charge objects subclass the dict class so there is no need to do any data transformation
+            # NOTE: PaymentIntent objects subclass the dict class so there is no need to do any data transformation
             # before storing the response in the database.
-            self.record_processor_response(charge, transaction_id=transaction_id, basket=basket)
-            logger.info('Successfully created Stripe charge [%s] for basket [%d].', transaction_id, basket.id)
+
+            self.record_processor_response(modify_api_response, transaction_id=payment_intent_id, basket=basket)
+
+            confirm_api_response = stripe.PaymentIntent.confirm(
+                payment_intent_id,
+                # stop on complicated payments MFE can't handle yet
+                error_on_requires_action=True,
+            )
+
+            self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
+
+            logger.info('Successfully confirmed Stripe payment intent [%s] for basket [%d].', payment_intent_id, basket.id)
+
         except stripe.error.CardError as ex:
             base_message = "Stripe payment for basket [%d] declined with HTTP status [%d]"
             exception_format_string = "{}: %s".format(base_message)
@@ -132,12 +137,17 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             self.record_processor_response(body, basket=basket)
             raise TransactionDeclined(base_message, basket.id, ex.http_status) from ex
 
+        # proceed only if payment went through
+        assert confirm_api_response.status == "succeeded"
+
         total = basket.total_incl_tax
-        card_number = charge.source.last4
-        card_type = STRIPE_CARD_TYPE_MAP.get(charge.source.brand)
+        currency = basket.currency
+        card_object = confirm_api_response.charges.data[0].payment_method_details.card
+        card_number = card_object.last4
+        card_type = STRIPE_CARD_TYPE_MAP.get(card_object.brand)
 
         return HandledProcessorResponse(
-            transaction_id=transaction_id,
+            transaction_id=payment_intent_id,
             total=total,
             currency=currency,
             card_number=card_number,
