@@ -1,0 +1,26 @@
+# pylintrc tweaks for use with edx_lint.
+[MASTER]
+ignore = migrations,tests
+load-plugins = edx_lint.pylint,pylint_django,pylint_celery
+
+[FORMAT]
+max-line-length = 140
+
+[MESSAGES CONTROL]
+disable+ = 
+    import-error,
+    missing-timeout,
+    no-name-in-module,
+    undefined-variable,
+    unused-argument,
+    attribute-defined-outside-init,
+    unsupported-binary-operation,
+    unneeded-not,
+    django-not-configured,
+    annotation-missing-token,
+    redefined-outer-name,
+    wildcard-import,
+    invalid-django-waffle-import,
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring

@@ -1,4 +1,4 @@
-
+# pylint: disable=missing-module-docstring
 
 from django.conf.urls import url
 

@@ -610,7 +610,7 @@ THEME_SCSS = 'sass/themes/default.scss'
 COURSE_CATALOG_API_URL = 'http://localhost:8008/api/v1/'
 
 # Black-listed course modes not allowed to create coupons with
-BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']
+BLACK_LIST_COUPON_COURSE_MODES = ['audit', 'honor']
 
 # Theme settings
 # enable or disable comprehensive theming

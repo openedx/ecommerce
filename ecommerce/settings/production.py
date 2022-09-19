@@ -38,9 +38,9 @@ def get_env_setting(setting):
     """ Get the environment setting or return exception """
     try:
         return environ[setting]
-    except KeyError:
+    except KeyError as e:
         error_msg = "Set the %s env variable" % setting
-        raise ImproperlyConfigured(error_msg)
+        raise ImproperlyConfigured(error_msg) from e
 
 
 # HOST CONFIGURATION

@@ -1,6 +1,6 @@
 """Development settings and globals."""
 
-
+# pylint: disable=line-too-long
 from urllib.parse import urljoin
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
@@ -158,7 +158,7 @@ REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = REST_FRAMEWORK['DEFAULT_RENDERER_CL
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
-    from .private import *  # pylint: disable=import-error
+    from .private import *
 
 ENTERPRISE_API_URL = urljoin(f"{ENTERPRISE_SERVICE_URL}/", 'api/v1/')
 

@@ -1,4 +1,4 @@
-
+# pylint: disable=missing-module-docstring
 
 from ecommerce.core.url_utils import get_favicon_url, get_lms_dashboard_url, get_lms_url, get_logo_url
 

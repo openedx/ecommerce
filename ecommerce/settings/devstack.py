@@ -67,6 +67,7 @@ ENTERPRISE_CATALOG_API_URL = urljoin(f"{ENTERPRISE_CATALOG_SERVICE_URL}/", 'api/
 ENTERPRISE_ANALYTICS_API_URL = 'http://edx.devstack.analyticsapi:19001'
 
 # PAYMENT PROCESSING
+# pylint: disable=line-too-long
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
         'cybersource': {
@@ -115,4 +116,4 @@ REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = REST_FRAMEWORK['DEFAULT_RENDERER_CL
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
     # noinspection PyUnresolvedReferences
-    from .private import *  # pylint: disable=import-error
+    from .private import *
