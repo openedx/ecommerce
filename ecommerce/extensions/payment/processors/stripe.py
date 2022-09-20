@@ -179,3 +179,28 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.record_processor_response(refund, transaction_id=transaction_id, basket=basket)
 
         return transaction_id
+
+    def get_address_from_token(self, payment_intent_id):
+        """ Retrieves the billing address associated with a PaymentIntent.
+        Returns:
+            BillingAddress
+        """
+        payment_intent = stripe.PaymentIntent.retrieve(
+            payment_intent_id,
+            expand=['customer']
+        )
+
+        customer = payment_intent.data.customer
+        customer_address = payment_intent.data.customer.address
+
+        address = BillingAddress(
+            first_name=customer.name,    # Stripe only has a single name field
+            last_name='',
+            line1=customer_address.line1,
+            line2=customer_address.line2,
+            line4=customer_address.city,  # Oscar uses line4 for city
+            postcode=customer_address.postal_code,
+            state=customer_address.state,
+            country=Country.objects.get(iso_3166_1_a2__iexact=customer_address.country)
+        )
+        return address

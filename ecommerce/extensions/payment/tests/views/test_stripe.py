@@ -69,7 +69,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
 
     def generate_form_data(self, basket_id):
         return {
-            'stripe_token': 'st_abc123',
+            'payment_intent_id': 'pi_testtesttest',
             'basket': basket_id,
         }
 
@@ -99,10 +99,10 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
     def test_billing_address_error(self):
         basket = self.create_basket()
         data = self.generate_form_data(basket.id)
-        card_type = 'American Express'
-        label = '1986'
-        charge = stripe.Charge.construct_from({
-            'id': '2404',
+        card_type = 'visa'
+        label = '4242'
+        payment_intent = stripe.PaymentIntent.construct_from({
+            'id': 'pi_testtesttest',
             'source': {
                 'brand': card_type,
                 'last4': label,
@@ -112,11 +112,11 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
             address_mock.side_effect = Exception
 
-            with mock.patch.object(stripe.Charge, 'create') as charge_mock:
-                charge_mock.return_value = charge
+            with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
+                pi_mock.return_value = payment_intent
                 response = self.client.post(self.path, data)
 
-            address_mock.assert_called_once_with(data['stripe_token'])
+            address_mock.assert_called_once_with(data['payment_intent_id'])
 
         self.assert_successful_order_response(response, basket.order_number)
         self.assert_order_created(basket, None, card_type, label)
@@ -124,10 +124,10 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
     def test_successful_payment(self):
         basket = self.create_basket()
         data = self.generate_form_data(basket.id)
-        card_type = 'American Express'
-        label = '1986'
-        charge = stripe.Charge.construct_from({
-            'id': '2404',
+        card_type = 'visa'
+        label = '4242'
+        payment_intent = stripe.PaymentIntent.construct_from({
+            'id': 'pi_testtesttest',
             'source': {
                 'brand': card_type,
                 'last4': label,
@@ -138,11 +138,11 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
             address_mock.return_value = billing_address
 
-            with mock.patch.object(stripe.Charge, 'create') as charge_mock:
-                charge_mock.return_value = charge
+            with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
+                pi_mock.return_value = payment_intent
                 response = self.client.post(self.path, data)
 
-            address_mock.assert_called_once_with(data['stripe_token'])
+            address_mock.assert_called_once_with(data['payment_intent_id'])
 
         self.assert_successful_order_response(response, basket.order_number)
         self.assert_order_created(basket, billing_address, card_type, label)
@@ -168,10 +168,10 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         # Manually add organization attribute on the basket for testing
         basket_add_organization_attribute(basket, data)
 
-        card_type = 'American Express'
-        label = '1986'
-        charge = stripe.Charge.construct_from({
-            'id': '2404',
+        card_type = 'visa'
+        label = '4242'
+        payment_intent = stripe.PaymentIntent.construct_from({
+            'id': 'pi_testtesttest',
             'source': {
                 'brand': card_type,
                 'last4': label,
@@ -182,11 +182,11 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
             address_mock.return_value = billing_address
 
-            with mock.patch.object(stripe.Charge, 'create') as charge_mock:
-                charge_mock.return_value = charge
+            with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
+                pi_mock.return_value = payment_intent
                 response = self.client.post(self.path, data)
 
-            address_mock.assert_called_once_with(data['stripe_token'])
+            address_mock.assert_called_once_with(data['payment_intent_id'])
 
         self.assert_successful_order_response(response, basket.order_number)
         self.assert_order_created(basket, billing_address, card_type, label)
