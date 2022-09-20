@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, project-zebra]
   pull_request:
-    branches: [master]
+    branches: [master, project-zebra]
 
 jobs:
   build:
