@@ -52,7 +52,7 @@ rules
 simplejson
 social-auth-app-django
 sorl-thumbnail
-stripe==1.70.0
+stripe
 unicodecsv
 xss-utils
 zeep
