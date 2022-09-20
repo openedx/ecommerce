@@ -5,10 +5,7 @@ import logging
 from django.http import JsonResponse
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.extensions.basket.utils import (
-    basket_add_organization_attribute,
-    basket_add_payment_intent_id_attribute,
-)
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute, basket_add_payment_intent_id_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.forms import StripeSubmitForm

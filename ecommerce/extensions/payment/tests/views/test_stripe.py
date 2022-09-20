@@ -1,26 +1,28 @@
 
 
-import stripe
+# import stripe
 from django.conf import settings
 from django.urls import reverse
-from mock import mock
+# from mock import mock
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import BillingAddressFactory
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
-from ecommerce.core.models import BusinessClient
-from ecommerce.core.tests import toggle_switch
-from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
-from ecommerce.extensions.basket.utils import basket_add_organization_attribute
+# from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+# from ecommerce.core.models import BusinessClient
+# from ecommerce.core.tests import toggle_switch
+# from ecommerce.courses.tests.factories import CourseFactory
+# from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+# from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.test.factories import create_basket
-from ecommerce.invoice.models import Invoice
+# from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
+
+# from oscar.test.factories import BillingAddressFactory
+
 
 Country = get_model('address', 'Country')
 Order = get_model('order', 'Order')

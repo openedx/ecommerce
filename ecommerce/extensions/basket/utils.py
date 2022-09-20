@@ -18,10 +18,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
-from ecommerce.extensions.basket.constants import (
-    PURCHASER_BEHALF_ATTRIBUTE,
-    PAYMENT_INTENT_ID_ATTRIBUTE,
-)
+from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
