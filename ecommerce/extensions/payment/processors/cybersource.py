@@ -177,8 +177,9 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
     def client_side_payment_url(self):
         return None
 
-    def get_capture_context(self, session):  # pragma: no cover
+    def get_capture_context(self, request):  # pragma: no cover
         # To delete None values in Input Request Json body
+        session = request.session
 
         requestObj = GeneratePublicKeyRequest(
             encryption_type='RsaOaep256',
