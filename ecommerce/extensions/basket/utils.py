@@ -18,7 +18,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
-from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
@@ -382,6 +382,26 @@ def basket_add_organization_attribute(basket, request_data):
             attribute_type=purchaser_attribute,
             value_text=purchaser
         )
+
+
+@newrelic.agent.function_trace()
+def basket_add_payment_intent_id_attribute(basket, request_data):
+    """
+    Adds the Stripe payment_intent_id attribute on basket.
+
+    Arguments:
+        basket(Basket): order basket
+        request_data (dict): HttpRequest data
+
+    """
+    payment_intent_id = request_data.get(PAYMENT_INTENT_ID_ATTRIBUTE)
+
+    payment_intent_id_attribute, __ = BasketAttributeType.objects.get_or_create(name=PAYMENT_INTENT_ID_ATTRIBUTE)
+    BasketAttribute.objects.get_or_create(
+        basket=basket,
+        attribute_type=payment_intent_id_attribute,
+        value_text=payment_intent_id.strip()
+    )
 
 
 @newrelic.agent.function_trace()
