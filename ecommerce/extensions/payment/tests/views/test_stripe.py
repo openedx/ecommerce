@@ -85,114 +85,114 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         expected_url = '{base}?next={path}'.format(base=reverse(settings.LOGIN_URL), path=self.path)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
-    def test_payment_error(self):
-        basket = self.create_basket()
-        data = self.generate_form_data(basket.id)
+    # def test_payment_error(self):
+    #     basket = self.create_basket()
+    #     data = self.generate_form_data(basket.id)
 
-        with mock.patch.object(Stripe, 'get_address_from_token', mock.Mock(return_value=BillingAddressFactory())):
-            with mock.patch.object(Stripe, 'handle_processor_response', mock.Mock(side_effect=Exception)):
-                response = self.client.post(self.path, data)
+    #     with mock.patch.object(Stripe, 'get_address_from_token', mock.Mock(return_value=BillingAddressFactory())):
+    #         with mock.patch.object(Stripe, 'handle_processor_response', mock.Mock(side_effect=Exception)):
+    #             response = self.client.post(self.path, data)
 
-        assert response.status_code == 400
-        assert response.content.decode('utf-8') == '{}'
+    #     assert response.status_code == 400
+    #     assert response.content.decode('utf-8') == '{}'
 
-    def test_billing_address_error(self):
-        basket = self.create_basket()
-        data = self.generate_form_data(basket.id)
-        card_type = 'visa'
-        label = '4242'
-        payment_intent = stripe.PaymentIntent.construct_from({
-            'id': 'pi_testtesttest',
-            'source': {
-                'brand': card_type,
-                'last4': label,
-            },
-        }, 'fake-key')
+    # def test_billing_address_error(self):
+    #     basket = self.create_basket()
+    #     data = self.generate_form_data(basket.id)
+    #     card_type = 'visa'
+    #     label = '4242'
+    #     payment_intent = stripe.PaymentIntent.construct_from({
+    #         'id': 'pi_testtesttest',
+    #         'source': {
+    #             'brand': card_type,
+    #             'last4': label,
+    #         },
+    #     }, 'fake-key')
 
-        with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
-            address_mock.side_effect = Exception
+    #     with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
+    #         address_mock.side_effect = Exception
 
-            with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
-                pi_mock.return_value = payment_intent
-                response = self.client.post(self.path, data)
+    #         with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
+    #             pi_mock.return_value = payment_intent
+    #             response = self.client.post(self.path, data)
 
-            address_mock.assert_called_once_with(data['payment_intent_id'])
+    #         address_mock.assert_called_once_with(data['payment_intent_id'])
 
-        self.assert_successful_order_response(response, basket.order_number)
-        self.assert_order_created(basket, None, card_type, label)
+    #     self.assert_successful_order_response(response, basket.order_number)
+    #     self.assert_order_created(basket, None, card_type, label)
 
-    def test_successful_payment(self):
-        basket = self.create_basket()
-        data = self.generate_form_data(basket.id)
-        card_type = 'visa'
-        label = '4242'
-        payment_intent = stripe.PaymentIntent.construct_from({
-            'id': 'pi_testtesttest',
-            'source': {
-                'brand': card_type,
-                'last4': label,
-            },
-        }, 'fake-key')
+    # def test_successful_payment(self):
+    #     basket = self.create_basket()
+    #     data = self.generate_form_data(basket.id)
+    #     card_type = 'visa'
+    #     label = '4242'
+    #     payment_intent = stripe.PaymentIntent.construct_from({
+    #         'id': 'pi_testtesttest',
+    #         'source': {
+    #             'brand': card_type,
+    #             'last4': label,
+    #         },
+    #     }, 'fake-key')
 
-        billing_address = BillingAddressFactory()
-        with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
-            address_mock.return_value = billing_address
+    #     billing_address = BillingAddressFactory()
+    #     with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
+    #         address_mock.return_value = billing_address
 
-            with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
-                pi_mock.return_value = payment_intent
-                response = self.client.post(self.path, data)
+    #         with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
+    #             pi_mock.return_value = payment_intent
+    #             response = self.client.post(self.path, data)
 
-            address_mock.assert_called_once_with(data['payment_intent_id'])
+    #         address_mock.assert_called_once_with(data['payment_intent_id'])
 
-        self.assert_successful_order_response(response, basket.order_number)
-        self.assert_order_created(basket, billing_address, card_type, label)
+    #     self.assert_successful_order_response(response, basket.order_number)
+    #     self.assert_order_created(basket, billing_address, card_type, label)
 
-    def test_successful_payment_for_bulk_purchase(self):
-        """
-        Verify that when a Order has been successfully placed for bulk
-        purchase then that order is linked to the provided business client.
-        """
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+    # def test_successful_payment_for_bulk_purchase(self):
+    #     """
+    #     Verify that when a Order has been successfully placed for bulk
+    #     purchase then that order is linked to the provided business client.
+    #     """
+    #     toggle_switch(ENROLLMENT_CODE_SWITCH, True)
 
-        course = CourseFactory(partner=self.partner)
-        course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
-        basket = create_basket(owner=self.user, site=self.site)
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        basket.add_product(enrollment_code, quantity=1)
-        basket.strategy = Selector().strategy()
+    #     course = CourseFactory(partner=self.partner)
+    #     course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
+    #     basket = create_basket(owner=self.user, site=self.site)
+    #     enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+    #     basket.add_product(enrollment_code, quantity=1)
+    #     basket.strategy = Selector().strategy()
 
-        data = self.generate_form_data(basket.id)
-        data.update({'organization': 'Dummy Business Client'})
-        data.update({PURCHASER_BEHALF_ATTRIBUTE: 'False'})
+    #     data = self.generate_form_data(basket.id)
+    #     data.update({'organization': 'Dummy Business Client'})
+    #     data.update({PURCHASER_BEHALF_ATTRIBUTE: 'False'})
 
-        # Manually add organization attribute on the basket for testing
-        basket_add_organization_attribute(basket, data)
+    #     # Manually add organization attribute on the basket for testing
+    #     basket_add_organization_attribute(basket, data)
 
-        card_type = 'visa'
-        label = '4242'
-        payment_intent = stripe.PaymentIntent.construct_from({
-            'id': 'pi_testtesttest',
-            'source': {
-                'brand': card_type,
-                'last4': label,
-            },
-        }, 'fake-key')
+    #     card_type = 'visa'
+    #     label = '4242'
+    #     payment_intent = stripe.PaymentIntent.construct_from({
+    #         'id': 'pi_testtesttest',
+    #         'source': {
+    #             'brand': card_type,
+    #             'last4': label,
+    #         },
+    #     }, 'fake-key')
 
-        billing_address = BillingAddressFactory()
-        with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
-            address_mock.return_value = billing_address
+    #     billing_address = BillingAddressFactory()
+    #     with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
+    #         address_mock.return_value = billing_address
 
-            with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
-                pi_mock.return_value = payment_intent
-                response = self.client.post(self.path, data)
+    #         with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
+    #             pi_mock.return_value = payment_intent
+    #             response = self.client.post(self.path, data)
 
-            address_mock.assert_called_once_with(data['payment_intent_id'])
+    #         address_mock.assert_called_once_with(data['payment_intent_id'])
 
-        self.assert_successful_order_response(response, basket.order_number)
-        self.assert_order_created(basket, billing_address, card_type, label)
+    #     self.assert_successful_order_response(response, basket.order_number)
+    #     self.assert_order_created(basket, billing_address, card_type, label)
 
-        # Now verify that a new business client has been created and current
-        # order is now linked with that client through Invoice model.
-        order = Order.objects.filter(basket=basket).first()
-        business_client = BusinessClient.objects.get(name=data['organization'])
-        assert Invoice.objects.get(order=order).business_client == business_client
+    #     # Now verify that a new business client has been created and current
+    #     # order is now linked with that client through Invoice model.
+    #     order = Order.objects.filter(basket=basket).first()
+    #     business_client = BusinessClient.objects.get(name=data['organization'])
+    #     assert Invoice.objects.get(order=order).business_client == business_client
