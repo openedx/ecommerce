@@ -2,6 +2,7 @@
 
 import abc
 from collections import namedtuple
+import logging
 
 import waffle
 from django.conf import settings
@@ -12,6 +13,8 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 HandledProcessorResponse = namedtuple('HandledProcessorResponse',
                                       ['transaction_id', 'total', 'currency', 'card_number', 'card_type'])
+
+logger = logging.getLogger(__name__)
 
 
 class BasePaymentProcessor(metaclass=abc.ABCMeta):  # pragma: no cover
@@ -108,8 +111,14 @@ class BasePaymentProcessor(metaclass=abc.ABCMeta):  # pragma: no cover
         Return
             PaymentProcessorResponse
         """
-        return PaymentProcessorResponse.objects.create(processor_name=self.NAME, transaction_id=transaction_id,
+        print("yo dawg i'm in the record_processor_response")
+        print(f'response {response}')
+        print(f'transaction_id {transaction_id}')
+        print(f'basket {basket}')
+        ppr = PaymentProcessorResponse.objects.create(processor_name=self.NAME, transaction_id=transaction_id,
                                                        response=response, basket=basket)
+        print(PaymentProcessorResponse.objects.all())
+        return ppr
 
     @abc.abstractmethod
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
