@@ -42,13 +42,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         return Stripe(self.request.site)
 
     def form_valid(self, form):
-        print('-----------------------------')
-        print(form)
-        print('-----------------------------')
         form_data = form.cleaned_data
-        print('-----------------------------')
-        print(form_data)
-        print('-----------------------------')
         basket = form_data['basket']
         payment_intent_id = form_data['payment_intent_id']
         order_number = basket.order_number
@@ -103,19 +97,11 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
                 transaction_id=payment_intent_id,
             )
             basket = ppr.basket
-            print("yyyyyyy")
-            print(f'processor_name {self.payment_processor.NAME}')
-            print(f'transaction_id {payment_intent_id}')
-            print(f'ppr {ppr}')
-            print(f'dir(ppr) {dir(ppr)}')
-            print(f'ppr.basket {ppr.basket}')
-            print(f'basket {basket}')
-            
             basket.strategy = strategy.Default()
 
             Applicator().apply(basket, basket.owner, self.request)
 
-            ## TODO
+            ## TODO: do we need to do this?
             # basket_add_organization_attribute(basket, self.request.GET)
         except MultipleObjectsReturned:
             logger.warning(u"Duplicate payment_intent_id [%s] received from Stripe.", payment_intent_id)
@@ -134,12 +120,10 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         # ... and then potentially compare it against what our basket has? TBD
         stripe_response = request.GET.dict()
         basket = self._get_basket(payment_intent_id)
-        print(f'yo dawg, in the GET. just got the basket {basket}')
 
         if not basket:
             return redirect(self.payment_processor.error_url)
 
-        print('yo dawg just got past "if not basket"')
         receipt_url = get_receipt_page_url(
             self.request,
             order_number=basket.order_number,
