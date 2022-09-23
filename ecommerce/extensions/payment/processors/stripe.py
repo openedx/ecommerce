@@ -63,13 +63,11 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
     @property
     def cancel_url(self):
-        # TODO: fix this too
-        return 'http://localhost:18130/checkout/cancel-checkout/' #get_ecommerce_url(self.configuration['cancel_checkout_path'])
+        return get_ecommerce_url(self.configuration['cancel_checkout_path'])
 
     @property
     def error_url(self):
-        # TODO: make we have error_path here
-        return 'http://localhost:18130/checkout/error/' #get_ecommerce_url(self.configuration['error_path'])
+        return get_ecommerce_url(self.configuration['error_path'])
 
     def _get_basket_amount(self, basket):
         """Convert to stripe amount, which is in cents."""
@@ -118,48 +116,26 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
     def handle_processor_response(self, response, basket=None):
         payment_intent_id = response['payment_intent']
-
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
-        try:
-            # modify_api_response = stripe.PaymentIntent.modify(
-            #     payment_intent_id,
-            #     **self._build_payment_intent_parameters(basket),
-            # )
+        self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
 
-            # NOTE: PaymentIntent objects subclass the dict class so there is no need to do any data transformation
-            # before storing the response in the database.
-
-            self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
-
-            # confirm_api_response = stripe.PaymentIntent.confirm(
-            #     payment_intent_id,
-            #     # stop on complicated payments MFE can't handle yet
-            #     error_on_requires_action=True,
-            # )
-
-            # self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
-            confirm_api_response = stripe.PaymentIntent.retrieve(
-                payment_intent_id
-            )
-            logger.info(
-                'Successfully confirmed Stripe payment intent [%s] for basket [%d].',
-                payment_intent_id,
-                basket.id
-            )
-
-        except stripe.error.CardError as ex:
-            base_message = "Stripe payment for basket [%d] declined with HTTP status [%d]"
-            exception_format_string = "{}: %s".format(base_message)
-            body = ex.json_body
-            logger.exception(
-                exception_format_string,
-                basket.id,
-                ex.http_status,
-                body
-            )
-            self.record_processor_response(body, basket=basket)
-            raise TransactionDeclined(base_message, basket.id, ex.http_status) from ex
-
+        # TODO: Potentially needing some confirm logic here.
+        # You'll want to catch the stripe.error.CardError in the confirm case
+        # and raise a TransactionDeclined (what we used to do)
+        #
+        # confirm_api_response = stripe.PaymentIntent.confirm(
+        #     payment_intent_id,
+        #     # stop on complicated payments MFE can't handle yet
+        #     error_on_requires_action=True,
+        # )
+        confirm_api_response = stripe.PaymentIntent.retrieve(
+            payment_intent_id
+        )
+        logger.info(
+            'Successfully confirmed Stripe payment intent [%s] for basket [%d].',
+            payment_intent_id,
+            basket.id
+        )
         # proceed only if payment went through
         assert confirm_api_response.status == "succeeded"
 

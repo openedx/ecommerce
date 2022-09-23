@@ -97,6 +97,9 @@ PAYMENT_PROCESSOR_CONFIG = {
             'proxy': None,
             'publishable_key': 'fake-publishable-key',
             'secret_key': 'fake-secret-key',
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
     },
     'other': {
@@ -133,6 +136,9 @@ PAYMENT_PROCESSOR_CONFIG = {
             'proxy': None,
             'publishable_key': 'fake-publishable-key',
             'secret_key': 'fake-secret-key',
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
     }
 }
