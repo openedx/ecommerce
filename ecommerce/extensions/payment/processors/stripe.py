@@ -6,8 +6,8 @@ import logging
 import stripe
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
-from ecommerce.core.url_utils import get_ecommerce_url
 
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors import (

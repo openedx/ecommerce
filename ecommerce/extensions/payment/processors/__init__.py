@@ -1,8 +1,8 @@
 
 
 import abc
-from collections import namedtuple
 import logging
+from collections import namedtuple
 
 import waffle
 from django.conf import settings
