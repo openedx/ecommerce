@@ -77,7 +77,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             order_number=order_number,
             disable_back_button=True
         )
-        return JsoPaymentErrornResponse({'url': receipt_url}, status=201)
+        return JsonResponse({'url': receipt_url}, status=201)
 
 
 class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
