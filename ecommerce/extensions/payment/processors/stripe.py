@@ -95,10 +95,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
     def get_capture_context(self, request):
         # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
-        print('-------------------get_capture_context-------------------------')
         basket = Basket.get_basket(request.user, request.site)
-        print(basket)
-        print('------------------------------------')
+    
         # TODO: handle stripe.error.IdempotencyError when basket was already created, but with different amount
         create_api_response = stripe.PaymentIntent.create(
             **self._build_payment_intent_parameters(basket),
@@ -108,25 +106,17 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         # id is the payment_intent_id from Stripe
         transaction_id = create_api_response['id']
-        print('yo dawg, in get_capture_context')
-        print(f'create_api_response {create_api_response}')
-        print(f'transaction_id {transaction_id}')
         self.record_processor_response(create_api_response, transaction_id, basket)
         new_capture_context = {
             'key_id': create_api_response['client_secret'],
             'order_id': basket.order_number,
         }
-        print(new_capture_context)
         return new_capture_context
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
         return {'payment_page_url': self.client_side_payment_url}
 
     def handle_processor_response(self, response, basket=None):
-        print(f"yo dawg in handle_processor_response {basket}")
-        #payment_intent = response
-        # might need this: response.json()['id']
-        print(response)
         payment_intent_id = response['payment_intent']
 
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.

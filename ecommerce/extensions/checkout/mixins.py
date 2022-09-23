@@ -105,7 +105,6 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         # If payment didn't go through, the handle_processor_response function will raise an error. We want to
         # send the event regardless of if the payment didn't go through.
         try:
-            print(f'yo dawg handle_payment {basket} ')
             handled_processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
         except Exception as ex:
             properties.update({'success': False, 'payment_error': type(ex).__name__, })
