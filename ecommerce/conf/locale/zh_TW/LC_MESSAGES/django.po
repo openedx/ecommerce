@@ -25,7 +25,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-09-11 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: Xaver Y.R. Chen <yrchen@atcity.org>, 2016,2018\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/open-edx/edx-platform/language/zh_TW/)\n"
@@ -374,7 +374,7 @@ msgstr ""
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr ""
 
-#: ecommerce/courses/models.py:32 ecommerce/extensions/basket/models.py:20
+#: ecommerce/courses/models.py:33 ecommerce/extensions/basket/models.py:20
 #: ecommerce/extensions/offer/models.py:237
 #: ecommerce/extensions/payment/models.py:68
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
@@ -382,7 +382,7 @@ msgstr ""
 msgid "Site"
 msgstr ""
 
-#: ecommerce/courses/models.py:39
+#: ecommerce/courses/models.py:40
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr ""
@@ -803,41 +803,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:255
+#: ecommerce/extensions/api/serializers.py:256
 msgid "EXPIRED"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:257
+#: ecommerce/extensions/api/serializers.py:258
 msgid "INACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:258
+#: ecommerce/extensions/api/serializers.py:259
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:664
+#: ecommerce/extensions/api/serializers.py:693
 msgid "Products must have a certificate type."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:667
-#: ecommerce/extensions/api/serializers.py:710
+#: ecommerce/extensions/api/serializers.py:696
+#: ecommerce/extensions/api/serializers.py:741
 msgid "Products must have a price."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:674
+#: ecommerce/extensions/api/serializers.py:703
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:706
+#: ecommerce/extensions/api/serializers.py:737
 msgid "Products must indicate whether ID verification is required."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:777
+#: ecommerce/extensions/api/serializers.py:808
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:809
+#: ecommerce/extensions/api/serializers.py:840
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -845,29 +845,29 @@ msgid ""
 " been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1479
+#: ecommerce/extensions/api/serializers.py:1510
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1480
+#: ecommerce/extensions/api/serializers.py:1511
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1947
+#: ecommerce/extensions/api/serializers.py:1978
 msgid "Invalid order number or order {} does not exists."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:2002
+#: ecommerce/extensions/api/serializers.py:2033
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:2020
+#: ecommerce/extensions/api/serializers.py:2051
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:2051
+#: ecommerce/extensions/api/serializers.py:2082
 msgid "Could note create new voucher for the order: {}"
 msgstr ""
 
@@ -1055,7 +1055,7 @@ msgstr ""
 msgid "Coupon code '%s' was removed from your basket."
 msgstr ""
 
-#: ecommerce/extensions/catalogue/models.py:68
+#: ecommerce/extensions/catalogue/models.py:69
 msgid "Last date/time on which this product can be purchased."
 msgstr ""
 
@@ -1258,7 +1258,7 @@ msgstr ""
 msgid "Partner"
 msgstr ""
 
-#: ecommerce/extensions/partner/models.py:23 ecommerce/settings/_oscar.py:258
+#: ecommerce/extensions/partner/models.py:23 ecommerce/settings/_oscar.py:259
 msgid "Partners"
 msgstr "合作夥伴"
 
@@ -1827,7 +1827,7 @@ msgstr ""
 msgid "UTM Created At"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:215
+#: ecommerce/settings/_oscar.py:216
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:18
 #: ecommerce/templates/oscar/dashboard/index.html:22
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:12
@@ -1840,38 +1840,38 @@ msgstr ""
 msgid "Dashboard"
 msgstr "我的課程"
 
-#: ecommerce/settings/_oscar.py:220
+#: ecommerce/settings/_oscar.py:221
 msgid "Catalogue"
 msgstr "目錄"
 
-#: ecommerce/settings/_oscar.py:224
+#: ecommerce/settings/_oscar.py:225
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:12
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:21
 msgid "Products"
 msgstr "產品"
 
-#: ecommerce/settings/_oscar.py:228
+#: ecommerce/settings/_oscar.py:229
 msgid "Product Types"
 msgstr "產品類型"
 
-#: ecommerce/settings/_oscar.py:232
+#: ecommerce/settings/_oscar.py:233
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:75
 msgid "Categories"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:236
+#: ecommerce/settings/_oscar.py:237
 msgid "Ranges"
 msgstr "範圍"
 
-#: ecommerce/settings/_oscar.py:240
+#: ecommerce/settings/_oscar.py:241
 msgid "Low stock alerts"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:246
+#: ecommerce/settings/_oscar.py:247
 msgid "Fulfillment"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:250
+#: ecommerce/settings/_oscar.py:251
 #: ecommerce/templates/oscar/dashboard/index.html:33
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:17
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:32
@@ -1883,11 +1883,11 @@ msgstr ""
 msgid "Orders"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:254
+#: ecommerce/settings/_oscar.py:255
 msgid "Statistics"
 msgstr "統計"
 
-#: ecommerce/settings/_oscar.py:262
+#: ecommerce/settings/_oscar.py:263
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:5
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:34
@@ -1898,25 +1898,25 @@ msgstr "統計"
 msgid "Refunds"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:268 ecommerce/settings/_oscar.py:272
+#: ecommerce/settings/_oscar.py:269 ecommerce/settings/_oscar.py:273
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:276
+#: ecommerce/settings/_oscar.py:277
 msgid "Stock alert requests"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:282 ecommerce/settings/_oscar.py:286
+#: ecommerce/settings/_oscar.py:283 ecommerce/settings/_oscar.py:287
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:15
 msgid "Offers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:290
+#: ecommerce/settings/_oscar.py:291
 msgid "Vouchers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:296
+#: ecommerce/settings/_oscar.py:297
 msgid "Reports"
 msgstr "報告"
 
