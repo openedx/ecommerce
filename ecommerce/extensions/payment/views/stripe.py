@@ -83,7 +83,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
     @property
     def payment_processor(self):
         return Stripe(self.request.site)
-    
+
     def _get_basket(self, payment_intent_id):
         """
         Retrieve a basket using a payment intent ID.

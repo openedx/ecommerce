@@ -6,6 +6,7 @@ from django.conf import settings
 from django.urls import reverse
 from mock import mock
 from oscar.core.loading import get_class, get_model
+from oscar.test.factories import BillingAddressFactory
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import BusinessClient
@@ -21,8 +22,6 @@ from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
-
-from oscar.test.factories import BillingAddressFactory
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -160,7 +159,6 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
             value_text='pi_testtesttest',
             basket=basket,
         ).count() == 1
-
 
     # def test_payment_error(self):
     #     basket = self.create_basket()
