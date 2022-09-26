@@ -143,7 +143,6 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
             basket=basket,
         ).count() == 1
 
-
     # def test_payment_error(self):
     #     basket = self.create_basket()
     #     data = self.generate_form_data(basket.id)
