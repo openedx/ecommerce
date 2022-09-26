@@ -1,12 +1,13 @@
 
 
+from rest_framework import status
 import stripe
 from django.conf import settings
 from django.urls import reverse
 from mock import mock
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
@@ -42,6 +43,10 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         self.client.login(username=self.user.username, password=self.password)
         self.site.siteconfiguration.client_side_payment_processor = 'stripe'
         self.site.siteconfiguration.save()
+        Country.objects.create(iso_3166_1_a2='US', name='US')
+        self.mock_enrollment_api_resp = mock.Mock()
+        self.mock_enrollment_api_resp.status_code = status.HTTP_200_OK
+
         self.stripe_checkout_url = reverse('stripe:checkout')
         self.capture_context_url = reverse('bff:payment:v0:capture_context')
 
@@ -74,23 +79,14 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         )
         assert order.billing_address == billing_address
 
-    def generate_form_data(self, basket_id):
-        return {
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'city': 'Townsville',
-            'country': 'US',
-            'state': 'MA',
-            'address_line1': '123 Town Road',
-            'postal_code': '02138',
-            'payment_intent': 'pi_testtesttest',
-            'basket': basket_id,
-        }
-
-    def create_basket(self):
-        basket = create_basket(owner=self.user, site=self.site)
+    def create_basket(self, product_class=None):
+        basket = create_basket(owner=self.user, site=self.site, product_class=product_class)
         basket.strategy = Selector().strategy()
         basket.thaw()
+        basket.flush()
+        course = CourseFactory()
+        seat = course.create_or_update_seat('credit', False, 100, 'credit_provider_id', None, 2)
+        basket.add_product(seat, 1)
         return basket
 
     def test_login_required(self):
@@ -105,8 +101,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         stripe-checkout urls, results in a basket associated with the correct
         stripe payment_intent_id.
         """
-        basket = self.create_basket()
-        data = self.generate_form_data(basket.id)
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
         # need to call capture-context endpoint before we call do GET to the stripe checkout view
         # so that the PaymentProcessorResponse is already created
@@ -133,13 +128,35 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
                         }
                     }]
                 },
+                'customer': {
+                    'name': 'John Doe',
+                    'address': {
+                        'line1': '123 Town Road',
+                        'line2': '',
+                        'city': 'Townsville',
+                        'postal_code': '02138',
+                        'state': 'MA',
+                        'country': 'US',
+                    }
+                }
             }
-            response = self.client.get(self.stripe_checkout_url, data)
-            mock_retrieve.assert_called_once()
+            with mock.patch('ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api') as mock_api_resp:
+                mock_api_resp.return_value = self.mock_enrollment_api_resp
+                response = self.client.get(
+                    self.stripe_checkout_url,
+                    {'payment_intent': 'pi_testtesttest'},
+                )
+                mock_retrieve.call_count == 2
+                assert mock_retrieve.call_args.kwargs['idempotency_key'] == 'basket_pi_create_v1_EDX-100001'
+
+        # Verify BillingAddress was set correctly
+        basket.refresh_from_db()
+        order = basket.order_set.first()
+        assert str(order.billing_address) == "John Doe, 123 Town Road, Townsville, MA, 02138"
 
         # Verify there is 1 and only 1 Basket Attribute with the payment_intent_id
         # associated with our basket.
-        assert BasketAttribute.objects.get(
+        assert BasketAttribute.objects.filter(
             value_text='pi_testtesttest',
             basket=basket,
         ).count() == 1

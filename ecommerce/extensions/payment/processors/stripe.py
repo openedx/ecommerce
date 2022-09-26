@@ -9,7 +9,10 @@ from oscar.core.loading import get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.basket.models import Basket
-from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute
+from ecommerce.extensions.basket.utils import (
+    basket_add_payment_intent_id_attribute,
+    get_billing_address_from_payment_intent_data,
+)
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors import (
     ApplePayMixin,
@@ -132,7 +135,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         #     error_on_requires_action=True,
         # )
         confirm_api_response = stripe.PaymentIntent.retrieve(
-            payment_intent_id
+            payment_intent_id,
+            idempotency_key=self._generate_basket_pi_idempotency_key(basket),
         )
         # proceed only if payment went through
         assert confirm_api_response['status'] == "succeeded"
@@ -173,27 +177,22 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return transaction_id
 
-    def get_address_from_token(self, payment_intent_id):
-        """ Retrieves the billing address associated with a PaymentIntent.
+    def get_address_from_token(self, payment_intent_id, idempotency_key=None):
+        """
+        Retrieves the billing address associated with a PaymentIntent.
+
         Returns:
             BillingAddress
         """
+        retrieve_kwargs = {
+            'expand': ['customer'],
+        }
+        if idempotency_key is not None:
+            retrieve_kwargs['idempotency_key'] = idempotency_key
+
         payment_intent = stripe.PaymentIntent.retrieve(
             payment_intent_id,
-            expand=['customer']
+            **retrieve_kwargs,
         )
 
-        customer = payment_intent.data.customer
-        customer_address = payment_intent.data.customer.address
-
-        address = BillingAddress(
-            first_name=customer.name,    # Stripe only has a single name field
-            last_name='',
-            line1=customer_address.line1,
-            line2=customer_address.line2,
-            line4=customer_address.city,  # Oscar uses line4 for city
-            postcode=customer_address.postal_code,
-            state=customer_address.state,
-            country=Country.objects.get(iso_3166_1_a2__iexact=customer_address.country)
-        )
-        return address
+        return get_billing_address_from_payment_intent_data(payment_intent)

@@ -12,7 +12,11 @@ from oscar.core.loading import get_class, get_model
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ecommerce.extensions.basket.utils import basket_add_organization_attribute, basket_add_payment_intent_id_attribute
+from ecommerce.extensions.basket.utils import (
+    basket_add_organization_attribute,
+    basket_add_payment_intent_id_attribute,
+    get_billing_address_from_payment_intent_data
+)
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.forms import StripeSubmitForm
@@ -141,6 +145,13 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
 
         try:
             order = self.create_order(request, basket)
+            idempotency_key = self.payment_processor._generate_basket_pi_idempotency_key(basket)
+            billing_address = self.payment_processor.get_address_from_token(payment_intent_id, idempotency_key)
+            order.billing_address = self.create_billing_address(
+                user=self.request.user,
+                billing_address=billing_address
+            )
+            order.save()
         except Exception:  # pylint: disable=broad-except
             # any errors here will be logged in the create_order method. If we wanted any
             # Paypal specific logging for this error, we would do that here.
