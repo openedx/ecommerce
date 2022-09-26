@@ -116,6 +116,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         return {'payment_page_url': self.client_side_payment_url}
 
     def handle_processor_response(self, response, basket=None):
+        # pretty sure we should simply return/error if basket is None, as not
+        # sure what it would mean if there
         payment_intent_id = response['payment_intent']
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
         self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
@@ -132,13 +134,13 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         confirm_api_response = stripe.PaymentIntent.retrieve(
             payment_intent_id
         )
+        # proceed only if payment went through
+        assert confirm_api_response['status'] == "succeeded"
         logger.info(
             'Successfully confirmed Stripe payment intent [%s] for basket [%d].',
             payment_intent_id,
             basket.id
         )
-        # proceed only if payment went through
-        assert confirm_api_response['status'] == "succeeded"
 
         total = basket.total_incl_tax
         currency = basket.currency

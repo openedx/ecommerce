@@ -101,8 +101,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
 
             Applicator().apply(basket, basket.owner, self.request)
 
-            ## TODO: do we need to do this?
-            # basket_add_organization_attribute(basket, self.request.GET)
+            basket_add_organization_attribute(basket, self.request.GET)
         except MultipleObjectsReturned:
             logger.warning(u"Duplicate payment_intent_id [%s] received from Stripe.", payment_intent_id)
             return None
