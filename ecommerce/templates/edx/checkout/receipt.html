@@ -193,16 +193,18 @@
         {% endif %}
       </div>
 
-      <div id="cta-nav-links" class="row">
-        <div class="col-xs-12 text-right">
-          <a class="dashboard-link nav-link" href="{{ order_dashboard_url }}">
-            {% trans "Go to dashboard" as tmsg %}{{ tmsg | force_escape }}
-          </a>
-          <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}">
-            {% trans "Find more courses" as tmsg %}{{ tmsg | force_escape }}
-          </a>
+      {% if show_receipt_cta_links %}
+        <div id="cta-nav-links" class="row">
+          <div class="col-xs-12 text-right">
+            <a class="dashboard-link nav-link" href="{{ order_dashboard_url }}">
+              {% trans "Go to dashboard" as tmsg %}{{ tmsg | force_escape }}
+            </a>
+            <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}">
+              {% trans "Find more courses" as tmsg %}{{ tmsg | force_escape }}
+            </a>
+          </div>
         </div>
-      </div>
+      {% endif %}
     </div>
   </div>
 {% endblock content %}

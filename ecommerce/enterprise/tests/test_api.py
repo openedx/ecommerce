@@ -248,9 +248,16 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
             'results': [
                 {
                     'enterprise_customer': {
-                        'uuid': 'my-uuid'
-                    }
-                }
+                        'uuid': 'my-uuid',
+                    },
+                    'active': True,
+                },
+                {
+                    'enterprise_customer': {
+                        'uuid': 'my-uuid-2',
+                    },
+                    'active': False,
+                },
             ]
         }
         assert enterprise_api.get_enterprise_id_for_user('some-site', self.learner) == 'my-uuid'

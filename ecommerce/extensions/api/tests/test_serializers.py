@@ -85,9 +85,9 @@ class OrderSerializerTests(TestCase):
             self.assertTrue(mock_receipt_payment_method)
             logger.check_present(*expected)
 
-    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.add_message_if_enterprise_user')
-    def test_get_enterprise_learner_portal_url(self, mock_learner_portal_url):
-        mock_learner_portal_url.side_effect = ValueError()
+    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.get_metadata_for_enterprise_user')
+    def test_get_enterprise_learner_portal_url(self, mock_enterprise_user):
+        mock_enterprise_user.side_effect = ValueError()
         order = factories.create_order(site=self.site, user=self.user)
         serializer = OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')})
 
@@ -101,7 +101,7 @@ class OrderSerializerTests(TestCase):
 
         with LogCapture(self.LOGGER_NAME) as logger:
             serializer.get_enterprise_learner_portal_url(order)
-            self.assertTrue(mock_learner_portal_url)
+            self.assertTrue(mock_enterprise_user)
             logger.check_present(*expected)
 
     @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.add_product_tracking')

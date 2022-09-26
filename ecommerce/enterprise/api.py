@@ -196,9 +196,10 @@ def get_enterprise_id_for_user(site, user):
         logger.info('Unable to retrieve enterprise learner data for User: %s, Exception: %s', user, exc)
         return None
 
-    try:
-        return enterprise_learner_response['results'][0]['enterprise_customer']['uuid']
-    except IndexError:
-        pass
-
+    active_enterprise_customer_user = next(
+        (ecu for ecu in enterprise_learner_response['results'] if ecu['active'] is True),
+        None,
+    )
+    if active_enterprise_customer_user:
+        return active_enterprise_customer_user['enterprise_customer']['uuid']
     return None
