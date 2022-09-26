@@ -9,6 +9,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.basket.models import Basket
+from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors import (
     ApplePayMixin,
@@ -94,16 +95,16 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def get_capture_context(self, request):
         # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
         basket = Basket.get_basket(request.user, request.site)
-    
         # TODO: handle stripe.error.IdempotencyError when basket was already created, but with different amount
         create_api_response = stripe.PaymentIntent.create(
             **self._build_payment_intent_parameters(basket),
             # don't create a new intent for the same basket
-            #idempotency_key=self._generate_basket_pi_idempotency_key(basket),
+            idempotency_key=self._generate_basket_pi_idempotency_key(basket),
         )
 
         # id is the payment_intent_id from Stripe
         transaction_id = create_api_response['id']
+        basket_add_payment_intent_id_attribute(basket, transaction_id)
         self.record_processor_response(create_api_response, transaction_id, basket)
         new_capture_context = {
             'key_id': create_api_response['client_secret'],
@@ -137,13 +138,13 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             basket.id
         )
         # proceed only if payment went through
-        assert confirm_api_response.status == "succeeded"
+        assert confirm_api_response['status'] == "succeeded"
 
         total = basket.total_incl_tax
         currency = basket.currency
-        card_object = confirm_api_response.charges.data[0].payment_method_details.card
-        card_number = card_object.last4
-        card_type = STRIPE_CARD_TYPE_MAP.get(card_object.brand)
+        card_object = confirm_api_response['charges']['data'][0]['payment_method_details']['card']
+        card_number = card_object['last4']
+        card_type = STRIPE_CARD_TYPE_MAP.get(card_object['brand'])
 
         return HandledProcessorResponse(
             transaction_id=payment_intent_id,

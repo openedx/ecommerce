@@ -385,16 +385,15 @@ def basket_add_organization_attribute(basket, request_data):
 
 
 @newrelic.agent.function_trace()
-def basket_add_payment_intent_id_attribute(basket, request_data):
+def basket_add_payment_intent_id_attribute(basket, payment_intent_id):
     """
     Adds the Stripe payment_intent_id attribute on basket.
 
     Arguments:
         basket(Basket): order basket
-        request_data (dict): HttpRequest data
+        payment_intent_id (string): Payment Intent Identifier
 
     """
-    payment_intent_id = request_data.get(PAYMENT_INTENT_ID_ATTRIBUTE)
 
     payment_intent_id_attribute, __ = BasketAttributeType.objects.get_or_create(name=PAYMENT_INTENT_ID_ATTRIBUTE)
     BasketAttribute.objects.get_or_create(

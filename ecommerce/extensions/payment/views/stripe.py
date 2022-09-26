@@ -113,12 +113,11 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
 
     def get(self, request):
         """Handle an incoming user returned to us by Stripe after approving payment."""
-        # ?payment_intent=pi_3LkunSIadiFyUl1x0KT2BWzv&payment_intent_client_secret=pi_3LkunSIadiFyUl1x0KT2BWzv_secret_LYOAHVmb3H3GUdkoISSDG3ilF&redirect_status=succeeded
-        payment_intent_id = request.GET.get('payment_intent')
-        # we're gonna want to check the $$ price of paymentIntentId
+        # TBD: we're gonna want to check the $$ price of paymentIntentId
         # to see if it suceeded or failed
-        # ... and then potentially compare it against what our basket has? TBD
+        # ... and then potentially compare it against what our basket has?
         stripe_response = request.GET.dict()
+        payment_intent_id = stripe_response.get('payment_intent')
         basket = self._get_basket(payment_intent_id)
 
         if not basket:

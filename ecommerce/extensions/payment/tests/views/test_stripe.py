@@ -1,29 +1,30 @@
 
 
-# import stripe
+import stripe
 from django.conf import settings
 from django.urls import reverse
-# from mock import mock
+from mock import mock
 from oscar.core.loading import get_class, get_model
 
-# from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
-# from ecommerce.core.models import BusinessClient
-# from ecommerce.core.tests import toggle_switch
-# from ecommerce.courses.tests.factories import CourseFactory
-# from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
-# from ecommerce.extensions.basket.utils import basket_add_organization_attribute
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.models import BusinessClient
+from ecommerce.core.tests import toggle_switch
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.test.factories import create_basket
-# from ecommerce.invoice.models import Invoice
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
-# from oscar.test.factories import BillingAddressFactory
+from oscar.test.factories import BillingAddressFactory
 
-
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Country = get_model('address', 'Country')
 Order = get_model('order', 'Order')
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -39,6 +40,10 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         super(StripeSubmitViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
+        self.site.siteconfiguration.client_side_payment_processor = 'stripe'
+        self.site.siteconfiguration.save()
+        self.stripe_checkout_url = reverse('stripe:checkout')
+        self.capture_context_url = reverse('bff:payment:v0:capture_context')
 
     def assert_successful_order_response(self, response, order_number):
         assert response.status_code == 201
@@ -71,7 +76,14 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
 
     def generate_form_data(self, basket_id):
         return {
-            'payment_intent_id': 'pi_testtesttest',
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'city': 'Townsville',
+            'country': 'US',
+            'state': 'MA',
+            'address_line1': '123 Town Road',
+            'postal_code': '02138',
+            'payment_intent': 'pi_testtesttest',
             'basket': basket_id,
         }
 
@@ -86,6 +98,52 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         response = self.client.post(self.path)
         expected_url = '{base}?next={path}'.format(base=reverse(settings.LOGIN_URL), path=self.path)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
+
+    def test_payment_flow(self):
+        """
+        Verify that the stripe payment flow, hitting capture-context and
+        stripe-checkout urls, results in a basket associated with the correct
+        stripe payment_intent_id.
+        """
+        basket = self.create_basket()
+        data = self.generate_form_data(basket.id)
+
+        # need to call capture-context endpoint before we call do GET to the stripe checkout view
+        # so that the PaymentProcessorResponse is already created
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': 'pi_testtesttest',
+                'client_secret': 'a_client_secret',
+            }
+            response = self.client.get(self.capture_context_url)
+            mock_create.assert_called_once()
+            assert mock_create.call_args.kwargs['idempotency_key'] == 'basket_pi_create_v1_EDX-100001'
+
+        with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
+            # Actual call returns more fields. Only including necessary ones here
+            mock_retrieve.return_value = {
+                'status': 'succeeded',
+                'charges': {
+                    'data': [{
+                        'payment_method_details': {
+                            'card': {
+                                'last4': '6789',
+                                'brand': 'credit_card_brand',
+                            }
+                        }
+                    }]
+                },
+            }
+            response = self.client.get(self.stripe_checkout_url, data)
+            mock_retrieve.assert_called_once()
+
+        # Verify there is 1 and only 1 Basket Attribute with the payment_intent_id
+        # associated with our basket.
+        assert BasketAttribute.objects.get(
+            value_text='pi_testtesttest',
+            basket=basket,
+        ).count() == 1
+
 
     # def test_payment_error(self):
     #     basket = self.create_basket()
