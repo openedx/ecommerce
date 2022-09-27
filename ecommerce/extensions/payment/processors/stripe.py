@@ -11,7 +11,7 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.utils import (
     basket_add_payment_intent_id_attribute,
-    get_billing_address_from_payment_intent_data,
+    get_billing_address_from_payment_intent_data
 )
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors import (

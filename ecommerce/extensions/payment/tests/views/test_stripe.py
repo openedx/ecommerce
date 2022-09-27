@@ -1,14 +1,18 @@
 
 
-from rest_framework import status
 import stripe
 from django.conf import settings
 from django.urls import reverse
 from mock import mock
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BillingAddressFactory
+from rest_framework import status
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.constants import (
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_SWITCH,
+    SEAT_PRODUCT_CLASS_NAME
+)
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
