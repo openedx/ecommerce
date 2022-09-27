@@ -4,7 +4,7 @@ import logging
 
 import mock
 import stripe
-from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
+from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.payment.processors.stripe import Stripe
