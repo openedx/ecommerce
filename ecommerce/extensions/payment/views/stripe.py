@@ -9,13 +9,10 @@ from django.shortcuts import redirect
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
-from rest_framework.decorators import action
-from rest_framework.response import Response
 
 from ecommerce.extensions.basket.utils import (
     basket_add_organization_attribute,
     basket_add_payment_intent_id_attribute,
-    get_billing_address_from_payment_intent_data
 )
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -32,51 +29,6 @@ Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
-
-
-class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
-    """ Stripe payment handler.
-
-    The payment form should POST here. This view will handle creating the charge at Stripe, creating an order,
-    and redirecting the user to the receipt page.
-    """
-    form_class = StripeSubmitForm
-
-    @property
-    def payment_processor(self):
-        return Stripe(self.request.site)
-
-    def form_valid(self, form):
-        form_data = form.cleaned_data
-        basket = form_data['basket']
-        payment_intent_id = form_data['payment_intent_id']
-        order_number = basket.order_number
-
-        basket_add_organization_attribute(basket, self.request.POST)
-        basket_add_payment_intent_id_attribute(basket, self.request.POST)
-
-        try:
-            self.handle_payment(payment_intent_id, basket)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception('An error occurred while processing the Stripe payment for basket [%d].', basket.id)
-            return JsonResponse({}, status=400)
-
-        try:
-            order = self.create_order(self.request, basket)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception('An error occurred while processing the Stripe payment for basket [%d].', basket.id)
-            return JsonResponse({}, status=400)
-
-        self.handle_post_order(order)
-
-        receipt_url = get_receipt_page_url(
-            self.request,
-            site_configuration=self.request.site.siteconfiguration,
-            order_number=order_number,
-            disable_back_button=True
-        )
-        return JsonResponse({'url': receipt_url}, status=201)
-
 
 class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
     http_method_names = ['get', 'post', 'head']
@@ -143,7 +95,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
 
         try:
             order = self.create_order(request, basket)
-            idempotency_key = self.payment_processor._generate_basket_pi_idempotency_key(basket)
+            idempotency_key = self.payment_processor.generate_basket_pi_idempotency_key(basket)
             billing_address = self.payment_processor.get_address_from_token(payment_intent_id, idempotency_key)
             order.billing_address = self.create_billing_address(
                 user=self.request.user,

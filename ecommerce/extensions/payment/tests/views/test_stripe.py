@@ -1,30 +1,17 @@
-
-
-import stripe
 from django.conf import settings
 from django.urls import reverse
 from mock import mock
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import BillingAddressFactory
 from rest_framework import status
 
-from ecommerce.core.constants import (
-    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
-    ENROLLMENT_CODE_SWITCH,
-    SEAT_PRODUCT_CLASS_NAME
-)
-from ecommerce.core.models import BusinessClient
-from ecommerce.core.tests import toggle_switch
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
-from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.test.factories import create_basket
-from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -113,7 +100,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
                 'id': 'pi_testtesttest',
                 'client_secret': 'a_client_secret',
             }
-            response = self.client.get(self.capture_context_url)
+            self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
             assert mock_create.call_args.kwargs['idempotency_key'] == 'basket_pi_create_v1_EDX-100001'
 
@@ -143,13 +130,15 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
                     }
                 }
             }
-            with mock.patch('ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api') as mock_api_resp:
+            with mock.patch(
+                'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api'
+            ) as mock_api_resp:
                 mock_api_resp.return_value = self.mock_enrollment_api_resp
-                response = self.client.get(
+                self.client.get(
                     self.stripe_checkout_url,
                     {'payment_intent': 'pi_testtesttest'},
                 )
-                mock_retrieve.call_count == 2
+                assert mock_retrieve.call_count == 2
                 assert mock_retrieve.call_args.kwargs['idempotency_key'] == 'basket_pi_create_v1_EDX-100001'
 
         # Verify BillingAddress was set correctly

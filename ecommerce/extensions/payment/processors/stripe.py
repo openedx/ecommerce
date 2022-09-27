@@ -4,7 +4,7 @@
 import logging
 
 import stripe
-from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
+from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
@@ -88,7 +88,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             'metadata': {'order_number': order_number},
         }
 
-    def _generate_basket_pi_idempotency_key(self, basket):
+    def generate_basket_pi_idempotency_key(self, basket):
         """
         Generate an idempotency key for creating a PaymentIntent for a Basket.
         Using a version number in they key to aid in future development.
