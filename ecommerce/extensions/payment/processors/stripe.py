@@ -108,7 +108,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # id is the payment_intent_id from Stripe
         transaction_id = create_api_response['id']
         basket_add_payment_intent_id_attribute(basket, transaction_id)
-        self.record_processor_response(create_api_response, transaction_id, basket)
         new_capture_context = {
             'key_id': create_api_response['client_secret'],
             'order_id': basket.order_number,
