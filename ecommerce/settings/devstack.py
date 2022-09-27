@@ -102,6 +102,9 @@ PAYMENT_PROCESSOR_CONFIG = {
             'proxy': None,
             'publishable_key': 'pk_test_51Li2KoIadiFyUl1xvRRiJohVzLNtnWUYNelHjMkzaf59Mq01ZMdsCGKzh9qyRwCIHBVEv0aQPkrvdH3OJ6F6WjSv00hdOx2EMb',
             'secret_key': 'sk_test_51Li2KoIadiFyUl1x0OydyXFEzZT3jM68qFCzhUGq6BX8yYkN76tqlXeqBL4UCUuivWOjkfoodzzuThd7mMKtES3h00C8EvDvUq',
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
     },
 }

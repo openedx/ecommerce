@@ -4,10 +4,15 @@
 import logging
 
 import stripe
-from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
+from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.basket.models import Basket
+from ecommerce.extensions.basket.utils import (
+    basket_add_payment_intent_id_attribute,
+    get_billing_address_from_payment_intent_data
+)
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors import (
     ApplePayMixin,
@@ -60,6 +65,14 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         stripe.max_network_retries = self.max_network_retries
         stripe.proxy = self.proxy
 
+    @property
+    def cancel_url(self):
+        return get_ecommerce_url(self.configuration['cancel_checkout_path'])
+
+    @property
+    def error_url(self):
+        return get_ecommerce_url(self.configuration['error_path'])
+
     def _get_basket_amount(self, basket):
         """Convert to stripe amount, which is in cents."""
         return str((basket.total_incl_tax * 100).to_integral_value())
@@ -75,7 +88,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             'metadata': {'order_number': order_number},
         }
 
-    def _generate_basket_pi_idempotency_key(self, basket):
+    def generate_basket_pi_idempotency_key(self, basket):
         """
         Generate an idempotency key for creating a PaymentIntent for a Basket.
         Using a version number in they key to aid in future development.
@@ -85,75 +98,57 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def get_capture_context(self, request):
         # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
         basket = Basket.get_basket(request.user, request.site)
-
         # TODO: handle stripe.error.IdempotencyError when basket was already created, but with different amount
         create_api_response = stripe.PaymentIntent.create(
             **self._build_payment_intent_parameters(basket),
-            # only allow backend to submit payments
-            confirmation_method='manual',
             # don't create a new intent for the same basket
-            idempotency_key=self._generate_basket_pi_idempotency_key(basket),
+            idempotency_key=self.generate_basket_pi_idempotency_key(basket),
         )
 
+        # id is the payment_intent_id from Stripe
         transaction_id = create_api_response['id']
-        self.record_processor_response(create_api_response, transaction_id)
-        new_capture_context = {'key_id': create_api_response['client_secret']}
+        basket_add_payment_intent_id_attribute(basket, transaction_id)
+        new_capture_context = {
+            'key_id': create_api_response['client_secret'],
+            'order_id': basket.order_number,
+        }
         return new_capture_context
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
         return {'payment_page_url': self.client_side_payment_url}
 
     def handle_processor_response(self, response, basket=None):
-        payment_intent = response
-        payment_intent_id = payment_intent.id
-
+        # pretty sure we should simply return/error if basket is None, as not
+        # sure what it would mean if there
+        payment_intent_id = response['payment_intent']
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
-        try:
-            modify_api_response = stripe.PaymentIntent.modify(
-                payment_intent_id,
-                **self._build_payment_intent_parameters(basket),
-            )
+        self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
 
-            # NOTE: PaymentIntent objects subclass the dict class so there is no need to do any data transformation
-            # before storing the response in the database.
-
-            self.record_processor_response(modify_api_response, transaction_id=payment_intent_id, basket=basket)
-
-            confirm_api_response = stripe.PaymentIntent.confirm(
-                payment_intent_id,
-                # stop on complicated payments MFE can't handle yet
-                error_on_requires_action=True,
-            )
-
-            self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
-
-            logger.info(
-                'Successfully confirmed Stripe payment intent [%s] for basket [%d].',
-                payment_intent_id,
-                basket.id
-            )
-
-        except stripe.error.CardError as ex:
-            base_message = "Stripe payment for basket [%d] declined with HTTP status [%d]"
-            exception_format_string = "{}: %s".format(base_message)
-            body = ex.json_body
-            logger.exception(
-                exception_format_string,
-                basket.id,
-                ex.http_status,
-                body
-            )
-            self.record_processor_response(body, basket=basket)
-            raise TransactionDeclined(base_message, basket.id, ex.http_status) from ex
-
+        # TODO: Potentially needing some confirm logic here.
+        # You'll want to catch the stripe.error.CardError in the confirm case
+        # and raise a TransactionDeclined (what we used to do)
+        #
+        # confirm_api_response = stripe.PaymentIntent.confirm(
+        #     payment_intent_id,
+        #     # stop on complicated payments MFE can't handle yet
+        #     error_on_requires_action=True,
+        # )
+        confirm_api_response = stripe.PaymentIntent.retrieve(
+            payment_intent_id,
+        )
         # proceed only if payment went through
-        assert confirm_api_response.status == "succeeded"
+        assert confirm_api_response['status'] == "succeeded"
+        logger.info(
+            'Successfully confirmed Stripe payment intent [%s] for basket [%d].',
+            payment_intent_id,
+            basket.id
+        )
 
         total = basket.total_incl_tax
         currency = basket.currency
-        card_object = confirm_api_response.charges.data[0].payment_method_details.card
-        card_number = card_object.last4
-        card_type = STRIPE_CARD_TYPE_MAP.get(card_object.brand)
+        card_object = confirm_api_response['charges']['data'][0]['payment_method_details']['card']
+        card_number = card_object['last4']
+        card_type = STRIPE_CARD_TYPE_MAP.get(card_object['brand'])
 
         return HandledProcessorResponse(
             transaction_id=payment_intent_id,
@@ -180,27 +175,22 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return transaction_id
 
-    def get_address_from_token(self, payment_intent_id):
-        """ Retrieves the billing address associated with a PaymentIntent.
+    def get_address_from_token(self, payment_intent_id, idempotency_key=None):
+        """
+        Retrieves the billing address associated with a PaymentIntent.
+
         Returns:
             BillingAddress
         """
+        retrieve_kwargs = {
+            'expand': ['customer'],
+        }
+        if idempotency_key is not None:
+            retrieve_kwargs['idempotency_key'] = idempotency_key
+
         payment_intent = stripe.PaymentIntent.retrieve(
             payment_intent_id,
-            expand=['customer']
+            **retrieve_kwargs,
         )
 
-        customer = payment_intent.data.customer
-        customer_address = payment_intent.data.customer.address
-
-        address = BillingAddress(
-            first_name=customer.name,    # Stripe only has a single name field
-            last_name='',
-            line1=customer_address.line1,
-            line2=customer_address.line2,
-            line4=customer_address.city,  # Oscar uses line4 for city
-            postcode=customer_address.postal_code,
-            state=customer_address.state,
-            country=Country.objects.get(iso_3166_1_a2__iexact=customer_address.country)
-        )
-        return address
+        return get_billing_address_from_payment_intent_data(payment_intent)

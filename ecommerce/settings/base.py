@@ -814,10 +814,12 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
         'stripe': {
             'api_version': None,
             'enable_telemetry': None,
+            'error_url': '/checkout/error/',
             'log_level': None,
             'max_network_retries': 0,
             'proxy': None,
             'publishable_key': 'SET-ME-PLEASE',
+            'receipt_url': '/checkout/receipt/',
             'secret_key': 'SET-ME-PLEASE',
         },
     }
