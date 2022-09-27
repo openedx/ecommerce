@@ -92,6 +92,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         stripe payment_intent_id.
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        idempotency_key = f'basket_pi_create_v1_{basket.order_number}'
 
         # need to call capture-context endpoint before we call do GET to the stripe checkout view
         # so that the PaymentProcessorResponse is already created
@@ -102,7 +103,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             }
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
-            assert mock_create.call_args.kwargs['idempotency_key'] == 'basket_pi_create_v1_EDX-100001'
+            assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
 
         with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
             # Actual call returns more fields. Only including necessary ones here
@@ -139,7 +140,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                     {'payment_intent': 'pi_testtesttest'},
                 )
                 assert mock_retrieve.call_count == 2
-                assert mock_retrieve.call_args.kwargs['idempotency_key'] == 'basket_pi_create_v1_EDX-100001'
+                assert mock_retrieve.call_args.kwargs['idempotency_key'] == idempotency_key
 
         # Verify BillingAddress was set correctly
         basket.refresh_from_db()
