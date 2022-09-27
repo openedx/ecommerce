@@ -30,6 +30,8 @@ Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+BillingAddress = get_model('order', 'BillingAddress')
+Country = get_model('address', 'Country')
 BUNDLE = 'bundle_identifier'
 ORGANIZATION_ATTRIBUTE_TYPE = 'organization'
 ENTERPRISE_CATALOG_ATTRIBUTE_TYPE = 'enterprise_catalog_uuid'
@@ -385,16 +387,15 @@ def basket_add_organization_attribute(basket, request_data):
 
 
 @newrelic.agent.function_trace()
-def basket_add_payment_intent_id_attribute(basket, request_data):
+def basket_add_payment_intent_id_attribute(basket, payment_intent_id):
     """
     Adds the Stripe payment_intent_id attribute on basket.
 
     Arguments:
         basket(Basket): order basket
-        request_data (dict): HttpRequest data
+        payment_intent_id (string): Payment Intent Identifier
 
     """
-    payment_intent_id = request_data.get(PAYMENT_INTENT_ID_ATTRIBUTE)
 
     payment_intent_id_attribute, __ = BasketAttributeType.objects.get_or_create(name=PAYMENT_INTENT_ID_ATTRIBUTE)
     BasketAttribute.objects.get_or_create(
@@ -589,3 +590,24 @@ def is_duplicate_seat_attempt(basket, product):
     found_product_quantity = basket.product_quantity(product)
 
     return bool(product_type == 'Seat' and found_product_quantity)
+
+
+def get_billing_address_from_payment_intent_data(payment_intent):
+    """
+    Take strips response_data dict, instantiates a BillingAddress object
+    and return it.
+    """
+    customer = payment_intent['customer']
+    customer_address = payment_intent['customer']['address']
+
+    address = BillingAddress(
+        first_name=customer['name'],    # Stripe only has a single name field
+        last_name='',
+        line1=customer_address['line1'],
+        line2=customer_address['line2'],
+        line4=customer_address['city'],  # Oscar uses line4 for city
+        postcode=customer_address['postal_code'],
+        state=customer_address['state'],
+        country=Country.objects.get(iso_3166_1_a2__iexact=customer_address['country'])
+    )
+    return address
