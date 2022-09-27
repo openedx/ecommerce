@@ -175,6 +175,9 @@ PAYMENT_PROCESSOR_CONFIG = {
             'proxy': None,
             'publishable_key': None,
             'secret_key': None,
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
     },
 }

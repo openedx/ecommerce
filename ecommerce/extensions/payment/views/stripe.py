@@ -2,7 +2,12 @@
 
 import logging
 
+from django.core.exceptions import MultipleObjectsReturned
+from django.db import transaction
 from django.http import JsonResponse
+from django.shortcuts import redirect
+from oscar.apps.partner import strategy
+from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute, basket_add_payment_intent_id_attribute
@@ -15,10 +20,12 @@ from ecommerce.extensions.payment.views import BasePaymentSubmitView
 logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
+BasketAttribute = get_model('basket', 'BasketAttribute')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
@@ -63,3 +70,95 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             disable_back_button=True
         )
         return JsonResponse({'url': receipt_url}, status=201)
+
+
+class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
+    http_method_names = ['get', 'post', 'head']
+
+    def form_valid(self, form):
+        """
+        TODO: remove. BasePaymentSubmitView is has form_valid as abstract class.
+        We dont actually need to use this, so we should change what we're
+        inheriting from.
+        """
+
+    @property
+    def payment_processor(self):
+        return Stripe(self.request.site)
+
+    def _get_basket(self, payment_intent_id):
+        """
+        Retrieve a basket using a payment intent ID.
+
+        Arguments:
+            payment_intent_id: payment_intent_id received from Stripe.
+
+        Returns:
+            It will return related basket or log exception and return None if
+            duplicate payment_intent_id* received or any other exception occurred.
+        """
+        try:
+            basket_attribute = BasketAttribute.objects.get(value_text=payment_intent_id)
+            basket = basket_attribute.basket
+            basket.strategy = strategy.Default()
+
+            Applicator().apply(basket, basket.owner, self.request)
+
+            basket_add_organization_attribute(basket, self.request.GET)
+        except MultipleObjectsReturned:
+            logger.warning(u"Duplicate payment_intent_id [%s] received from Stripe.", payment_intent_id)
+            return None
+        except Exception:  # pylint: disable=broad-except
+            logger.exception(u"Unexpected error during basket retrieval while executing Stripe payment.")
+            return None
+        return basket
+
+    def get(self, request):
+        """Handle an incoming user returned to us by Stripe after approving payment."""
+        # TBD: we're gonna want to check the $$ price of paymentIntentId
+        # to see if it suceeded or failed
+        # ... and then potentially compare it against what our basket has?
+        stripe_response = request.GET.dict()
+        payment_intent_id = stripe_response.get('payment_intent')
+        basket = self._get_basket(payment_intent_id)
+
+        if not basket:
+            return redirect(self.payment_processor.error_url)
+
+        receipt_url = get_receipt_page_url(
+            self.request,
+            order_number=basket.order_number,
+            site_configuration=basket.site.siteconfiguration,
+            disable_back_button=True
+        )
+
+        try:
+            with transaction.atomic():
+                try:
+                    self.handle_payment(stripe_response, basket)
+                except PaymentError:
+                    return redirect(self.payment_processor.error_url)
+        except:  # pylint: disable=bare-except
+            logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
+            return redirect(receipt_url)
+
+        try:
+            order = self.create_order(request, basket)
+            idempotency_key = self.payment_processor.generate_basket_pi_idempotency_key(basket)
+            billing_address = self.payment_processor.get_address_from_token(payment_intent_id, idempotency_key)
+            order.billing_address = self.create_billing_address(
+                user=self.request.user,
+                billing_address=billing_address
+            )
+            order.save()
+        except Exception:  # pylint: disable=broad-except
+            # any errors here will be logged in the create_order method. If we wanted any
+            # Paypal specific logging for this error, we would do that here.
+            return redirect(receipt_url)
+
+        try:
+            self.handle_post_order(order)
+        except Exception:  # pylint: disable=broad-except
+            self.log_order_placement_exception(basket.order_number, basket.id)
+
+        return redirect(receipt_url)
