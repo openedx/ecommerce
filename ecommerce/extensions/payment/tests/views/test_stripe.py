@@ -24,11 +24,11 @@ Source = get_model('payment', 'Source')
 Product = get_model('catalogue', 'Product')
 
 
-class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
+class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
     path = reverse('stripe:submit')
 
     def setUp(self):
-        super(StripeSubmitViewTests, self).setUp()
+        super(StripeCheckoutViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.site.siteconfiguration.client_side_payment_processor = 'stripe'

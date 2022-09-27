@@ -102,7 +102,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         create_api_response = stripe.PaymentIntent.create(
             **self._build_payment_intent_parameters(basket),
             # don't create a new intent for the same basket
-            idempotency_key=self._generate_basket_pi_idempotency_key(basket),
+            idempotency_key=self.generate_basket_pi_idempotency_key(basket),
         )
 
         # id is the payment_intent_id from Stripe
