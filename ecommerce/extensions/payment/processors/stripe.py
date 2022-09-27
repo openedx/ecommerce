@@ -135,7 +135,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # )
         confirm_api_response = stripe.PaymentIntent.retrieve(
             payment_intent_id,
-            idempotency_key=self._generate_basket_pi_idempotency_key(basket),
         )
         # proceed only if payment went through
         assert confirm_api_response['status'] == "succeeded"
