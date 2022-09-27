@@ -26,6 +26,7 @@ from ecommerce.extensions.payment.views import BasePaymentSubmitView
 logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
+BasketAttribute = get_model('basket', 'BasketAttribute')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
@@ -96,11 +97,8 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             duplicate payment_intent_id* received or any other exception occurred.
         """
         try:
-            ppr = PaymentProcessorResponse.objects.get(
-                processor_name=self.payment_processor.NAME,
-                transaction_id=payment_intent_id,
-            )
-            basket = ppr.basket
+            basket_attribute = BasketAttribute.objects.get(value_text=payment_intent_id)
+            basket = basket_attribute.basket
             basket.strategy = strategy.Default()
 
             Applicator().apply(basket, basket.owner, self.request)
