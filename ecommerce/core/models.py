@@ -192,7 +192,8 @@ class SiteConfiguration(models.Model):
         verbose_name=_('Enable Microfrontend for Basket Page'),
         help_text=_('Use the microfrontend implementation of the basket page instead of the server-side template'),
         blank=True,
-        default=False
+        default=False,
+        null=True
     )
     payment_microfrontend_url = models.URLField(
         verbose_name=_('Payment Microfrontend URL'),
