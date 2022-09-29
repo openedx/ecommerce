@@ -753,3 +753,27 @@ def generate_offer_display_name(conditional_offer):
     if enterprise_name and start_date:
         return "{} - {}".format(enterprise_name, start_date)
     return None
+
+
+def find_active_enterprise_customer_user(enterprise_customer_users):
+    """
+    Finds and returns the metadata for the active enterprise customer user.
+
+    Arguments:
+        enterprise_customer_users: List of dictionaries representing enterprise customer users, with an `active` field.
+    """
+    active_ecus = list(filter(lambda ecu: ecu.get('active', False) is True, enterprise_customer_users))
+    total_active_ecus = len(active_ecus)
+    if total_active_ecus == 0:
+        return None
+    
+    if total_active_ecus > 0:
+        # while there is supposed to be, at most, 1 active enterprise customer
+        # user record per learner, log when there isn't for monitoring.
+        log.warning(
+            'More than one active enterprise customer user record provided '
+            'with the following EnterpriseCustomerUser ids: %s',
+            ', '.join([str(ecu['id']) for ecu in active_ecus if ecu.get('id') is not None]),
+        )
+
+    return active_ecus[0]

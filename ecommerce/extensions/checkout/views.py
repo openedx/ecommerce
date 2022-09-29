@@ -24,7 +24,10 @@ from ecommerce.core.url_utils import (
     get_lms_program_dashboard_url
 )
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
-from ecommerce.enterprise.utils import has_enterprise_offer
+from ecommerce.enterprise.utils import (
+    find_active_enterprise_customer_user,
+    has_enterprise_offer,
+)
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -273,7 +276,7 @@ class ReceiptResponseView(ThankYouView):
                      'User: %s, Exception: %s', request.user, exc)
             return None
 
-        active_enterprise_customer_user = next((ecu for ecu in learner_data['results'] if ecu['active'] is True), None)
+        active_enterprise_customer_user = find_active_enterprise_customer_user(learner_data['results'])
         return active_enterprise_customer_user
 
     def get_enterprise_learner_portal_url(self, request, enterprise_customer):

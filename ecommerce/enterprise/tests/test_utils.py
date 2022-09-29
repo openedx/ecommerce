@@ -19,6 +19,7 @@ from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
     CUSTOMER_CATALOGS_DEFAULT_RESPONSE,
     enterprise_customer_user_needs_consent,
+    find_active_enterprise_customer_user,
     get_enterprise_catalog,
     get_enterprise_customer,
     get_enterprise_customer_catalogs,
@@ -422,3 +423,16 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         mock_request2 = RequestFactory().get('/any')
         parsed = parse_consent_params(mock_request2)
         assert parsed is None
+
+    def test_find_active_enterprise_customer_user(self):
+        """
+        Verify `find_active_enterprise_customer_user` returns the enterprise customer user that is
+        marked as `active=True`.
+        """
+        example_enterprise_customer_users = [
+            {'id': 1, 'active': False},
+            {'id': 2, 'active': True},
+            {'id': 3, 'active': False},
+        ]
+        active_enterprise_customer_user = find_active_enterprise_customer_user(example_enterprise_customer_users)
+        assert active_enterprise_customer_user['id'] == 2
