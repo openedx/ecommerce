@@ -594,14 +594,14 @@ def is_duplicate_seat_attempt(basket, product):
 
 def get_billing_address_from_payment_intent_data(payment_intent):
     """
-    Take strips response_data dict, instantiates a BillingAddress object
+    Take stripes response_data dict, instantiates a BillingAddress object
     and return it.
     """
-    customer = payment_intent['customer']
-    customer_address = payment_intent['customer']['address']
+    billing_details = payment_intent['charges']['data'][0]['billing_details']
+    customer_address = billing_details['address']
 
     address = BillingAddress(
-        first_name=customer['name'],    # Stripe only has a single name field
+        first_name=billing_details['name'],    # Stripe only has a single name field
         last_name='',
         line1=customer_address['line1'],
         line2=customer_address['line2'],
