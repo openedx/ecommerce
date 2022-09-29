@@ -155,13 +155,15 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         card_type = STRIPE_CARD_TYPE_MAP.get(card_object['brand'])
         logger.info(f'card_type {card_type}')
         logger.info("Returning HandledProcessorResponse...")
-        return HandledProcessorResponse(
+        hpr = HandledProcessorResponse(
             transaction_id=payment_intent_id,
             total=total,
             currency=currency,
             card_number=card_number,
             card_type=card_type
         )
+        logger.info(f'hpr {hpr}')
+        return hpr
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
