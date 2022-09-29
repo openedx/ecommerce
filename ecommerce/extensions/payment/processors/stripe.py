@@ -197,5 +197,5 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             payment_intent_id,
             **retrieve_kwargs,
         )
-
+        logger.info(f'payment_intent {payment_intent}')
         return get_billing_address_from_payment_intent_data(payment_intent)
