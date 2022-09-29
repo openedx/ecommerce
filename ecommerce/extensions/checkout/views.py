@@ -24,10 +24,7 @@ from ecommerce.core.url_utils import (
     get_lms_program_dashboard_url
 )
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
-from ecommerce.enterprise.utils import (
-    find_active_enterprise_customer_user,
-    has_enterprise_offer,
-)
+from ecommerce.enterprise.utils import find_active_enterprise_customer_user, has_enterprise_offer
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url

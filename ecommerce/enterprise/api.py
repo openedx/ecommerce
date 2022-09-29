@@ -14,7 +14,7 @@ from requests.exceptions import HTTPError, Timeout
 from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise.utils import (
     find_active_enterprise_customer_user,
-    get_enterprise_id_for_current_request_user_from_jwt,
+    get_enterprise_id_for_current_request_user_from_jwt
 )
 
 logger = logging.getLogger(__name__)
