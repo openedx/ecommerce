@@ -143,14 +143,13 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             return redirect(receipt_url)
 
         try:
-            order = self.create_order(request, basket)
             idempotency_key = self.payment_processor.generate_basket_pi_idempotency_key(basket)
             billing_address = self.payment_processor.get_address_from_token(payment_intent_id, idempotency_key)
-            order.billing_address = self.create_billing_address(
+            billing_address = self.create_billing_address(
                 user=self.request.user,
                 billing_address=billing_address
             )
-            order.save()
+            order = self.create_order(request, basket, billing_address)
         except Exception:  # pylint: disable=broad-except
             # any errors here will be logged in the create_order method. If we wanted any
             # Paypal specific logging for this error, we would do that here.
