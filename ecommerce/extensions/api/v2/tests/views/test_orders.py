@@ -137,6 +137,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         """
         test_learner_portal_url = 'http://fake-learner-portal-url.org'
         mock_get_metadata_for_enterprise_user.return_value = {
+            'id': 1,
             'active': True,
             'enterprise_customer': {'slug': 'fake-enterprise'},
         }

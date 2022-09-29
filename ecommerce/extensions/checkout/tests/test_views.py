@@ -194,6 +194,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         # Note: actual response is far more rich. Just including the bits relevant to us
         self.enterprise_learner_data_no_portal = {
             'results': [{
+                'id': 1,
                 'enterprise_customer': {
                     'name': 'Test Company',
                     'slug': 'test-company',
@@ -205,6 +206,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         }
         self.enterprise_learner_data_with_portal = {
             'results': [{
+                'id': 1,
                 'enterprise_customer': {
                     'name': 'Test Company',
                     'slug': 'test-company',
@@ -216,6 +218,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         }
         self.enterprise_learner_data_with_portal_no_search = {
             'results': [{
+                'id': 1,
                 'enterprise_customer': {
                     'name': 'Test Company',
                     'slug': 'test-company',

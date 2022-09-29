@@ -247,12 +247,14 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         mock_fetch.return_value = {
             'results': [
                 {
+                    'id': 1,
                     'enterprise_customer': {
                         'uuid': 'my-uuid',
                     },
                     'active': True,
                 },
                 {
+                    'id': 2,
                     'enterprise_customer': {
                         'uuid': 'my-uuid-2',
                     },
