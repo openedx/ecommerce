@@ -144,11 +144,14 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
 
         try:
             billing_address = self.payment_processor.get_address_from_token(payment_intent_id)
+            logger.info("zzzz got billing address from token")
             billing_address = self.create_billing_address(
                 user=self.request.user,
                 billing_address=billing_address
             )
+            logger.info("zzzz made billing address")
             order = self.create_order(request, basket, billing_address)
+            logger.info("zzzz order created!!!!!!!zzzz")
         except Exception:  # pylint: disable=broad-except
             # any errors here will be logged in the create_order method. If we wanted any
             # Paypal specific logging for this error, we would do that here.
