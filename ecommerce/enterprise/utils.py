@@ -766,7 +766,7 @@ def find_active_enterprise_customer_user(enterprise_customer_users):
     total_active_ecus = len(active_ecus)
     if total_active_ecus == 0:
         return None
-    
+
     if total_active_ecus > 0:
         # while there is supposed to be, at most, 1 active enterprise customer
         # user record per learner, log when there isn't for monitoring.
