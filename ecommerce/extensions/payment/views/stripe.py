@@ -143,8 +143,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             return redirect(receipt_url)
 
         try:
-            idempotency_key = self.payment_processor.generate_basket_pi_idempotency_key(basket)
-            billing_address = self.payment_processor.get_address_from_token(payment_intent_id, idempotency_key)
+            billing_address = self.payment_processor.get_address_from_token(payment_intent_id)
             billing_address = self.create_billing_address(
                 user=self.request.user,
                 billing_address=billing_address
