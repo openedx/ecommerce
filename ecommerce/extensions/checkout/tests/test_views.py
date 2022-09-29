@@ -615,7 +615,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         The "Go to dashboard" and "Find more courses" CTA links at the bottom of the receipt
         page should be hidden when the integrated learner portal search configuration is disabled.
         """
-        mock_learner_data.return_value = self.enterprise_learner_data_with_portal
+        mock_learner_data.return_value = self.enterprise_learner_data_with_portal_no_search
         order = self._create_order_for_receipt()
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
