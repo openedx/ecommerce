@@ -145,25 +145,18 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         )
 
         total = basket.total_incl_tax
-        logger.info(f'total {total}')
         currency = basket.currency
-        logger.info(f'currency {currency}')
         card_object = confirm_api_response['charges']['data'][0]['payment_method_details']['card']
-        logger.info(f'card_object {card_object}')
         card_number = card_object['last4']
-        logger.info(f'card_number {card_number}')
         card_type = STRIPE_CARD_TYPE_MAP.get(card_object['brand'])
-        logger.info(f'card_type {card_type}')
-        logger.info("Returning HandledProcessorResponse...")
-        hpr = HandledProcessorResponse(
+
+        return HandledProcessorResponse(
             transaction_id=payment_intent_id,
             total=total,
             currency=currency,
             card_number=card_number,
             card_type=card_type
         )
-        logger.info(f'hpr {hpr}')
-        return hpr
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
@@ -197,5 +190,5 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             payment_intent_id,
             **retrieve_kwargs,
         )
-        logger.info(f'payment_intent {payment_intent}')
+
         return get_billing_address_from_payment_intent_data(payment_intent)

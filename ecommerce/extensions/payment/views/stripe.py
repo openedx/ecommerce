@@ -131,8 +131,6 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             site_configuration=basket.site.siteconfiguration,
             disable_back_button=True
         )
-        logger.info(f'receipt_url {receipt_url}')
-        logger.info('attempting to handle payment from view')
 
         try:
             with transaction.atomic():
@@ -141,23 +139,22 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
                 except PaymentError:
                     return redirect(self.payment_processor.error_url)
         except:  # pylint: disable=bare-except
-            logger.info('in the except clause')
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return redirect(receipt_url)
-        logger.info('trying to get the billing address and then make order')
-        billing_address = self.payment_processor.get_address_from_token(payment_intent_id)
-        logger.info("zzzz got billing address from token")
-        billing_address = self.create_billing_address(
-            user=self.request.user,
-            billing_address=billing_address
-        )
-        logger.info("zzzz made billing address")
+
+        try:
+            billing_address = self.payment_processor.get_address_from_token(payment_intent_id)
+            billing_address = self.create_billing_address(
+                user=self.request.user,
+                billing_address=billing_address
+            )
+        except Exception as err:
+            logger.exception('Error creating billing address for basket [%d]: %s', basket.id, err)
+            billing_address = None
+
         try:
             order = self.create_order(request, basket, billing_address)
-            logger.info("zzzz order created!!!!!!!zzzz")
         except Exception:  # pylint: disable=broad-except
-            # any errors here will be logged in the create_order method. If we wanted any
-            # Paypal specific logging for this error, we would do that here.
             return redirect(receipt_url)
 
         try:
