@@ -116,20 +116,22 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                                 'last4': '6789',
                                 'brand': 'credit_card_brand',
                             }
-                        }
+                        },
+                        'billing_details': {
+                            'address': {
+                                'line1': '123 Town Road',
+                                'line2': '',
+                                'city': 'Townsville',
+                                'postal_code': '02138',
+                                'state': 'MA',
+                                'country': 'US',
+                            },
+                            'email': 'test@example.com',
+                            'name': 'John Doe',
+                            'phone': None,
+                        },
                     }]
                 },
-                'customer': {
-                    'name': 'John Doe',
-                    'address': {
-                        'line1': '123 Town Road',
-                        'line2': '',
-                        'city': 'Townsville',
-                        'postal_code': '02138',
-                        'state': 'MA',
-                        'country': 'US',
-                    }
-                }
             }
             with mock.patch(
                 'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api'
@@ -140,7 +142,6 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                     {'payment_intent': 'pi_testtesttest'},
                 )
                 assert mock_retrieve.call_count == 2
-                assert mock_retrieve.call_args.kwargs['idempotency_key'] == idempotency_key
 
         # Verify BillingAddress was set correctly
         basket.refresh_from_db()
