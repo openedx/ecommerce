@@ -554,7 +554,6 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         {'is_integrated_learner_portal_search_enabled': True},
         {'is_integrated_learner_portal_search_enabled': False},
     )
-    @ddt.unpack
     def test_no_enterprise_learner_dashboard_link_in_messages(self,
                                                               is_integrated_learner_portal_search_enabled,
                                                               mock_learner_data):
