@@ -175,7 +175,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return transaction_id
 
-    def get_address_from_token(self, payment_intent_id, idempotency_key=None):
+    def get_address_from_token(self, payment_intent_id):
         """
         Retrieves the billing address associated with a PaymentIntent.
 
@@ -185,8 +185,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         retrieve_kwargs = {
             'expand': ['customer'],
         }
-        if idempotency_key is not None:
-            retrieve_kwargs['idempotency_key'] = idempotency_key
 
         payment_intent = stripe.PaymentIntent.retrieve(
             payment_intent_id,
