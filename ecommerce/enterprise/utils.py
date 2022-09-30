@@ -762,18 +762,17 @@ def find_active_enterprise_customer_user(enterprise_customer_users):
     Arguments:
         enterprise_customer_users: List of dictionaries representing enterprise customer users, with an `active` field.
     """
-    active_ecus = list(filter(lambda ecu: ecu.get('active', False) is True, enterprise_customer_users))
-    total_active_ecus = len(active_ecus)
-    if total_active_ecus == 0:
+    active_ecus = [ecu for ecu in enterprise_customer_users if ecu.get('active', False) is True]
+    if not active_ecus:
         return None
 
-    if total_active_ecus > 0:
+    if len(active_ecus) > 1:
         # while there is supposed to be, at most, 1 active enterprise customer
         # user record per learner, log when there isn't for monitoring.
         log.warning(
             'More than one active enterprise customer user record provided '
             'with the following EnterpriseCustomerUser ids: %s',
-            ', '.join([str(ecu['id']) for ecu in active_ecus if ecu.get('id') is not None]),
+            ', '.join(str(ecu['id']) for ecu in active_ecus if ecu.get('id')),
         )
 
     return active_ecus[0]
