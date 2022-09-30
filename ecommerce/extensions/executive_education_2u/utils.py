@@ -1,4 +1,8 @@
+from datetime import datetime
+
+import pytz
 from django.conf import settings
+from django.db.models import Q
 from oscar.core.loading import get_model
 
 from ecommerce.courses.constants import CertificateType
@@ -51,8 +55,12 @@ def get_enterprise_offers_for_catalogs(enterprise_id, catalog_list):
     """
     Return enterprise offers filtered by the user's enterprise.
     """
+    cutoff = datetime.now(pytz.UTC)
     ConditionalOffer = get_model('offer', 'ConditionalOffer')
-    offers = ConditionalOffer.active.filter(
+    offers = ConditionalOffer.objects.filter(
+        Q(end_datetime__gte=cutoff) | Q(end_datetime=None),
+        Q(start_datetime__lte=cutoff) | Q(start_datetime=None),
+    ).filter(
         offer_type=ConditionalOffer.SITE,
         condition__enterprise_customer_catalog_uuid__in=catalog_list,
         condition__enterprise_customer_uuid=enterprise_id,

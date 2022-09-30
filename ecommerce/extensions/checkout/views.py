@@ -24,7 +24,7 @@ from ecommerce.core.url_utils import (
     get_lms_program_dashboard_url
 )
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
-from ecommerce.enterprise.utils import has_enterprise_offer
+from ecommerce.enterprise.utils import find_active_enterprise_customer_user, has_enterprise_offer
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -168,9 +168,15 @@ class ReceiptResponseView(ThankYouView):
                 'order_history_url': request.site.siteconfiguration.build_lms_url('account/settings'),
             }
             return self.render_to_response(context=context, status=404)
-        learner_portal_url = self.add_message_if_enterprise_user(request)
-        if learner_portal_url:
-            response.context_data['order_dashboard_url'] = learner_portal_url
+        enterprise_customer_user = self.get_metadata_for_enterprise_user(request)
+        if enterprise_customer_user:
+            enterprise_customer = enterprise_customer_user['enterprise_customer']
+            learner_portal_url = self.get_enterprise_learner_portal_url(request, enterprise_customer)
+            if learner_portal_url:
+                self.add_message_if_enterprise_user(request, enterprise_customer, learner_portal_url)
+                response.context_data['order_dashboard_url'] = learner_portal_url
+            else:
+                response.context_data['show_receipt_cta_links'] = False
         return response
 
     def get_context_data(self, **kwargs):  # pylint: disable=arguments-differ
@@ -190,6 +196,7 @@ class ReceiptResponseView(ThankYouView):
         context.update({
             'order_dashboard_url': self.get_order_dashboard_url(order),
             'explore_courses_url': get_lms_explore_courses_url(),
+            'show_receipt_cta_links': True,
             'has_enrollment_code_product': has_enrollment_code_product,
             'disable_back_button': self.request.GET.get('disable_back_button', 0),
         })
@@ -252,7 +259,12 @@ class ReceiptResponseView(ThankYouView):
             order_dashboard_url = get_lms_dashboard_url()
         return order_dashboard_url
 
-    def add_message_if_enterprise_user(self, request):
+    def get_metadata_for_enterprise_user(self, request):
+        """
+        Retrieves metadata about the authenticated user's linked enterprise customers. Returns the metadata
+        for the `EnterpriseCustomerUser` record marked as active (i.e., there is only one active at a time) for
+        the current Django session.
+        """
         try:
             # If enterprise feature is enabled return all the enterprise_customer associated with user.
             learner_data = fetch_enterprise_learner_data(request.site, request.user)
@@ -261,22 +273,49 @@ class ReceiptResponseView(ThankYouView):
                      'User: %s, Exception: %s', request.user, exc)
             return None
 
-        try:
-            enterprise_customer = learner_data['results'][0]['enterprise_customer']
-        except (IndexError, KeyError):
-            # If enterprise feature is enabled and user is not associated to any enterprise
-            return None
+        active_enterprise_customer_user = find_active_enterprise_customer_user(learner_data['results'])
+        return active_enterprise_customer_user
 
+    def get_enterprise_learner_portal_url(self, request, enterprise_customer):
+        """
+        Returns an enterprise learner portal URL string given a request and the metadata
+        for an enterprise customer, or None if the specified enterprise customer is not
+        configured for a learner portal URL.
+
+        The enterprise customer must have a `slug`, and the `enable_learner_portal` and
+        `enable_integrated_customer_learner_portal_search` fields turned on.
+
+        Arguments:
+            request: A request object
+            enterprise_customer: Dictionary containing the following properties:
+                - enable_learner_portal
+                - enable_integrated_customer_learner_portal_search
+                - slug
+
+        """
         enable_learner_portal = enterprise_customer.get('enable_learner_portal')
+        enable_integrated_customer_learner_portal_search = enterprise_customer.get(
+            'enable_integrated_customer_learner_portal_search',
+        )
         enterprise_learner_portal_slug = enterprise_customer.get('slug')
-        if enable_learner_portal and enterprise_learner_portal_slug:
+
+        if enable_learner_portal and enterprise_learner_portal_slug and enable_integrated_customer_learner_portal_search:  # pylint: disable=line-too-long
             learner_portal_url = '{scheme}://{hostname}/{slug}'.format(
                 scheme=request.scheme,
                 hostname=settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME,
                 slug=enterprise_learner_portal_slug,
             )
+            return learner_portal_url
+        return None
+
+    def add_message_if_enterprise_user(self, request, enterprise_customer, learner_portal_url):
+        """
+        Adds a info message alert informing the user of their enterprise learner portal dashboard. The message
+        will only appear if the learner is linked to an enterprise customer with a valid learner portal URL.
+        """
+        if enterprise_customer and learner_portal_url:
             message = (
-                'Your company, {enterprise_customer_name}, has a dedicated page where '
+                'Your organization, {enterprise_customer_name}, has a dedicated page where '
                 'you can see all of your sponsored courses. '
                 'Go to <a href="{url}">your learner portal</a>.'
             ).format(
@@ -284,5 +323,3 @@ class ReceiptResponseView(ThankYouView):
                 url=learner_portal_url
             )
             messages.add_message(request, messages.INFO, message, extra_tags='safe')
-            return learner_portal_url
-        return None

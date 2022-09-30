@@ -217,6 +217,7 @@ class EnterpriseServiceMockMixin:
             'results': [
                 {
                     'id': learner_id,
+                    'active': True,
                     'enterprise_customer': {
                         'uuid': enterprise_customer_uuid,
                         'name': 'BigEnterprise',

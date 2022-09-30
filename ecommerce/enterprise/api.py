@@ -12,7 +12,10 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.core.utils import get_cache_key
-from ecommerce.enterprise.utils import get_enterprise_id_for_current_request_user_from_jwt
+from ecommerce.enterprise.utils import (
+    find_active_enterprise_customer_user,
+    get_enterprise_id_for_current_request_user_from_jwt
+)
 
 logger = logging.getLogger(__name__)
 
@@ -196,9 +199,7 @@ def get_enterprise_id_for_user(site, user):
         logger.info('Unable to retrieve enterprise learner data for User: %s, Exception: %s', user, exc)
         return None
 
-    try:
-        return enterprise_learner_response['results'][0]['enterprise_customer']['uuid']
-    except IndexError:
-        pass
-
+    active_enterprise_customer_user = find_active_enterprise_customer_user(enterprise_learner_response['results'])
+    if active_enterprise_customer_user:
+        return active_enterprise_customer_user['enterprise_customer']['uuid']
     return None
