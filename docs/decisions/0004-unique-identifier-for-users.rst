@@ -25,7 +25,7 @@ In addition, middleware now checks to see if the user is missing an LMS user id.
 retrieves it from the user's social auth. If multiple social auth rows are found for the user, the most recently
 saved row is used.
 
-To back-fill the LMS user id for existing users, run the `import_user_ids <https://github.com/edx/ecommerce/blob/master/ecommerce/core/management/commands/import_user_ids.py>`_
+To back-fill the LMS user id for existing users, run the `import_user_ids <https://github.com/openedx/ecommerce/blob/master/ecommerce/core/management/commands/import_user_ids.py>`_
 management command.
 
 New users receive an LMS user id in the ecommerce database as part of the JWT and/or social auth flow once they login
@@ -45,4 +45,4 @@ the affected user(s), unless the *allow_missing_lms_user_id* waffle switch is en
 References
 ----------
 
-* https://github.com/edx/open-edx-proposals/blob/master/oeps/oep-0032-arch-unique-identifier-for-users.rst
+* https://github.com/openedx/open-edx-proposals/blob/master/oeps/oep-0032-arch-unique-identifier-for-users.rst
