@@ -26,7 +26,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-04 20:12+0000\n"
+"POT-Creation-Date: 2022-10-02 20:20+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: alexis swyngedauw, 2022\n"
 "Language-Team: French (http://www.transifex.com/open-edx/edx-platform/language/fr/)\n"
@@ -816,29 +816,29 @@ msgstr "INACTIF"
 msgid "ACTIVE"
 msgstr "ACTIF"
 
-#: ecommerce/extensions/api/serializers.py:693
+#: ecommerce/extensions/api/serializers.py:700
 msgid "Products must have a certificate type."
 msgstr "Les produits doivent avoir un type d'attestation."
 
-#: ecommerce/extensions/api/serializers.py:696
-#: ecommerce/extensions/api/serializers.py:741
+#: ecommerce/extensions/api/serializers.py:703
+#: ecommerce/extensions/api/serializers.py:748
 msgid "Products must have a price."
 msgstr "Les produits doivent avoir un prix."
 
-#: ecommerce/extensions/api/serializers.py:703
+#: ecommerce/extensions/api/serializers.py:710
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "Vous devez fournir un UUID de cours pour créer des droits de cours."
 
-#: ecommerce/extensions/api/serializers.py:737
+#: ecommerce/extensions/api/serializers.py:744
 msgid "Products must indicate whether ID verification is required."
 msgstr "les produits doivent indiquer si un vérification d’identifiant est nécessaire."
 
-#: ecommerce/extensions/api/serializers.py:808
+#: ecommerce/extensions/api/serializers.py:815
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Classe de produit invalide [{product_class}] demandée"
 
-#: ecommerce/extensions/api/serializers.py:840
+#: ecommerce/extensions/api/serializers.py:847
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -846,29 +846,29 @@ msgid ""
 " been saved."
 msgstr "Le cours [{course_id}] n'a pas été publié sur le LMS car le switch[publish_course_modes_to_lms] est désactivée. Afin d'éviter les SKU fantômes, les données n'ont pas été sauvegardées."
 
-#: ecommerce/extensions/api/serializers.py:1510
+#: ecommerce/extensions/api/serializers.py:1517
 msgid "Enrollment code"
 msgstr "Code d'inscription"
 
-#: ecommerce/extensions/api/serializers.py:1511
+#: ecommerce/extensions/api/serializers.py:1518
 msgid "Discount code"
 msgstr "Code de réduction"
 
-#: ecommerce/extensions/api/serializers.py:1978
+#: ecommerce/extensions/api/serializers.py:1985
 msgid "Invalid order number or order {} does not exists."
 msgstr "Numéro de commande incorrect ou la commande {} n'existe pas."
 
-#: ecommerce/extensions/api/serializers.py:2033
+#: ecommerce/extensions/api/serializers.py:2040
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr "Échec de l'attribution du nouveau bon de réduction. Erreur: {}"
 
-#: ecommerce/extensions/api/serializers.py:2051
+#: ecommerce/extensions/api/serializers.py:2058
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr "Votre commande {} ne peut pas être remboursée car le coupon '{}' ne peut pas être remboursé."
 
-#: ecommerce/extensions/api/serializers.py:2082
+#: ecommerce/extensions/api/serializers.py:2089
 msgid "Could note create new voucher for the order: {}"
 msgstr "Impossible de créer un nouveau bon pour la commande: {}"
 
@@ -2126,11 +2126,11 @@ msgid ""
 " course name."
 msgstr "Pour recevoir un crédit académique pour ce cours, vous devez faire une demande de crédit auprès de l'organisation qui offre le crédit. Vous pouvez trouver un lien vers le site Web de l'organisation sur votre {link_start}{lms_dashboard_url}{link_middle}tableau de bord{link_end}, près du nom du cours.."
 
-#: ecommerce/templates/edx/checkout/receipt.html:199
+#: ecommerce/templates/edx/checkout/receipt.html:200
 msgid "Go to dashboard"
 msgstr "Aller au tableau de bord"
 
-#: ecommerce/templates/edx/checkout/receipt.html:202
+#: ecommerce/templates/edx/checkout/receipt.html:203
 msgid "Find more courses"
 msgstr "Trouver d'autres cours"
 
