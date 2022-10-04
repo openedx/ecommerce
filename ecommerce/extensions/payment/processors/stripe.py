@@ -101,6 +101,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # TODO: handle stripe.error.IdempotencyError when basket was already created, but with different amount
         create_api_response = stripe.PaymentIntent.create(
             **self._build_payment_intent_parameters(basket),
+            # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
+            secret_key_confirmation='required',
             # don't create a new intent for the same basket
             idempotency_key=self.generate_basket_pi_idempotency_key(basket),
         )
@@ -124,18 +126,18 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
         self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
 
-        # TODO: Potentially needing some confirm logic here.
-        # You'll want to catch the stripe.error.CardError in the confirm case
-        # and raise a TransactionDeclined (what we used to do)
-        #
-        # confirm_api_response = stripe.PaymentIntent.confirm(
-        #     payment_intent_id,
-        #     # stop on complicated payments MFE can't handle yet
-        #     error_on_requires_action=True,
-        # )
-        confirm_api_response = stripe.PaymentIntent.retrieve(
-            payment_intent_id,
-        )
+        # Previously did a retrieve here, but now that we implemented SDN logic
+        # we will want to do a confirm instead
+        try:
+            confirm_api_response = stripe.PaymentIntent.confirm(
+                payment_intent_id,
+                # stop on complicated payments MFE can't handle yet
+                error_on_requires_action=True,
+            )
+        except stripe.error.CardError as err:
+            logger.exception(f'Card Error for basket [{basket}]: {err}')
+            raise
+
         # proceed only if payment went through
         assert confirm_api_response['status'] == "succeeded"
         logger.info(

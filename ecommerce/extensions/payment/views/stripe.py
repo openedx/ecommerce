@@ -13,6 +13,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute, basket_add_payment_intent_id_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.payment.core.sdn import  checkSDN
 from ecommerce.extensions.payment.forms import StripeSubmitForm
 from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
@@ -86,6 +87,37 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
     def payment_processor(self):
         return Stripe(self.request.site)
 
+    def check_sdn(self, request, data):
+        """
+        Check that the supplied request and form data passes SDN checks.
+
+        Returns:
+            JsonResponse with an error if the SDN check fails, or None if it succeeds.
+        """
+        hit_count = checkSDN(
+            request,
+            data['name'],
+            data['city'],
+            data['country'])
+
+        if hit_count > 0:
+            logger.info(
+                'SDNCheck function called for basket [%d]. It received %d hit(s).',
+                request.basket.id,
+                hit_count,
+            )
+            response_to_return = {
+                'error': 'There was an error submitting the basket',
+                'sdn_check_failure': {'hit_count': hit_count}}
+
+            return JsonResponse(response_to_return, status=403)
+
+        logger.info(
+            'SDNCheck function called for basket [%d]. It did not receive a hit.',
+            request.basket.id,
+        )
+        return None
+
     def _get_basket(self, payment_intent_id):
         """
         Retrieve a basket using a payment intent ID.
@@ -132,10 +164,26 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             disable_back_button=True
         )
 
+        # SDN Check here!
+        billing_address_obj = self.payment_processor.get_address_from_token(
+            payment_intent_id
+        )
+        sdn_check_data = {
+            # Stripe has 1 name field so we use first_name on billing_address_obj
+            'name': billing_address_obj.first_name,
+            'city': billing_address_obj.city,
+            'country': billing_address_obj.country,
+        }
+        sdn_check_failure = self.check_sdn(self.request, sdn_check_data)
+        if sdn_check_failure is not None:
+            return sdn_check_failure
+            #redirect(self.payment_processor.error_url)
+
         try:
             with transaction.atomic():
                 try:
                     self.handle_payment(stripe_response, basket)
+                # may want to catch more exceptions here
                 except PaymentError:
                     return redirect(self.payment_processor.error_url)
         except:  # pylint: disable=bare-except
@@ -143,10 +191,9 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             return redirect(receipt_url)
 
         try:
-            billing_address = self.payment_processor.get_address_from_token(payment_intent_id)
             billing_address = self.create_billing_address(
                 user=self.request.user,
-                billing_address=billing_address
+                billing_address=billing_address_obj
             )
         except Exception as err:
             logger.exception('Error creating billing address for basket [%d]: %s', basket.id, err)

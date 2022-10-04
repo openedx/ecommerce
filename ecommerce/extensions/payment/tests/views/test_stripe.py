@@ -105,43 +105,54 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             mock_create.assert_called_once()
             assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
 
+        response_dict = {
+            'status': 'requires_payment_method',
+            'charges': {
+                'data': [{
+                    'payment_method_details': {
+                        'card': {
+                            'last4': '6789',
+                            'brand': 'credit_card_brand',
+                        }
+                    },
+                    'billing_details': {
+                        'address': {
+                            'line1': '123 Town Road',
+                            'line2': '',
+                            'city': 'Townsville',
+                            'postal_code': '02138',
+                            'state': 'MA',
+                            'country': 'US',
+                        },
+                        'email': 'test@example.com',
+                        'name': 'John Doe',
+                        'phone': None,
+                    },
+                }]
+            },
+        }
+        # Response for retrieve call that should be made when getting billing address
+        retrieve_resp = dict(response_dict)
+        # Response for confim call that shouls be made when handling processor response
+        confirm_resp = dict(response_dict)
+        confirm_resp['status'] = 'succeeded'
+
         with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
-            # Actual call returns more fields. Only including necessary ones here
-            mock_retrieve.return_value = {
-                'status': 'succeeded',
-                'charges': {
-                    'data': [{
-                        'payment_method_details': {
-                            'card': {
-                                'last4': '6789',
-                                'brand': 'credit_card_brand',
-                            }
-                        },
-                        'billing_details': {
-                            'address': {
-                                'line1': '123 Town Road',
-                                'line2': '',
-                                'city': 'Townsville',
-                                'postal_code': '02138',
-                                'state': 'MA',
-                                'country': 'US',
-                            },
-                            'email': 'test@example.com',
-                            'name': 'John Doe',
-                            'phone': None,
-                        },
-                    }]
-                },
-            }
+            mock_retrieve.return_value = retrieve_resp
+
             with mock.patch(
                 'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api'
             ) as mock_api_resp:
                 mock_api_resp.return_value = self.mock_enrollment_api_resp
-                self.client.get(
-                    self.stripe_checkout_url,
-                    {'payment_intent': 'pi_testtesttest'},
-                )
-                assert mock_retrieve.call_count == 2
+
+                with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
+                    mock_confirm.return_value = confirm_resp
+                    self.client.get(
+                        self.stripe_checkout_url,
+                        {'payment_intent': 'pi_testtesttest'},
+                    )
+                assert mock_retrieve.call_count == 1
+                assert mock_confirm.call_count == 1
 
         # Verify BillingAddress was set correctly
         basket.refresh_from_db()
