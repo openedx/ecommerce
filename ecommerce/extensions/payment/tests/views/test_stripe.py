@@ -133,7 +133,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         }
         # Response for retrieve call that should be made when getting billing address
         retrieve_resp = dict(response_dict)
-        # Response for confim call that shouls be made when handling processor response
+        # Response for confirm call that should be made when handling processor response
         confirm_resp = dict(response_dict)
         confirm_resp['status'] = 'succeeded'
 

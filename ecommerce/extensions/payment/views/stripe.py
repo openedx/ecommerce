@@ -176,14 +176,12 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         }
         sdn_check_failure = self.check_sdn(self.request, sdn_check_data)
         if sdn_check_failure is not None:
-            return sdn_check_failure
-            #redirect(self.payment_processor.error_url)
+            return sdn_check_failure  # redirect(self.payment_processor.error_url)
 
         try:
             with transaction.atomic():
                 try:
                     self.handle_payment(stripe_response, basket)
-                # may want to catch more exceptions here
                 except PaymentError:
                     return redirect(self.payment_processor.error_url)
         except:  # pylint: disable=bare-except
