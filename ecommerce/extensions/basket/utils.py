@@ -603,7 +603,7 @@ def get_billing_address_from_payment_intent_data(payment_intent):
         first_name=billing_details['name'],  # Stripe only has a single name field
         last_name='',
         line1=customer_address['line1'],
-        line2=customer_address.get('line2', ''),  # line2 is optional, default to '' if not provided
+        line2='' if not customer_address['line2'] else customer_address['line2'],  # line2 is optional, default to '' if not provided
         line4=customer_address['city'],  # Oscar uses line4 for city
         postcode=customer_address['postal_code'],
         state=customer_address['state'],
