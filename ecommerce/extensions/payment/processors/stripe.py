@@ -3,6 +3,7 @@
 
 import logging
 
+from django.db.utils import IntegrityError
 import stripe
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
@@ -101,13 +102,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def get_capture_context(self, request):
         # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
         basket = Basket.get_basket(request.user, request.site)
+        payment_intent_id_attribute = BasketAttributeType.objects.get(name=PAYMENT_INTENT_ID_ATTRIBUTE)
         try:
-            # NOTE: if the order number on a basket changes, but the basket has been
-            # created before successfully through this get_capture_context method,
-            # we will hit an integrity error where a 2nd payment_id basket_attribute will
-            # try to be created and fail... as of 10/6/2022 we believe this was an odd
-            # dirty test data scenario, but we may want to account for it here in another
-            # except clause
             stripe_response = stripe.PaymentIntent.create(
                 **self._build_payment_intent_parameters(basket),
                 # don't create a new intent for the same basket
@@ -115,14 +111,29 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             )
             # id is the payment_intent_id from Stripe
             transaction_id = stripe_response['id']
-            basket_add_payment_intent_id_attribute(basket, transaction_id)
+            try:
+                basket_add_payment_intent_id_attribute(basket, transaction_id)
+            except IntegrityError:
+                # If we got here, it's because a basket has had its order number incremented
+                # (for some reason), yet the basket has remained the same object.
+                # This will result in a NEW payment intent object being created in stripe.
+                # which is okay; however, in this case there would already be a BasketAttribute
+                # for payment_intent_id already created for this basket... and you can only have
+                # one. So instead of choking, update the attribute that exists to have
+                # the value of the new payment intent in question (and orphan the old payment
+                # intent in stripe)
+                payment_intent_attr = BasketAttribute.objects.get(
+                    basket=basket,
+                    attribute_type=payment_intent_id_attribute
+                )
+                payment_intent_attr.value_text = transaction_id.strip()
+                payment_intent_attr.save()
         # for when basket was already created, but with different amount
         except stripe.error.IdempotencyError:
             # if this PI has been created before, we should be able to retrieve
             # it from Stripe using the payment_intent_id BasketAttribute.
             # Note that we update the PI's price in handle_processor_response
             # before hitting the confirm endpoint, so we don't need to do that here
-            payment_intent_id_attribute = BasketAttributeType.objects.get(name=PAYMENT_INTENT_ID_ATTRIBUTE)
             payment_intent_attr = BasketAttribute.objects.get(
                 basket=basket,
                 attribute_type=payment_intent_id_attribute
