@@ -180,7 +180,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
-            refund = stripe.Refund.create(charge=reference_number)
+            refund = stripe.Refund.create(payment_intent=reference_number)
         except:
             msg = 'An error occurred while attempting to issue a credit (via Stripe) for order [{}].'.format(
                 order_number)
