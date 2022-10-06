@@ -8,6 +8,7 @@ from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE
 from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.utils import (
     basket_add_payment_intent_id_attribute,
@@ -22,6 +23,8 @@ from ecommerce.extensions.payment.processors import (
 
 logger = logging.getLogger(__name__)
 
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -98,18 +101,36 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def get_capture_context(self, request):
         # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
         basket = Basket.get_basket(request.user, request.site)
-        # TODO: handle stripe.error.IdempotencyError when basket was already created, but with different amount
-        create_api_response = stripe.PaymentIntent.create(
-            **self._build_payment_intent_parameters(basket),
-            # don't create a new intent for the same basket
-            idempotency_key=self.generate_basket_pi_idempotency_key(basket),
-        )
+        try:
+            # NOTE: if the order number on a basket changes, but the basket has been
+            # created before successfully through this get_capture_context method,
+            # we will hit an integrity error where a 2nd payment_id basket_attribute will
+            # try to be created and fail... as of 10/6/2022 we believe this was an odd
+            # dirty test data scenario, but we may want to account for it here in another
+            # except clause
+            stripe_response = stripe.PaymentIntent.create(
+                **self._build_payment_intent_parameters(basket),
+                # don't create a new intent for the same basket
+                idempotency_key=self.generate_basket_pi_idempotency_key(basket),
+            )
+            # id is the payment_intent_id from Stripe
+            transaction_id = stripe_response['id']
+            basket_add_payment_intent_id_attribute(basket, transaction_id)
+        # for when basket was already created, but with different amount
+        except stripe.error.IdempotencyError:
+            # if this PI has been created before, we should be able to retrieve
+            # it from Stripe using the payment_intent_id BasketAttribute.
+            # Note that we update the PI's price in handle_processor_response
+            # before hitting the confirm endpoint, so we don't need to do that here
+            payment_intent_id_attribute = BasketAttributeType.objects.get(name=PAYMENT_INTENT_ID_ATTRIBUTE)
+            payment_intent_attr = BasketAttribute.objects.get(
+                basket=basket,
+                attribute_type=payment_intent_id_attribute
+            )
+            stripe_response = stripe.PaymentIntent.retrieve(id=payment_intent_attr.value_text.strip())
 
-        # id is the payment_intent_id from Stripe
-        transaction_id = create_api_response['id']
-        basket_add_payment_intent_id_attribute(basket, transaction_id)
         new_capture_context = {
-            'key_id': create_api_response['client_secret'],
+            'key_id': stripe_response['client_secret'],
             'order_id': basket.order_number,
         }
         return new_capture_context
