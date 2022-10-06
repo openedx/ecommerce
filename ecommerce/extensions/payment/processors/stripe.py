@@ -133,7 +133,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 error_on_requires_action=True,
             )
         except stripe.error.CardError as err:
-            logger.exception(f'Card Error for basket [{basket}]: {err}')
+            logger.exception('Card Error for basket [%d]: %s}', basket.id, err)
             raise
 
         # proceed only if payment went through

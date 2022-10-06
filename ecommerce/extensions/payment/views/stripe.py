@@ -189,7 +189,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
                 user=self.request.user,
                 billing_address=billing_address_obj
             )
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             logger.exception('Error creating billing address for basket [%d]: %s', basket.id, err)
             billing_address = None
 
