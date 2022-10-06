@@ -141,6 +141,11 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
         self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
 
+        # rewrite order amount so it's updated for coupon & quantity and unchanged by the user
+        stripe.PaymentIntent.modify(
+            **self._build_payment_intent_parameters(basket),
+        )
+
         try:
             confirm_api_response = stripe.PaymentIntent.confirm(
                 payment_intent_id,
