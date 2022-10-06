@@ -3,6 +3,7 @@ from django.urls import reverse
 from mock import mock
 from oscar.core.loading import get_class, get_model
 from rest_framework import status
+import stripe
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.courses.tests.factories import CourseFactory
@@ -165,6 +166,51 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             value_text='pi_testtesttest',
             basket=basket,
         ).count() == 1
+
+    def test_capture_context_basket_price_change(self):
+        """
+        Verify that existing payment intent is retrieved,
+        and that we do not error with an IdempotencyError in this case: capture
+        context is called to generate stripe elements, but then user backs out from
+        payment page, and tries to check out with a different things in the basket.
+        """
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        idempotency_key = f'basket_pi_create_v1_{basket.order_number}'
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': 'pi_testtesttest',
+                'client_secret': 'a_client_secret',
+            }
+            self.client.get(self.capture_context_url)
+            mock_create.assert_called_once()
+            assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
+
+        # Verify there is 1 and only 1 Basket Attribute with the payment_intent_id
+        # associated with our basket.
+        assert BasketAttribute.objects.filter(
+            value_text='pi_testtesttest',
+            basket=basket,
+        ).count() == 1
+
+        # Change the basket price
+        basket.flush()
+        course = CourseFactory()
+        seat = course.create_or_update_seat('credit', False, 99, 'credit_provider_id', None, 2)
+        basket.add_product(seat, 1)
+        basket.save()
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.side_effect = stripe.error.IdempotencyError
+
+            with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
+                mock_retrieve.return_value = {
+                    'id': 'pi_testtesttest',
+                    'client_secret': 'a_client_secret',
+                }
+                self.client.get(self.capture_context_url)
+                mock_retrieve.assert_called_once()
+                assert mock_retrieve.call_args.kwargs['id'] == 'pi_testtesttest'
 
     # def test_payment_error(self):
     #     basket = self.create_basket()
