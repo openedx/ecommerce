@@ -92,7 +92,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         Check that the supplied request and form data passes SDN checks.
 
         Returns:
-            JsonResponse with an error if the SDN check fails, or None if it succeeds.
+            hit_count (int) if the SDN check fails, or None if it succeeds.
         """
         hit_count = checkSDN(
             request,
@@ -106,11 +106,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
                 request.basket.id,
                 hit_count,
             )
-            response_to_return = {
-                'error': 'There was an error submitting the basket',
-                'sdn_check_failure': {'hit_count': hit_count}}
-
-            return JsonResponse(response_to_return, status=403)
+            return hit_count
 
         logger.info(
             'SDNCheck function called for basket [%d]. It did not receive a hit.',
@@ -176,7 +172,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         }
         sdn_check_failure = self.check_sdn(self.request, sdn_check_data)
         if sdn_check_failure is not None:
-            return sdn_check_failure  # redirect(self.payment_processor.error_url)
+            return redirect(self.payment_processor.error_url)
 
         try:
             with transaction.atomic():

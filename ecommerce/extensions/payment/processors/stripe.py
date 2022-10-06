@@ -126,8 +126,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
         self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
 
-        # Previously did a retrieve here, but now that we implemented SDN logic
-        # we will want to do a confirm instead
         try:
             confirm_api_response = stripe.PaymentIntent.confirm(
                 payment_intent_id,
