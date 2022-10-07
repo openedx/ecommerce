@@ -1,9 +1,9 @@
+import stripe
 from django.conf import settings
 from django.urls import reverse
 from mock import mock
 from oscar.core.loading import get_class, get_model
 from rest_framework import status
-import stripe
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.courses.tests.factories import CourseFactory
