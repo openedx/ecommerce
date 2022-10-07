@@ -123,6 +123,21 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             logger.warning('Basket %d has more than one successful transaction id, using the first one', basket.id)
         return successful_transaction[0]
 
+    @staticmethod
+    def get_card_info_from_payment_notification(payment_notification):
+        if payment_notification.transaction_id.startswith('PAY'):
+            card_number = 'Paypal Account'
+            card_type = None
+        elif payment_notification.transaction_id.startswith('pi_'):
+            card_number = payment_notification.response['payment_method']['card']['last4']
+            stripe_card_type = payment_notification.response['payment_method']['card']['brand']
+            card_type = STRIPE_CARD_TYPE_MAP[stripe_card_type]
+        else:
+            card_number = payment_notification.response['req_card_number']
+            cybersource_card_type = payment_notification.response['req_card_type']
+            card_type = CYBERSOURCE_CARD_TYPE_MAP[cybersource_card_type]
+        return (card_number, card_type)
+
     def fulfill_basket(self, basket_id, site):
 
         logger.info('Trying to complete order for frozen basket %d', basket_id)
@@ -156,17 +171,7 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
                 return False
 
             try:
-                if payment_notification.transaction_id.startswith('PAY'):
-                    card_number = 'Paypal Account'
-                    card_type = None
-                elif payment_notification.transaction_id.startswith('pi_'):
-                    card_number = payment_notification.response['payment_method']['card']['last4']
-                    stripe_card_type = payment_notification.response['payment_method']['card']['brand']
-                    card_type = STRIPE_CARD_TYPE_MAP[stripe_card_type]
-                else:
-                    card_number = payment_notification.response['req_card_number']
-                    cybersource_card_type = payment_notification.response['req_card_type']
-                    card_type = CYBERSOURCE_CARD_TYPE_MAP[cybersource_card_type]
+                card_number, card_type = self.get_card_info_from_payment_notification(payment_notification)
             except (KeyError, TypeError):
                 logger.exception('Unable to parse payment details for basket %d', basket.id)
                 return False
