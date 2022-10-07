@@ -102,12 +102,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
         basket = Basket.get_basket(request.user, request.site)
         try:
-            # NOTE: if the order number on a basket changes, but the basket has been
-            # created before successfully through this get_capture_context method,
-            # we will hit an integrity error where a 2nd payment_id basket_attribute will
-            # try to be created and fail... as of 10/6/2022 we believe this was an odd
-            # dirty test data scenario, but we may want to account for it here in another
-            # except clause
             stripe_response = stripe.PaymentIntent.create(
                 **self._build_payment_intent_parameters(basket),
                 # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
