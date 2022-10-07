@@ -812,7 +812,7 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'receipt_url': '/checkout/receipt/'
         },
         'stripe': {
-            'api_version': None,
+            'api_version': '2022-08-01; server_side_confirmation_beta=v1',
             'enable_telemetry': None,
             'error_url': '/checkout/error/',
             'log_level': None,
