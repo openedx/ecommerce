@@ -168,7 +168,7 @@ PAYMENT_PROCESSOR_CONFIG = {
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
         'stripe': {
-            'api_version': None,
+            'api_version': '2022-08-01; server_side_confirmation_beta=v1',
             'enable_telemetry': None,
             'log_level': None,
             'max_network_retries': 0,
