@@ -64,6 +64,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.secret_key = configuration['secret_key']
 
         stripe.api_key = self.secret_key
+        stripe.api_version = self.api_version
+        stripe.enable_telemetry = self.enable_telemetry
         stripe.log = self.log_level
         stripe.max_network_retries = self.max_network_retries
         stripe.proxy = self.proxy
