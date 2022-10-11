@@ -139,12 +139,13 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def handle_processor_response(self, response, basket=None):
         # pretty sure we should simply return/error if basket is None, as not
         # sure what it would mean if there
-        payment_intent_id = response['payment_intent']
+        payment_intent_id = response['payment_intent_id']
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
         self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
 
         # rewrite order amount so it's updated for coupon & quantity and unchanged by the user
         stripe.PaymentIntent.modify(
+            payment_intent_id,
             **self._build_payment_intent_parameters(basket),
         )
 
@@ -205,7 +206,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             BillingAddress
         """
         retrieve_kwargs = {
-            'expand': ['customer'],
+            'expand': ['payment_method'],
         }
 
         payment_intent = stripe.PaymentIntent.retrieve(
