@@ -2,10 +2,13 @@
 
 import logging
 
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
+from django.views.generic import View
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
@@ -73,15 +76,8 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         return JsonResponse({'url': receipt_url}, status=201)
 
 
-class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
-    http_method_names = ['get', 'post', 'head']
-
-    def form_valid(self, form):
-        """
-        TODO: remove. BasePaymentSubmitView is has form_valid as abstract class.
-        We dont actually need to use this, so we should change what we're
-        inheriting from.
-        """
+class StripeCheckoutView(EdxOrderPlacementMixin, View):
+    http_method_names = ['post']
 
     @property
     def payment_processor(self):
@@ -141,14 +137,21 @@ class StripeCheckoutView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             return None
         return basket
 
-    def get(self, request):
+    @method_decorator(login_required)
+    def post(self, request):
         """Handle an incoming user returned to us by Stripe after approving payment."""
         # TBD: we're gonna want to check the $$ price of paymentIntentId
         # to see if it suceeded or failed
         # ... and then potentially compare it against what our basket has?
-        stripe_response = request.GET.dict()
-        payment_intent_id = stripe_response.get('payment_intent')
+        stripe_response = request.POST.dict()
+        payment_intent_id = stripe_response.get('payment_intent_id')
         basket = self._get_basket(payment_intent_id)
+
+        logger.info(
+            '%s called for payment intent id [%s].',
+            self.__class__.__name__,
+            request.POST.get('payment_intent_id')
+        )
 
         if not basket:
             return redirect(self.payment_processor.error_url)
