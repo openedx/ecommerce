@@ -597,7 +597,7 @@ def get_billing_address_from_payment_intent_data(payment_intent):
     Take stripes response_data dict, instantiates a BillingAddress object
     and return it.
     """
-    billing_details = payment_intent['charges']['data'][0]['billing_details']
+    billing_details = payment_intent['payment_method']['billing_details']
     customer_address = billing_details['address']
     address = BillingAddress(
         first_name=billing_details['name'],  # Stripe only has a single name field
