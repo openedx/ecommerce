@@ -34,6 +34,10 @@ CARD_TYPES = {
         'display_name': _('UnionPay'),
         'stripe_brand': 'unionpay',
     },
+    'unknown': {
+        'display_name': _('Unknown'),
+        'stripe_brand': 'unknown',
+    },
     'visa': {
         'display_name': _('Visa'),
         'cybersource_code': '001',
