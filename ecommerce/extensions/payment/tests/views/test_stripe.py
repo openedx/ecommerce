@@ -147,12 +147,14 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 mock_api_resp.return_value = self.mock_enrollment_api_resp
 
                 with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
-                    mock_confirm.return_value = confirm_resp
-                    self.client.get(
-                        self.stripe_checkout_url,
-                        {'payment_intent': 'pi_testtesttest'},
-                    )
+                    with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
+                        mock_confirm.return_value = confirm_resp
+                        self.client.post(
+                            self.stripe_checkout_url,
+                            data={'payment_intent': 'pi_testtesttest'},
+                        )
                 assert mock_retrieve.call_count == 1
+                assert mock_modify.call_count == 1
                 assert mock_confirm.call_count == 1
 
         # Verify BillingAddress was set correctly
