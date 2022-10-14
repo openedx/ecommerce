@@ -184,6 +184,17 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
             refund = stripe.Refund.create(payment_intent=reference_number)
+        except stripe.error.InvalidRequestError as err:
+            if err.code == 'charge_already_refunded':
+                refund = stripe.Refund.list(payment_intent=reference_number, limit=1)['data'][0]
+                msg = 'Skipping issuing credit (via Stripe) for order [{}] because charge was already refunded.'.format(
+                    order_number)
+                logger.warning(msg)
+            else:
+                msg = 'An error occurred while attempting to issue a credit (via Stripe) for order [{}].'.format(
+                    order_number)
+                logger.exception(msg)
+                raise
         except:
             msg = 'An error occurred while attempting to issue a credit (via Stripe) for order [{}].'.format(
                 order_number)
