@@ -3,7 +3,7 @@
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -131,6 +131,9 @@ class StripeCheckoutView(EdxOrderPlacementMixin, View):
             basket_add_organization_attribute(basket, self.request.GET)
         except MultipleObjectsReturned:
             logger.warning(u"Duplicate payment_intent_id [%s] received from Stripe.", payment_intent_id)
+            return None
+        except ObjectDoesNotExist:
+            logger.warning(u"Could not find payment_intent_id [%s] among baskets.", payment_intent_id)
             return None
         except Exception:  # pylint: disable=broad-except
             logger.exception(u"Unexpected error during basket retrieval while executing Stripe payment.")
