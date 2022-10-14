@@ -148,13 +148,14 @@ class StripeCheckoutView(EdxOrderPlacementMixin, View):
         # ... and then potentially compare it against what our basket has?
         stripe_response = request.POST.dict()
         payment_intent_id = stripe_response.get('payment_intent_id')
-        basket = self._get_basket(payment_intent_id)
 
         logger.info(
             '%s called for payment intent id [%s].',
             self.__class__.__name__,
             request.POST.get('payment_intent_id')
         )
+
+        basket = self._get_basket(payment_intent_id)
 
         if not basket:
             return redirect(self.payment_processor.error_url)
