@@ -1,4 +1,5 @@
 import stripe
+from ddt import ddt, file_data
 from django.conf import settings
 from django.urls import reverse
 from mock import mock
@@ -25,6 +26,7 @@ Source = get_model('payment', 'Source')
 Product = get_model('catalogue', 'Product')
 
 
+@ddt
 class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
     path = reverse('stripe:submit')
 
@@ -86,11 +88,25 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         expected_url = '{base}?next={path}'.format(base=reverse(settings.LOGIN_URL), path=self.path)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
-    def test_payment_flow(self):
+    @file_data('fixtures/test_stripe_test_payment_flow.json')
+    def test_payment_flow(
+            self,
+            confirm_resp,
+            create_resp,
+            modify_resp,
+            refund_resp,  # pylint: disable=unused-argument
+            retrieve_addr_resp):
         """
         Verify that the stripe payment flow, hitting capture-context and
         stripe-checkout urls, results in a basket associated with the correct
         stripe payment_intent_id.
+
+        Args:
+            confirm_resp: Response for confirm call on payment purchase
+            create_resp: Response for create call when capturing context
+            modify_resp: Response for modify call before confirming response
+            retrieve_addr_resp: Response for retrieve call that should be made when getting billing address
+            confirm_resp: Response for confirm call that should be made when handling processor response
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
         idempotency_key = f'basket_pi_create_v1_{basket.order_number}'
@@ -98,48 +114,13 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         # need to call capture-context endpoint before we call do GET to the stripe checkout view
         # so that the PaymentProcessorResponse is already created
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
-            mock_create.return_value = {
-                'id': 'pi_testtesttest',
-                'client_secret': 'a_client_secret',
-            }
+            mock_create.return_value = create_resp
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
             assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
 
-        response_dict = {
-            'status': 'requires_payment_method',
-            'charges': {
-                'data': [{
-                    'payment_method_details': {
-                        'card': {
-                            'last4': '6789',
-                            'brand': 'credit_card_brand',
-                        }
-                    },
-                    'billing_details': {
-                        'address': {
-                            'line1': '123 Town Road',
-                            'line2': '',
-                            'city': 'Townsville',
-                            'postal_code': '02138',
-                            'state': 'MA',
-                            'country': 'US',
-                        },
-                        'email': 'test@example.com',
-                        'name': 'John Doe',
-                        'phone': None,
-                    },
-                }]
-            },
-        }
-        # Response for retrieve call that should be made when getting billing address
-        retrieve_resp = dict(response_dict)
-        # Response for confirm call that should be made when handling processor response
-        confirm_resp = dict(response_dict)
-        confirm_resp['status'] = 'succeeded'
-
         with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
-            mock_retrieve.return_value = retrieve_resp
+            mock_retrieve.return_value = retrieve_addr_resp
 
             with mock.patch(
                 'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api'
@@ -147,11 +128,12 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 mock_api_resp.return_value = self.mock_enrollment_api_resp
 
                 with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
+                    mock_confirm.return_value = confirm_resp
                     with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
-                        mock_confirm.return_value = confirm_resp
+                        mock_modify.return_value = modify_resp
                         self.client.post(
                             self.stripe_checkout_url,
-                            data={'payment_intent': 'pi_testtesttest'},
+                            data={'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
                         )
                 assert mock_retrieve.call_count == 1
                 assert mock_modify.call_count == 1
@@ -160,12 +142,12 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         # Verify BillingAddress was set correctly
         basket.refresh_from_db()
         order = basket.order_set.first()
-        assert str(order.billing_address) == "John Doe, 123 Town Road, Townsville, MA, 02138"
+        assert str(order.billing_address) == "Test User, 123 Test St, Sample, MA, 12345"
 
         # Verify there is 1 and only 1 Basket Attribute with the payment_intent_id
         # associated with our basket.
         assert BasketAttribute.objects.filter(
-            value_text='pi_testtesttest',
+            value_text='pi_3LsftNIadiFyUl1x2TWxaADZ',
             basket=basket,
         ).count() == 1
 
@@ -181,8 +163,8 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
 
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
             mock_create.return_value = {
-                'id': 'pi_testtesttest',
-                'client_secret': 'a_client_secret',
+                'id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
             }
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
@@ -191,7 +173,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         # Verify there is 1 and only 1 Basket Attribute with the payment_intent_id
         # associated with our basket.
         assert BasketAttribute.objects.filter(
-            value_text='pi_testtesttest',
+            value_text='pi_3LsftNIadiFyUl1x2TWxaADZ',
             basket=basket,
         ).count() == 1
 
@@ -207,12 +189,12 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
 
             with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
                 mock_retrieve.return_value = {
-                    'id': 'pi_testtesttest',
-                    'client_secret': 'a_client_secret',
+                    'id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                    'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
                 }
                 self.client.get(self.capture_context_url)
                 mock_retrieve.assert_called_once()
-                assert mock_retrieve.call_args.kwargs['id'] == 'pi_testtesttest'
+                assert mock_retrieve.call_args.kwargs['id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
 
     # def test_payment_error(self):
     #     basket = self.create_basket()
