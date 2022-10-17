@@ -6,17 +6,18 @@ from urllib.parse import urljoin
 
 import ddt
 import mock
-from django.conf import settings
 from django.test import RequestFactory
 from django.urls import reverse
-from oscar.apps.payment.exceptions import GatewayError
+from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.iap.processors.base_iap import BaseIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
+from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -38,7 +39,6 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         Class set up - setting static up paypal sdk configuration to be used in test methods
         """
         super(IOSIAPTests, cls).setUpClass()  # required to pass CI build
-        ios_iap_configuration = settings.PAYMENT_PROCESSOR_CONFIG['edx']['ios-iap']
 
     def setUp(self):
         """
@@ -55,6 +55,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         )
         self.RETURN_DATA = {
             'transactionId': 'transactionId.ios.test.purchased',
+            'originalTransactionId': 'originalTransactionId.ios.test.purchased',
             'productId': 'ios.test.purchased',
             'purchaseToken': 'inapp:org.edx.mobile:ios.test.purchased',
         }
@@ -76,7 +77,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         self.assertEqual(actual, expected)
 
     @mock.patch.object(IOSValidator, 'validate')
-    def test_handle_processor_response_error(self, mock_ios_validator):
+    def test_handle_processor_response_gateway_error(self, mock_ios_validator):
         """
         Verify that the processor creates the appropriate PaymentEvent and Source objects.
         """
@@ -89,7 +90,10 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         with LogCapture(logger_name) as ios_iap_logger:
             with self.assertRaises(GatewayError):
                 handled_response = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
-                self.assert_processor_response_recorded(self.processor_name, handled_response.get('error'), basket=self.basket)
+                self.assert_processor_response_recorded(
+                    self.processor_name, handled_response.get('error'), handled_response,
+                    basket=self.basket
+                )
                 ppr = PaymentProcessorResponse.objects.filter(
                     processor_name=self.processor_name
                 ).latest('created')
@@ -116,11 +120,43 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                 )
 
     @mock.patch.object(IOSValidator, 'validate')
-    def test_handle_processor_response(self, mock_google_validator):
+    def test_handle_processor_response_payment_error(self, mock_ios_validator):
+        """
+        Verify that appropriate PaymentError is raised in absence of originalTransactionId parameter.
+        """
+        mock_ios_validator.return_value = {
+            'resource': {
+                'orderId': 'orderId.ios.test.purchased'
+            }
+        }
+        with self.assertRaises(PaymentError):
+            modified_return_data = self.RETURN_DATA
+            modified_return_data.pop('originalTransactionId')
+            self.processor.handle_processor_response(modified_return_data, basket=self.basket)
+
+    @mock.patch.object(BaseIAP, 'is_payment_redundant')
+    @mock.patch.object(IOSValidator, 'validate')
+    def test_handle_processor_response_redundant_error(self, mock_ios_validator, mock_payment_redundant):
+        """
+        Verify that appropriate RedundantPaymentNotificationError is raised in case payment with same
+        originalTransactionId exists with another user
+        """
+        mock_ios_validator.return_value = {
+            'resource': {
+                'orderId': 'orderId.ios.test.purchased'
+            }
+        }
+        mock_payment_redundant.return_value = True
+
+        with self.assertRaises(RedundantPaymentNotificationError):
+            self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+
+    @mock.patch.object(IOSValidator, 'validate')
+    def test_handle_processor_response(self, mock_ios_validator):  # pylint: disable=arguments-differ
         """
         Verify that the processor creates the appropriate PaymentEvent and Source objects.
         """
-        mock_google_validator.return_value = {
+        mock_ios_validator.return_value = {
             'resource': {
                 'orderId': 'orderId.ios.test.purchased'
             }

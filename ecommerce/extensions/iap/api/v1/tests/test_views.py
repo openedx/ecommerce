@@ -217,8 +217,9 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             'basket_id': self.basket.id
         }
         self.order_placement_error_message = \
-            'Order Failure: {payment_processor} payment was received, but an order for basket [{basket_id}] ' \
-            'could not be placed.'.format(basket_id=self.basket.id, payment_processor=self.processor.NAME.title())
+            'Order Failure: {payment_processor} payment was received, but an order ' \
+            'for basket [{basket_id}] could not be placed.' \
+            ''.format(basket_id=self.basket.id, payment_processor=self.processor.NAME.title())
 
     def _assert_response(self, error_message):
         """
@@ -230,13 +231,13 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
 
     def test_payment_error(self):
         """
-        Verify that a user who has approved payment is redirected to the configured receipt page when payment
-        execution fails.
+        Verify that a user who has approved payment is redirected to the configured receipt
+        page when payment execution fails.
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_payment',
                                side_effect=PaymentError) as fake_handle_payment:
             with LogCapture(self.logger_name) as logger:
-                self._assert_response({'error': 'An error occured during payment handling.'})
+                self._assert_response({'error': 'An error occurred during payment handling.'})
                 self.assertTrue(fake_handle_payment.called)
 
                 logger.check(
@@ -252,29 +253,31 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
 
     def test_unanticipated_error_during_payment_handling(self):
         """
-        Verify that a user who has approved payment is redirected to the configured receipt page when payment
-        execution fails in an unanticipated manner.
+        Verify that a user who has approved payment is redirected to the configured receipt
+        page when payment execution fails in an unanticipated manner.
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_payment',
                                side_effect=KeyError) as fake_handle_payment:
             with LogCapture(self.logger_name) as logger:
-                self._assert_response({'error': 'An error occured during handling payment.'})
+                self._assert_response({'error': 'An error occurred during handling payment.'})
                 self.assertTrue(fake_handle_payment.called)
 
                 logger.check_present(
                     (
                         self.logger_name,
                         'ERROR',
-                        'Attempts to handle payment for basket [{basket_id}] failed.'.format(basket_id=self.basket.id)
+                        'Attempts to handle payment for basket [{basket_id}] '
+                        'failed.'.format(basket_id=self.basket.id)
                     ),
                 )
 
     def test_unable_to_place_order(self):
         """
-        Verify that a user who has approved payment is redirected to the configured receipt page when the payment
-        is executed but an order cannot be placed.
+        Verify that a user who has approved payment is redirected to the configured receipt
+        page when the payment is executed but an order cannot be placed.
         """
-        with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_order_placement', side_effect=UnableToPlaceOrder) as fake_handle_order_placement, \
+        with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_order_placement',
+                               side_effect=UnableToPlaceOrder) as fake_handle_order_placement, \
             mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
             LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger:
             fake_google_validation.return_value = {
@@ -282,7 +285,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                     'orderId': 'orderId.android.test.purchased'
                 }
             }
-            self._assert_response({'error': 'An error occured during order creation.'})
+            self._assert_response({'error': 'An error occurred during order creation.'})
             self.assertTrue(fake_google_validation.called)
             self.assertTrue(fake_handle_order_placement.called)
             logger.check(
@@ -293,7 +296,8 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         """
         Verify that unanticipated errors during order placement are handled gracefully.
         """
-        with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_order_placement', side_effect=UnableToPlaceOrder) as fake_handle_order_placement, \
+        with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_order_placement',
+                               side_effect=UnableToPlaceOrder) as fake_handle_order_placement, \
             mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
             LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger:
             fake_google_validation.return_value = {
@@ -301,7 +305,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                     'orderId': 'orderId.android.test.purchased'
                 }
             }
-            self._assert_response({'error': 'An error occured during order creation.'})
+            self._assert_response({'error': 'An error occurred during order creation.'})
             self.assertTrue(fake_handle_order_placement.called)
             logger.check(
                 (self.DUPLICATE_ORDER_LOGGER_NAME, 'ERROR', self.order_placement_error_message)
@@ -316,9 +320,9 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         self.request.site = self.site
         dummy_view.request = self.request
 
-        with LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as lc, self.assertRaises(Exception):
+        with LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as log_capture, self.assertRaises(Exception):
             dummy_view.create_order(request=self.request, basket=prior_order.basket)
-            lc.check(
+            log_capture.check(
                 (
                     self.DUPLICATE_ORDER_LOGGER_NAME,
                     'ERROR',
@@ -339,22 +343,25 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
 
     def test_payment_error_with_unanticipated_error_while_getting_basket(self):
         """
-        Verify that we fail gracefully when an unanticipated Exception occured while getting the basket.
+        Verify that we fail gracefully when an unanticipated Exception occurred while
+        getting the basket.
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, '_get_basket', side_effect=KeyError), \
             LogCapture(self.logger_name) as logger:
-            self._assert_response({'error': 'An unexpected exception occured while obtaining basket for user {}.'.format(self.user.email)})
+            self._assert_response({'error': 'An unexpected exception occurred while obtaining basket '
+                                            'for user [{}].'.format(self.user.email)})
             logger.check_present(
                 (
                     self.logger_name,
                     'ERROR',
-                    'An unexpected exception occured while obtaining basket for user [{}].'.format(self.user.email)
+                    'An unexpected exception occurred while obtaining basket for user [{}].'.format(self.user.email)
                 ),
             )
 
     def test_iap_payment_execution(self):
         """
-        Verify that a user gets successful response if payment is handled correctly and order is created successfully.
+        Verify that a user gets successful response if payment is handled correctly and
+        order is created successfully.
         """
         with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
             fake_google_validation.return_value = {
