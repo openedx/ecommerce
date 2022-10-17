@@ -16,3 +16,6 @@ class IOSIAP(BaseIAP):
 
     def get_validator(self):
         return IOSValidator()
+
+    def issue_credit(self, order_number, basket, reference_number, amount, currency):
+        raise NotImplementedError('The {} payment processor does not support credit issuance.'.format(self.NAME))

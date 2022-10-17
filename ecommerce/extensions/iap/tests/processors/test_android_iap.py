@@ -6,7 +6,6 @@ from urllib.parse import urljoin
 
 import ddt
 import mock
-from django.conf import settings
 from django.test import RequestFactory
 from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError
@@ -38,7 +37,6 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         Class set up - setting static up paypal sdk configuration to be used in test methods
         """
         super(AndroidIAPTests, cls).setUpClass()  # required to pass CI build
-        android_iap_configuration = settings.PAYMENT_PROCESSOR_CONFIG['edx']['android-iap']
 
     def setUp(self):
         """
@@ -89,7 +87,10 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         with LogCapture(logger_name) as android_iap_logger:
             with self.assertRaises(GatewayError):
                 handled_response = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
-                self.assert_processor_response_recorded(self.processor_name, handled_response.get('error'), basket=self.basket)
+                self.assert_processor_response_recorded(
+                    self.processor_name, handled_response.get('error'), handled_response,
+                    basket=self.basket
+                )
                 ppr = PaymentProcessorResponse.objects.filter(
                     processor_name=self.processor_name
                 ).latest('created')
@@ -116,7 +117,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                 )
 
     @mock.patch.object(GooglePlayValidator, 'validate')
-    def test_handle_processor_response(self, mock_google_validator):
+    def test_handle_processor_response(self, mock_google_validator):  # pylint: disable=arguments-differ
         """
         Verify that the processor creates the appropriate PaymentEvent and Source objects.
         """
