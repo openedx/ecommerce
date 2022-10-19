@@ -814,7 +814,6 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
         'stripe': {
             'api_version': '2022-08-01; server_side_confirmation_beta=v1',
             'enable_telemetry': None,
-            'error_url': '/checkout/error/',
             'log_level': None,
             'max_network_retries': 0,
             'proxy': None,
