@@ -2,16 +2,15 @@
 
 import logging
 
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.utils.decorators import method_decorator
-from django.views.generic import View
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute, basket_add_payment_intent_id_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -76,8 +75,12 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         return JsonResponse({'url': receipt_url}, status=201)
 
 
-class StripeCheckoutView(EdxOrderPlacementMixin, View):
+class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
     http_method_names = ['post']
+
+    # DRF APIView wrapper which allows clients to use JWT authentication when
+    # making Stripe checkout submit requests.
+    permission_classes = [IsAuthenticated]
 
     @property
     def payment_processor(self):
@@ -140,7 +143,6 @@ class StripeCheckoutView(EdxOrderPlacementMixin, View):
             return None
         return basket
 
-    @method_decorator(login_required)
     def post(self, request):
         """Handle an incoming user returned to us by Stripe after approving payment."""
         # TBD: we're gonna want to check the $$ price of paymentIntentId
