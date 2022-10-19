@@ -7,10 +7,10 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from oscar.apps.partner import strategy
-from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from stripe.error import CardError
 
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute, basket_add_payment_intent_id_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -145,9 +145,6 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
 
     def post(self, request):
         """Handle an incoming user returned to us by Stripe after approving payment."""
-        # TBD: we're gonna want to check the $$ price of paymentIntentId
-        # to see if it suceeded or failed
-        # ... and then potentially compare it against what our basket has?
         stripe_response = request.POST.dict()
         payment_intent_id = stripe_response.get('payment_intent_id')
 
@@ -162,13 +159,6 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         if not basket:
             return redirect(self.payment_processor.error_url)
 
-        receipt_url = get_receipt_page_url(
-            self.request,
-            order_number=basket.order_number,
-            site_configuration=basket.site.siteconfiguration,
-            disable_back_button=True
-        )
-
         # SDN Check here!
         billing_address_obj = self.payment_processor.get_address_from_token(
             payment_intent_id
@@ -181,17 +171,17 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         }
         sdn_check_failure = self.check_sdn(self.request, sdn_check_data)
         if sdn_check_failure is not None:
-            return redirect(self.payment_processor.error_url)
+            return self.sdn_error_page_response(sdn_check_failure)
 
         try:
             with transaction.atomic():
                 try:
                     self.handle_payment(stripe_response, basket)
-                except PaymentError:
-                    return redirect(self.payment_processor.error_url)
+                except CardError as err:
+                    return self.stripe_error_response(err)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
-            return redirect(receipt_url)
+            return self.error_page_response()
 
         try:
             billing_address = self.create_billing_address(
@@ -204,12 +194,44 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
 
         try:
             order = self.create_order(request, basket, billing_address)
-        except Exception:  # pylint: disable=broad-except
-            return redirect(receipt_url)
-
-        try:
             self.handle_post_order(order)
         except Exception:  # pylint: disable=broad-except
-            self.log_order_placement_exception(basket.order_number, basket.id)
+            logger.exception(
+                'Error processing order for transaction [%s], with order [%s] and basket [%d]. Processed by [%s].',
+                payment_intent_id,
+                basket.order_number,
+                basket.id,
+                self.payment_processor.NAME,
+            )
+            return self.error_page_response()
 
-        return redirect(receipt_url)
+        return self.receipt_page_response(basket)
+
+    def error_page_response(self):
+        """Tell the frontend to redirect to a generic error page."""
+        return JsonResponse({}, status=400)
+
+    def sdn_error_page_response(self, hit_count):
+        """Tell the frontend to redirect to the SDN error page."""
+        return JsonResponse({
+            'sdn_check_failure': {'hit_count': hit_count}
+        }, status=400)
+
+    def receipt_page_response(self, basket):
+        """Tell the frontend to redirect to the receipt page."""
+        receipt_page_url = get_receipt_page_url(
+            self.request,
+            order_number=basket.order_number,
+            site_configuration=basket.site.siteconfiguration,
+            disable_back_button=True
+        )
+        return JsonResponse({
+            'receipt_page_url': receipt_page_url,
+        }, status=201)
+
+    def stripe_error_response(self, error):
+        """Tell the frontend that a Stripe error has occurred."""
+        return JsonResponse({
+            'error_code': error.code,
+            'user_message': error.message,
+        }, status=400)
