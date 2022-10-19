@@ -138,8 +138,8 @@ PAYMENT_PROCESSOR_CONFIG = {
             'log_level': 'debug',
             'max_network_retries': 0,
             'proxy': None,
-            'publishable_key': 'pk_test_51Li2KoIadiFyUl1xvRRiJohVzLNtnWUYNelHjMkzaf59Mq01ZMdsCGKzh9qyRwCIHBVEv0aQPkrvdH3OJ6F6WjSv00hdOx2EMb',
-            'secret_key': 'sk_test_51Li2KoIadiFyUl1x0OydyXFEzZT3jM68qFCzhUGq6BX8yYkN76tqlXeqBL4UCUuivWOjkfoodzzuThd7mMKtES3h00C8EvDvUq',
+            'publishable_key': 'SET-ME-PLEASE',
+            'secret_key': 'SET-ME-PLEASE',
         },
     },
 }
