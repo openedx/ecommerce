@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-aiohttp==3.7.4.post0
+aiohttp==3.8.0.post0
     # via
     #   -r requirements/test.txt
     #   inapppy
