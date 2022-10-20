@@ -401,8 +401,6 @@ protobuf==3.17.3
     # via
     #   google-api-core
     #   googleapis-common-protos
-psutil==5.9.0
-    # via edx-django-utils
 purl==1.6
     # via django-oscar
 pyasn1-modules==0.2.8
