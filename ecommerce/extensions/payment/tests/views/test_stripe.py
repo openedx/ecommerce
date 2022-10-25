@@ -155,8 +155,8 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         pprs = PaymentProcessorResponse.objects.filter(
             transaction_id="pi_3LsftNIadiFyUl1x2TWxaADZ"
         )
-        # 1 from capture_context, and 3 in handle_processor_response
-        assert pprs.count() == 4
+        # created when andle_processor_response is successful
+        assert pprs.count() == 1
 
     def test_capture_context_basket_price_change(self):
         """
@@ -202,10 +202,6 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 self.client.get(self.capture_context_url)
                 mock_retrieve.assert_called_once()
                 assert mock_retrieve.call_args.kwargs['id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
-
-        # 1 created each time capture_content is called
-        pprs = PaymentProcessorResponse.objects.filter(transaction_id="pi_3LsftNIadiFyUl1x2TWxaADZ")
-        assert pprs.count() == 2
 
     # def test_payment_error(self):
     #     basket = self.create_basket()

@@ -114,7 +114,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             # id is the payment_intent_id from Stripe
             transaction_id = stripe_response['id']
             basket_add_payment_intent_id_attribute(basket, transaction_id)
-            self.record_processor_response(stripe_response, transaction_id=transaction_id, basket=basket)
         # for when basket was already created, but with different amount
         except stripe.error.IdempotencyError:
             # if this PI has been created before, we should be able to retrieve
@@ -127,8 +126,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 attribute_type=payment_intent_id_attribute
             )
             stripe_response = stripe.PaymentIntent.retrieve(id=payment_intent_attr.value_text.strip())
-            transaction_id = stripe_response['id']
-            self.record_processor_response(stripe_response, transaction_id=transaction_id, basket=basket)
 
         new_capture_context = {
             'key_id': stripe_response['client_secret'],
@@ -145,21 +142,17 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         payment_intent_id = response['payment_intent_id']
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
 
-        # This records the initial response that is handed here from the view
-        self.record_processor_response(response, transaction_id=payment_intent_id, basket=basket)
-
         # rewrite order amount so it's updated for coupon & quantity and unchanged by the user
-        modify_api_response = stripe.PaymentIntent.modify(
+        stripe.PaymentIntent.modify(
             payment_intent_id,
             **self._build_payment_intent_parameters(basket),
         )
-        self.record_processor_response(modify_api_response, transaction_id=payment_intent_id, basket=basket)
-
         try:
             confirm_api_response = stripe.PaymentIntent.confirm(
                 payment_intent_id,
                 # stop on complicated payments MFE can't handle yet
                 error_on_requires_action=True,
+                expand=['payment_method'],
             )
         except stripe.error.CardError as err:
             self.record_processor_response(err.json_body, transaction_id=payment_intent_id, basket=basket)
