@@ -201,7 +201,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                     order_number)
                 logger.warning(msg)
             else:
-                self.record_processor_response(err.json_body, transaction_id=transaction_id, basket=basket)
+                self.record_processor_response(err.json_body, transaction_id=reference_number, basket=basket)
                 msg = 'An error occurred while attempting to issue a credit (via Stripe) for order [{}].'.format(
                     order_number)
                 logger.exception(msg)
