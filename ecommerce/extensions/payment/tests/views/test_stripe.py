@@ -24,6 +24,7 @@ PaymentEvent = get_model('order', 'PaymentEvent')
 Selector = get_class('partner.strategy', 'Selector')
 Source = get_model('payment', 'Source')
 Product = get_model('catalogue', 'Product')
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 @ddt
@@ -150,6 +151,12 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             value_text='pi_3LsftNIadiFyUl1x2TWxaADZ',
             basket=basket,
         ).count() == 1
+
+        pprs = PaymentProcessorResponse.objects.filter(
+            transaction_id="pi_3LsftNIadiFyUl1x2TWxaADZ"
+        )
+        # created when andle_processor_response is successful
+        assert pprs.count() == 1
 
     def test_capture_context_basket_price_change(self):
         """

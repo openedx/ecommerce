@@ -233,5 +233,5 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         """Tell the frontend that a Stripe error has occurred."""
         return JsonResponse({
             'error_code': error.code,
-            'user_message': error.message,
+            'user_message': error.user_message,
         }, status=400)
