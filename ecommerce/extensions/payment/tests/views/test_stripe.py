@@ -24,6 +24,7 @@ PaymentEvent = get_model('order', 'PaymentEvent')
 Selector = get_class('partner.strategy', 'Selector')
 Source = get_model('payment', 'Source')
 Product = get_model('catalogue', 'Product')
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 @ddt
@@ -151,6 +152,12 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             basket=basket,
         ).count() == 1
 
+        pprs = PaymentProcessorResponse.objects.filter(
+            transaction_id="pi_3LsftNIadiFyUl1x2TWxaADZ"
+        )
+        # 1 from capture_context, and 3 in handle_processor_response
+        assert pprs.count() == 4
+
     def test_capture_context_basket_price_change(self):
         """
         Verify that existing payment intent is retrieved,
@@ -195,6 +202,10 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 self.client.get(self.capture_context_url)
                 mock_retrieve.assert_called_once()
                 assert mock_retrieve.call_args.kwargs['id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+
+        # 1 created each time capture_content is called
+        pprs = PaymentProcessorResponse.objects.filter(transaction_id="pi_3LsftNIadiFyUl1x2TWxaADZ")
+        assert pprs.count() == 2
 
     # def test_payment_error(self):
     #     basket = self.create_basket()

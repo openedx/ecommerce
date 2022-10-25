@@ -127,6 +127,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 attribute_type=payment_intent_id_attribute
             )
             stripe_response = stripe.PaymentIntent.retrieve(id=payment_intent_attr.value_text.strip())
+            transaction_id = stripe_response['id']
+            self.record_processor_response(stripe_response, transaction_id=transaction_id, basket=basket)
 
         new_capture_context = {
             'key_id': stripe_response['client_secret'],
