@@ -112,8 +112,7 @@ class BaseIAP(BasePaymentProcessor):
                 )
                 raise GatewayError(validation_response)
 
-        transaction_id = response.get('transactionId', self._get_attribute_from_receipt(
-            validation_response, 'transaction_id'))
+        transaction_id = response.get('transactionId', self._get_transaction_id_from_receipt(validation_response))
         # original_transaction_id is primary identifier for a purchase on iOS
         original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
             validation_response, 'original_transaction_id'))
@@ -122,7 +121,7 @@ class BaseIAP(BasePaymentProcessor):
             if not original_transaction_id:
                 raise PaymentError(response)
             # Check for multiple edx users using same iOS device/iOS account for purchase
-            is_redundant_payment = self.is_payment_redundant(basket.owner, original_transaction_id)
+            is_redundant_payment = self._is_payment_redundant(basket.owner, original_transaction_id)
             if is_redundant_payment:
                 raise RedundantPaymentNotificationError(response)
 
@@ -173,8 +172,17 @@ class BaseIAP(BasePaymentProcessor):
         raise NotImplementedError('The {} payment processor does not support credit issuance.'.format(self.NAME))
 
     def _get_attribute_from_receipt(self, validated_receipt, attribute):
-        return validated_receipt.get('receipt', {}).get('in_app', [{}])[0].get(attribute)
+        if self.NAME == 'ios-iap':
+            return validated_receipt.get('receipt', {}).get('in_app', [{}])[0].get(attribute)
+        elif self.NAME == 'android-iap':
+            validated_receipt.get('raw_response', {}).get(attribute)
 
-    def is_payment_redundant(self, basket_owner, original_transaction_id):
+    def _get_transaction_id_from_receipt(self, validated_receipt):
+        if self.NAME == 'ios-iap':
+            return self._get_attribute_from_receipt(validated_receipt, 'transaction_id')
+        elif self.NAME == 'android-iap':
+            return self._get_attribute_from_receipt(validated_receipt, 'orderId')
+
+    def _is_payment_redundant(self, basket_owner, original_transaction_id):
         return PaymentProcessorResponse.objects.filter(
             ~Q(basket__owner=basket_owner), extension__original_transaction_id=original_transaction_id).exists()
