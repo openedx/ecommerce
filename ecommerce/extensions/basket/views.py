@@ -583,7 +583,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             basket view context needs to be updated with.
         """
         site_configuration = self.request.site.siteconfiguration
-        payment_processor_class = site_configuration.get_client_side_payment_processor_class()
+        payment_processor_class = site_configuration.get_client_side_payment_processor_class(self.request)
 
         if payment_processor_class:
             payment_processor = payment_processor_class(self.request.site)
@@ -615,7 +615,8 @@ class CaptureContextApiLogicMixin:  # pragma: no cover
     Business logic for the capture context API.
     """
     def _add_capture_context(self, response):
-        payment_processor_class = self.request.site.siteconfiguration.get_client_side_payment_processor_class()
+        site_configuration = self.request.site.siteconfiguration
+        payment_processor_class = site_configuration.get_client_side_payment_processor_class(self.request)
         if not payment_processor_class:
             return
         payment_processor = payment_processor_class(self.request.site)
