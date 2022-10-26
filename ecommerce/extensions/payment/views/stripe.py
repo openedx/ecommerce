@@ -167,7 +167,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
             # Stripe has 1 name field so we use first_name on billing_address_obj
             'name': billing_address_obj.first_name,
             'city': billing_address_obj.city,
-            'country': billing_address_obj.country,
+            'country': billing_address_obj.country_id,
         }
         sdn_check_failure = self.check_sdn(self.request, sdn_check_data)
         if sdn_check_failure is not None:
