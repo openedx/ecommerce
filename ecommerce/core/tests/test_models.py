@@ -13,6 +13,7 @@ from edx_rest_api_client.client import OAuthAPIClient
 from requests.exceptions import ConnectionError as ReqConnectionError
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
+from waffle.testutils import override_flag
 
 from ecommerce.core.models import (
     BusinessClient,
@@ -22,6 +23,7 @@ from ecommerce.core.models import (
     User
 )
 from ecommerce.core.tests import toggle_switch
+from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
 from ecommerce.tests.factories import SiteConfigurationFactory
@@ -334,10 +336,22 @@ class SiteConfigurationTests(TestCase):
         site_config = _make_site_config(processor_name)
 
         site_config.client_side_payment_processor = None
-        self.assertIsNone(site_config.get_client_side_payment_processor_class())
+        self.assertIsNone(site_config.get_client_side_payment_processor_class(request=None))
 
         site_config.client_side_payment_processor = processor_name
-        self.assertEqual(site_config.get_client_side_payment_processor_class().NAME, processor_name)
+        self.assertEqual(site_config.get_client_side_payment_processor_class(request=None).NAME, processor_name)
+
+    @override_flag(ENABLE_STRIPE_PAYMENT_PROCESSOR, active=True)
+    def test_get_client_side_payment_processor_waffle_enabled(self):
+        """ Verify that Stripe is always returned when waffle flag is on. """
+        processor_name = 'cybersource,stripe'
+        site_config = _make_site_config(processor_name)
+
+        site_config.client_side_payment_processor = None
+        self.assertIsNone(site_config.get_client_side_payment_processor_class(request=None))
+
+        site_config.client_side_payment_processor = 'cybersource'
+        self.assertEqual(site_config.get_client_side_payment_processor_class(request=None).NAME, 'stripe')
 
     def test_get_from_email(self):
         """
