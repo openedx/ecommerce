@@ -605,8 +605,8 @@ def get_billing_address_from_payment_intent_data(payment_intent):
         line1=customer_address['line1'],
         line2='' if not customer_address['line2'] else customer_address['line2'],  # line2 is optional
         line4=customer_address['city'],  # Oscar uses line4 for city
-        postcode=customer_address['postal_code'],
-        state=customer_address['state'],
+        postcode='' if not customer_address['postal_code'] else customer_address['postal_code'],  # postcode is optional
+        state='' if not customer_address['state'] else customer_address['state'],  # state is optional
         country=Country.objects.get(iso_3166_1_a2__iexact=customer_address['country'])
     )
     return address
