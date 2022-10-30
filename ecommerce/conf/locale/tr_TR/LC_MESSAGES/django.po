@@ -24,7 +24,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-10-30 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 01:39+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>, 2017-2022\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
@@ -373,7 +373,7 @@ msgstr "{enterprise_customer_name} tarafından sunulan indirim, uygulandı."
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr "Bu kupon kodu bu eğitim için geçerli değil. Lütfen başka bir eğitimle deneyin."
 
-#: ecommerce/courses/models.py:32 ecommerce/extensions/basket/models.py:20
+#: ecommerce/courses/models.py:33 ecommerce/extensions/basket/models.py:20
 #: ecommerce/extensions/offer/models.py:237
 #: ecommerce/extensions/payment/models.py:68
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
@@ -381,7 +381,7 @@ msgstr "Bu kupon kodu bu eğitim için geçerli değil. Lütfen başka bir eğit
 msgid "Site"
 msgstr ""
 
-#: ecommerce/courses/models.py:39
+#: ecommerce/courses/models.py:40
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "Bu ürün için doğrulama teslim edilebileceği son tarih / saat."
@@ -417,19 +417,19 @@ msgstr "Yönetici Eğitimi"
 
 #: ecommerce/courses/utils.py:145
 msgid "Paid Executive Education"
-msgstr ""
+msgstr "Ödenmiş Yönetici Eğitimi"
 
 #: ecommerce/courses/utils.py:146
 msgid "Unpaid Executive Education"
-msgstr ""
+msgstr "Ödenmemiş Yönetici Eğitimi"
 
 #: ecommerce/courses/utils.py:147
 msgid "Paid Bootcamp"
-msgstr ""
+msgstr "Ödenmiş Bootcamp"
 
 #: ecommerce/courses/utils.py:148
 msgid "Unpaid Bootcamp"
-msgstr ""
+msgstr "Ödenmemiş Bootcamp"
 
 #: ecommerce/credit/views.py:40
 msgid ""
@@ -589,7 +589,7 @@ msgstr "Yeni değerin tüketilen ({offer_enrollments}) değerinden büyük veya 
 msgid ""
 "Salesforce Opportunity ID must be 18 alphanumeric characters and begin with "
 "006."
-msgstr ""
+msgstr "Salesforce Fırsat ID'si 18 karakterli alfanümerik olmalı ve 006 ile başlamalı."
 
 #: ecommerce/enterprise/forms.py:168 ecommerce/enterprise/forms.py:216
 msgid "Ensure this value is greater than or equal to 0."
@@ -802,41 +802,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:255
+#: ecommerce/extensions/api/serializers.py:256
 msgid "EXPIRED"
 msgstr "SÜRESİ DOLDU"
 
-#: ecommerce/extensions/api/serializers.py:257
+#: ecommerce/extensions/api/serializers.py:258
 msgid "INACTIVE"
 msgstr "PASİF"
 
-#: ecommerce/extensions/api/serializers.py:258
+#: ecommerce/extensions/api/serializers.py:259
 msgid "ACTIVE"
 msgstr "AKTİF"
 
-#: ecommerce/extensions/api/serializers.py:664
+#: ecommerce/extensions/api/serializers.py:700
 msgid "Products must have a certificate type."
 msgstr "Ürünler bir sertifika türüne sahip olmak zorunda."
 
-#: ecommerce/extensions/api/serializers.py:667
-#: ecommerce/extensions/api/serializers.py:710
+#: ecommerce/extensions/api/serializers.py:703
+#: ecommerce/extensions/api/serializers.py:748
 msgid "Products must have a price."
 msgstr "Ürünlerin ücreti olmak zorunda."
 
-#: ecommerce/extensions/api/serializers.py:674
+#: ecommerce/extensions/api/serializers.py:710
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:706
+#: ecommerce/extensions/api/serializers.py:744
 msgid "Products must indicate whether ID verification is required."
 msgstr "Ürünler, kimlik doğrulamasının gerekli olup olmadığını belirtmelidir."
 
-#: ecommerce/extensions/api/serializers.py:777
+#: ecommerce/extensions/api/serializers.py:815
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Geçersiz istenen  [{product_class}] ürün sınıfı."
 
-#: ecommerce/extensions/api/serializers.py:809
+#: ecommerce/extensions/api/serializers.py:847
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -844,29 +844,29 @@ msgid ""
 " been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:1479
+#: ecommerce/extensions/api/serializers.py:1517
 msgid "Enrollment code"
 msgstr "Kayıt kodu"
 
-#: ecommerce/extensions/api/serializers.py:1480
+#: ecommerce/extensions/api/serializers.py:1518
 msgid "Discount code"
 msgstr "İndirim kodu"
 
-#: ecommerce/extensions/api/serializers.py:1947
+#: ecommerce/extensions/api/serializers.py:1985
 msgid "Invalid order number or order {} does not exists."
 msgstr "Geçersiz sipariş numarası ya da {} siparişi mevcut değil."
 
-#: ecommerce/extensions/api/serializers.py:2002
+#: ecommerce/extensions/api/serializers.py:2040
 msgid "New coupon voucher assignment Failure. Error: {}"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:2020
+#: ecommerce/extensions/api/serializers.py:2058
 msgid ""
 "Your order {} can not be refunded as '{}' coupon are not supported to "
 "refund."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:2051
+#: ecommerce/extensions/api/serializers.py:2089
 msgid "Could note create new voucher for the order: {}"
 msgstr ""
 
@@ -1054,7 +1054,7 @@ msgstr "'%s' numaralı kupon bulunamadı"
 msgid "Coupon code '%s' was removed from your basket."
 msgstr "'%s' kupon kodu sepetinizden kaldırıldı."
 
-#: ecommerce/extensions/catalogue/models.py:68
+#: ecommerce/extensions/catalogue/models.py:69
 msgid "Last date/time on which this product can be purchased."
 msgstr "Bu ürünün satın alınabilir son tarih / saat."
 
@@ -1257,7 +1257,7 @@ msgstr "Stok kaydı eklemek için lütfen \"Kaydet ve Düzenlemeye Devam Et\"e t
 msgid "Partner"
 msgstr "İş Ortağı"
 
-#: ecommerce/extensions/partner/models.py:23 ecommerce/settings/_oscar.py:258
+#: ecommerce/extensions/partner/models.py:23 ecommerce/settings/_oscar.py:259
 msgid "Partners"
 msgstr "İş Ortakları"
 
@@ -1826,7 +1826,7 @@ msgstr "UTM İçerik"
 msgid "UTM Created At"
 msgstr "UTM Oluşturma Zamanı"
 
-#: ecommerce/settings/_oscar.py:215
+#: ecommerce/settings/_oscar.py:216
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:18
 #: ecommerce/templates/oscar/dashboard/index.html:22
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:12
@@ -1839,38 +1839,38 @@ msgstr "UTM Oluşturma Zamanı"
 msgid "Dashboard"
 msgstr "Ana Panel"
 
-#: ecommerce/settings/_oscar.py:220
+#: ecommerce/settings/_oscar.py:221
 msgid "Catalogue"
 msgstr "Katalog"
 
-#: ecommerce/settings/_oscar.py:224
+#: ecommerce/settings/_oscar.py:225
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:12
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:21
 msgid "Products"
 msgstr "Ürünler"
 
-#: ecommerce/settings/_oscar.py:228
+#: ecommerce/settings/_oscar.py:229
 msgid "Product Types"
 msgstr "Ürün Tipleri"
 
-#: ecommerce/settings/_oscar.py:232
+#: ecommerce/settings/_oscar.py:233
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:75
 msgid "Categories"
 msgstr "Kategoriler"
 
-#: ecommerce/settings/_oscar.py:236
+#: ecommerce/settings/_oscar.py:237
 msgid "Ranges"
 msgstr "Aralıklar"
 
-#: ecommerce/settings/_oscar.py:240
+#: ecommerce/settings/_oscar.py:241
 msgid "Low stock alerts"
 msgstr "Düşük stok alarmı"
 
-#: ecommerce/settings/_oscar.py:246
+#: ecommerce/settings/_oscar.py:247
 msgid "Fulfillment"
 msgstr "Tamamlanma"
 
-#: ecommerce/settings/_oscar.py:250
+#: ecommerce/settings/_oscar.py:251
 #: ecommerce/templates/oscar/dashboard/index.html:33
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:17
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:32
@@ -1882,11 +1882,11 @@ msgstr "Tamamlanma"
 msgid "Orders"
 msgstr "Siparişler"
 
-#: ecommerce/settings/_oscar.py:254
+#: ecommerce/settings/_oscar.py:255
 msgid "Statistics"
 msgstr "İstatistikler"
 
-#: ecommerce/settings/_oscar.py:262
+#: ecommerce/settings/_oscar.py:263
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:5
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:34
@@ -1897,25 +1897,25 @@ msgstr "İstatistikler"
 msgid "Refunds"
 msgstr "İadeler"
 
-#: ecommerce/settings/_oscar.py:268 ecommerce/settings/_oscar.py:272
+#: ecommerce/settings/_oscar.py:269 ecommerce/settings/_oscar.py:273
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
 msgstr "Müşteriler"
 
-#: ecommerce/settings/_oscar.py:276
+#: ecommerce/settings/_oscar.py:277
 msgid "Stock alert requests"
 msgstr "Stok alarm istekleri"
 
-#: ecommerce/settings/_oscar.py:282 ecommerce/settings/_oscar.py:286
+#: ecommerce/settings/_oscar.py:283 ecommerce/settings/_oscar.py:287
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:15
 msgid "Offers"
 msgstr "Teklifler"
 
-#: ecommerce/settings/_oscar.py:290
+#: ecommerce/settings/_oscar.py:291
 msgid "Vouchers"
 msgstr "Hediye Kartları"
 
-#: ecommerce/settings/_oscar.py:296
+#: ecommerce/settings/_oscar.py:297
 msgid "Reports"
 msgstr "Raporlar"
 
@@ -2124,11 +2124,11 @@ msgid ""
 " course name."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:199
+#: ecommerce/templates/edx/checkout/receipt.html:200
 msgid "Go to dashboard"
 msgstr "Ana panele git"
 
-#: ecommerce/templates/edx/checkout/receipt.html:202
+#: ecommerce/templates/edx/checkout/receipt.html:203
 msgid "Find more courses"
 msgstr "Yeni dersler bul"
 
