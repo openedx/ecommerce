@@ -1,7 +1,6 @@
 
 
 import logging
-from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
 
 import waffle
 from django.dispatch import receiver
@@ -9,6 +8,7 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.courses.utils import get_is_personalized_recommendation, mode_for_product
 from ecommerce.extensions.analytics.utils import silence_exceptions, track_segment_event
+from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.notifications.notifications import send_notification
 from ecommerce.programs.utils import get_program
