@@ -21,7 +21,7 @@ from simple_history.models import HistoricalRecords
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, ALLOW_MISSING_LMS_USER_ID
 from ecommerce.core.exceptions import MissingLmsUserIdException
 from ecommerce.core.utils import log_message_and_raise_validation_error
-from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
+from ecommerce.extensions.basket.constants import ENABLE_STRIPE_INTENTS_PAYMENT_PROCESSOR
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
 
@@ -287,8 +287,8 @@ class SiteConfiguration(models.Model):
 
         # Force client_side_payment_processor to be Stripe when waffle flag is set.
         # This allows slowly increasing the percentage of users redirected to Stripe.
-        if waffle.flag_is_active(request, ENABLE_STRIPE_PAYMENT_PROCESSOR):
-            desired_processor = 'stripe'
+        if waffle.flag_is_active(request, ENABLE_STRIPE_INTENTS_PAYMENT_PROCESSOR):
+            desired_processor = 'stripe-intents'
 
         if self.client_side_payment_processor:
             for processor in self._all_payment_processors():

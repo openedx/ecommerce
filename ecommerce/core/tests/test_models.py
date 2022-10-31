@@ -23,7 +23,7 @@ from ecommerce.core.models import (
     User
 )
 from ecommerce.core.tests import toggle_switch
-from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
+from ecommerce.extensions.basket.constants import ENABLE_STRIPE_INTENTS_PAYMENT_PROCESSOR
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
 from ecommerce.tests.factories import SiteConfigurationFactory
@@ -341,17 +341,17 @@ class SiteConfigurationTests(TestCase):
         site_config.client_side_payment_processor = processor_name
         self.assertEqual(site_config.get_client_side_payment_processor_class(request=None).NAME, processor_name)
 
-    @override_flag(ENABLE_STRIPE_PAYMENT_PROCESSOR, active=True)
+    @override_flag(ENABLE_STRIPE_INTENTS_PAYMENT_PROCESSOR, active=True)
     def test_get_client_side_payment_processor_waffle_enabled(self):
         """ Verify that Stripe is always returned when waffle flag is on. """
-        processor_name = 'cybersource,stripe'
+        processor_name = 'cybersource,stripe-intents'
         site_config = _make_site_config(processor_name)
 
         site_config.client_side_payment_processor = None
         self.assertIsNone(site_config.get_client_side_payment_processor_class(request=None))
 
         site_config.client_side_payment_processor = 'cybersource'
-        self.assertEqual(site_config.get_client_side_payment_processor_class(request=None).NAME, 'stripe')
+        self.assertEqual(site_config.get_client_side_payment_processor_class(request=None).NAME, 'stripe-intents')
 
     def test_get_from_email(self):
         """
