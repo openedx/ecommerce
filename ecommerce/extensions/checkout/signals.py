@@ -1,6 +1,7 @@
 
 
 import logging
+from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
 
 import waffle
 from django.dispatch import receiver
@@ -70,6 +71,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'currency': order.currency,
         'discount': float(order.total_discount_incl_tax),
         'products': products,
+        'stripe_enabled': waffle.flag_is_active(sender.request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
     }
     if order.user:
         properties['email'] = order.user.email
