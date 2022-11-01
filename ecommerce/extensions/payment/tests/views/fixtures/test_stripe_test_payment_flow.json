@@ -1,0 +1,384 @@
+{
+  "happy_path": {
+    "confirm_resp": {
+      "id": "pi_3LsftNIadiFyUl1x2TWxaADZ",
+      "object": "payment_intent",
+      "amount": 14900,
+      "amount_capturable": 0,
+      "amount_details": {
+        "tip": {}
+      },
+      "amount_received": 14900,
+      "application": null,
+      "application_fee_amount": null,
+      "automatic_payment_methods": null,
+      "canceled_at": null,
+      "cancellation_reason": null,
+      "capture_method": "automatic",
+      "charges": {
+        "object": "list",
+        "data": [
+          {
+            "id": "ch_3LsftNIadiFyUl1x2Qh9P6Te",
+            "object": "charge",
+            "amount": 14900,
+            "amount_captured": 14900,
+            "amount_refunded": 0,
+            "application": null,
+            "application_fee": null,
+            "application_fee_amount": null,
+            "balance_transaction": "txn_3LsftNIadiFyUl1x2vxcOEsM",
+            "billing_details": {
+              "address": {
+                "city": "Sample",
+                "country": "US",
+                "line1": "123 Test St",
+                "line2": null,
+                "postal_code": "12345",
+                "state": "MA"
+              },
+              "email": "pshiu-dev-test-3@example.com",
+              "name": "Test User",
+              "phone": null
+            },
+            "calculated_statement_descriptor": "WWW.EDX.ORG",
+            "captured": true,
+            "created": 1665723259,
+            "currency": "usd",
+            "customer": null,
+            "description": "EDX-100011",
+            "destination": null,
+            "dispute": null,
+            "disputed": false,
+            "failure_balance_transaction": null,
+            "failure_code": null,
+            "failure_message": null,
+            "fraud_details": {},
+            "invoice": null,
+            "livemode": false,
+            "metadata": {
+              "order_number": "EDX-100011"
+            },
+            "on_behalf_of": null,
+            "order": null,
+            "outcome": {
+              "network_status": "approved_by_network",
+              "reason": null,
+              "risk_level": "normal",
+              "risk_score": 6,
+              "seller_message": "Payment complete.",
+              "type": "authorized"
+            },
+            "paid": true,
+            "payment_intent": "pi_3LsftNIadiFyUl1x2TWxaADZ",
+            "payment_method": "pm_1LsfuTIadiFyUl1xcHa5WALi",
+            "payment_method_details": {
+              "card": {
+                "brand": "visa",
+                "checks": {
+                  "address_line1_check": "pass",
+                  "address_postal_code_check": "pass",
+                  "cvc_check": "pass"
+                },
+                "country": "US",
+                "exp_month": 1,
+                "exp_year": 2023,
+                "fingerprint": "N2ltqpPKT2DuO8HF",
+                "funding": "credit",
+                "installments": null,
+                "last4": "1111",
+                "mandate": null,
+                "network": "visa",
+                "three_d_secure": null,
+                "wallet": null
+              },
+              "type": "card"
+            },
+            "receipt_email": null,
+            "receipt_number": null,
+            "receipt_url": "https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xTGkyS29JYWRpRnlVbDF4KPzWo5oGMgZEeRWu5K86LBbPJHPT2KSM6XjNMXK1BnCeCX2gQYlTjBilX6VYkgohptS97JXM0Ey2L7-N",
+            "refunded": false,
+            "refunds": {},
+            "review": null,
+            "shipping": null,
+            "source": null,
+            "source_transfer": null,
+            "statement_descriptor": null,
+            "statement_descriptor_suffix": null,
+            "status": "succeeded",
+            "transfer_data": null,
+            "transfer_group": null
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/charges?payment_intent=pi_3LsftNIadiFyUl1x2TWxaADZ"
+      },
+      "client_secret": "pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh",
+      "confirmation_method": "automatic",
+      "created": 1665723185,
+      "currency": "usd",
+      "customer": null,
+      "description": "EDX-100011",
+      "invoice": null,
+      "last_payment_error": null,
+      "livemode": false,
+      "metadata": {
+        "order_number": "EDX-100011"
+      },
+      "next_action": null,
+      "on_behalf_of": null,
+      "payment_method": "pm_1LsfuTIadiFyUl1xcHa5WALi",
+      "payment_method_options": {
+        "card": {
+          "installments": null,
+          "mandate_options": null,
+          "network": null,
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card"
+      ],
+      "processing": null,
+      "receipt_email": null,
+      "review": null,
+      "secret_key_confirmation": "required",
+      "setup_future_usage": null,
+      "shipping": null,
+      "source": null,
+      "statement_descriptor": null,
+      "statement_descriptor_suffix": null,
+      "status": "succeeded",
+      "transfer_data": null,
+      "transfer_group": null
+    },
+    "create_resp": {
+      "id": "pi_3LsftNIadiFyUl1x2TWxaADZ",
+      "object": "payment_intent",
+      "amount": 14900,
+      "amount_capturable": 0,
+      "amount_details": {
+        "tip": {}
+      },
+      "amount_received": 0,
+      "application": null,
+      "application_fee_amount": null,
+      "automatic_payment_methods": null,
+      "canceled_at": null,
+      "cancellation_reason": null,
+      "capture_method": "automatic",
+      "charges": {},
+      "client_secret": "pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh",
+      "confirmation_method": "automatic",
+      "created": 1665723185,
+      "currency": "usd",
+      "customer": null,
+      "description": "EDX-100011",
+      "invoice": null,
+      "last_payment_error": null,
+      "livemode": false,
+      "metadata": {
+        "order_number": "EDX-100011"
+      },
+      "next_action": null,
+      "on_behalf_of": null,
+      "payment_method": null,
+      "payment_method_options": {
+        "card": {
+          "installments": null,
+          "mandate_options": null,
+          "network": null,
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card"
+      ],
+      "processing": null,
+      "receipt_email": null,
+      "review": null,
+      "secret_key_confirmation": "required",
+      "setup_future_usage": null,
+      "shipping": null,
+      "source": null,
+      "statement_descriptor": null,
+      "statement_descriptor_suffix": null,
+      "status": "requires_payment_method",
+      "transfer_data": null,
+      "transfer_group": null
+    },
+    "modify_resp": {
+      "id": "pi_3LsftNIadiFyUl1x2TWxaADZ",
+      "object": "payment_intent",
+      "amount": 14900,
+      "amount_capturable": 0,
+      "amount_details": {
+        "tip": {}
+      },
+      "amount_received": 0,
+      "application": null,
+      "application_fee_amount": null,
+      "automatic_payment_methods": null,
+      "canceled_at": null,
+      "cancellation_reason": null,
+      "capture_method": "automatic",
+      "charges": {},
+      "client_secret": "pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh",
+      "confirmation_method": "automatic",
+      "created": 1665723185,
+      "currency": "usd",
+      "customer": null,
+      "description": "EDX-100011",
+      "invoice": null,
+      "last_payment_error": null,
+      "livemode": false,
+      "metadata": {
+        "order_number": "EDX-100011"
+      },
+      "next_action": null,
+      "on_behalf_of": null,
+      "payment_method": "pm_1LsfuTIadiFyUl1xcHa5WALi",
+      "payment_method_options": {
+        "card": {
+          "installments": null,
+          "mandate_options": null,
+          "network": null,
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card"
+      ],
+      "processing": null,
+      "receipt_email": null,
+      "review": null,
+      "secret_key_confirmation": "required",
+      "setup_future_usage": null,
+      "shipping": null,
+      "source": null,
+      "statement_descriptor": null,
+      "statement_descriptor_suffix": null,
+      "status": "requires_confirmation",
+      "transfer_data": null,
+      "transfer_group": null
+    },
+    "refund_resp": {
+      "id": "re_3LsftNIadiFyUl1x2KvTM7FO",
+      "object": "refund",
+      "amount": 14900,
+      "balance_transaction": "txn_3LsftNIadiFyUl1x2trZAzQP",
+      "charge": "ch_3LsftNIadiFyUl1x2Qh9P6Te",
+      "created": 1665723358,
+      "currency": "usd",
+      "metadata": {},
+      "payment_intent": "pi_3LsftNIadiFyUl1x2TWxaADZ",
+      "reason": null,
+      "receipt_number": null,
+      "source_transfer_reversal": null,
+      "status": "succeeded",
+      "transfer_reversal": null
+    },
+    "retrieve_addr_resp": {
+      "id": "pi_3LsftNIadiFyUl1x2TWxaADZ",
+      "object": "payment_intent",
+      "amount": 14900,
+      "amount_capturable": 0,
+      "amount_details": {
+        "tip": {}
+      },
+      "amount_received": 0,
+      "application": null,
+      "application_fee_amount": null,
+      "automatic_payment_methods": null,
+      "canceled_at": null,
+      "cancellation_reason": null,
+      "capture_method": "automatic",
+      "charges": {},
+      "client_secret": "pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh",
+      "confirmation_method": "automatic",
+      "created": 1665723185,
+      "currency": "usd",
+      "customer": null,
+      "description": "EDX-100011",
+      "invoice": null,
+      "last_payment_error": null,
+      "livemode": false,
+      "metadata": {
+        "order_number": "EDX-100011"
+      },
+      "next_action": null,
+      "on_behalf_of": null,
+      "payment_method": {
+        "id": "pm_1LsfuTIadiFyUl1xcHa5WALi",
+        "object": "payment_method",
+        "billing_details": {
+          "address": {
+            "city": "Sample",
+            "country": "US",
+            "line1": "123 Test St",
+            "line2": null,
+            "postal_code": "12345",
+            "state": "MA"
+          },
+          "email": "pshiu-dev-test-3@example.com",
+          "name": "Test User",
+          "phone": null
+        },
+        "card": {
+          "brand": "visa",
+          "checks": {
+            "address_line1_check": "unchecked",
+            "address_postal_code_check": "unchecked",
+            "cvc_check": "unchecked"
+          },
+          "country": "US",
+          "exp_month": 1,
+          "exp_year": 2023,
+          "fingerprint": "N2ltqpPKT2DuO8HF",
+          "funding": "credit",
+          "generated_from": null,
+          "last4": "1111",
+          "networks": {
+            "available": [
+              "visa"
+            ],
+            "preferred": null
+          },
+          "three_d_secure_usage": {
+            "supported": true
+          },
+          "wallet": null
+        },
+        "created": 1665723253,
+        "customer": null,
+        "livemode": false,
+        "metadata": {},
+        "type": "card"
+      },
+      "payment_method_options": {
+        "card": {
+          "installments": null,
+          "mandate_options": null,
+          "network": null,
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card"
+      ],
+      "processing": null,
+      "receipt_email": null,
+      "review": null,
+      "secret_key_confirmation": "required",
+      "setup_future_usage": null,
+      "shipping": null,
+      "source": null,
+      "statement_descriptor": null,
+      "statement_descriptor_suffix": null,
+      "status": "requires_confirmation",
+      "transfer_data": null,
+      "transfer_group": null
+    }
+  }
+}

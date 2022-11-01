@@ -810,7 +810,17 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'error_url': '/checkout/error/',
             'mode': 'sandbox',
             'receipt_url': '/checkout/receipt/'
-        }
+        },
+        'stripe': {
+            'api_version': '2022-08-01; server_side_confirmation_beta=v1',
+            'enable_telemetry': None,
+            'log_level': None,
+            'max_network_retries': 0,
+            'proxy': None,
+            'publishable_key': 'SET-ME-PLEASE',
+            'receipt_url': '/checkout/receipt/',
+            'secret_key': 'SET-ME-PLEASE',
+        },
     }
 }
 MEDIA_STORAGE_BACKEND = {

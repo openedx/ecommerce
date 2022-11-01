@@ -18,7 +18,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
-from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
@@ -30,6 +30,8 @@ Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+BillingAddress = get_model('order', 'BillingAddress')
+Country = get_model('address', 'Country')
 BUNDLE = 'bundle_identifier'
 ORGANIZATION_ATTRIBUTE_TYPE = 'organization'
 ENTERPRISE_CATALOG_ATTRIBUTE_TYPE = 'enterprise_catalog_uuid'
@@ -385,6 +387,25 @@ def basket_add_organization_attribute(basket, request_data):
 
 
 @newrelic.agent.function_trace()
+def basket_add_payment_intent_id_attribute(basket, payment_intent_id):
+    """
+    Adds the Stripe payment_intent_id attribute on basket.
+
+    Arguments:
+        basket(Basket): order basket
+        payment_intent_id (string): Payment Intent Identifier
+
+    """
+
+    payment_intent_id_attribute, __ = BasketAttributeType.objects.get_or_create(name=PAYMENT_INTENT_ID_ATTRIBUTE)
+    BasketAttribute.objects.update_or_create(
+        basket=basket,
+        attribute_type=payment_intent_id_attribute,
+        defaults={'value_text': payment_intent_id.strip()}
+    )
+
+
+@newrelic.agent.function_trace()
 def basket_add_enterprise_catalog_attribute(basket, request_data):
     """
     Add enterprise catalog UUID attribute on basket, if the catalog UUID value
@@ -569,3 +590,23 @@ def is_duplicate_seat_attempt(basket, product):
     found_product_quantity = basket.product_quantity(product)
 
     return bool(product_type == 'Seat' and found_product_quantity)
+
+
+def get_billing_address_from_payment_intent_data(payment_intent):
+    """
+    Take stripes response_data dict, instantiates a BillingAddress object
+    and return it.
+    """
+    billing_details = payment_intent['payment_method']['billing_details']
+    customer_address = billing_details['address']
+    address = BillingAddress(
+        first_name=billing_details['name'],  # Stripe only has a single name field
+        last_name='',
+        line1=customer_address['line1'],
+        line2='' if not customer_address['line2'] else customer_address['line2'],  # line2 is optional
+        line4=customer_address['city'],  # Oscar uses line4 for city
+        postcode='' if not customer_address['postal_code'] else customer_address['postal_code'],  # postcode is optional
+        state='' if not customer_address['state'] else customer_address['state'],  # state is optional
+        country=Country.objects.get(iso_3166_1_a2__iexact=customer_address['country'])
+    )
+    return address
