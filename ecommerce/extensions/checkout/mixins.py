@@ -3,7 +3,6 @@
 
 import abc
 import logging
-from urllib import request
 
 import waffle
 from django.db import transaction
