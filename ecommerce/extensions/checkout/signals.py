@@ -61,7 +61,6 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             order_line['is_personalized_recommendation'] = is_personalized_recommendation
 
         products.append(order_line)
-
     properties = {
         'orderId': order.number,
         'total': float(order.total_excl_tax),
@@ -71,7 +70,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'currency': order.currency,
         'discount': float(order.total_discount_incl_tax),
         'products': products,
-        'stripe_enabled': waffle.flag_is_active(sender.request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
+        'stripe_enabled': waffle.flag_is_active(sender, ENABLE_STRIPE_PAYMENT_PROCESSOR),
     }
     if order.user:
         properties['email'] = order.user.email

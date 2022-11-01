@@ -3,6 +3,7 @@
 
 import abc
 import logging
+from urllib import request
 
 import waffle
 from django.db import transaction
@@ -101,10 +102,10 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         events (using add_payment_event) so they can be
         linked to the order when it is saved later on.
         """
-        
-        properties = {'basket_id': basket.id,
+        properties = {
+            'basket_id': basket.id,
             'processor_name': self.payment_processor.NAME,
-            'stripe_enabled': waffle.flag_is_active(self.request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
+            'stripe_enabled': waffle.flag_is_active(response, ENABLE_STRIPE_PAYMENT_PROCESSOR),
         }
         # If payment didn't go through, the handle_processor_response function will raise an error. We want to
         # send the event regardless of if the payment didn't go through.

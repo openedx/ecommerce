@@ -291,7 +291,7 @@ class BusinessIntelligenceMixin:
         completed order or refund.
         """
         self.assertEqual(
-            ['coupon', 'currency', 'discount', 'email', 'orderId', 'products', 'revenue', 'total'],
+            ['coupon', 'currency', 'discount', 'email', 'orderId', 'products', 'revenue', 'stripe_enabled', 'total'],
             sorted(event_payload.keys())
         )
         self.assertEqual(event_payload['orderId'], order_number)
