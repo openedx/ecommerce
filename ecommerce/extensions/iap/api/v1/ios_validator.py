@@ -13,10 +13,13 @@ class IOSValidator:
 
         try:
             exclude_old_transactions = False  # if True, include only the latest renewal transaction
-            validation_result = validator.validate(receipt['purchaseToken'], exclude_old_transactions=exclude_old_transactions)
+            validation_result = validator.validate(
+                receipt['purchaseToken'],
+                exclude_old_transactions=exclude_old_transactions
+            )
         except InAppPyValidationError as ex:
             # handle validation error
-            logger.error('Purchase validation failed {}'.format(ex.raw_response))
+            logger.error('Purchase validation failed %s', ex.raw_response)
             validation_result = {'error': ex.raw_response}
 
         return validation_result

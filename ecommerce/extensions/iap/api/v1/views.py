@@ -1,11 +1,7 @@
-# pylint: disable=no-else-return
-
-
 import logging
 import time
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.apps.payment.exceptions import PaymentError
-from oscar.apps.partner import strategy
 from oscar.core.loading import get_class, get_model
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -120,8 +116,7 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
     def payment_processor(self):
         if self.request.data['payment_processor'] == IOSIAP.NAME:
             return IOSIAP(self.request.site)
-        else:
-            return AndroidIAP(self.request.site)
+        return AndroidIAP(self.request.site)
 
     def _get_basket(self, request, basket_id):
         """
@@ -151,7 +146,7 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
     def dispatch(self, request, *args, **kwargs):
         return super(MobileCoursePurchaseExecutionView, self).dispatch(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
         properties = {'emitted_at': time.time()}
         track_segment_event(request.site, request.user, 'Mobile Course Purchase View Called', properties)
@@ -169,34 +164,38 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         except ObjectDoesNotExist:
             logger.exception('Basket [%s] not found.', basket_id)
             return JsonResponse({'error': 'Basket [{}] not found.'.format(basket_id)}, status=400)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.exception('An unexpected exception occured while obtaining basket for user [%s].', request.user.email)
-            return JsonResponse({'error': 'An unexpected exception occured while obtaining basket for user {}.'.format(request.user.email)}, status=400)
+        except:  # pylint: disable=bare-except
+            error_message = 'An unexpected exception occurred while obtaining basket for user ' \
+                            '[{}].'.format(request.user.email)
+            logger.exception(error_message)
+            return JsonResponse({'error': error_message}, status=400)
 
         try:
             with transaction.atomic():
                 try:
                     self.handle_payment(receipt, basket)
                 except RedundantPaymentNotificationError:
-                    return  JsonResponse({'error': 'The course has already been paid for on this device by the associated Apple ID.'}, status=409)
-                except PaymentError as ex:
-                    return JsonResponse({'error': repr(ex)}, status=400)
+                    error_message = 'The course has already been paid for on this device by the associated Apple ID.'
+                    return JsonResponse({'error': error_message}, status=409)
+                except PaymentError:
+                    error_message = 'An error occurred during payment handling.'
+                    return JsonResponse({'error': error_message}, status=400)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
-            return JsonResponse({'error': 'An error occured during handling payment.'}, status=400)
+            return JsonResponse({'error': 'An error occurred during handling payment.'}, status=400)
 
         try:
             order = self.create_order(request, basket)
         except Exception:  # pylint: disable=broad-except
-            # any errors here will be logged in the create_order method. If we wanted any
+            # Any errors here will be logged in the create_order method. If we wanted any
             # IAP specific logging for this error, we would do that here.
-            return JsonResponse({'error': 'An error occured during order creation.'}, status=400)
+            return JsonResponse({'error': 'An error occurred during order creation.'}, status=400)
 
         try:
             self.handle_post_order(order)
         except Exception:  # pylint: disable=broad-except
             self.log_order_placement_exception(basket.order_number, basket.id)
-            return JsonResponse({'error': 'An error occured during post order operations.'}, status=200)
+            return JsonResponse({'error': 'An error occurred during post order operations.'}, status=200)
 
         return JsonResponse({'order_data': OrderSerializer(order, context={'request': request}).data}, status=200)
 

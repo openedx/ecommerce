@@ -46,9 +46,10 @@ class BaseIAP(BasePaymentProcessor):
 
         Arguments:
             basket (Basket): The basket of products being purchased.
-            request (Request, optional): A Request object which could be used to construct an absolute URL; not
-                used by this method.
-            use_client_side_checkout (bool, optional): Indicates if the Silent Order POST profile should be used.
+            request (Request, optional): A Request object which could be used to construct an
+                absolute URL; not used by this method.
+            use_client_side_checkout (bool, optional): Indicates if the Silent Order POST
+                profile should be used.
             **kwargs: Additional parameters.
 
         Returns:
@@ -66,11 +67,11 @@ class BaseIAP(BasePaymentProcessor):
             basket (Basket): Basket being purchased via the payment processor.
 
         Raises:
-            GatewayError: Indicates a general error or unexpected behavior on the part of IAP system which prevented
-                an approved payment from being executed.
+            GatewayError: Indicates a general error or unexpected behavior on the part of IAP
+                system which prevented an approved payment from being executed.
             PaymentError: Indicates a general error in processing payment details
-            RedundantPaymentNotificationError: Indicates that a similar payment was initialized before from a different
-                account.
+            RedundantPaymentNotificationError: Indicates that a similar payment was
+                initialized before from a different account.
 
         Returns:
             HandledProcessorResponse
@@ -111,28 +112,25 @@ class BaseIAP(BasePaymentProcessor):
                 )
                 raise GatewayError(validation_response)
 
-        transaction_id = response.get('transactionId')
-        if not transaction_id:
-            transaction_id = self._get_attribute_from_receipt(validation_response, 'transaction_id')
+        transaction_id = response.get('transactionId', self._get_transaction_id_from_receipt(validation_response))
+        # original_transaction_id is primary identifier for a purchase on iOS
+        original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
+            validation_response, 'original_transaction_id'))
 
         if self.NAME == 'ios-iap':
-            # original_transaction_id is primary identifier for a purchase on iOS
-            original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
-                validation_response, 'original_transaction_id'))
             if not original_transaction_id:
                 raise PaymentError(response)
-
             # Check for multiple edx users using same iOS device/iOS account for purchase
-            is_redundant_payment = PaymentProcessorResponse.objects.filter(
-                ~Q(basket__owner=basket.owner), extension__original_transaction_id=original_transaction_id).exists()
+            is_redundant_payment = self._is_payment_redundant(basket.owner, original_transaction_id)
             if is_redundant_payment:
                 raise RedundantPaymentNotificationError(response)
 
-            self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket,
-                                           original_transaction_id=original_transaction_id)
-        else:
-            self.record_processor_response(validation_response, transaction_id=transaction_id, basket=basket)
-
+        self.record_processor_response(
+            validation_response,
+            transaction_id=transaction_id,
+            basket=basket,
+            original_transaction_id=original_transaction_id
+        )
         logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
 
         currency = basket.currency
@@ -148,7 +146,7 @@ class BaseIAP(BasePaymentProcessor):
             card_type=None
         )
 
-    def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None):
+    def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None):  # pylint: disable=arguments-differ
         """
         Save the processor's response to the database for auditing.
 
@@ -171,7 +169,18 @@ class BaseIAP(BasePaymentProcessor):
         return processor_response
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
-        raise NotImplementedError('The [%s] payment processor does not support credit issuance.', self.NAME)
+        raise NotImplementedError('The {} payment processor does not support credit issuance.'.format(self.NAME))
 
     def _get_attribute_from_receipt(self, validated_receipt, attribute):
-        return validated_receipt.get('receipt', {}).get('in_app', [{}])[0].get(attribute)
+        if self.NAME == 'ios-iap':
+            return validated_receipt.get('receipt', {}).get('in_app', [{}])[0].get(attribute)
+        elif self.NAME == 'android-iap':
+            validated_receipt.get('raw_response', {}).get(attribute)
+
+    def _get_transaction_id_from_receipt(self, validated_receipt):
+        transaction_key = 'transaction_id' if self.NAME == 'ios-iap' else 'orderId'
+        return self._get_attribute_from_receipt(validated_receipt, transaction_key)
+
+    def _is_payment_redundant(self, basket_owner, original_transaction_id):
+        return PaymentProcessorResponse.objects.filter(
+            ~Q(basket__owner=basket_owner), extension__original_transaction_id=original_transaction_id).exists()
