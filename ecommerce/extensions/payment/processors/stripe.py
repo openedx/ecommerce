@@ -185,7 +185,9 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
-            refund = stripe.Refund.create(payment_intent=reference_number)
+            # Stripe requires amount to be in cents. "amount" is a Decimal object to the hundredths place
+            amount = int(amount * 100)
+            refund = stripe.Refund.create(payment_intent=reference_number, amount=amount)
         except stripe.error.InvalidRequestError as err:
             if err.code == 'charge_already_refunded':
                 refund = stripe.Refund.list(payment_intent=reference_number, limit=1)['data'][0]
