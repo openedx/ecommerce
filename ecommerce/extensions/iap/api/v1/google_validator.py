@@ -11,7 +11,10 @@ class GooglePlayValidator:
         """
         purchase_token = receipt['purchaseToken']
         product_sku = receipt['productId']
-        verifier = GooglePlayVerifier(configuration.get('google_bundle_id'),configuration.get('google_service_account_key_file'),)
+        verifier = GooglePlayVerifier(
+            configuration.get('google_bundle_id'),
+            configuration.get('google_service_account_key_file'),
+        )
         try:
             response = verifier.verify_with_result(purchase_token, product_sku, is_subscription=False)
             result = {
@@ -20,7 +23,7 @@ class GooglePlayValidator:
                 'is_expired': response.is_expired
             }
         except errors.GoogleError as exc:
-            logger.error('Purchase validation failed {}'.format(exc))
+            logger.error('Purchase validation failed %s', exc)
             result = {
                 'error': exc.raw_response,
                 'message': exc.message
