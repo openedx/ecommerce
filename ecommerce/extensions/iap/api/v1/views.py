@@ -61,10 +61,7 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
 
             self._set_email_preference_on_basket(request, basket)
 
-            return JsonResponse(
-                {'success': _('Course added to the basket successfully'), 'basket_id': basket.id},
-                status=200
-            )
+            return JsonResponse({'success': _('Course added to the basket successfully'), 'basket_id': basket.id}, status=200)
 
         except BadRequestException as e:
             return JsonResponse({'error': str(e)}, status=400)

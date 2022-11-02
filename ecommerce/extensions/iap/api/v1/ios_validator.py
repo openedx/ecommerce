@@ -9,10 +9,7 @@ class IOSValidator:
         bundle_id = configuration.get('ios_bundle_id')
         # if True, automatically query sandbox endpoint if validation fails on production endpoint
         auto_retry_wrong_env_request = True
-        validator = AppStoreValidator(
-            bundle_id,
-            auto_retry_wrong_env_request=auto_retry_wrong_env_request
-        )
+        validator = AppStoreValidator(bundle_id, auto_retry_wrong_env_request=auto_retry_wrong_env_request)
 
         try:
             exclude_old_transactions = False  # if True, include only the latest renewal transaction

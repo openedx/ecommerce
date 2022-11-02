@@ -178,10 +178,8 @@ class BaseIAP(BasePaymentProcessor):
             validated_receipt.get('raw_response', {}).get(attribute)
 
     def _get_transaction_id_from_receipt(self, validated_receipt):
-        if self.NAME == 'ios-iap':
-            return self._get_attribute_from_receipt(validated_receipt, 'transaction_id')
-        elif self.NAME == 'android-iap':
-            return self._get_attribute_from_receipt(validated_receipt, 'orderId')
+        transaction_key = 'transaction_id' if self.NAME == 'ios-iap' else 'orderId'
+        return self._get_attribute_from_receipt(validated_receipt, transaction_key)
 
     def _is_payment_redundant(self, basket_owner, original_transaction_id):
         return PaymentProcessorResponse.objects.filter(

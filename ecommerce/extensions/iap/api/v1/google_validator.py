@@ -16,11 +16,7 @@ class GooglePlayValidator:
             configuration.get('google_service_account_key_file'),
         )
         try:
-            response = verifier.verify_with_result(
-                purchase_token,
-                product_sku,
-                is_subscription=False
-            )
+            response = verifier.verify_with_result(purchase_token, product_sku, is_subscription=False)
             result = {
                 'raw_response': response.raw_response,
                 'is_canceled': response.is_canceled,
