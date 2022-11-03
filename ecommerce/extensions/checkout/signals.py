@@ -8,6 +8,7 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.courses.utils import get_is_personalized_recommendation, mode_for_product
 from ecommerce.extensions.analytics.utils import silence_exceptions, track_segment_event
+from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.notifications.notifications import send_notification
 from ecommerce.programs.utils import get_program
@@ -60,7 +61,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             order_line['is_personalized_recommendation'] = is_personalized_recommendation
 
         products.append(order_line)
-
+    request = kwargs.get('request', None)
     properties = {
         'orderId': order.number,
         'total': float(order.total_excl_tax),
@@ -70,6 +71,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'currency': order.currency,
         'discount': float(order.total_discount_incl_tax),
         'products': products,
+        'stripe_enabled': waffle.flag_is_active(request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
     }
     if order.user:
         properties['email'] = order.user.email

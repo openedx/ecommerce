@@ -253,6 +253,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             'coupon': coupon,
             'discount': float(order.total_discount_incl_tax),
             'products': products,
+            'stripe_enabled': False,
         }
         if order.user:
             properties['email'] = order.user.email
