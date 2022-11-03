@@ -114,9 +114,17 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
 
         with mock.patch('stripe.Refund.create') as refund_mock:
             refund_mock.return_value = refund
-            self.processor.issue_credit(order.number, order.basket, charge_reference_number, order.total_incl_tax,
-                                        order.currency)
-            refund_mock.assert_called_once_with(payment_intent=charge_reference_number)
+            self.processor.issue_credit(
+                order.number,
+                order.basket,
+                charge_reference_number,
+                order.total_incl_tax,
+                order.currency,
+            )
+            refund_mock.assert_called_once_with(
+                payment_intent=charge_reference_number,
+                amount=2000,
+            )
 
         self.assert_processor_response_recorded(self.processor_name, refund.id, refund, basket=self.basket)
 

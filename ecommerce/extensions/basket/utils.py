@@ -18,7 +18,12 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
-from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.basket.constants import (
+    ENABLE_STRIPE_PAYMENT_PROCESSOR,
+    PAYMENT_INTENT_ID_ATTRIBUTE,
+    PURCHASER_BEHALF_ATTRIBUTE,
+    REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
+)
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
@@ -43,21 +48,23 @@ Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
-# TODO: Remove this as part of PCI-81
-def add_flex_microform_flag_to_url(url, request, force_flag=None):
-    microform_flag_name = 'payment.cybersource.flex_microform_enabled'
-    flag_is_active = waffle.flag_is_active(
+def add_stripe_flag_to_url(url, request):
+    """
+    Add value of ENABLE_STRIPE_PAYMENT_PROCESSOR to url if REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING is on.
+    """
+    if not waffle.flag_is_active(
         request,
-        microform_flag_name
-    )
-
-    if not flag_is_active and force_flag is None:
+        REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
+    ):
         return url
 
-    if force_flag is not None:
-        flag_is_active = force_flag
+    flag_name = ENABLE_STRIPE_PAYMENT_PROCESSOR
+    flag_is_active = waffle.flag_is_active(
+        request,
+        flag_name
+    )
 
-    flag = 'dwft_{}={}'.format(microform_flag_name, 1 if flag_is_active else 0)
+    flag = 'dwft_{}={}'.format(flag_name, 1 if flag_is_active else 0)
     join = '&' if '?' in url else '?'
     return '{url}{join}{flag}'.format(
         url=url,
