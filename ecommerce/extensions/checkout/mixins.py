@@ -4,6 +4,7 @@
 import abc
 import logging
 
+import crum
 import waffle
 from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
@@ -101,11 +102,13 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         events (using add_payment_event) so they can be
         linked to the order when it is saved later on.
         """
+        request = crum.get_current_request()
         properties = {
             'basket_id': basket.id,
             'processor_name': self.payment_processor.NAME,
-            'stripe_enabled': waffle.flag_is_active(response, ENABLE_STRIPE_PAYMENT_PROCESSOR),
+            'stripe_enabled': waffle.flag_is_active(request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
         }
+        print(properties)
         # If payment didn't go through, the handle_processor_response function will raise an error. We want to
         # send the event regardless of if the payment didn't go through.
         try:
