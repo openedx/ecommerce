@@ -62,7 +62,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             order_line['is_personalized_recommendation'] = is_personalized_recommendation
 
         products.append(order_line)
-    request = crum.get_current_request()
+    request = kwargs.get('request', None)
     properties = {
         'orderId': order.number,
         'total': float(order.total_excl_tax),
@@ -74,7 +74,6 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'products': products,
         'stripe_enabled': waffle.flag_is_active(request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
     }
-    print(properties)
     if order.user:
         properties['email'] = order.user.email
 
