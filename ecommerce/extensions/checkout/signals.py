@@ -61,6 +61,9 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
         products.append(order_line)
 
+    processor_response = order.basket.paymentprocessorresponse_set.first()
+    processor_name = processor_response.processor_name if processor_response else None
+
     properties = {
         'orderId': order.number,
         'total': float(order.total_excl_tax),
@@ -69,6 +72,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'revenue': float(order.total_excl_tax),
         'currency': order.currency,
         'discount': float(order.total_discount_incl_tax),
+        'processor_name': processor_name,
         'products': products,
     }
     if order.user:
