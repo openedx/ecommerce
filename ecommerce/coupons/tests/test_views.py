@@ -27,7 +27,10 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_data_sharing_consent_token
 )
 from ecommerce.extensions.api.serializers import CouponCodeAssignmentSerializer
-from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR, REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
+from ecommerce.extensions.basket.constants import (
+    ENABLE_STRIPE_PAYMENT_PROCESSOR,
+    REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
+)
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url

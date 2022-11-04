@@ -36,7 +36,7 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import (
     add_stripe_flag_to_url,
     get_payment_microfrontend_or_basket_url,
-    prepare_basket,
+    prepare_basket
 )
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
