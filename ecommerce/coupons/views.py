@@ -34,7 +34,7 @@ from ecommerce.enterprise.utils import (
 )
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import (
-    add_flex_microform_flag_to_url,
+    add_stripe_flag_to_url,
     get_payment_microfrontend_or_basket_url,
     prepare_basket,
 )
@@ -303,7 +303,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         # and should not display the payment form before making that determination.
         # TODO: It would be cleaner if the user could be redirected to their final destination up front.
         redirect_url = get_payment_microfrontend_or_basket_url(self.request) + "?coupon_redeem_redirect=1"
-        redirect_url = add_flex_microform_flag_to_url(redirect_url)
+        redirect_url = add_stripe_flag_to_url(redirect_url, self.request)
         return HttpResponseRedirect(redirect_url)
 
 
