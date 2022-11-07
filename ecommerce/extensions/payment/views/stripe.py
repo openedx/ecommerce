@@ -130,6 +130,9 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
             basket.strategy = strategy.Default()
 
             Applicator().apply(basket, basket.owner, self.request)
+            logger.info(
+                'Applicator applied, basket id: [%s]. Processed by [%s].',
+                basket.id, self.payment_processor.NAME)
 
             basket_add_organization_attribute(basket, self.request.GET)
         except MultipleObjectsReturned:
@@ -148,15 +151,22 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         stripe_response = request.POST.dict()
         payment_intent_id = stripe_response.get('payment_intent_id')
 
-        logger.info(
-            '%s called for payment intent id [%s].',
-            self.__class__.__name__,
-            request.POST.get('payment_intent_id')
-        )
-
         basket = self._get_basket(payment_intent_id)
 
+        logger.info(
+            '%s called for Stripe payment intent id [%s], basket [%d] with status [%s], and order number [%s].',
+            self.__class__.__name__,
+            request.POST.get('payment_intent_id'),
+            basket.id,
+            basket.status,
+            basket.order_number,
+        )
+
         if not basket:
+            logger.info(
+                'Received Stripe payment notification for non-existent basket with payment intent id [%s].',
+                payment_intent_id,
+            )
             return redirect(self.payment_processor.error_url)
 
         # SDN Check here!

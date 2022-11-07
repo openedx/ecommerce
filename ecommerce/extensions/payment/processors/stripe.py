@@ -113,6 +113,13 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             )
             # id is the payment_intent_id from Stripe
             transaction_id = stripe_response['id']
+            logger.info(
+                'Stripe payment intent created for basket [%d] with transaction ID [%s] and order number [%s].',
+                basket.id,
+                transaction_id,
+                basket.order_number,
+            )
+
             basket_add_payment_intent_id_attribute(basket, transaction_id)
         # for when basket was already created, but with different amount
         except stripe.error.IdempotencyError:
@@ -121,6 +128,12 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             # Note that we update the PI's price in handle_processor_response
             # before hitting the confirm endpoint, so we don't need to do that here
             payment_intent_id_attribute = BasketAttributeType.objects.get(name=PAYMENT_INTENT_ID_ATTRIBUTE)
+            logger.info(
+                'Idempotency Error: Stripe payment intent already exists for basket [%d] with transaction ID [%s] and order number [%s].',
+                basket.id,
+                transaction_id,
+                basket.order_number,
+            )
             payment_intent_attr = BasketAttribute.objects.get(
                 basket=basket,
                 attribute_type=payment_intent_id_attribute
@@ -164,9 +177,10 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
 
         logger.info(
-            'Successfully confirmed Stripe payment intent [%s] for basket [%d].',
+            'Successfully confirmed Stripe payment intent [%s] for basket [%d] and order number [%s].',
             payment_intent_id,
-            basket.id
+            basket.id,
+            basket.order_number,
         )
 
         total = basket.total_incl_tax
