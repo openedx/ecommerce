@@ -62,6 +62,9 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
         products.append(order_line)
     request = kwargs.get('request', None)
+    processor_response = order.basket.paymentprocessorresponse_set.first()
+    processor_name = processor_response.processor_name if processor_response else None
+
     properties = {
         'orderId': order.number,
         'total': float(order.total_excl_tax),
@@ -70,6 +73,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'revenue': float(order.total_excl_tax),
         'currency': order.currency,
         'discount': float(order.total_discount_incl_tax),
+        'processor_name': processor_name,
         'products': products,
         'stripe_enabled': waffle.flag_is_active(request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
     }
