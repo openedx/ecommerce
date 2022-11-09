@@ -103,6 +103,12 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def get_capture_context(self, request):
         # TODO: consider whether the basket should be passed in from MFE, not retrieved from Oscar
         basket = Basket.get_basket(request.user, request.site)
+        if not basket.lines.exists():
+            logger.info(
+                'Stripe capture-context called with empty basket [%d] and order number [%s].',
+                basket.id,
+                basket.order_number,
+            )
         try:
             stripe_response = stripe.PaymentIntent.create(
                 **self._build_payment_intent_parameters(basket),
@@ -113,6 +119,16 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             )
             # id is the payment_intent_id from Stripe
             transaction_id = stripe_response['id']
+
+            # TEMP: This could lead to performance/cost issues due to the high number of calls.
+            # Remove after investigation on parameter_invalid_integer
+            logger.info(
+                'Stripe payment intent created for basket [%d] with transaction ID [%s] and order number [%s].',
+                basket.id,
+                transaction_id,
+                basket.order_number,
+            )
+
             basket_add_payment_intent_id_attribute(basket, transaction_id)
         # for when basket was already created, but with different amount
         except stripe.error.IdempotencyError:
@@ -125,7 +141,15 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 basket=basket,
                 attribute_type=payment_intent_id_attribute
             )
-            stripe_response = stripe.PaymentIntent.retrieve(id=payment_intent_attr.value_text.strip())
+            transaction_id = payment_intent_attr.value_text.strip()
+            logger.info(
+                'Idempotency Error: Retrieving existing Payment Intent for basket [%d]'
+                ' with transaction ID [%s] and order number [%s].',
+                basket.id,
+                transaction_id,
+                basket.order_number,
+            )
+            stripe_response = stripe.PaymentIntent.retrieve(id=transaction_id)
 
         new_capture_context = {
             'key_id': stripe_response['client_secret'],
@@ -164,9 +188,10 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
 
         logger.info(
-            'Successfully confirmed Stripe payment intent [%s] for basket [%d].',
+            'Successfully confirmed Stripe payment intent [%s] for basket [%d] and order number [%s].',
             payment_intent_id,
-            basket.id
+            basket.id,
+            basket.order_number,
         )
 
         total = basket.total_incl_tax
