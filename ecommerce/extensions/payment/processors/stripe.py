@@ -120,15 +120,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             # id is the payment_intent_id from Stripe
             transaction_id = stripe_response['id']
 
-            # TEMP: This could lead to performance/cost issues due to the high number of calls.
-            # Remove after investigation on parameter_invalid_integer
-            logger.info(
-                'Stripe payment intent created for basket [%d] with transaction ID [%s] and order number [%s].',
-                basket.id,
-                transaction_id,
-                basket.order_number,
-            )
-
             basket_add_payment_intent_id_attribute(basket, transaction_id)
         # for when basket was already created, but with different amount
         except stripe.error.IdempotencyError:
