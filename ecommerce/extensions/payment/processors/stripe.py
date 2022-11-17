@@ -4,6 +4,7 @@
 import logging
 
 import stripe
+from django.http import JsonResponse
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 
@@ -109,6 +110,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 basket.id,
                 basket.order_number,
             )
+            return JsonResponse({}, status=400)
         try:
             stripe_response = stripe.PaymentIntent.create(
                 **self._build_payment_intent_parameters(basket),
