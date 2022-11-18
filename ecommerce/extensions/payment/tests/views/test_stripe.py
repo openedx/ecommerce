@@ -56,7 +56,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         of context managers in your test.
         """
         # Requires us to run tests from repo root directory. Too fragile?
-        with open(STRIPE_TEST_FIXTURE_PATH, 'r') as fixtures:
+        with open(STRIPE_TEST_FIXTURE_PATH, 'r') as fixtures:  # pylint: disable=unspecified-encoding
             fixture_data = json.load(fixtures)['happy_path']
 
         # hit capture_context first
