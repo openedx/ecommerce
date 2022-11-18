@@ -153,6 +153,13 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
 
         basket = self._get_basket(payment_intent_id)
 
+        if not basket:
+            logger.info(
+                'Received Stripe payment notification for non-existent basket with payment intent id [%s].',
+                payment_intent_id,
+            )
+            return redirect(self.payment_processor.error_url)
+
         logger.info(
             '%s called for Stripe payment intent id [%s], basket [%d] with status [%s], and order number [%s].',
             self.__class__.__name__,
@@ -161,13 +168,6 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
             basket.status,
             basket.order_number,
         )
-
-        if not basket:
-            logger.info(
-                'Received Stripe payment notification for non-existent basket with payment intent id [%s].',
-                payment_intent_id,
-            )
-            return redirect(self.payment_processor.error_url)
 
         # SDN Check here!
         billing_address_obj = self.payment_processor.get_address_from_token(
