@@ -30,6 +30,7 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 STRIPE_TEST_FIXTURE_PATH = 'ecommerce/extensions/payment/tests/views/fixtures/test_stripe_test_payment_flow.json'
 
+
 @ddt
 class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
     path = reverse('stripe:submit')
