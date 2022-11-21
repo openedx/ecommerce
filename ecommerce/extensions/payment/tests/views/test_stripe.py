@@ -48,7 +48,8 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         self.stripe_checkout_url = reverse('stripe:checkout')
         self.capture_context_url = reverse('bff:payment:v0:capture_context')
 
-    def payment_flow_with_mocked_stripe_calls(self,
+    def payment_flow_with_mocked_stripe_calls(
+            self,
             url,
             data,
             create_side_effect=None,
