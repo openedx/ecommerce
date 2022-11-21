@@ -48,7 +48,13 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         self.stripe_checkout_url = reverse('stripe:checkout')
         self.capture_context_url = reverse('bff:payment:v0:capture_context')
 
-    def payment_flow_with_mocked_stripe_calls(self, url, data):
+    def payment_flow_with_mocked_stripe_calls(self,
+            url,
+            data,
+            create_side_effect=None,
+            retrieve_side_effect=None,
+            confirm_side_effect=None,
+            modify_side_effect=None):
         """
         Helper function to mock all stripe calls with successful responses.
 
@@ -61,12 +67,18 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
 
         # hit capture_context first
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
-            mock_create.return_value = fixture_data['create_resp']
+            if create_side_effect is not None:
+                mock_create.side_effect = create_side_effect
+            else:
+                mock_create.side_effect = [fixture_data['create_resp']]
             self.client.get(self.capture_context_url)
 
         # now hit POST endpoint
         with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
-            mock_retrieve.return_value = fixture_data['retrieve_addr_resp']
+            if retrieve_side_effect is not None:
+                mock_retrieve.side_effect = retrieve_side_effect
+            else:
+                mock_retrieve.side_effect = [fixture_data['retrieve_addr_resp']]
 
             with mock.patch(
                 'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api'
@@ -74,9 +86,15 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 mock_api_resp.return_value = self.mock_enrollment_api_resp
 
                 with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
-                    mock_confirm.return_value = fixture_data['confirm_resp']
+                    if confirm_side_effect is not None:
+                        mock_confirm.side_effect = confirm_side_effect
+                    else:
+                        mock_confirm.side_effect = [fixture_data['confirm_resp']]
                     with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
-                        mock_modify.return_value = fixture_data['modify_resp']
+                        if modify_side_effect is not None:
+                            mock_modify.side_effect = modify_side_effect
+                        else:
+                            mock_modify.side_effect = [fixture_data['modify_resp']]
                         # make your call
                         return self.client.post(
                             url,
@@ -275,15 +293,13 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         """
         self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
-        path = 'ecommerce.extensions.payment.views.stripe.StripeCheckoutView.handle_payment'
-        with mock.patch(path) as mock_handle_payment:
-            mock_handle_payment.side_effect = stripe.error.CardError('Oops!', {}, 'card_declined')
-            response = self.payment_flow_with_mocked_stripe_calls(
-                self.stripe_checkout_url,
-                {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
-            )
-            assert response.status_code == 400
-            assert response.json() == {'error_code': 'card_declined', 'user_message': 'Oops!'}
+        response = self.payment_flow_with_mocked_stripe_calls(
+            self.stripe_checkout_url,
+            {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+            confirm_side_effect=stripe.error.CardError('Oops!', {}, 'card_declined'),
+        )
+        assert response.status_code == 400
+        assert response.json() == {'error_code': 'card_declined', 'user_message': 'Oops!'}
 
     def test_handle_payment_fails_with_unexpected_error(self):
         """
