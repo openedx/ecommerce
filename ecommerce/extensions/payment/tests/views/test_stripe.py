@@ -1,3 +1,5 @@
+import json
+
 import stripe
 from ddt import ddt, file_data
 from django.conf import settings
@@ -26,6 +28,8 @@ Source = get_model('payment', 'Source')
 Product = get_model('catalogue', 'Product')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
+STRIPE_TEST_FIXTURE_PATH = 'ecommerce/extensions/payment/tests/views/fixtures/test_stripe_test_payment_flow.json'
+
 
 @ddt
 class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
@@ -43,6 +47,60 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
 
         self.stripe_checkout_url = reverse('stripe:checkout')
         self.capture_context_url = reverse('bff:payment:v0:capture_context')
+
+    def payment_flow_with_mocked_stripe_calls(
+            self,
+            url,
+            data,
+            create_side_effect=None,
+            retrieve_side_effect=None,
+            confirm_side_effect=None,
+            modify_side_effect=None):
+        """
+        Helper function to mock all stripe calls with successful responses.
+
+        Useful for when you want to mock something else without a wall
+        of context managers in your test.
+        """
+        # Requires us to run tests from repo root directory. Too fragile?
+        with open(STRIPE_TEST_FIXTURE_PATH, 'r') as fixtures:  # pylint: disable=unspecified-encoding
+            fixture_data = json.load(fixtures)['happy_path']
+
+        # hit capture_context first
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            if create_side_effect is not None:
+                mock_create.side_effect = create_side_effect
+            else:
+                mock_create.side_effect = [fixture_data['create_resp']]
+            self.client.get(self.capture_context_url)
+
+        # now hit POST endpoint
+        with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
+            if retrieve_side_effect is not None:
+                mock_retrieve.side_effect = retrieve_side_effect
+            else:
+                mock_retrieve.side_effect = [fixture_data['retrieve_addr_resp']]
+
+            with mock.patch(
+                'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api'
+            ) as mock_api_resp:
+                mock_api_resp.return_value = self.mock_enrollment_api_resp
+
+                with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
+                    if confirm_side_effect is not None:
+                        mock_confirm.side_effect = confirm_side_effect
+                    else:
+                        mock_confirm.side_effect = [fixture_data['confirm_resp']]
+                    with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
+                        if modify_side_effect is not None:
+                            mock_modify.side_effect = modify_side_effect
+                        else:
+                            mock_modify.side_effect = [fixture_data['modify_resp']]
+                        # make your call
+                        return self.client.post(
+                            url,
+                            data=data
+                        )
 
     def assert_successful_order_response(self, response, order_number):
         assert response.status_code == 201
@@ -203,67 +261,82 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 mock_retrieve.assert_called_once()
                 assert mock_retrieve.call_args.kwargs['id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
 
-    # def test_payment_error(self):
-    #     basket = self.create_basket()
-    #     data = self.generate_form_data(basket.id)
+    def test_payment_error_no_basket(self):
+        """
+        Verify view redirects to error page if no basket exists for payment_intent_id.
+        """
+        # Post without actually making a basket
+        response = self.client.post(
+            self.stripe_checkout_url,
+            data={'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+        )
+        assert response.status_code == 302
+        assert response.url == "http://testserver.fake/checkout/error/"
 
-    #     with mock.patch.object(Stripe, 'get_address_from_token', mock.Mock(return_value=BillingAddressFactory())):
-    #         with mock.patch.object(Stripe, 'handle_processor_response', mock.Mock(side_effect=Exception)):
-    #             response = self.client.post(self.path, data)
+    def test_payment_check_sdn_returns_hits(self):
+        """
+        Verify positive SDN hits returns correct error JSON.
+        """
+        self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
-    #     assert response.status_code == 400
-    #     assert response.content.decode('utf-8') == '{}'
+        with mock.patch('ecommerce.extensions.payment.views.stripe.checkSDN') as mock_sdn_check:
+            mock_sdn_check.return_value = 1
+            response = self.payment_flow_with_mocked_stripe_calls(
+                self.stripe_checkout_url,
+                {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+            )
+            assert response.status_code == 400
+            assert response.json() == {'sdn_check_failure': {'hit_count': 1}}
 
-    # def test_billing_address_error(self):
-    #     basket = self.create_basket()
-    #     data = self.generate_form_data(basket.id)
-    #     card_type = 'visa'
-    #     label = '4242'
-    #     payment_intent = stripe.PaymentIntent.construct_from({
-    #         'id': 'pi_testtesttest',
-    #         'source': {
-    #             'brand': card_type,
-    #             'last4': label,
-    #         },
-    #     }, 'fake-key')
+    def test_handle_payment_fails_with_carderror(self):
+        """
+        Verify handle payment failing with CardError returns correct error JSON.
+        """
+        self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
-    #     with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
-    #         address_mock.side_effect = Exception
+        response = self.payment_flow_with_mocked_stripe_calls(
+            self.stripe_checkout_url,
+            {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+            confirm_side_effect=stripe.error.CardError('Oops!', {}, 'card_declined'),
+        )
+        assert response.status_code == 400
+        assert response.json() == {'error_code': 'card_declined', 'user_message': 'Oops!'}
 
-    #         with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
-    #             pi_mock.return_value = payment_intent
-    #             response = self.client.post(self.path, data)
+    def test_handle_payment_fails_with_unexpected_error(self):
+        """
+        Verify handle payment failing with unexpected error returns correct JSON response.
+        """
+        self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
-    #         address_mock.assert_called_once_with(data['payment_intent_id'])
+        path = 'ecommerce.extensions.payment.views.stripe.StripeCheckoutView.handle_payment'
+        with mock.patch(path) as mock_handle_payment:
+            mock_handle_payment.side_effect = ZeroDivisionError
+            response = self.payment_flow_with_mocked_stripe_calls(
+                self.stripe_checkout_url,
+                {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+            )
+            assert response.status_code == 400
+            assert response.json() == {}
 
-    #     self.assert_successful_order_response(response, basket.order_number)
-    #     self.assert_order_created(basket, None, card_type, label)
+    def test_create_billing_address_fails(self):
+        """
+        Verify order is not successful if billing address objects fails
+        to be created.
+        """
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
-    # def test_successful_payment(self):
-    #     basket = self.create_basket()
-    #     data = self.generate_form_data(basket.id)
-    #     card_type = 'visa'
-    #     label = '4242'
-    #     payment_intent = stripe.PaymentIntent.construct_from({
-    #         'id': 'pi_testtesttest',
-    #         'source': {
-    #             'brand': card_type,
-    #             'last4': label,
-    #         },
-    #     }, 'fake-key')
+        path = 'ecommerce.extensions.payment.views.stripe.StripeCheckoutView.create_billing_address'
+        with mock.patch(path) as mock_billing_create:
+            mock_billing_create.side_effect = Exception
+            response = self.payment_flow_with_mocked_stripe_calls(
+                self.stripe_checkout_url,
+                {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+            )
+            assert response.status_code == 400
+            assert response.json() == {}
 
-    #     billing_address = BillingAddressFactory()
-    #     with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
-    #         address_mock.return_value = billing_address
-
-    #         with mock.patch.object(stripe.PaymentIntent, 'create') as pi_mock:
-    #             pi_mock.return_value = payment_intent
-    #             response = self.client.post(self.path, data)
-
-    #         address_mock.assert_called_once_with(data['payment_intent_id'])
-
-    #     self.assert_successful_order_response(response, basket.order_number)
-    #     self.assert_order_created(basket, billing_address, card_type, label)
+        basket.refresh_from_db()
+        assert not basket.order_set.exists()
 
     # def test_successful_payment_for_bulk_purchase(self):
     #     """

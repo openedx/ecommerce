@@ -137,3 +137,60 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
                 GatewayError, self.processor.issue_credit, order.number, order.basket, '123', order.total_incl_tax,
                 order.currency
             )
+
+    def test_issue_credit_error_invalid_request(self):
+        """
+        Verify InvalidRequest errors with the charge_already_refunded code
+        return the id of the refund that already took place.
+        """
+        order = create_order(basket=self.basket)
+
+        with mock.patch('stripe.Refund.create') as refund_mock:
+            refund_mock.side_effect = stripe.error.InvalidRequestError('Oops!', {}, 'charge_already_refunded')
+
+            with mock.patch('stripe.Refund.list') as list_mock:
+                charge_reference_number = '9436'
+                refund = stripe.Refund.construct_from({
+                    'id': '946',
+                }, 'fake-key')
+                list_mock.return_value = {
+                    'data': [refund]
+                }
+
+                result = self.processor.issue_credit(
+                    order.number,
+                    order.basket,
+                    charge_reference_number,
+                    order.total_incl_tax,
+                    order.currency,
+                )
+                assert result == '946'
+
+    def test_issue_credit_error_invalid_request_not_already_refunded(self):
+        """
+        Verify InvalidRequest errors with any non "already_refunded" codes
+        raise an error.
+        """
+        order = create_order(basket=self.basket)
+
+        with mock.patch('stripe.Refund.create') as refund_mock:
+            refund_mock.side_effect = stripe.error.InvalidRequestError('Oops!', {}, 'charge_declined')
+
+            with mock.patch('stripe.Refund.list') as list_mock:
+                charge_reference_number = '9436'
+                refund = stripe.Refund.construct_from({
+                    'id': '946',
+                }, 'fake-key')
+                list_mock.return_value = {
+                    'data': [refund]
+                }
+
+                self.assertRaises(
+                    stripe.error.InvalidRequestError,
+                    self.processor.issue_credit,
+                    order.number,
+                    order.basket,
+                    charge_reference_number,
+                    order.total_incl_tax,
+                    order.currency,
+                )
