@@ -153,6 +153,34 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
 
         basket = self._get_basket(payment_intent_id)
 
+        # Check if skus in basket match what the frontend has
+        # This is intended to prevent undesired behavior where a user opens up
+        # 2 tabs in their browser to buy 2 courses, attempts to purchase the
+        # course in the 1st tab, but receives the course in the 2nd tab
+        # (the 2nd course is "correctly" displayed on the receipt page).
+        # Why?
+        # The basket in ecommerce is updated with the product of the
+        # 2nd tab when it is loaded. When purchase is clicked on the 1st tab,
+        # the checkout happens for the user and the basket... but not with the
+        # course listed on the 1st tab's display.
+        # What to do?
+        # When the frontend makes a purchase, they have the product SKUs available
+        # to them. Let's hand those to the backend and verify what they think
+        # they are buying matches what we have in the basket. If not, throw
+        # an error and stop the purchase.
+        request_skus = stripe_response.get('skus')
+        if request_skus:
+            request_skus = set(request_skus.split(','))
+            basket_skus = set(basket.lines.values_list(
+                'stockrecord__partner_sku',
+                flat=True
+            ))
+            if request_skus != basket_skus:
+                print("WE GOT A PROBLEM DAWG \n\n\n\n\n\n\n\n\n")
+                raise Exception
+            else:
+                print("everything is a-ok")
+        raise Exception # <-- for testing purposes only :)
         if not basket:
             logger.info(
                 'Received Stripe payment notification for non-existent basket with payment intent id [%s].',
