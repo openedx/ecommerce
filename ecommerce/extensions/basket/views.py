@@ -626,7 +626,9 @@ class CaptureContextApiLogicMixin:  # pragma: no cover
             return
 
         try:
-            response['capture_context'] = payment_processor.get_capture_context(self.request)
+            capture_context = payment_processor.get_capture_context(self.request)
+            if capture_context is not None:
+                response['capture_context'] = capture_context
         except:  # pylint: disable=bare-except
             logger.exception("Error generating capture_context")
             return
@@ -772,6 +774,8 @@ class CaptureContextApiView(CaptureContextApiLogicMixin, APIView):  # pragma: no
         """
         data = {}
         self._add_capture_context(data)
+        if not data:
+            return JsonResponse(data, status=400)
         return Response(data, status=status)
 
 
