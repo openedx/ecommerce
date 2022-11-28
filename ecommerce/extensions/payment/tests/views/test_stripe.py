@@ -192,7 +192,10 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                         mock_modify.return_value = modify_resp
                         self.client.post(
                             self.stripe_checkout_url,
-                            data={'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+                            data={
+                                'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                                'skus': basket.lines.first().stockrecord.partner_sku,
+                            },
                         )
                 assert mock_retrieve.call_count == 1
                 assert mock_modify.call_count == 1
@@ -268,22 +271,52 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         # Post without actually making a basket
         response = self.client.post(
             self.stripe_checkout_url,
-            data={'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+            data={
+                'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'skus': '',
+            },
         )
         assert response.status_code == 302
         assert response.url == "http://testserver.fake/checkout/error/"
+
+    def test_payment_error_sku_mismatch(self):
+        """
+        Verify a sku mismatch between basket and request logs warning.
+        TODO: this should raise an error once verified.
+        """
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+
+        with self.assertLogs(level='WARNING') as log:
+            self.payment_flow_with_mocked_stripe_calls(
+                self.stripe_checkout_url,
+                {
+                    'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                    'skus': 'totally_the_wrong_sku',
+                },
+            )
+            expected = (
+                "WARNING:ecommerce.extensions.payment.views.stripe:"
+                "Basket [1] SKU mismatch! request_skus "
+                "[{'totally_the_wrong_sku'}] and basket_skus [{'%s'}]."
+                % basket.lines.first().stockrecord.partner_sku
+            )
+            actual = log.output[0]
+            assert actual == expected
 
     def test_payment_check_sdn_returns_hits(self):
         """
         Verify positive SDN hits returns correct error JSON.
         """
-        self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
         with mock.patch('ecommerce.extensions.payment.views.stripe.checkSDN') as mock_sdn_check:
             mock_sdn_check.return_value = 1
             response = self.payment_flow_with_mocked_stripe_calls(
                 self.stripe_checkout_url,
-                {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+                {
+                    'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                    'skus': basket.lines.first().stockrecord.partner_sku,
+                },
             )
             assert response.status_code == 400
             assert response.json() == {'sdn_check_failure': {'hit_count': 1}}
@@ -292,11 +325,14 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         """
         Verify handle payment failing with CardError returns correct error JSON.
         """
-        self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
         response = self.payment_flow_with_mocked_stripe_calls(
             self.stripe_checkout_url,
-            {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+            {
+                'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'skus': basket.lines.first().stockrecord.partner_sku,
+            },
             confirm_side_effect=stripe.error.CardError('Oops!', {}, 'card_declined'),
         )
         assert response.status_code == 400
@@ -306,14 +342,17 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         """
         Verify handle payment failing with unexpected error returns correct JSON response.
         """
-        self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
         path = 'ecommerce.extensions.payment.views.stripe.StripeCheckoutView.handle_payment'
         with mock.patch(path) as mock_handle_payment:
             mock_handle_payment.side_effect = ZeroDivisionError
             response = self.payment_flow_with_mocked_stripe_calls(
                 self.stripe_checkout_url,
-                {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+                {
+                    'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                    'skus': basket.lines.first().stockrecord.partner_sku,
+                },
             )
             assert response.status_code == 400
             assert response.json() == {}
@@ -330,7 +369,10 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             mock_billing_create.side_effect = Exception
             response = self.payment_flow_with_mocked_stripe_calls(
                 self.stripe_checkout_url,
-                {'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ'},
+                {
+                    'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                    'skus': basket.lines.first().stockrecord.partner_sku,
+                },
             )
             assert response.status_code == 400
             assert response.json() == {}

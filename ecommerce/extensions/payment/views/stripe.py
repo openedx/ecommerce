@@ -153,6 +153,22 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
 
         basket = self._get_basket(payment_intent_id)
 
+        if not basket:
+            logger.info(
+                'Received Stripe payment notification for non-existent basket with payment intent id [%s].',
+                payment_intent_id,
+            )
+            return redirect(self.payment_processor.error_url)
+
+        logger.info(
+            '%s called for Stripe payment intent id [%s], basket [%d] with status [%s], and order number [%s].',
+            self.__class__.__name__,
+            request.POST.get('payment_intent_id'),
+            basket.id,
+            basket.status,
+            basket.order_number,
+        )
+
         # Check if skus in basket match what the frontend has
         # This is intended to prevent undesired behavior where a user opens up
         # 2 tabs in their browser to buy 2 courses, attempts to purchase the
@@ -176,26 +192,13 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
                 flat=True
             ))
             if request_skus != basket_skus:
-                print("WE GOT A PROBLEM DAWG \n\n\n\n\n\n\n\n\n")
-                raise Exception
-            else:
-                print("everything is a-ok")
-        raise Exception # <-- for testing purposes only :)
-        if not basket:
-            logger.info(
-                'Received Stripe payment notification for non-existent basket with payment intent id [%s].',
-                payment_intent_id,
-            )
-            return redirect(self.payment_processor.error_url)
-
-        logger.info(
-            '%s called for Stripe payment intent id [%s], basket [%d] with status [%s], and order number [%s].',
-            self.__class__.__name__,
-            request.POST.get('payment_intent_id'),
-            basket.id,
-            basket.status,
-            basket.order_number,
-        )
+                # Let's just log this to start (to verify the frequency of occurance)
+                logger.warning(
+                    'Basket [%d] SKU mismatch! request_skus [%s] and basket_skus [%s].',
+                    basket.id,
+                    request_skus,
+                    basket_skus,
+                )
 
         # SDN Check here!
         billing_address_obj = self.payment_processor.get_address_from_token(
