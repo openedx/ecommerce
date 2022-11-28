@@ -309,7 +309,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 "WARNING:ecommerce.extensions.payment.views.stripe:"
                 "Basket [%s] SKU mismatch! request_skus "
                 "[{'totally_the_wrong_sku'}] and basket_skus [{'%s'}]."
-                % basket.id, basket.lines.first().stockrecord.partner_sku
+                % (basket.id, basket.lines.first().stockrecord.partner_sku)
             )
             actual = log.output[0]
             assert actual == expected
