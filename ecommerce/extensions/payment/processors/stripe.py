@@ -109,6 +109,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 basket.id,
                 basket.order_number,
             )
+            return None
         try:
             stripe_response = stripe.PaymentIntent.create(
                 **self._build_payment_intent_parameters(basket),
