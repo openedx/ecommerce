@@ -172,10 +172,12 @@ class BaseIAP(BasePaymentProcessor):
         raise NotImplementedError('The {} payment processor does not support credit issuance.'.format(self.NAME))
 
     def _get_attribute_from_receipt(self, validated_receipt, attribute):
+        value = None
         if self.NAME == 'ios-iap':
-            return validated_receipt.get('receipt', {}).get('in_app', [{}])[0].get(attribute)
+            value = validated_receipt.get('receipt', {}).get('in_app', [{}])[0].get(attribute)
         elif self.NAME == 'android-iap':
-            validated_receipt.get('raw_response', {}).get(attribute)
+            value = validated_receipt.get('raw_response', {}).get(attribute)
+        return value
 
     def _get_transaction_id_from_receipt(self, validated_receipt):
         transaction_key = 'transaction_id' if self.NAME == 'ios-iap' else 'orderId'
