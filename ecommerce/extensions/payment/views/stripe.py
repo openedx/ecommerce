@@ -192,7 +192,6 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
                 flat=True
             ))
             if request_skus != basket_skus:
-                # Let's just log this to start (to verify the frequency of occurance)
                 logger.warning(
                     'Basket [%d] SKU mismatch! request_skus [%s] and basket_skus [%s].',
                     basket.id,
