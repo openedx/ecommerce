@@ -192,13 +192,13 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
                 flat=True
             ))
             if request_skus != basket_skus:
-                # Let's just log this to start (to verify the frequency of occurance)
                 logger.warning(
                     'Basket [%d] SKU mismatch! request_skus [%s] and basket_skus [%s].',
                     basket.id,
                     request_skus,
                     basket_skus,
                 )
+                return self.sku_mismatch_error_response()
 
         # SDN Check here!
         billing_address_obj = self.payment_processor.get_address_from_token(
@@ -251,6 +251,12 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
     def error_page_response(self):
         """Tell the frontend to redirect to a generic error page."""
         return JsonResponse({}, status=400)
+
+    def sku_mismatch_error_response(self):
+        """Tell the frontend the SKU in the request does not match the basket."""
+        return JsonResponse({
+            'sku_error': True,
+        }, status=400)
 
     def sdn_error_page_response(self, hit_count):
         """Tell the frontend to redirect to the SDN error page."""

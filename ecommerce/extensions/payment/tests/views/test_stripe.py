@@ -293,26 +293,27 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
     def test_payment_error_sku_mismatch(self):
         """
         Verify a sku mismatch between basket and request logs warning.
-        TODO: this should raise an error once verified.
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
         with self.assertLogs(level='WARNING') as log:
-            self.payment_flow_with_mocked_stripe_calls(
+            response = self.payment_flow_with_mocked_stripe_calls(
                 self.stripe_checkout_url,
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': 'totally_the_wrong_sku',
                 },
             )
-            expected = (
+            assert response.json() == {'sku_error': True}
+            assert response.status_code == 400
+            expected_log = (
                 "WARNING:ecommerce.extensions.payment.views.stripe:"
                 "Basket [%s] SKU mismatch! request_skus "
                 "[{'totally_the_wrong_sku'}] and basket_skus [{'%s'}]."
                 % (basket.id, basket.lines.first().stockrecord.partner_sku)
             )
-            actual = log.output[0]
-            assert actual == expected
+            actual_log = log.output[0]
+            assert actual_log == expected_log
 
     def test_payment_check_sdn_returns_hits(self):
         """
