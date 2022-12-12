@@ -14,13 +14,16 @@ from waffle.testutils import override_flag
 
 from ecommerce.core.url_utils import get_lms_course_about_url, get_lms_program_dashboard_url
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
+from ecommerce.courses.constants import CertificateType
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.v2.constants import ENABLE_RECEIPTS_VIA_ECOMMERCE_MFE
 from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.checkout.views import ReceiptResponseView
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -646,3 +649,24 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
+
+    def test_get_smarter_msg_for_executive_education_2u_product(self):
+        """
+        The receipt page should show Get Smarter specific message for
+        orders with executive education 2u products
+        """
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        exec_ed_2u_course_entitlement = create_or_update_course_entitlement(
+            CertificateType.PAID_EXECUTIVE_EDUCATION,
+            100,
+            self.site.siteconfiguration.partner,
+            '111-222-333-444',
+            'Executive Education (2U) Course Entitlement'
+        )
+        basket.add_product(exec_ed_2u_course_entitlement)
+        order = create_order(basket=basket, user=self.user)
+
+        response = self._get_receipt_response(order.number)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context_data['show_get_smarter_msg'], True)

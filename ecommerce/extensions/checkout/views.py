@@ -197,6 +197,7 @@ class ReceiptResponseView(ThankYouView):
             'order_dashboard_url': self.get_order_dashboard_url(order),
             'explore_courses_url': get_lms_explore_courses_url(),
             'show_receipt_cta_links': True,
+            'show_get_smarter_msg': self.order_contains_executive_education_2u_product(order),
             'has_enrollment_code_product': has_enrollment_code_product,
             'disable_back_button': self.request.GET.get('disable_back_button', 0),
         })
@@ -250,6 +251,9 @@ class ReceiptResponseView(ThankYouView):
             if getattr(line.product.attr, 'credit_provider', None):
                 return True
         return False
+
+    def order_contains_executive_education_2u_product(self, order):
+        return any(line.product.is_executive_education_2u_product for line in order.lines.all())
 
     def get_order_dashboard_url(self, order):
         program_uuid = get_program_uuid(order)

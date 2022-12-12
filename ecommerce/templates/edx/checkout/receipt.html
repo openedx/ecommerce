@@ -56,9 +56,18 @@
                   {% endblocktrans %}
                   {% interpolate_html tmsg email=order.user.email|safe link_end="</a>"|safe link_start=link_start|safe %}
               {% else %}
-                  {% blocktrans trimmed asvar tmsg %}
-                      Your order is complete. If you need a receipt, you can print this page.
-                  {% endblocktrans %}
+                  {% if show_get_smarter_msg %}
+                      {% blocktrans trimmed asvar tmsg %}
+                          Your order is complete. If you need a receipt, you can print this page.
+                          <h2><i class="fa fa-info-circle" aria-hidden="true"></i> Next Steps:</h2>
+                          1. Check your inbox for an order confirmation email from Get Smarter.<br/>
+                          2: Follow the instructions in the email to complete your registration.
+                      {% endblocktrans %}
+                  {% else %}
+                      {% blocktrans trimmed asvar tmsg %}
+                          Your order is complete. If you need a receipt, you can print this page.
+                      {% endblocktrans %}
+                  {% endif %}
                 {% interpolate_html tmsg %}
               {% endif %}
             </div>
