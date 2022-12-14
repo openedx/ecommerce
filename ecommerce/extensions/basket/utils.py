@@ -408,8 +408,8 @@ def basket_add_payment_intent_id_attribute(basket, payment_intent_id):
     # Do a get_or_create and update value_text after (instead of update_or_create)
     # to prevent a particularly slow full table scan that uses a LIKE
     basket_attribute, __ = BasketAttribute.objects.get_or_create(
-        basket=basket,
         attribute_type=payment_intent_id_attribute,
+        basket=basket,
     )
     basket_attribute.value_text = payment_intent_id.strip()
     basket_attribute.save()

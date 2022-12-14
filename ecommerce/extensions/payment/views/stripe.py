@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from stripe.error import CardError
 
+from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute, basket_add_payment_intent_id_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
@@ -125,7 +127,11 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
             duplicate payment_intent_id* received or any other exception occurred.
         """
         try:
-            basket_attribute = BasketAttribute.objects.get(value_text=payment_intent_id)
+            payment_intent_id_attribute, __ = BasketAttributeType.objects.get_or_create(name=PAYMENT_INTENT_ID_ATTRIBUTE)
+            basket_attribute = BasketAttribute.objects.get(
+                attribute_type=payment_intent_id_attribute,
+                value_text=payment_intent_id,
+            )
             basket = basket_attribute.basket
             basket.strategy = strategy.Default()
 
