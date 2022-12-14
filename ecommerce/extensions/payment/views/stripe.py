@@ -127,7 +127,9 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
             duplicate payment_intent_id* received or any other exception occurred.
         """
         try:
-            payment_intent_id_attribute, __ = BasketAttributeType.objects.get_or_create(name=PAYMENT_INTENT_ID_ATTRIBUTE)
+            payment_intent_id_attribute, __ = BasketAttributeType.objects.get_or_create(
+                name=PAYMENT_INTENT_ID_ATTRIBUTE
+            )
             basket_attribute = BasketAttribute.objects.get(
                 attribute_type=payment_intent_id_attribute,
                 value_text=payment_intent_id,
