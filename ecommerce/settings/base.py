@@ -208,6 +208,7 @@ TEMPLATES = [
                 'oscar.apps.communication.notifications.context_processors.notifications',
                 'oscar.core.context_processors.metadata',
                 'ecommerce.core.context_processors.core',
+                "ecommerce.core.context_processors.localization",
                 'ecommerce.extensions.analytics.context_processors.analytics',
             ),
             'debug': True,  # Django will only display debug pages if the global DEBUG setting is set to True.
