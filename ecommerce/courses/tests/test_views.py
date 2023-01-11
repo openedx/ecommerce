@@ -134,6 +134,25 @@ class CourseAppViewTests(TestCase):
         )
 
     @responses.activate
+    def test_currency_localization(self):
+        """Verify the currency symbol is localized based on settings"""
+        self._create_and_login_staff_user()
+        self.mock_access_token_response()
+        __ = self.mock_credit_api_providers()
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        # default is USD
+        self.assertEqual(response.context["currency_symbol_"], "$")
+        self.assertEqual(response.context["currency_code_"], "USD")
+
+        with self.settings(PAID_COURSE_REGISTRATION_CURRENCY="GBP"):
+            response = self.client.get(self.path)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.context["currency_symbol_"], "£")
+            self.assertEqual(response.context["currency_code_"], "GBP")
+
+    @responses.activate
     def test_credit_providers_in_context_cached(self):
         """ Verify the cached context data includes a list of credit providers. """
         self._create_and_login_staff_user()
