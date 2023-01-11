@@ -95,7 +95,7 @@
                 <% if(coupon.contract_discount_value && coupon.contract_discount_type == 'Percentage') { %>
                     <%= coupon.contract_discount_value %>%
                 <% } else if(coupon.contract_discount_type == 'Absolute') { %>
-                    $<%= coupon.contract_discount_value && coupon.contract_discount_value %>
+                    {{ currency_symbol_ }}<%= coupon.contract_discount_value && coupon.contract_discount_value %>
                 <% } else { %>
                     -
                 <%}%>
@@ -103,7 +103,7 @@
         </div>
         <div class="info-item grid-item prepaid-invoice-amount">
             <div class="heading"><%= gettext('Prepaid Invoice Amount:') %></div>
-            <div class="value">$<%= coupon.prepaid_invoice_amount %></div>
+            <div class="value">{{ currency_symbol_ }}<%= coupon.prepaid_invoice_amount %></div>
         </div>
         <div class="info-item grid-item invoice-type">
             <div class="heading"><%= gettext('Invoice Type:') %></div>
