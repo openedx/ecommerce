@@ -20,6 +20,7 @@ def core(request):
         'optimizely_snippet_src': site_configuration.optimizely_snippet_src,
     }
 
+
 def localization(_request):
     defaults = getattr(settings, "COURSE_MODE_DEFAULTS", {})
     default_currency = defaults.get("currency")
