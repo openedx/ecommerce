@@ -155,7 +155,10 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         return basket
 
     def post(self, request):
-        """Handle an incoming user returned to us by Stripe after approving payment."""
+        """
+        Handle an incoming payment submission from the payment MFE after capture-context.
+        SDN Check and confirmation by Stripe on the payment intent is performed.
+        """
         stripe_response = request.POST.dict()
         payment_intent_id = stripe_response.get('payment_intent_id')
 
