@@ -23,6 +23,7 @@ from ecommerce.extensions.api.v2.views import retirement as retirement_views
 from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
 from ecommerce.extensions.api.v2.views import user_management as user_management_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
+from ecommerce.extensions.api.v2.views import webhooks as webhooks_views
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
@@ -49,6 +50,10 @@ BASKET_URLS = [
 
 PAYMENT_URLS = [
     url(r'^processors/$', payment_views.PaymentProcessorListView.as_view(), name='list_processors'),
+]
+
+WEBHOOKS_URLS = [
+    url(r'^stripe/$', webhooks_views.StripeWebhooksView.as_view(), name='webhook_events'),
 ]
 
 REFUND_URLS = [
@@ -116,6 +121,7 @@ urlpatterns = [
     url(r'^retirement/', include((RETIREMENT_URLS, 'retirement'))),
     url(r'^user_management/', include((USER_MANAGEMENT_URLS, 'user_management'))),
     url(r'^assignment-email/', include((ASSIGNMENT_EMAIL_URLS, 'assignment-email'))),
+    url(r'^webhooks/', include((WEBHOOKS_URLS, 'webhooks'))),
 ]
 
 router = SimpleRouter()
