@@ -1,5 +1,6 @@
-from inapppy import AppStoreValidator, InAppPyValidationError
 import logging
+
+from inapppy import AppStoreValidator, InAppPyValidationError
 
 logger = logging.getLogger(__name__)
 

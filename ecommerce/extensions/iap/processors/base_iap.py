@@ -1,19 +1,16 @@
 import logging
-
-from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from urllib.parse import urljoin
-import waffle
 
+import waffle
 from django.db.models import Q
 from django.urls import reverse
+from oscar.apps.payment.exceptions import GatewayError, PaymentError
 
-from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
-from ecommerce.extensions.iap.models import PaymentProcessorResponseExtension
-from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
-from ecommerce.extensions.payment.models import PaymentProcessorResponse
+from ecommerce.extensions.iap.models import IAPProcessorConfiguration, PaymentProcessorResponseExtension
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
-
+from ecommerce.extensions.payment.models import PaymentProcessorResponse
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +34,10 @@ class BaseIAP(BasePaymentProcessor):
         self.retry_attempts = IAPProcessorConfiguration.get_solo().retry_attempts
         self.validator = self.get_validator()
 
+    @property
+    def client_side_payment_url(self):
+        return urljoin(get_ecommerce_url(), reverse('iap:iap-execute'))
+
     def get_validator(self):
         raise NotImplementedError
 
@@ -55,7 +56,7 @@ class BaseIAP(BasePaymentProcessor):
         Returns:
             dict: IAP specific parameters required to complete a transaction.
         """
-        return {'payment_page_url': urljoin(get_ecommerce_url(), reverse('iap:iap-execute')) }
+        return {'payment_page_url': self.client_side_payment_url}
 
     def handle_processor_response(self, response, basket=None):
         """

@@ -2,9 +2,8 @@ import mock
 from inapppy import InAppPyValidationError
 from testfixtures import LogCapture
 
-from ecommerce.tests.testcases import TestCase
 from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
-
+from ecommerce.tests.testcases import TestCase
 
 VALID_PURCHASE_TOKEN = "test.purchase.token"
 INVALID_PURCHASE_TOKEN = "test.purchase.invalid_token"

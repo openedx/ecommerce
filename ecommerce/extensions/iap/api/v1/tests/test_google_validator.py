@@ -2,9 +2,8 @@ import mock
 from inapppy import errors
 from testfixtures import LogCapture
 
-from ecommerce.tests.testcases import TestCase
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
-
+from ecommerce.tests.testcases import TestCase
 
 VALID_PURCHASE_TOKEN = "test.purchase.token"
 INVALID_PURCHASE_TOKEN = "test.purchase.invalid_token"

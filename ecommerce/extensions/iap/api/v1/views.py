@@ -1,10 +1,5 @@
 import logging
 import time
-from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
-from oscar.apps.payment.exceptions import PaymentError
-from oscar.core.loading import get_class, get_model
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -12,17 +7,22 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
+from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
+from oscar.apps.payment.exceptions import PaymentError
+from oscar.core.loading import get_class, get_model
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
-from ecommerce.extensions.api.v2.views.checkout import CheckoutView
 from ecommerce.extensions.analytics.utils import track_segment_event
+from ecommerce.extensions.api.v2.views.checkout import CheckoutView
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute, prepare_basket
 from ecommerce.extensions.basket.views import BasketLogicMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.iap.api.v1.serializers import OrderSerializer
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
-from ecommerce.extensions.iap.api.v1.serializers import OrderSerializer
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
@@ -61,7 +61,8 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
 
             self._set_email_preference_on_basket(request, basket)
 
-            return JsonResponse({'success': _('Course added to the basket successfully'), 'basket_id': basket.id}, status=200)
+            return JsonResponse({'success': _('Course added to the basket successfully'), 'basket_id': basket.id},
+                                status=200)
 
         except BadRequestException as e:
             return JsonResponse({'error': str(e)}, status=400)
@@ -204,7 +205,7 @@ class MobileCheckoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        response = CheckoutView.as_view()(request._request)
+        response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
         if response.status_code != 200:
             return JsonResponse({'error': response.content.decode()}, status=response.status_code)
 

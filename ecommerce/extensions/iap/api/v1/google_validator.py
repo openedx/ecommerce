@@ -1,5 +1,6 @@
-from inapppy import GooglePlayVerifier, errors
 import logging
+
+from inapppy import GooglePlayVerifier, errors
 
 logger = logging.getLogger(__name__)
 

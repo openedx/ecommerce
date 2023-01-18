@@ -14,9 +14,9 @@ from testfixtures import LogCapture
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
 from ecommerce.extensions.iap.processors.base_iap import BaseIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
-from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
@@ -64,7 +64,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         DRY helper for getting receipt page URL.
         """
-        return get_receipt_page_url(site_configuration=self.site.siteconfiguration)
+        return get_receipt_page_url(self.request, self.site.siteconfiguration)
 
     def test_get_transaction_parameters(self):
         """
@@ -134,7 +134,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
             modified_return_data.pop('originalTransactionId')
             self.processor.handle_processor_response(modified_return_data, basket=self.basket)
 
-    @mock.patch.object(BaseIAP, 'is_payment_redundant')
+    @mock.patch.object(BaseIAP, '_is_payment_redundant')
     @mock.patch.object(IOSValidator, 'validate')
     def test_handle_processor_response_redundant_error(self, mock_ios_validator, mock_payment_redundant):
         """

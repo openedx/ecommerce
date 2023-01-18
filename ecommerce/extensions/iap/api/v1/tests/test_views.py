@@ -2,27 +2,31 @@ import datetime
 import urllib.error
 import urllib.parse
 
-
 import ddt
 import mock
+import pytz
+from django.conf import settings
+from django.test import override_settings
+from django.urls import reverse
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
-import pytz
 from testfixtures import LogCapture
 
-from django.urls import reverse
-
+from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
-from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
+from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
 from ecommerce.extensions.iap.api.v1.serializers import OrderSerializer
 from ecommerce.extensions.iap.api.v1.views import MobileCoursePurchaseExecutionView
+from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
+from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
+from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.factories import ProductFactory, StockRecordFactory
@@ -43,7 +47,7 @@ Voucher = get_model('voucher', 'Voucher')
 
 @ddt.ddt
 class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketMixin,
-                              EnterpriseServiceMockMixin, TestCase):
+                                    EnterpriseServiceMockMixin, TestCase):
     """ MobileBasketAddItemsView view tests. """
     path = reverse('iap:mobile-basket-add')
 
@@ -278,8 +282,8 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_order_placement',
                                side_effect=UnableToPlaceOrder) as fake_handle_order_placement, \
-            mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
-            LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger:
+                mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
+                LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger:
             fake_google_validation.return_value = {
                 'resource': {
                     'orderId': 'orderId.android.test.purchased'
@@ -298,8 +302,8 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_order_placement',
                                side_effect=UnableToPlaceOrder) as fake_handle_order_placement, \
-            mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
-            LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger:
+                mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
+                LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger:
             fake_google_validation.return_value = {
                 'resource': {
                     'orderId': 'orderId.android.test.purchased'
@@ -339,7 +343,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         self.post_data['basket_id'] = dummy_basket_id
         with LogCapture(self.logger_name) as logger:
             self._assert_response({'error': 'Basket [{}] not found.'.format(dummy_basket_id)})
-            logger.check_present((self.logger_name,'ERROR','Basket [{}] not found.'.format(dummy_basket_id)),)
+            logger.check_present((self.logger_name, 'ERROR', 'Basket [{}] not found.'.format(dummy_basket_id)),)
 
     def test_payment_error_with_unanticipated_error_while_getting_basket(self):
         """
@@ -347,7 +351,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         getting the basket.
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, '_get_basket', side_effect=KeyError), \
-            LogCapture(self.logger_name) as logger:
+                LogCapture(self.logger_name) as logger:
             self._assert_response({'error': 'An unexpected exception occurred while obtaining basket '
                                             'for user [{}].'.format(self.user.email)})
             logger.check_present(
@@ -358,10 +362,31 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                 ),
             )
 
-    def test_iap_payment_execution(self):
+    def test_iap_payment_execution_ios(self):
         """
         Verify that a user gets successful response if payment is handled correctly and
         order is created successfully.
+        """
+        ios_post_data = self.post_data
+        ios_post_data['payment_processor'] = IOSIAP(self.site).NAME
+        with mock.patch.object(IOSValidator, 'validate') as fake_ios_validation:
+            fake_ios_validation.return_value = {
+                'receipt': {
+                    'in_app': [{
+                        'original_transaction_id': '123456',
+                        'transaction_id': '123456'
+                    }]
+                }
+            }
+            response = self.client.post(self.path, data=ios_post_data)
+            print(response)
+            order = Order.objects.get(number=self.basket.order_number)
+            self.assertEqual(response.json(), {'order_data': OrderSerializer(order).data})
+
+    def test_iap_payment_execution_android(self):
+        """
+        Verify that a user gets successful response if payment is handled correctly and
+        order is created successfully for Android.
         """
         with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
             fake_google_validation.return_value = {
@@ -372,3 +397,108 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             response = self.client.post(self.path, data=self.post_data)
             order = Order.objects.get(number=self.basket.order_number)
             self.assertEqual(response.json(), {'order_data': OrderSerializer(order).data})
+
+    def test_iap_payment_execution_basket_id_error(self):
+        """
+        Verify that a message is returned if basket_id is missing in
+        """
+        missing_basket_id_post_data = self.post_data
+        missing_basket_id_post_data.pop('basket_id')
+        expected_response = b'{"error": "Basket id is not provided"}'
+        expected_response_status_code = 400
+        with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
+            fake_google_validation.return_value = {
+                'resource': {
+                    'orderId': 'orderId.android.test.purchased'
+                }
+            }
+            response = self.client.post(self.path, data=missing_basket_id_post_data)
+            self.assertEqual(response.status_code, expected_response_status_code)
+            self.assertEqual(response.content, expected_response)
+
+    @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_payment')
+    def test_redundant_payment_notification_error(self, mock_handle_payment):
+        mock_handle_payment.side_effect = RedundantPaymentNotificationError()
+        expected_response_status_code = 409
+        error_message = b'The course has already been paid for on this device by the associated Apple ID.'
+        expected_response_content = b'{"error": "%s"}' % error_message
+        with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
+            fake_google_validation.return_value = {
+                'resource': {
+                    'orderId': 'orderId.android.test.purchased'
+                }
+            }
+            response = self.client.post(self.path, data=self.post_data)
+            self.assertTrue(mock_handle_payment.called)
+            self.assertEqual(response.status_code, expected_response_status_code)
+            self.assertEqual(response.content, expected_response_content)
+
+    @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order')
+    def test_post_order_exception(self, mock_handle_post_order):
+        mock_handle_post_order.side_effect = ValueError()
+        expected_response_status_code = 200
+        error_message = b'An error occurred during post order operations.'
+        expected_response_content = b'{"error": "%s"}' % error_message
+        with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
+            fake_google_validation.return_value = {
+                'resource': {
+                    'orderId': 'orderId.android.test.purchased'
+                }
+            }
+            response = self.client.post(self.path, data=self.post_data)
+            self.assertTrue(mock_handle_post_order.called)
+            self.assertEqual(response.status_code, expected_response_status_code)
+            self.assertEqual(response.content, expected_response_content)
+
+
+class TestMobileCheckoutView(TestCase):
+    """ Tests for MobileCheckoutView API view. """
+    path = reverse('iap:iap-checkout')
+
+    def setUp(self):
+        super(TestMobileCheckoutView, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+        self.course = CourseFactory(partner=self.partner)
+        product = self.course.create_or_update_seat('verified', False, 50)
+        self.basket = create_basket(
+            owner=self.user, site=self.site, price='50.0', product_class=product.product_class
+        )
+
+        self.processor = AndroidIAP(self.site)
+        self.processor_name = self.processor.NAME
+
+        self.post_data = {
+            'basket_id': self.basket.id,
+            'payment_processor': 'android-iap'
+        }
+
+    def test_authentication_required(self):
+        """ Verify the endpoint requires authentication. """
+        self.client.logout()
+        response = self.client.post(self.path, data=self.post_data)
+        self.assertEqual(response.status_code, 401)
+
+    def test_no_basket(self):
+        """ Verify the endpoint returns HTTP 400 if the user has no associated baskets. """
+        self.user.baskets.all().delete()
+        expected_content = b'{"error": "Basket [%s] not found."}' % str(self.post_data['basket_id']).encode()
+        response = self.client.post(self.path, data=self.post_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, expected_content)
+
+    @override_settings(
+        PAYMENT_PROCESSORS=['ecommerce.extensions.iap.processors.android_iap.AndroidIAP']
+    )
+    def test_view_response(self):
+        """ Verify the endpoint returns a successful response when the user is able to checkout. """
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + self.processor_name, True)
+        response = self.client.post(self.path, data=self.post_data)
+        self.assertEqual(response.status_code, 200)
+
+        basket = Basket.objects.get(id=self.basket.id)
+        self.assertEqual(basket.status, Basket.FROZEN)
+        response_data = response.json()
+        self.assertIn(reverse('iap:iap-execute'), response_data['payment_page_url'])
+        self.assertEqual(response_data['payment_processor'], self.processor_name)

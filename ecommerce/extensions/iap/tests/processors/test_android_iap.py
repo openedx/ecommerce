@@ -12,10 +12,11 @@ from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
+from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -61,7 +62,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         DRY helper for getting receipt page URL.
         """
-        return get_receipt_page_url(site_configuration=self.site.siteconfiguration)
+        return get_receipt_page_url(self.request, self.site.siteconfiguration)
 
     def test_get_transaction_parameters(self):
         """
@@ -126,6 +127,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                 'orderId': 'orderId.android.test.purchased'
             }
         }
+        toggle_switch('IAP_RETRY_ATTEMPTS', True)
 
         handled_response = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
         self.assertEqual(handled_response.currency, self.basket.currency)
