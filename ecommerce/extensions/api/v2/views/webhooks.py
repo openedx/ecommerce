@@ -5,6 +5,7 @@ import json
 import logging
 
 import stripe
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -27,12 +28,16 @@ class StripeWebhooksView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
+    stripe.api_key = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['secret_key']
+
     @csrf_exempt
     def post(self, request):
         event = None
         payload = request.body
+
         # TODO REV-3238: secure webhooks with endpoint_secret and stripe signature header
         # Note: this should be done before adding any logic to this endpoint besides logs.
+
         try:
             event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
         except ValueError as e:
@@ -58,7 +63,13 @@ class StripeWebhooksView(APIView):
                 payment_intent.amount,
                 payment_intent.id,
             )
+        elif event.type == 'payment_intent.created':
+            logger.info(
+                '[Stripe webhooks] event payment_intent.created with amount %d and payment intent ID [%s].',
+                payment_intent.amount,
+                payment_intent.id,
+            )
         else:
-            logger.info('[Stripe webhooks] unhandled event with type [%s].', event.type)
+            logger.warning('[Stripe webhooks] unhandled event with type [%s].', event.type)
 
         return Response(status=status.HTTP_200_OK)
