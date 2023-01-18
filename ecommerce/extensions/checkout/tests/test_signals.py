@@ -242,7 +242,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 course_key = CourseKey.from_string(line.product.course.id)
                 course_key = f'{course_key.org}+{course_key.course}'
                 if recommendations and course_key in recommendations['course_keys']:
-                    order_line['is_personalized_recommendation'] = recommendations['is_personalized_recommendation']
+                    order_line['dashboard_recommendations_group'] = recommendations['is_control']
             products.append(order_line)
 
         properties = {
@@ -285,7 +285,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 course_keys.append(course_key)
         return {
             'course_keys': course_keys,
-            'is_personalized_recommendation': True
+            'is_control': True
         }
 
     def test_track_completed_order(self):
