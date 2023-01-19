@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import serializers
+from ecommerce.extensions.api.throttles import ServiceUserThrottle
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 
 
@@ -16,6 +17,7 @@ class AtomicPublicationView(generics.CreateAPIView, generics.UpdateAPIView):
     """
     permission_classes = (IsAuthenticated, IsAdminUser,)
     serializer_class = serializers.AtomicPublicationSerializer
+    throttle_classes = (ServiceUserThrottle,)
 
     def get_serializer_context(self):
         context = super(AtomicPublicationView, self).get_serializer_context()
