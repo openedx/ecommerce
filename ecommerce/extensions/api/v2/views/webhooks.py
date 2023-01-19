@@ -1,7 +1,6 @@
 """HTTP endpoints for interacting with webhooks."""
 
 
-import json
 import logging
 
 import stripe
@@ -11,6 +10,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from stripe.error import SignatureVerificationError
 
 logger = logging.getLogger(__name__)
 
@@ -28,21 +28,24 @@ class StripeWebhooksView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    stripe.api_key = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['secret_key']
-
     @csrf_exempt
     def post(self, request):
-        event = None
+        stripe.api_key = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['secret_key']
+        endpoint_secret = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['endpoint_secret']
         payload = request.body
-
-        # TODO REV-3238: secure webhooks with endpoint_secret and stripe signature header
-        # Note: this should be done before adding any logic to this endpoint besides logs.
+        sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+        event = None
 
         try:
-            event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
         except ValueError as e:
             logger.exception('StripeWebhooksView failed with %s', e)
             return Response('Invalid payload', status=400)
+        except SignatureVerificationError as e:
+            logger.exception('StripeWebhooksView SignatureVerificationError: %s', e)
+            return Response('Invalid signature', status=400)
 
         # TODO REV-3296: save webhooks event data in webhooks data model. Possibly move the handling of the event
         # to another function, and return response asap if we're listening to many events.
@@ -57,18 +60,13 @@ class StripeWebhooksView(APIView):
             )
             # TODO: define and call a method to handle the successful payment intent.
             # handle_payment_intent_succeeded(payment_intent)
-        elif event.type == 'charge.succeeded':
+        elif event.type == 'payment_intent.requires_action':
             logger.info(
-                '[Stripe webhooks] event charge.succeeded with amount %d and payment intent ID [%s].',
+                '[Stripe webhooks] event payment_intent.requires_action with amount %d and payment intent ID [%s].',
                 payment_intent.amount,
                 payment_intent.id,
             )
-        elif event.type == 'payment_intent.created':
-            logger.info(
-                '[Stripe webhooks] event payment_intent.created with amount %d and payment intent ID [%s].',
-                payment_intent.amount,
-                payment_intent.id,
-            )
+            # TODO: define and call a method to handle requires_action for 3DS.
         else:
             logger.warning('[Stripe webhooks] unhandled event with type [%s].', event.type)
 
