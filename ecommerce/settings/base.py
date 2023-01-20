@@ -473,6 +473,9 @@ ECOMMERCE_SERVICE_WORKER_USERNAME = 'ecommerce_worker'
 # Worker user used by prospectus to query ecommerce
 PROSPECTUS_WORKER_USERNAME = 'prospectus_worker'
 
+# Worker used by Discovery to consume ecommerce endpoints
+DISCOVERY_WORKER_USERNAME = 'discovery_worker'
+
 # Used to access the Enrollment API. Set this to the same value used by the LMS.
 EDX_API_KEY = 'PUT_YOUR_API_KEY_HERE'
 
