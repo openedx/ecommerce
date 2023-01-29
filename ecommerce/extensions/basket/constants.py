@@ -6,7 +6,7 @@ PAYMENT_INTENT_ID_ATTRIBUTE = "payment_intent_id"
 # .. toggle_name: enable_stripe_payment_processor
 # .. toggle_type: waffle_flag
 # .. toggle_default: False
-# .. toggle_description: Allows payments to be processed through Stripe instead of CyberSource
+# .. toggle_description: Ignore client side payment processor setting and use Stripe
 # .. toggle_use_cases: open_edx
 # .. toggle_creation_date: 2022-09-19
 # .. toggle_tickets: REV-3004
