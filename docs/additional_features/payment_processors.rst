@@ -27,14 +27,15 @@ Enabling Payment Processors
 ***************************
 Payment processors must be enabled globally and individually for each site/tenant hosted by your installation. At the
 global level, you must specify the Python classes that will be used to process transactions for your processors. Each of
-these classes should inherit from xxx.
+these classes should inherit from `BasePaymentProcessor <https://github.com/openedx/ecommerce/blob/7555353ae972563fd293558eea608ae6151c1186/ecommerce/extensions/payment/processors/__init__.py#L20>`__.
 
 .. code-block:: python
 
-   PAYMENT_PROCESSORS = (
-       'ecommerce.extensions.payment.processors.cybersource.Cybersource',
-       'ecommerce.extensions.payment.processors.paypal.Paypal',
-   )
+    PAYMENT_PROCESSORS = (
+        'ecommerce.extensions.payment.processors.cybersource.CybersourceREST',
+        'ecommerce.extensions.payment.processors.paypal.Paypal',
+        'ecommerce.extensions.payment.processors.stripe.Stripe',
+    )
 
 The secret keys and additional configuration must be specified for each site. The keys of the
 ``PAYMENT_PROCESSOR_CONFIG`` dict correspond to the ``short_code`` field value on the ``Partner`` model linked to each
@@ -44,18 +45,24 @@ site.
 
    PAYMENT_PROCESSOR_CONFIG = {
        'edx': {
-           'cybersource': {
+           'cybersource-rest': {
                ...
            },
            'paypal': {
+               ...
+           },
+           'stripe': {
                ...
            },
        },
        'mitxpro': {
-           'cybersource': {
+           'cybersource-rest': {
                ...
            },
            'paypal': {
+               ...
+           },
+           'stripe': {
                ...
            },
        },
@@ -91,7 +98,7 @@ processors they control.
      - payment_processor_active_paypal
      - True
    * - CyberSource
-     - payment_processor_active_cybersource
+     - payment_processor_active_cybersource-rest
      - True
    * - Stripe
      - payment_processor_active_stripe
@@ -103,6 +110,9 @@ explaining why payment is not currently possible.
 
 Apple Pay
 *********
+
+.. warning:: Apple Pay has been unsupported since 9/2019.
+
 Apple Pay allows learners to checkout quickly without having to manually fill out the payment form. If you are not
 familiar with Apple Pay, please take a moment to read the following documents to understand the user flow and necessary
 configuration. **Apple Pay support is only available when using either the CyberSource or Stripe processors.**
@@ -158,7 +168,7 @@ environment in which you are operating.
 
     PAYMENT_PROCESSOR_CONFIG = {
         'edx': {
-            'cybersource': {
+            'cybersource-rest': {
                 # This is the merchant ID assigned by CyberSource
                 'merchant_id': '',
 
