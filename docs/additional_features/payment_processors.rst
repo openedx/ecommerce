@@ -237,19 +237,18 @@ Settings
 
 Stripe
 ******
-The Stripe integration supports payments via credit cards, Apple Pay, `Pay with Google`_, and the `Payment Request API`_
-which is a W3C browser standard that provides Apple Pay-like behavior across different browsers. Both payment methods
-take advantage of tokenization. Sensitive data--credit card number, card expiration date, CVC--never touches your
-servers. Instead this information is relayed directly to Stripe in exchange for a token. This token is sent to the
-E-Commerce Service and used to make a final call to Stripe, charging the learner and completing the checkout process.
-For additional details regarding Stripe payments, check out the `Stripe quickstart guide`_.
+The Stripe integration supports payments via credit cards. Sensitive data--credit card number, card expiration date, CVC--never touches your servers. Instead this information is relayed directly to Stripe in exchange for a token, which Stripe calls a `Payment Intent`_. This token is sent to the E-Commerce Service and used to make a final call to Stripe, charging the learner and completing the checkout process.
 
-If you wish to use Apple Pay, you must use SSL and verify your domain on your `Stripe Dashboard`_.
+The E-Commerce Service uses `Stripe Custom Actions`_ to send payments through a backend before payment. Ask your Stripe representative to enable this feature on your account. For more information, see `frontend-app-payment ADR-5`_.
 
-.. _Pay with Google: https://stripe.com/docs/pay-with-google
-.. _Payment Request API: https://stripe.com/docs/payment-request-api
-.. _Stripe quickstart guide: https://stripe.com/docs/quickstart
+To set up Ecommerce to use Stripe in frontend-app-payment, enable waffle flag ``enable_stripe_payment_processor``.
 
+To migrate from Cybersource to Stripe, see the example use case of the `frontend-app-payment feature toggle HOWTO`_.
+
+.. _Payment Intent: https://stripe.com/docs/payments/payment-intents
+.. _Stripe Custom Actions: https://stripe.com/docs/payments/run-custom-actions-before-confirmation
+.. _frontend-app-payment ADR-5: https://github.com/openedx/frontend-app-payment/blob/master/docs/decisions/0005-stripe-custom-actions.rst
+.. _frontend-app-payment feature toggle HOWTO: https://github.com/openedx/frontend-app-payment/blob/master/docs/how_tos/feature_toggle.rst#what-is-an-example-use-case
 
 
 Settings
@@ -260,18 +259,22 @@ Settings
     PAYMENT_PROCESSOR_CONFIG = {
         'edx': {
             'stripe': {
+                # Stripe API version to use.
+                'api_version': '',
+                # Send anonymous latency metrics to Stripe.
+                'enable_telemetry': '',
+                # Stripe client logging level. None will default to INFO.
+                'log_level': '',
+                # How many times to automatically retry requests. None means no retries.
+                'max_network_retries': '',
+                # Send requests somewhere else instead of Stripe. May be useful for testing.
+                'proxy': '',
                 # Get your keys from https://dashboard.stripe.com/account/apikeys.
                 # Remember to toggle test data to see keys for use with test mode
                 'publishable_key': '',
                 'secret_key': '',
-
-                # Two-letter ISO 3166 country code for your business/merchant account.
-                # This is required for Apple Pay and the Payment Request API!
-                # https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-                'country': '',
-
-                # Get this from Stripe at https://dashboard.stripe.com/account/apple_pay.
-                'apple_pay_merchant_id_domain_association': '',
+                # Get the signing secret of your webhook from https://dashboard.stripe.com/webhooks
+                'endpoint_secret": '',
             },
         },
     }
