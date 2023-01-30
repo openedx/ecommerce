@@ -60,6 +60,13 @@ class StripeWebhooksView(APIView):
             )
             # TODO: define and call a method to handle the successful payment intent.
             # handle_payment_intent_succeeded(payment_intent)
+        elif event.type == 'payment_intent.payment_failed':
+            logger.info(
+                '[Stripe webhooks] event payment_intent.payment_failed with amount %d and payment intent ID [%s].',
+                payment_intent.amount,
+                payment_intent.id,
+            )
+            # TODO: define and call a method to handle failed payment intent.
         elif event.type == 'payment_intent.requires_action':
             logger.info(
                 '[Stripe webhooks] event payment_intent.requires_action with amount %d and payment intent ID [%s].',

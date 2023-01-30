@@ -112,7 +112,8 @@ class StripeWebhooksViewTests(TestCase):
     @mock.patch('stripe.Webhook.construct_event')
     @ddt.data(
         ('payment_intent.succeeded', 299, 'pi_123dummy'),
-        ('payment_intent.requires_action', 399, 'pi_456dummy')
+        ('payment_intent.requires_action', 399, 'pi_456dummy'),
+        ('payment_intent.payment_failed', 499, 'pi_789dummy'),
     )
     @ddt.unpack
     def test_handled_webhook_event(self, event_type, amount, payment_intent_id, mock_construct_event):
