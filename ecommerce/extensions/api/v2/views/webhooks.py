@@ -32,7 +32,7 @@ class StripeWebhooksView(APIView):
     def post(self, request):
         stripe.api_key = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['secret_key']
         endpoint_secret = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['endpoint_secret']
-        payload = request.body
+        payload = request.body.decode('utf-8')
         sig_header = request.META['HTTP_STRIPE_SIGNATURE']
         event = None
 
