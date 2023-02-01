@@ -63,6 +63,12 @@ Waffle offers the following feature gates.
      - Switch
      - Allow a missing LMS user id without raising a MissingLmsUserIdException. For background, see
        `0004-unique-identifier-for-users <https://github.com/openedx/ecommerce/blob/master/docs/decisions/0004-unique-identifier-for-users.rst>`_
+   * - enable_stripe_payment_processor
+     - Flag
+     - Ignore client side payment processor setting and use Stripe. For background, see `frontend-app-payment 0005-stripe-custom-actions <https://github.com/openedx/frontend-app-payment/blob/master/docs/decisions/0005-stripe-custom-actions.rst>`_.
+   * - redirect_with_waffle_testing_querystring
+     - Flag
+     - Appends waffle flag value to MFE redirect URL's querystring.
 
 **********************************
 Enable a Feature Permanently
