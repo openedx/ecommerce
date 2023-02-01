@@ -66,8 +66,6 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
 
         except BadRequestException as e:
             return JsonResponse({'error': str(e)}, status=400)
-        except RedirectException as e:
-            return e.response
 
     def _get_skus(self, request):
         skus = [escape(sku) for sku in request.GET.getlist('sku')]
@@ -109,7 +107,7 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
 
 class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
     """
-    View that adds verifies an in-app purchase and completes an order.
+    View that verifies an in-app purchase and completes an order for a user.
     """
     permission_classes = (IsAuthenticated,)
 

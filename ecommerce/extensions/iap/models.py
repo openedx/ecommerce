@@ -21,6 +21,7 @@ class IAPProcessorConfiguration(SingletonModel):
 class PaymentProcessorResponseExtension(models.Model):
     """
     This extends extensions.payments.models.PaymentProcessorResponse
+    This extension was created to add extra fields like original_transaction_id to the original model.
     """
     processor_response = models.OneToOneField('payment.PaymentProcessorResponse', on_delete=models.CASCADE,
                                               related_name='extension')
