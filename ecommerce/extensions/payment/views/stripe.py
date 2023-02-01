@@ -225,15 +225,20 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         if sdn_check_failure is not None:
             return self.sdn_error_page_response(sdn_check_failure)
 
+        handled_processor_response = None
         try:
             with transaction.atomic():
                 try:
-                    self.handle_payment(stripe_response, basket)
+                    handled_processor_response = self.handle_payment(stripe_response, basket)
                 except CardError as err:
                     return self.stripe_error_response(err)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return self.error_page_response()
+
+        if 'requires_action' in handled_processor_response._fields:
+            # Tell MFE this Payment Intent requires 3DS authentication
+            return self.three_d_secure_response(handled_processor_response)
 
         try:
             billing_address = self.create_billing_address(
@@ -258,6 +263,13 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
             return self.error_page_response()
 
         return self.receipt_page_response(basket)
+
+    def three_d_secure_response(self, requires_action_response):
+        """Tell the frontend to require 3DS authentication before payment is completed."""
+        return JsonResponse({
+            'requiresAction': requires_action_response.requires_action,
+            'clientSecret': requires_action_response.client_secret,
+        }, status=200)
 
     def error_page_response(self):
         """Tell the frontend to redirect to a generic error page."""

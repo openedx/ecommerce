@@ -4,6 +4,7 @@
 import logging
 
 import stripe
+from django.conf import settings
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 
@@ -18,7 +19,8 @@ from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors import (
     ApplePayMixin,
     BaseClientSidePaymentProcessor,
-    HandledProcessorResponse
+    HandledProcessorResponse,
+    RequiresActionProcessorResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -116,6 +118,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             stripe_response = stripe.PaymentIntent.create(
                 **self._build_payment_intent_parameters(basket),
                 # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
+                # Needed for Custom Actions Beta, cannot be used with confirmation_method param
                 secret_key_confirmation='required',
                 # don't create a new intent for the same basket
                 idempotency_key=self.generate_basket_pi_idempotency_key(basket),
@@ -168,14 +171,24 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         try:
             confirm_api_response = stripe.PaymentIntent.confirm(
                 payment_intent_id,
-                # stop on complicated payments MFE can't handle yet
-                error_on_requires_action=True,
+                # URL to redirect to after 3DS authentication
+                # TODO: modify to URL decided in REV-3187
+                return_url=settings.ECOMMERCE_MICROFRONTEND_URL,
                 expand=['payment_method'],
             )
         except stripe.error.CardError as err:
             self.record_processor_response(err.json_body, transaction_id=payment_intent_id, basket=basket)
             logger.exception('Card Error for basket [%d]: %s}', basket.id, err)
             raise
+
+        if confirm_api_response['status'] == "requires_action":
+            # 3DS authentication is required for payment to go through
+            return RequiresActionProcessorResponse(
+                transaction_id=payment_intent_id,
+                total=basket.total_incl_tax,
+                requires_action=True,
+                client_secret=confirm_api_response['client_secret'],
+            )
 
         # proceed only if payment went through
         assert confirm_api_response['status'] == "succeeded"
