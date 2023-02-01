@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.api.v2.views.checkout import CheckoutView
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
-from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException
+from ecommerce.extensions.basket.exceptions import BadRequestException
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute, prepare_basket
 from ecommerce.extensions.basket.views import BasketLogicMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
