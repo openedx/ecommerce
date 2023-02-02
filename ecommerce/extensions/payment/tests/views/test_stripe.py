@@ -148,9 +148,59 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
     @file_data('fixtures/test_stripe_test_payment_flow.json')
+    def test_confirm_api_response(
+            self,
+            confirm_resp,  # pylint: disable=unused-argument
+            confirm_resp_three_d_secure,
+            create_resp,
+            modify_resp,  # pylint: disable=unused-argument
+            refund_resp,  # pylint: disable=unused-argument
+            retrieve_addr_resp):
+        """
+        Verify that the stripe payment flow with 3DS required results in a response
+        to the MFE with requiresAction state.
+
+        Args:
+            confirm_resp_three_d_secure: Response for confirm call on payment that requires 3DS authentication.
+            create_resp: Response for create call when capturing context
+            modify_resp: Response for modify call before confirming response
+            retrieve_addr_resp: Response for retrieve call that should be made when getting billing address
+        """
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = create_resp
+            self.client.get(self.capture_context_url)
+
+        with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
+            mock_retrieve.return_value = retrieve_addr_resp
+
+            with mock.patch(
+                'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule._post_to_enrollment_api'
+            ) as mock_api_resp:
+                mock_api_resp.return_value = self.mock_enrollment_api_resp
+
+                with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
+                    mock_confirm.return_value = confirm_resp_three_d_secure
+                    with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
+                        mock_modify.return_value = modify_resp
+                        response = self.client.post(
+                            self.stripe_checkout_url,
+                            data={
+                                'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                                'skus': basket.lines.first().stockrecord.partner_sku,
+                            },
+                        )
+
+                        self.assertEqual(response.status_code, 200)
+                        self.assertContains(response, "requiresAction")
+                        self.assertContains(response, "clientSecret")
+
+    @file_data('fixtures/test_stripe_test_payment_flow.json')
     def test_payment_flow(
             self,
             confirm_resp,
+            confirm_resp_three_d_secure,  # pylint: disable=unused-argument
             create_resp,
             modify_resp,
             refund_resp,  # pylint: disable=unused-argument
