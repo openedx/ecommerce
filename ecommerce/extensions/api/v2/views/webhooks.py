@@ -39,14 +39,14 @@ class StripeWebhooksView(APIView):
         # Temp: remove after webhook testing in stage/prod
         if endpoint_secret == 'SET-ME-PLEASE':
             logger.info('[Stripe webhooks] TESTING endpoint_secret unset')
-        if endpoint_secret == None:
+        if endpoint_secret is None:
             logger.info('[Stripe webhooks] TESTING endpoint_secret is None')
         if endpoint_secret == '':
             logger.info('[Stripe webhooks] TESTING endpoint_secret is empty')
 
         if stripe.api_key == 'SET-ME-PLEASE':
             logger.info('[Stripe webhooks] TESTING api key unset')
-        if stripe.api_key == None:
+        if stripe.api_key is None:
             logger.info('[Stripe webhooks] TESTING api key is None')
         if stripe.api_key == '':
             logger.info('[Stripe webhooks] TESTING api key is empty')
