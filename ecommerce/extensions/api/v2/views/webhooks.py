@@ -14,6 +14,9 @@ from stripe.error import SignatureVerificationError
 
 logger = logging.getLogger(__name__)
 
+stripe.api_key = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['secret_key']
+endpoint_secret = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['endpoint_secret']
+
 
 class StripeWebhooksView(APIView):
     """
@@ -30,9 +33,7 @@ class StripeWebhooksView(APIView):
 
     @csrf_exempt
     def post(self, request):
-        stripe.api_key = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['secret_key']
-        endpoint_secret = settings.ECOMMERCE_PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['endpoint_secret']
-        payload = request.body.decode('utf-8')
+        payload = request.body
         sig_header = request.META['HTTP_STRIPE_SIGNATURE']
         event = None
 
