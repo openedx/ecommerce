@@ -34,7 +34,7 @@ class StripeWebhooksView(APIView):
     @csrf_exempt
     def post(self, request):
         payload = request.body
-        sig_header = request.headers.get('stripe-signature')
+        sig_header = request.META['HTTP_STRIPE_SIGNATURE']
         event = None
 
         # Temp: remove after webhook testing in stage/prod
