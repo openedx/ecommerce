@@ -29,7 +29,7 @@ class StripeWebhooksViewTests(TestCase):
                 'edx': {
                     'stripe': {
                         'secret_key': 'sk_test_123',
-                        'endpoint_secret': 'whsec_123',
+                        'webhook_endpoint_secret': 'whsec_123',
                     }
                 }
             },

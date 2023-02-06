@@ -274,7 +274,7 @@ Settings
                 'publishable_key': '',
                 'secret_key': '',
                 # Get the signing secret of your webhook from https://dashboard.stripe.com/webhooks
-                'endpoint_secret": '',
+                'webhook_endpoint_secret': '',
             },
         },
     }

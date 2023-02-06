@@ -822,7 +822,7 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'proxy': None,
             'publishable_key': 'SET-ME-PLEASE',
             'secret_key': 'SET-ME-PLEASE',
-            'endpoint_secret': 'SET-ME-PLEASE',
+            'webhook_endpoint_secret': 'SET-ME-PLEASE',
             'receipt_url': '/checkout/receipt/',
         },
     }
