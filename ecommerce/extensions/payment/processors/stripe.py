@@ -62,6 +62,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.publishable_key = configuration['publishable_key']
         # The secret API key used by the backend to communicate with Stripe. Private/secret.
         self.secret_key = configuration['secret_key']
+        # The webhook endpoint secret used by Stripe to secure the endpoint. Private/secret.
+        self.endpoint_secret = configuration['webhook_endpoint_secret']
 
         stripe.api_key = self.secret_key
         stripe.api_version = self.api_version

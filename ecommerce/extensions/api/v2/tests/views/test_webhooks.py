@@ -25,11 +25,11 @@ class StripeWebhooksViewTests(TestCase):
         self.url = reverse("api:v2:webhooks:webhook_events")
         self.client = Client(enforce_csrf_checks=True)
         self.mock_settings = {
-            'ECOMMERCE_PAYMENT_PROCESSOR_CONFIG': {
+            'PAYMENT_PROCESSOR_CONFIG': {
                 'edx': {
                     'stripe': {
                         'secret_key': 'sk_test_123',
-                        'endpoint_secret': 'whsec_123',
+                        'webhook_endpoint_secret': 'whsec_123',
                     }
                 }
             },
