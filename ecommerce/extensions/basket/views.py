@@ -59,8 +59,8 @@ from ecommerce.extensions.basket.utils import (
     get_payment_microfrontend_or_basket_url,
     get_payment_microfrontend_url_if_configured,
     prepare_basket,
-    validate_voucher,
-    set_email_preference_on_basket
+    set_email_preference_on_basket,
+    validate_voucher
 )
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request

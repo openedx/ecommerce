@@ -19,11 +19,11 @@ from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.basket.constants import (
+    EMAIL_OPT_IN_ATTRIBUTE,
     ENABLE_STRIPE_PAYMENT_PROCESSOR,
     PAYMENT_INTENT_ID_ATTRIBUTE,
     PURCHASER_BEHALF_ATTRIBUTE,
-    REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING,
-    EMAIL_OPT_IN_ATTRIBUTE
+    REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
 )
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
