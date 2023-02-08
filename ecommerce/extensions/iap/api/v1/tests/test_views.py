@@ -21,7 +21,7 @@ from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
 from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
-from ecommerce.extensions.iap.api.v1.serializers import OrderSerializer
+from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
 from ecommerce.extensions.iap.api.v1.views import MobileCoursePurchaseExecutionView
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
@@ -381,7 +381,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             response = self.client.post(self.path, data=ios_post_data)
             print(response)
             order = Order.objects.get(number=self.basket.order_number)
-            self.assertEqual(response.json(), {'order_data': OrderSerializer(order).data})
+            self.assertEqual(response.json(), {'order_data': MobileOrderSerializer(order).data})
 
     def test_iap_payment_execution_android(self):
         """
@@ -396,7 +396,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             }
             response = self.client.post(self.path, data=self.post_data)
             order = Order.objects.get(number=self.basket.order_number)
-            self.assertEqual(response.json(), {'order_data': OrderSerializer(order).data})
+            self.assertEqual(response.json(), {'order_data': MobileOrderSerializer(order).data})
 
     def test_iap_payment_execution_basket_id_error(self):
         """

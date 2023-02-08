@@ -816,7 +816,7 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
         },
         'android-iap': {
             'google_bundle_id': 'org.edx.mobile',
-            'google_service_account_key_file': '<put-value-here>'
+            'google_service_account_key_file': 'SET-ME-PLEASE'
         },
         'ios-iap': {
             'ios_bundle_id': 'org.edx.mobile',

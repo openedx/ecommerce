@@ -7,8 +7,8 @@ from ecommerce.extensions.api.serializers import BillingAddressSerializer, UserS
 Order = get_model('order', 'Order')
 
 
-class OrderSerializer(serializers.ModelSerializer):
-    """Serializer for parsing order data."""
+class MobileOrderSerializer(serializers.ModelSerializer):
+    """Serializer for parsing order data for mobile apps."""
     billing_address = BillingAddressSerializer(allow_null=True)
     date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
     discount = serializers.SerializerMethodField()

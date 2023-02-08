@@ -15,12 +15,15 @@ from rest_framework.views import APIView
 
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.api.v2.views.checkout import CheckoutView
-from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException
-from ecommerce.extensions.basket.utils import basket_add_organization_attribute, prepare_basket
+from ecommerce.extensions.basket.utils import (
+    basket_add_organization_attribute,
+    prepare_basket,
+    set_email_preference_on_basket
+)
 from ecommerce.extensions.basket.views import BasketLogicMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.iap.api.v1.serializers import OrderSerializer
+from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -37,7 +40,7 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 class MobileBasketAddItemsView(BasketLogicMixin, APIView):
     """
-    View that adds multiple products to a mobile user's basket.
+    View that adds single or multiple products to a mobile user's basket.
     """
     permission_classes = (IsAuthenticated,)
 
@@ -59,7 +62,7 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
             except AlreadyPlacedOrderException:
                 return JsonResponse({'error': _('You have already purchased these products')}, status=406)
 
-            self._set_email_preference_on_basket(request, basket)
+            set_email_preference_on_basket(request, basket)
 
             return JsonResponse({'success': _('Course added to the basket successfully'), 'basket_id': basket.id},
                                 status=200)
@@ -92,17 +95,6 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
         if not available_products:
             raise BadRequestException(_('No product is available to buy.'))
         return available_products
-
-    def _set_email_preference_on_basket(self, request, basket):
-        """
-        Associate the user's email opt in preferences with the basket in
-        order to opt them in later as part of fulfillment
-        """
-        BasketAttribute.objects.update_or_create(
-            basket=basket,
-            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
-            defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
-        )
 
 
 class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
@@ -194,7 +186,7 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
             self.log_order_placement_exception(basket.order_number, basket.id)
             return JsonResponse({'error': 'An error occurred during post order operations.'}, status=200)
 
-        return JsonResponse({'order_data': OrderSerializer(order, context={'request': request}).data}, status=200)
+        return JsonResponse({'order_data': MobileOrderSerializer(order, context={'request': request}).data}, status=200)
 
 
 class MobileCheckoutView(APIView):
