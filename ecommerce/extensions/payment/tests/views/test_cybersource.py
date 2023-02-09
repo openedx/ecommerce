@@ -18,7 +18,6 @@ from testfixtures import LogCapture
 
 from ecommerce.core.models import User
 from ecommerce.extensions.api.serializers import OrderSerializer
-from ecommerce.extensions.basket.utils import get_payment_microfrontend_or_basket_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.core.sdn import SDNClient
@@ -367,7 +366,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
 
         request = RequestFactory(SERVER_NAME='testserver.fake').post(self.path, data)
         request.site = self.site
-        assert json.loads(response.content)['redirectTo'] == get_payment_microfrontend_or_basket_url(request)
+        assert json.loads(response.content)['redirectTo'] == self.site_configuration.payment_microfrontend_url
 
         # Ensure the basket is frozen
         basket = Basket.objects.get(pk=basket.pk)
@@ -397,7 +396,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
 
         request = RequestFactory(SERVER_NAME='testserver.fake').post(self.path, data)
         request.site = self.site
-        assert json.loads(response.content)['redirectTo'] == get_payment_microfrontend_or_basket_url(request)
+        assert json.loads(response.content)['redirectTo'] == self.site_configuration.payment_microfrontend_url
 
         # Ensure the basket is frozen
         basket = Basket.objects.get(pk=basket.pk)
@@ -435,7 +434,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
 
         request = RequestFactory(SERVER_NAME='testserver.fake').post(self.path, data)
         request.site = self.site
-        assert json.loads(response.content)['redirectTo'] == get_payment_microfrontend_or_basket_url(request)
+        assert json.loads(response.content)['redirectTo'] == self.site_configuration.payment_microfrontend_url
 
         # Ensure the basket is frozen
         basket = Basket.objects.get(pk=basket.pk)
@@ -516,21 +515,6 @@ class ApplePayStartSessionViewTests(LoginMixin, TestCase):
     def test_post(self, status, body):
         """ The view should POST to the given URL and return the response. """
         self._call_to_apple_pay_and_assert_response(status, body)
-
-    @responses.activate
-    @ddt.data(*itertools.product((True, False), (True, False)))
-    @ddt.unpack
-    def test_with_microfrontend(self, request_from_mfe, enable_microfrontend):
-        self.site.siteconfiguration.enable_microfrontend_for_basket_page = enable_microfrontend
-        self.site.siteconfiguration.payment_microfrontend_url = 'http://{}'.format(self.payment_microfrontend_domain)
-        self.site.siteconfiguration.save()
-
-        self._call_to_apple_pay_and_assert_response(
-            200,
-            {'foo': 'bar'},
-            request_from_mfe,
-            request_from_mfe and enable_microfrontend,
-        )
 
     def test_post_without_url(self):
         """ The view should return HTTP 400 if no url parameter is posted. """

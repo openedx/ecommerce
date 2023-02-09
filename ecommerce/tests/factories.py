@@ -40,7 +40,8 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
     enable_sdn_check = False
     enable_embargo_check = False
     enable_partial_program = False
-    discovery_api_url = 'http://{}.fake/'.format(Faker().domain_name())
+    discovery_api_url = f'http://{Faker().domain_name()}.fake/'
+    payment_microfrontend_url = f'http://{Faker().domain_name()}.fake/'
 
 
 class StockRecordFactory(OscarStockRecordFactory):

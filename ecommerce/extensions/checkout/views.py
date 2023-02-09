@@ -24,6 +24,7 @@ from ecommerce.core.url_utils import (
     get_lms_program_dashboard_url
 )
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
+from ecommerce.extensions.basket.utils import get_payment_microfrontend
 from ecommerce.enterprise.utils import find_active_enterprise_customer_user, has_enterprise_offer
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -88,7 +89,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
         else:
             # If a user's basket is empty redirect the user to the basket summary
             # page which displays the appropriate message for empty baskets.
-            url = reverse('basket:summary')
+            url = get_payment_microfrontend(request)
         return url
 
 

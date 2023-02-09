@@ -144,20 +144,12 @@ class Command(BaseCommand):
                             type=str,
                             required=True,
                             help='URL for Discovery service API calls.')
-        parser.add_argument('--enable-microfrontend-for-basket-page',
-                            action='store',
-                            dest='enable_microfrontend_for_basket_page',
-                            type=bool,
-                            required=False,
-                            help='Use the microfrontend implementation of the '
-                                 'basket page instead of the server-side template')
         parser.add_argument('--payment-microfrontend-url',
                             action='store',
                             dest='payment_microfrontend_url',
                             type=str,
-                            required=False,
-                            help='URL for the Payment Microfrontend '
-                                 '(used if Enable Microfrontend for Basket Page is set)')
+                            required=True,
+                            help='URL for the Payment Microfrontend.')
 
     def handle(self, *args, **options):  # pylint: disable=too-many-statements
         site_id = options.get('site_id')
@@ -179,10 +171,7 @@ class Command(BaseCommand):
         base_cookie_domain = options.get('base_cookie_domain', '')
         discovery_api_url = options.get('discovery_api_url')
 
-        enable_microfrontend_for_basket_page = bool(options.get('enable_microfrontend_for_basket_page', False))
-        payment_microfrontend_url = options.get(
-            'payment_microfrontend_url'
-        ) if enable_microfrontend_for_basket_page else None
+        payment_microfrontend_url = options.get('payment_microfrontend_url')
 
         try:
             site = Site.objects.get(id=site_id)
@@ -240,7 +229,6 @@ class Command(BaseCommand):
             'oauth_settings': oauth_settings,
             'base_cookie_domain': base_cookie_domain,
             'discovery_api_url': discovery_api_url,
-            'enable_microfrontend_for_basket_page': enable_microfrontend_for_basket_page,
             'payment_microfrontend_url': payment_microfrontend_url,
         }
         if payment_support_email:

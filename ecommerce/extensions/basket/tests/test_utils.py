@@ -26,7 +26,6 @@ from ecommerce.extensions.basket.utils import (
     apply_voucher_on_basket_and_check_discount,
     attribute_cookie_data,
     get_basket_switch_data,
-    get_payment_microfrontend_url_if_configured,
     is_duplicate_seat_attempt,
     prepare_basket
 )
@@ -35,7 +34,6 @@ from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWIT
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.partner.models import StockRecord
-from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.referrals.models import Referral
 from ecommerce.tests.testcases import TestCase, TransactionTestCase
@@ -683,26 +681,6 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         applied, msg = apply_voucher_on_basket_and_check_discount(invalid_voucher, self.request, basket)
         self.assertEqual(applied, False)
         self.assertEqual(msg, 'Basket does not qualify for coupon code {code}.'.format(code=invalid_voucher.code))
-
-    @ddt.data(
-        (True, '/payment', False, '/payment'),  # Microfrontend not disabled
-        (True, '/payment', True, None),  # Microfrontend disabled
-    )
-    @ddt.unpack
-    def test_disable_microfrontend_for_basket_page_flag(
-            self,
-            microfrontend_enabled,
-            payment_microfrontend_url,
-            disable_microfrontend_flag_active,
-            expected_result
-    ):
-        """
-        Verify that the `disable_microfrontend_for_basket_page_flag` correctly disables the microfrontend url retrieval
-        """
-        with override_flag(DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=disable_microfrontend_flag_active):
-            self.site_configuration.enable_microfrontend_for_basket_page = microfrontend_enabled
-            self.site_configuration.payment_microfrontend_url = payment_microfrontend_url
-            self.assertEqual(get_payment_microfrontend_url_if_configured(self.request), expected_result)
 
     def test_prepare_basket_with_duplicate_seat(self):
         """ Verify a basket fixes the case where flush doesn't work and we attempt adding duplicate seat. """

@@ -33,6 +33,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.payment_support_url = 'http://fake.server/support'
         self.base_cookie_domain = '.fake.server'
         self.discovery_api_url = 'https://fake.discovery.server/api/v1/'
+        self.payment_microfrontend_url = 'http://payment_mfe_fake.server'
 
     def _check_site_configuration(self, site, partner):
         site_configuration = site.siteconfiguration
@@ -92,6 +93,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
                       backend_service_client_id,
                       backend_service_client_secret,
                       from_email,
+                      payment_microfrontend_url,
                       lms_public_url_root=None,
                       site_id=None,
                       site_name=None,
@@ -118,7 +120,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             '--sso-client-secret={}'.format(sso_client_secret),
             '--backend-service-client-id={}'.format(backend_service_client_id),
             '--backend-service-client-secret={}'.format(backend_service_client_secret),
-            '--from-email={from_email}'.format(from_email=from_email)
+            '--from-email={from_email}'.format(from_email=from_email),
+            '--payment-microfrontend-url={}'.format(payment_microfrontend_url),
         ]
 
         # Optional arguments
@@ -186,6 +189,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             backend_service_client_secret=self.backend_service_client_secret,
             segment_key=self.segment_key,
             from_email=self.from_email,
+            payment_microfrontend_url=self.payment_microfrontend_url,
             discovery_api_url=self.discovery_api_url,
         )
 
@@ -218,6 +222,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             backend_service_client_secret=self.backend_service_client_secret,
             segment_key=self.segment_key,
             from_email=self.from_email,
+            payment_microfrontend_url=self.payment_microfrontend_url,
             enable_enrollment_codes=True,
             payment_support_email=self.payment_support_email,
             payment_support_url=self.payment_support_url,
@@ -239,7 +244,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.payment_support_email, self.payment_support_email)
         self.assertEqual(site_configuration.payment_support_url, self.payment_support_url)
         self.assertTrue(site_configuration.send_refund_notifications)
-        self.assertEqual(site.siteconfiguration.base_cookie_domain, self.base_cookie_domain)
+        self.assertEqual(site_configuration.base_cookie_domain, self.base_cookie_domain)
+        self.assertEqual(site_configuration.payment_microfrontend_url, self.payment_microfrontend_url)
 
     def test_update_site_with_updated_oauth(self):
         """
@@ -265,6 +271,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             backend_service_client_secret=self.backend_service_client_secret,
             segment_key=self.segment_key,
             from_email=self.from_email,
+            payment_microfrontend_url=self.payment_microfrontend_url,
             enable_enrollment_codes=True,
             payment_support_email=self.payment_support_email,
             payment_support_url=self.payment_support_url,
@@ -286,7 +293,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.payment_support_email, self.payment_support_email)
         self.assertEqual(site_configuration.payment_support_url, self.payment_support_url)
         self.assertTrue(site_configuration.send_refund_notifications)
-        self.assertEqual(site.siteconfiguration.base_cookie_domain, self.base_cookie_domain)
+        self.assertEqual(site_configuration.base_cookie_domain, self.base_cookie_domain)
+        self.assertEqual(site_configuration.payment_microfrontend_url, self.payment_microfrontend_url)
 
     @data(
         ['--site-id=1'],

@@ -869,7 +869,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.assert_redirected_to_email_confirmation(response)
 
     def get_coupon_redeem_success_expected_redirect_url(self):
-        return self.get_full_url(path=reverse('basket:summary')) + '?coupon_redeem_redirect=1'
+        return self.site_configuration.payment_microfrontend_url + '?coupon_redeem_redirect=1'
 
 
 @ddt.ddt
