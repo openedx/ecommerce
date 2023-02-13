@@ -1,6 +1,5 @@
 
-import json
-from urllib.parse import unquote, urljoin
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -152,25 +151,3 @@ def get_certificate_type_display_value(certificate_type):
         raise ValueError('Certificate Type [{}] not found.'.format(certificate_type))
 
     return display_values[certificate_type]
-
-
-def is_course_recommended_on_user_dashboard(course, request):
-    """
-    Tells whether the course was recommended on the user dashboard.
-
-    Return values:
-        Personalized recommendation: Returns whether the course was recommended on user dashboard
-        Control group: Returns the user segmentation group a user belonged in. This is useful when we
-                       show different recommendations based on the group a user belongs in i.e general
-                       vs personalized.
-    """
-    if request and course:
-        recommendations = request.COOKIES.get('edx-user-personalized-recommendation', None)
-        if recommendations:
-            recommendations = json.loads(unquote(recommendations))
-            course_key = CourseKey.from_string(course.id)
-            course_key = f'{course_key.org}+{course_key.course}'
-            if course_key in recommendations['course_keys']:
-                return True, recommendations.get('is_control')
-
-    return False, None
