@@ -19,6 +19,20 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
+from ecommerce.extensions.iap.api.v1.constants import (
+    COURSE_ALREADY_PAID_ON_DEVICE,
+    ERROR_ALREADY_PURCHASED,
+    ERROR_BASKET_ID_NOT_PROVIDED,
+    ERROR_BASKET_NOT_FOUND,
+    ERROR_DURING_ORDER_CREATION,
+    ERROR_DURING_PAYMENT_HANDLING,
+    ERROR_DURING_POST_ORDER_OP,
+    ERROR_WHILE_OBTAINING_BASKET_FOR_USER,
+    LOGGER_BASKET_NOT_FOUND,
+    LOGGER_PAYMENT_FAILED_FOR_BASKET,
+    NO_PRODUCT_AVAILABLE,
+    PRODUCTS_DO_NOT_EXIST
+)
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
 from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
@@ -87,10 +101,13 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
         self.assertEqual(response.json()['error'], 'No SKUs provided.')
 
     def test_add_multiple_products_no_available_products(self):
-        """ Verify the Bad request exception is thrown when no skus are provided. """
+        """
+        Verify that adding multiple products to the basket results in an error if
+        the products do not exist.
+        """
         response = self.client.get(self.path, data=[('sku', 1), ('sku', 2)])
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], 'Products with SKU(s) [1, 2] do not exist.')
+        self.assertEqual(response.json()['error'], PRODUCTS_DO_NOT_EXIST.format(skus='1, 2'))
 
     def test_all_already_purchased_products(self):
         """
@@ -110,7 +127,7 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
                 [product.stockrecords.first().partner_sku for product in [product1, product2]],
             )
             self.assertEqual(response.status_code, 406)
-            self.assertEqual(response.json()['error'], 'You have already purchased these products')
+            self.assertEqual(response.json()['error'], ERROR_ALREADY_PURCHASED)
 
     def test_not_already_purchased_products(self):
         """
@@ -141,7 +158,7 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
         product.save()
         self.assertFalse(Selector().strategy().fetch_for_product(product).availability.is_available_to_buy)
 
-        expected_content = 'No product is available to buy.'
+        expected_content = NO_PRODUCT_AVAILABLE
         response = self._get_response(self.stock_record.partner_sku)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], expected_content)
@@ -220,10 +237,8 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             'payment_processor': 'android-iap',
             'basket_id': self.basket.id
         }
-        self.order_placement_error_message = \
-            'Order Failure: {payment_processor} payment was received, but an order ' \
-            'for basket [{basket_id}] could not be placed.' \
-            ''.format(basket_id=self.basket.id, payment_processor=self.processor.NAME.title())
+        order_message = "Order Failure: {} payment was received, but an order for basket [{}] could not be placed."
+        self.order_placement_error_message = order_message.format(self.processor.NAME.title(), self.basket.id)
 
     def _assert_response(self, error_message):
         """
@@ -241,7 +256,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_payment',
                                side_effect=PaymentError) as fake_handle_payment:
             with LogCapture(self.logger_name) as logger:
-                self._assert_response({'error': 'An error occurred during payment handling.'})
+                self._assert_response({'error': ERROR_DURING_PAYMENT_HANDLING})
                 self.assertTrue(fake_handle_payment.called)
 
                 logger.check(
@@ -263,15 +278,14 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_payment',
                                side_effect=KeyError) as fake_handle_payment:
             with LogCapture(self.logger_name) as logger:
-                self._assert_response({'error': 'An error occurred during handling payment.'})
+                self._assert_response({'error': ERROR_DURING_PAYMENT_HANDLING})
                 self.assertTrue(fake_handle_payment.called)
 
                 logger.check_present(
                     (
                         self.logger_name,
                         'ERROR',
-                        'Attempts to handle payment for basket [{basket_id}] '
-                        'failed.'.format(basket_id=self.basket.id)
+                        LOGGER_PAYMENT_FAILED_FOR_BASKET % (self.basket.id)
                     ),
                 )
 
@@ -289,7 +303,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                     'orderId': 'orderId.android.test.purchased'
                 }
             }
-            self._assert_response({'error': 'An error occurred during order creation.'})
+            self._assert_response({'error': ERROR_DURING_ORDER_CREATION})
             self.assertTrue(fake_google_validation.called)
             self.assertTrue(fake_handle_order_placement.called)
             logger.check(
@@ -342,8 +356,8 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         dummy_basket_id = self.basket.id + 1
         self.post_data['basket_id'] = dummy_basket_id
         with LogCapture(self.logger_name) as logger:
-            self._assert_response({'error': 'Basket [{}] not found.'.format(dummy_basket_id)})
-            logger.check_present((self.logger_name, 'ERROR', 'Basket [{}] not found.'.format(dummy_basket_id)),)
+            self._assert_response({'error': ERROR_BASKET_NOT_FOUND.format(dummy_basket_id)})
+            logger.check_present((self.logger_name, 'ERROR', LOGGER_BASKET_NOT_FOUND % dummy_basket_id))
 
     def test_payment_error_with_unanticipated_error_while_getting_basket(self):
         """
@@ -352,13 +366,12 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, '_get_basket', side_effect=KeyError), \
                 LogCapture(self.logger_name) as logger:
-            self._assert_response({'error': 'An unexpected exception occurred while obtaining basket '
-                                            'for user [{}].'.format(self.user.email)})
+            self._assert_response({'error': ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(self.user.email)})
             logger.check_present(
                 (
                     self.logger_name,
                     'ERROR',
-                    'An unexpected exception occurred while obtaining basket for user [{}].'.format(self.user.email)
+                    ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(self.user.email)
                 ),
             )
 
@@ -379,7 +392,6 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                 }
             }
             response = self.client.post(self.path, data=ios_post_data)
-            print(response)
             order = Order.objects.get(number=self.basket.order_number)
             self.assertEqual(response.json(), {'order_data': MobileOrderSerializer(order).data})
 
@@ -404,7 +416,9 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         """
         missing_basket_id_post_data = self.post_data
         missing_basket_id_post_data.pop('basket_id')
-        expected_response = b'{"error": "Basket id is not provided"}'
+        error_message = f'"{ERROR_BASKET_ID_NOT_PROVIDED}"'
+        error_response = '{"error": ' + error_message + '}'
+        expected_response = error_response.encode('UTF-8')
         expected_response_status_code = 400
         with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
             fake_google_validation.return_value = {
@@ -420,7 +434,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
     def test_redundant_payment_notification_error(self, mock_handle_payment):
         mock_handle_payment.side_effect = RedundantPaymentNotificationError()
         expected_response_status_code = 409
-        error_message = b'The course has already been paid for on this device by the associated Apple ID.'
+        error_message = COURSE_ALREADY_PAID_ON_DEVICE.encode('UTF-8')
         expected_response_content = b'{"error": "%s"}' % error_message
         with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
             fake_google_validation.return_value = {
@@ -437,7 +451,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
     def test_post_order_exception(self, mock_handle_post_order):
         mock_handle_post_order.side_effect = ValueError()
         expected_response_status_code = 200
-        error_message = b'An error occurred during post order operations.'
+        error_message = ERROR_DURING_POST_ORDER_OP.encode('UTF-8')
         expected_response_content = b'{"error": "%s"}' % error_message
         with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
             fake_google_validation.return_value = {

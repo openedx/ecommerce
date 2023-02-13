@@ -23,6 +23,26 @@ from ecommerce.extensions.basket.utils import (
 )
 from ecommerce.extensions.basket.views import BasketLogicMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.iap.api.v1.constants import (
+    COURSE_ADDED_TO_BASKET,
+    COURSE_ALREADY_PAID_ON_DEVICE,
+    ERROR_ALREADY_PURCHASED,
+    ERROR_BASKET_ID_NOT_PROVIDED,
+    ERROR_BASKET_NOT_FOUND,
+    ERROR_DURING_ORDER_CREATION,
+    ERROR_DURING_PAYMENT_HANDLING,
+    ERROR_DURING_POST_ORDER_OP,
+    ERROR_WHILE_OBTAINING_BASKET_FOR_USER,
+    LOGGER_BASKET_NOT_FOUND,
+    LOGGER_PAYMENT_APPROVED,
+    LOGGER_PAYMENT_FAILED_FOR_BASKET,
+    LOGGER_STARTING_PAYMENT_FLOW,
+    NO_PRODUCT_AVAILABLE,
+    PRODUCT_IS_NOT_AVAILABLE,
+    PRODUCTS_DO_NOT_EXIST,
+    SEGMENT_MOBILE_BASKET_ADD,
+    SEGMENT_MOBILE_PURCHASE_VIEW
+)
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
@@ -46,25 +66,24 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
 
     def get(self, request):
         # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
-        properties = {'emitted_at': time.time()}
-        track_segment_event(request.site, request.user, 'Mobile Basket Add Items View Called', properties)
+        track_segment_event(request.site, request.user, SEGMENT_MOBILE_BASKET_ADD, {'emitted_at': time.time()})
 
         try:
             skus = self._get_skus(request)
             products = self._get_products(request, skus)
 
-            logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
+            logger.info(LOGGER_STARTING_PAYMENT_FLOW, request.user.username, skus)
 
             available_products = self._get_available_products(request, products)
 
             try:
                 basket = prepare_basket(request, available_products)
             except AlreadyPlacedOrderException:
-                return JsonResponse({'error': _('You have already purchased these products')}, status=406)
+                return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
 
             set_email_preference_on_basket(request, basket)
 
-            return JsonResponse({'success': _('Course added to the basket successfully'), 'basket_id': basket.id},
+            return JsonResponse({'success': _(COURSE_ADDED_TO_BASKET), 'basket_id': basket.id},
                                 status=200)
 
         except BadRequestException as e:
@@ -74,26 +93,30 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
         skus = [escape(sku) for sku in request.GET.getlist('sku')]
         if not skus:
             raise BadRequestException(_('No SKUs provided.'))
+
         return skus
 
     def _get_products(self, request, skus):
         partner = get_partner_for_site(request)
         products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
         if not products:
-            raise BadRequestException(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+            raise BadRequestException(_(PRODUCTS_DO_NOT_EXIST).format(skus=', '.join(skus)))
+
         return products
 
     def _get_available_products(self, request, products):
         unavailable_product_ids = []
+
         for product in products:
             purchase_info = request.strategy.fetch_for_product(product)
             if not purchase_info.availability.is_available_to_buy:
-                logger.warning('Product [%s] is not available to buy.', product.title)
+                logger.warning(PRODUCT_IS_NOT_AVAILABLE, product.title)
                 unavailable_product_ids.append(product.id)
 
         available_products = products.exclude(id__in=unavailable_product_ids)
         if not available_products:
-            raise BadRequestException(_('No product is available to buy.'))
+            raise BadRequestException(_(NO_PRODUCT_AVAILABLE))
+
         return available_products
 
 
@@ -107,6 +130,7 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
     def payment_processor(self):
         if self.request.data['payment_processor'] == IOSIAP.NAME:
             return IOSIAP(self.request.site)
+
         return AndroidIAP(self.request.site)
 
     def _get_basket(self, request, basket_id):
@@ -125,8 +149,8 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         basket.strategy = request.strategy
 
         Applicator().apply(basket, basket.owner, self.request)
-
         basket_add_organization_attribute(basket, self.request.GET)
+
         return basket
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
@@ -139,23 +163,21 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
 
     def post(self, request):
         # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
-        properties = {'emitted_at': time.time()}
-        track_segment_event(request.site, request.user, 'Mobile Course Purchase View Called', properties)
+        track_segment_event(request.site, request.user, SEGMENT_MOBILE_PURCHASE_VIEW, {'emitted_at': time.time()})
         receipt = request.data
 
         basket_id = receipt.get('basket_id')
         if not basket_id:
-            return JsonResponse({'error': 'Basket id is not provided'}, status=400)
-        logger.info('Payment [%s] approved by payer [%s]', receipt.get('transactionId'), request.user.id)
+            return JsonResponse({'error': ERROR_BASKET_ID_NOT_PROVIDED}, status=400)
+        logger.info(LOGGER_PAYMENT_APPROVED, receipt.get('transactionId'), request.user.id)
 
         try:
             basket = self._get_basket(request, basket_id)
         except ObjectDoesNotExist:
-            logger.exception('Basket [%s] not found.', basket_id)
-            return JsonResponse({'error': 'Basket [{}] not found.'.format(basket_id)}, status=400)
+            logger.exception(LOGGER_BASKET_NOT_FOUND, basket_id)
+            return JsonResponse({'error': ERROR_BASKET_NOT_FOUND.format(basket_id)}, status=400)
         except:  # pylint: disable=bare-except
-            error_message = 'An unexpected exception occurred while obtaining basket for user ' \
-                            '[{}].'.format(request.user.email)
+            error_message = ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(request.user.email)
             logger.exception(error_message)
             return JsonResponse({'error': error_message}, status=400)
 
@@ -164,27 +186,25 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
                 try:
                     self.handle_payment(receipt, basket)
                 except RedundantPaymentNotificationError:
-                    error_message = 'The course has already been paid for on this device by the associated Apple ID.'
-                    return JsonResponse({'error': error_message}, status=409)
+                    return JsonResponse({'error': COURSE_ALREADY_PAID_ON_DEVICE}, status=409)
                 except PaymentError:
-                    error_message = 'An error occurred during payment handling.'
-                    return JsonResponse({'error': error_message}, status=400)
+                    return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
         except:  # pylint: disable=bare-except
-            logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
-            return JsonResponse({'error': 'An error occurred during handling payment.'}, status=400)
+            logger.exception(LOGGER_PAYMENT_FAILED_FOR_BASKET, basket.id)
+            return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
 
         try:
             order = self.create_order(request, basket)
         except Exception:  # pylint: disable=broad-except
             # Any errors here will be logged in the create_order method. If we wanted any
             # IAP specific logging for this error, we would do that here.
-            return JsonResponse({'error': 'An error occurred during order creation.'}, status=400)
+            return JsonResponse({'error': ERROR_DURING_ORDER_CREATION}, status=400)
 
         try:
             self.handle_post_order(order)
         except Exception:  # pylint: disable=broad-except
             self.log_order_placement_exception(basket.order_number, basket.id)
-            return JsonResponse({'error': 'An error occurred during post order operations.'}, status=200)
+            return JsonResponse({'error': ERROR_DURING_POST_ORDER_OP}, status=200)
 
         return JsonResponse({'order_data': MobileOrderSerializer(order, context={'request': request}).data}, status=200)
 

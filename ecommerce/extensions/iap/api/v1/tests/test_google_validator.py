@@ -27,6 +27,7 @@ class GooglePlayVerifierProxy:
     def verify_with_result(self, purchase_token, product_sku, is_subscription=False):  # pylint: disable=unused-argument
         if purchase_token == INVALID_PURCHASE_TOKEN:
             raise errors.GoogleError()
+
         return GooglePlayVerifierResponse()
 
 
