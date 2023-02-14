@@ -416,7 +416,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         """
         missing_basket_id_post_data = self.post_data
         missing_basket_id_post_data.pop('basket_id')
-        error_message = f'"{ERROR_BASKET_ID_NOT_PROVIDED}"'
+        error_message = '"{}"'.format(ERROR_BASKET_ID_NOT_PROVIDED)
         error_response = '{"error": ' + error_message + '}'
         expected_response = error_response.encode('UTF-8')
         expected_response_status_code = 400

@@ -174,10 +174,12 @@ class BaseIAP(BasePaymentProcessor):
 
     def _get_attribute_from_receipt(self, validated_receipt, attribute):
         value = None
+
         if self.NAME == 'ios-iap':
             value = validated_receipt.get('receipt', {}).get('in_app', [{}])[0].get(attribute)
         elif self.NAME == 'android-iap':
             value = validated_receipt.get('raw_response', {}).get(attribute)
+
         return value
 
     def _get_transaction_id_from_receipt(self, validated_receipt):
