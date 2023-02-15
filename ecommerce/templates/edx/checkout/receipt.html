@@ -56,10 +56,20 @@
                   {% endblocktrans %}
                   {% interpolate_html tmsg email=order.user.email|safe link_end="</a>"|safe link_start=link_start|safe %}
               {% else %}
-                  {% blocktrans trimmed asvar tmsg %}
-                      Your order is complete. If you need a receipt, you can print this page.
-                  {% endblocktrans %}
-                {% interpolate_html tmsg %}
+                  {% if show_get_smarter_msg %}
+                      {% blocktrans trimmed asvar tmsg %}
+                          Your order is complete. If you need a receipt, you can print this page.
+                          {next_start} Next Steps:{next_end}
+                          1. Check your inbox for an order confirmation email from Get Smarter.{next_line}
+                          2: Follow the instructions in the email to complete your registration.
+                      {% endblocktrans %}
+                      {% interpolate_html tmsg next_start='<h2><i class="fa fa-info-circle" aria-hidden="true"></i>'|safe next_end='</h2>'|safe next_line='<br/>'|safe %}
+                  {% else %}
+                      {% blocktrans trimmed asvar tmsg %}
+                          Your order is complete. If you need a receipt, you can print this page.
+                      {% endblocktrans %}
+                      {% interpolate_html tmsg %}
+                  {% endif %}
               {% endif %}
             </div>
 
@@ -193,16 +203,18 @@
         {% endif %}
       </div>
 
-      <div id="cta-nav-links" class="row">
-        <div class="col-xs-12 text-right">
-          <a class="dashboard-link nav-link" href="{{ order_dashboard_url }}">
-            {% trans "Go to dashboard" as tmsg %}{{ tmsg | force_escape }}
-          </a>
-          <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}">
-            {% trans "Find more courses" as tmsg %}{{ tmsg | force_escape }}
-          </a>
+      {% if show_receipt_cta_links %}
+        <div id="cta-nav-links" class="row">
+          <div class="col-xs-12 text-right">
+            <a class="dashboard-link nav-link" href="{{ order_dashboard_url }}">
+              {% trans "Go to dashboard" as tmsg %}{{ tmsg | force_escape }}
+            </a>
+            <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}">
+              {% trans "Find more courses" as tmsg %}{{ tmsg | force_escape }}
+            </a>
+          </div>
         </div>
-      </div>
+      {% endif %}
     </div>
   </div>
 {% endblock content %}

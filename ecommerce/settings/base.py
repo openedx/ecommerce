@@ -473,6 +473,9 @@ ECOMMERCE_SERVICE_WORKER_USERNAME = 'ecommerce_worker'
 # Worker user used by prospectus to query ecommerce
 PROSPECTUS_WORKER_USERNAME = 'prospectus_worker'
 
+# Worker used by Discovery to consume ecommerce endpoints
+DISCOVERY_WORKER_USERNAME = 'discovery_worker'
+
 # Used to access the Enrollment API. Set this to the same value used by the LMS.
 EDX_API_KEY = 'PUT_YOUR_API_KEY_HERE'
 
@@ -810,7 +813,18 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'error_url': '/checkout/error/',
             'mode': 'sandbox',
             'receipt_url': '/checkout/receipt/'
-        }
+        },
+        'stripe': {
+            'api_version': '2022-08-01; server_side_confirmation_beta=v1',
+            'enable_telemetry': None,
+            'log_level': None,
+            'max_network_retries': 0,
+            'proxy': None,
+            'publishable_key': 'SET-ME-PLEASE',
+            'secret_key': 'SET-ME-PLEASE',
+            'webhook_endpoint_secret': 'SET-ME-PLEASE',
+            'receipt_url': '/checkout/receipt/',
+        },
     }
 }
 MEDIA_STORAGE_BACKEND = {

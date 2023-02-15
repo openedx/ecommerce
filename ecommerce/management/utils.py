@@ -7,7 +7,7 @@ from oscar.apps.partner import strategy
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
+from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP, STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 from ecommerce.extensions.payment.processors import HandledProcessorResponse
 
@@ -106,9 +106,10 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
         """
         # Filter the successful payment processor response which in case
         # of Cybersource includes "u'decision': u'ACCEPT'" and in case of
-        # Paypal includes "u'state': u'approved'".
+        # Paypal includes "u'state': u'approved'" and in the case of Stripe
+        # includes "u'status': u'succeeded'".
         successful_transaction = basket.paymentprocessorresponse_set.filter(
-            Q(response__contains='ACCEPT') | Q(response__contains='approved')
+            Q(response__contains='ACCEPT') | Q(response__contains='approved') | Q(response__contains='succeeded')
         )
 
         # In case of no successful transactions log and return none.
@@ -121,6 +122,21 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
         if len(unique_transaction_ids) > 1:
             logger.warning('Basket %d has more than one successful transaction id, using the first one', basket.id)
         return successful_transaction[0]
+
+    @staticmethod
+    def get_card_info_from_payment_notification(payment_notification):
+        if payment_notification.transaction_id.startswith('PAY'):
+            card_number = 'Paypal Account'
+            card_type = None
+        elif payment_notification.transaction_id.startswith('pi_'):
+            card_number = payment_notification.response['payment_method']['card']['last4']
+            stripe_card_type = payment_notification.response['payment_method']['card']['brand']
+            card_type = STRIPE_CARD_TYPE_MAP[stripe_card_type]
+        else:
+            card_number = payment_notification.response['req_card_number']
+            cybersource_card_type = payment_notification.response['req_card_type']
+            card_type = CYBERSOURCE_CARD_TYPE_MAP[cybersource_card_type]
+        return (card_number, card_type)
 
     def fulfill_basket(self, basket_id, site):
 
@@ -154,12 +170,11 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             if not payment_notification:
                 return False
 
-            if payment_notification.transaction_id.startswith('PAY'):
-                card_number = 'Paypal Account'
-                card_type = None
-            else:
-                card_number = payment_notification.response['req_card_number']
-                card_type = CYBERSOURCE_CARD_TYPE_MAP.get(payment_notification.response['req_card_type'])
+            try:
+                card_number, card_type = self.get_card_info_from_payment_notification(payment_notification)
+            except (KeyError, TypeError):
+                logger.exception('Unable to parse payment details for basket %d', basket.id)
+                return False
 
             self.payment_processor = _get_payment_processor(site, payment_notification.processor_name)
             # Create handled response

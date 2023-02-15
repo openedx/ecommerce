@@ -510,7 +510,14 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_enterprise_learner_portal_url(self, obj):
         try:
             request = self.context['request']
-            return ReceiptResponseView().add_message_if_enterprise_user(request)
+            enterprise_customer_user = ReceiptResponseView().get_metadata_for_enterprise_user(request)
+            if not enterprise_customer_user:
+                return None
+            enterprise_customer = enterprise_customer_user['enterprise_customer']
+            learner_portal_url = ReceiptResponseView().get_enterprise_learner_portal_url(
+                request, enterprise_customer
+            )
+            return learner_portal_url
         except (AttributeError, ValueError):
             logger.exception(
                 '[Receipt MFE] Failed to retrieve enterprise learner portal URL for order [%s]',

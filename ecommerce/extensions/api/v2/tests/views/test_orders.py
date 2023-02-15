@@ -124,56 +124,61 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         ('audit', False, 0, None, 0, False, '124'),
     )
     @ddt.unpack
+    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.get_enterprise_learner_portal_url')
+    @mock.patch('ecommerce.extensions.checkout.views.ReceiptResponseView.get_metadata_for_enterprise_user')
     def test_orders_api_attributes_for_receipt_mfe(
         self, certificate_type, has_discount, percent_benefit,
-        credit_provider, credit_hours, create_enrollment_code, sku
+        credit_provider, credit_hours, create_enrollment_code, sku,
+        mock_get_metadata_for_enterprise_user, mock_get_enterprise_learner_portal_url,
     ):
         """
         Verify that orders have the values added in the Orders API serializer
         to be utilized in the receipt page in ecommerce MFE.
         """
-        with mock.patch(
-                'ecommerce.extensions.checkout.views.ReceiptResponseView.add_message_if_enterprise_user'
-        ) as mock_learner_portal_url:
-            test_learner_portal_url = 'http://fake-learner-portal-url.org'
-            mock_learner_portal_url.return_value = test_learner_portal_url
-            price = 100.00
-            currency = 'USD'
-            course_id = 'a/b/c'
-            course = CourseFactory(id=course_id, name='Test Course', partner=self.partner)
-            product = factories.ProductFactory(
-                categories=[],
-                stockrecords__price_excl_tax=price,
-                stockrecords__price_currency=currency
+        test_learner_portal_url = 'http://fake-learner-portal-url.org'
+        mock_get_metadata_for_enterprise_user.return_value = {
+            'id': 1,
+            'active': True,
+            'enterprise_customer': {'slug': 'fake-enterprise'},
+        }
+        mock_get_enterprise_learner_portal_url.return_value = test_learner_portal_url
+        price = 100.00
+        currency = 'USD'
+        course_id = 'a/b/c'
+        course = CourseFactory(id=course_id, name='Test Course', partner=self.partner)
+        product = factories.ProductFactory(
+            categories=[],
+            stockrecords__price_excl_tax=price,
+            stockrecords__price_currency=currency
+        )
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        product = course.create_or_update_seat(
+            certificate_type,
+            True,
+            price,
+            credit_provider=credit_provider,
+            credit_hours=credit_hours,
+            create_enrollment_code=create_enrollment_code,
+            sku=sku,
+        )
+
+        if has_discount:
+            voucher, product = prepare_voucher(
+                _range=factories.RangeFactory(products=[product]),
+                benefit_value=percent_benefit,
+                benefit_type=Benefit.PERCENTAGE
             )
-            basket = factories.BasketFactory(owner=self.user, site=self.site)
-            product = course.create_or_update_seat(
-                certificate_type,
-                True,
-                price,
-                credit_provider=credit_provider,
-                credit_hours=credit_hours,
-                create_enrollment_code=create_enrollment_code,
-                sku=sku,
-            )
+            basket.vouchers.add(voucher)
 
-            if has_discount:
-                voucher, product = prepare_voucher(
-                    _range=factories.RangeFactory(products=[product]),
-                    benefit_value=percent_benefit,
-                    benefit_type=Benefit.PERCENTAGE
-                )
-                basket.vouchers.add(voucher)
+        basket.add_product(product)
+        Applicator().apply(basket, user=basket.owner, request=self.request)
+        order = factories.create_order(basket=basket, user=self.user)
 
-            basket.add_product(product)
-            Applicator().apply(basket, user=basket.owner, request=self.request)
-            order = factories.create_order(basket=basket, user=self.user)
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        self.assertEqual(response.status_code, 200)
 
-            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
-            self.assertEqual(response.status_code, 200)
-
-            content = json.loads(response.content.decode('utf-8'))
-            payment_method = ReceiptResponseView().get_payment_method(order)
+        content = json.loads(response.content.decode('utf-8'))
+        payment_method = ReceiptResponseView().get_payment_method(order)
 
         for line in order.lines.all():
             # Test for: is_enrollment_code_product

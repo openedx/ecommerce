@@ -18,7 +18,12 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
-from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.basket.constants import (
+    ENABLE_STRIPE_PAYMENT_PROCESSOR,
+    PAYMENT_INTENT_ID_ATTRIBUTE,
+    PURCHASER_BEHALF_ATTRIBUTE,
+    REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
+)
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
@@ -30,6 +35,8 @@ Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+BillingAddress = get_model('order', 'BillingAddress')
+Country = get_model('address', 'Country')
 BUNDLE = 'bundle_identifier'
 ORGANIZATION_ATTRIBUTE_TYPE = 'organization'
 ENTERPRISE_CATALOG_ATTRIBUTE_TYPE = 'enterprise_catalog_uuid'
@@ -41,21 +48,23 @@ Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
-# TODO: Remove this as part of PCI-81
-def add_flex_microform_flag_to_url(url, request, force_flag=None):
-    microform_flag_name = 'payment.cybersource.flex_microform_enabled'
-    flag_is_active = waffle.flag_is_active(
+def add_stripe_flag_to_url(url, request):
+    """
+    Add value of ENABLE_STRIPE_PAYMENT_PROCESSOR to url if REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING is on.
+    """
+    if not waffle.flag_is_active(
         request,
-        microform_flag_name
-    )
-
-    if not flag_is_active and force_flag is None:
+        REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
+    ):
         return url
 
-    if force_flag is not None:
-        flag_is_active = force_flag
+    flag_name = ENABLE_STRIPE_PAYMENT_PROCESSOR
+    flag_is_active = waffle.flag_is_active(
+        request,
+        flag_name
+    )
 
-    flag = 'dwft_{}={}'.format(microform_flag_name, 1 if flag_is_active else 0)
+    flag = 'dwft_{}={}'.format(flag_name, 1 if flag_is_active else 0)
     join = '&' if '?' in url else '?'
     return '{url}{join}{flag}'.format(
         url=url,
@@ -385,6 +394,28 @@ def basket_add_organization_attribute(basket, request_data):
 
 
 @newrelic.agent.function_trace()
+def basket_add_payment_intent_id_attribute(basket, payment_intent_id):
+    """
+    Adds the Stripe payment_intent_id attribute on basket.
+
+    Arguments:
+        basket(Basket): order basket
+        payment_intent_id (string): Payment Intent Identifier
+
+    """
+
+    payment_intent_id_attribute, __ = BasketAttributeType.objects.get_or_create(name=PAYMENT_INTENT_ID_ATTRIBUTE)
+    # Do a get_or_create and update value_text after (instead of update_or_create)
+    # to prevent a particularly slow full table scan that uses a LIKE
+    basket_attribute, __ = BasketAttribute.objects.get_or_create(
+        attribute_type=payment_intent_id_attribute,
+        basket=basket,
+    )
+    basket_attribute.value_text = payment_intent_id.strip()
+    basket_attribute.save()
+
+
+@newrelic.agent.function_trace()
 def basket_add_enterprise_catalog_attribute(basket, request_data):
     """
     Add enterprise catalog UUID attribute on basket, if the catalog UUID value
@@ -569,3 +600,23 @@ def is_duplicate_seat_attempt(basket, product):
     found_product_quantity = basket.product_quantity(product)
 
     return bool(product_type == 'Seat' and found_product_quantity)
+
+
+def get_billing_address_from_payment_intent_data(payment_intent):
+    """
+    Take stripes response_data dict, instantiates a BillingAddress object
+    and return it.
+    """
+    billing_details = payment_intent['payment_method']['billing_details']
+    customer_address = billing_details['address']
+    address = BillingAddress(
+        first_name=billing_details['name'],  # Stripe only has a single name field
+        last_name='',
+        line1=customer_address['line1'],
+        line2='' if not customer_address['line2'] else customer_address['line2'],  # line2 is optional
+        line4=customer_address['city'],  # Oscar uses line4 for city
+        postcode='' if not customer_address['postal_code'] else customer_address['postal_code'],  # postcode is optional
+        state='' if not customer_address['state'] else customer_address['state'],  # state is optional
+        country=Country.objects.get(iso_3166_1_a2__iexact=customer_address['country'])
+    )
+    return address

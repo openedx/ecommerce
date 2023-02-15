@@ -16,6 +16,7 @@ from django.utils.timezone import now
 from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import OrderFactory, OrderLineFactory, ProductFactory, RangeFactory, VoucherFactory
+from waffle.testutils import override_flag
 
 from ecommerce.core.url_utils import get_lms_course_about_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
@@ -26,6 +27,10 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_data_sharing_consent_token
 )
 from ecommerce.extensions.api.serializers import CouponCodeAssignmentSerializer
+from ecommerce.extensions.basket.constants import (
+    ENABLE_STRIPE_PAYMENT_PROCESSOR,
+    REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
+)
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -489,6 +494,19 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
         self.assert_redemption_page_redirects(self.get_coupon_redeem_success_expected_redirect_url())
+
+    @override_flag(REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING, active=True)
+    @responses.activate
+    def test_basket_redirect_discount_code_with_waffle(self):
+        """ Verify the view redirects to the basket view with waffle flag url param. """
+        self.mock_course_api_response(course=self.course)
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        self.assert_redemption_page_redirects(
+            self.get_coupon_redeem_success_expected_redirect_url() + f'&dwft_{ENABLE_STRIPE_PAYMENT_PROCESSOR}=0'
+        )
 
     @responses.activate
     def test_basket_redirect_enrollment_code(self):

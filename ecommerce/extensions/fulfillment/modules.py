@@ -936,7 +936,7 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
         """
         return [line for line in lines if self.supports_line(line)]
 
-    def _create_allocation_payload(
+    def _create_enterprise_allocation_payload(
         self,
         order,
         line,
@@ -946,8 +946,13 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
         # A variant_id attribute must exist on the product
         variant_id = getattr(line.product.attr, 'variant_id')
 
+        # This will be the offer that was applied. We will let an error be thrown if this doesn't exist.
+        discount = order.discounts.first()
+        enterprise_customer_uuid = str(discount.offer.condition.enterprise_customer_uuid)
+
         return {
             'payment_reference': order.number,
+            'enterprise_customer_uuid': enterprise_customer_uuid,
             'currency': currency,
             'order_items': [
                 {
@@ -1008,14 +1013,14 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
         for line in lines:
             product = line.product
 
-            allocation_payload = self._create_allocation_payload(
+            allocation_payload = self._create_enterprise_allocation_payload(
                 order=order,
                 line=line,
                 fulfillment_details=fulfillment_details
             )
 
             try:
-                self.get_smarter_client.create_allocation(**allocation_payload)
+                self.get_smarter_client.create_enterprise_allocation(**allocation_payload)
             except Exception as ex:  # pylint: disable=broad-except
                 reason = ''
                 try:

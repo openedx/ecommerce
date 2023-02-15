@@ -14,13 +14,16 @@ from waffle.testutils import override_flag
 
 from ecommerce.core.url_utils import get_lms_course_about_url, get_lms_program_dashboard_url
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
+from ecommerce.courses.constants import CertificateType
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.v2.constants import ENABLE_RECEIPTS_VIA_ECOMMERCE_MFE
 from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.checkout.views import ReceiptResponseView
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -194,23 +197,43 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         # Note: actual response is far more rich. Just including the bits relevant to us
         self.enterprise_learner_data_no_portal = {
             'results': [{
+                'id': 1,
                 'enterprise_customer': {
                     'name': 'Test Company',
                     'slug': 'test-company',
                     'enable_learner_portal': False,
-                }
+                    'enable_integrated_customer_learner_portal_search': False,
+                },
+                'active': False,
             }]
         }
         self.enterprise_learner_data_with_portal = {
             'results': [{
+                'id': 1,
                 'enterprise_customer': {
                     'name': 'Test Company',
                     'slug': 'test-company',
                     'enable_learner_portal': True,
-                }
+                    'enable_integrated_customer_learner_portal_search': True,
+                },
+                'active': True,
             }]
         }
-        self.non_enterprise_learner_data = {}
+        self.enterprise_learner_data_with_portal_no_search = {
+            'results': [{
+                'id': 1,
+                'enterprise_customer': {
+                    'name': 'Test Company',
+                    'slug': 'test-company',
+                    'enable_learner_portal': True,
+                    'enable_integrated_customer_learner_portal_search': False,
+                },
+                'active': True,
+            }]
+        }
+        self.non_enterprise_learner_data = {
+            'results': [],
+        }
 
     def _get_receipt_response(self, order_number):
         """
@@ -490,7 +513,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         response_messages = list(response.context['messages'])
 
         expected_message = (
-            'Your company, Test Company, has a dedicated page where you can see all of '
+            'Your organization, Test Company, has a dedicated page where you can see all of '
             'your sponsored courses. Go to <a href="http://{}/test-company">'
             'your learner portal</a>.'
         ).format(settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME)
@@ -530,13 +553,23 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @responses.activate
-    def test_no_enterprise_learner_dashboard_link_in_messages(self, mock_learner_data):
+    @ddt.data(
+        {'is_integrated_learner_portal_search_enabled': True},
+        {'is_integrated_learner_portal_search_enabled': False},
+    )
+    def test_no_enterprise_learner_dashboard_link_in_messages(self,
+                                                              is_integrated_learner_portal_search_enabled,
+                                                              mock_learner_data):
         """
         The receipt page should NOT include a message with a link to the enterprise
         learner portal for a learner if response from enterprise shows the portal
-        is not configured.
+        dashboard/search is disabled.
         """
-        mock_learner_data.return_value = self.enterprise_learner_data_no_portal
+        if is_integrated_learner_portal_search_enabled:
+            mock_learner_data.return_value = self.enterprise_learner_data_with_portal
+        else:
+            mock_learner_data.return_value = self.enterprise_learner_data_with_portal_no_search
+
         order = self._create_order_for_receipt()
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
@@ -548,7 +581,10 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         response_messages = list(response.context['messages'])
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response_messages), 0)
+        if is_integrated_learner_portal_search_enabled:
+            self.assertEqual(len(response_messages), 1)
+        else:
+            self.assertEqual(len(response_messages), 0)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @responses.activate
@@ -573,6 +609,25 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
+        self.assertEqual(response.context_data['show_receipt_cta_links'], True)
+
+    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @responses.activate
+    def test_show_receipt_cta_links_for_enterprise_learner(self, mock_learner_data):
+        """
+        The "Go to dashboard" and "Find more courses" CTA links at the bottom of the receipt
+        page should be hidden when the integrated learner portal search configuration is disabled.
+        """
+        mock_learner_data.return_value = self.enterprise_learner_data_with_portal_no_search
+        order = self._create_order_for_receipt()
+        BasketAttribute.objects.update_or_create(
+            basket=order.basket,
+            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+            value_text='test_bundle'
+        )
+        response = self._get_receipt_response(order.number)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context_data['show_receipt_cta_links'], False)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @responses.activate
@@ -594,3 +649,24 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
+
+    def test_get_smarter_msg_for_executive_education_2u_product(self):
+        """
+        The receipt page should show Get Smarter specific message for
+        orders with executive education 2u products
+        """
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        exec_ed_2u_course_entitlement = create_or_update_course_entitlement(
+            CertificateType.PAID_EXECUTIVE_EDUCATION,
+            100,
+            self.site.siteconfiguration.partner,
+            '111-222-333-444',
+            'Executive Education (2U) Course Entitlement'
+        )
+        basket.add_product(exec_ed_2u_course_entitlement)
+        order = create_order(basket=basket, user=self.user)
+
+        response = self._get_receipt_response(order.number)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context_data['show_get_smarter_msg'], True)

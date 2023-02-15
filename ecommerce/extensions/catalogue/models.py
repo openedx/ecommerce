@@ -169,7 +169,7 @@ class Catalog(models.Model):
 
 class Category(AbstractCategory):
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
-    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    # django-simple-history.  Background: https://github.com/openedx/course-discovery/pull/332
     history = CreateSafeHistoricalRecords(excluded_fields=['slug'])
 
     def set_ancestors_are_public(self):
@@ -178,13 +178,13 @@ class Category(AbstractCategory):
 
 class Option(AbstractOption):
     # Do not record the code field in the history table because AutoSlugField is not compatible with
-    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    # django-simple-history.  Background: https://github.com/openedx/course-discovery/pull/332
     history = CreateSafeHistoricalRecords(excluded_fields=['code'])
 
 
 class ProductClass(AbstractProductClass):
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
-    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    # django-simple-history.  Background: https://github.com/openedx/course-discovery/pull/332
     history = CreateSafeHistoricalRecords(excluded_fields=['slug'])
 
 

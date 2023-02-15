@@ -4,6 +4,7 @@
 import abc
 import logging
 
+import crum
 import waffle
 from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
@@ -13,7 +14,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
 from ecommerce.extensions.api import data as data_api
-from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.basket.utils import ORGANIZATION_ATTRIBUTE_TYPE
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
@@ -101,7 +102,12 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         events (using add_payment_event) so they can be
         linked to the order when it is saved later on.
         """
-        properties = {'basket_id': basket.id, 'processor_name': self.payment_processor.NAME, }
+        request = crum.get_current_request()
+        properties = {
+            'basket_id': basket.id,
+            'processor_name': self.payment_processor.NAME,
+            'stripe_enabled': waffle.flag_is_active(request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
+        }
         # If payment didn't go through, the handle_processor_response function will raise an error. We want to
         # send the event regardless of if the payment didn't go through.
         try:

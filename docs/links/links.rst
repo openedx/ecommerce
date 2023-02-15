@@ -80,25 +80,25 @@
 
 .. _GitHub: http://github.com
 
-.. _Contribute to edX Documentation: https://github.com/edx/edx-documentation#contribute-to-edx-documentation
+.. _Contribute to edX Documentation: https://github.com/openedx/edx-documentation#contribute-to-edx-documentation
 
-.. _edx-documentation/shared: https://github.com/edx/edx-documentation/blob/master/shared/conf.py
+.. _edx-documentation/shared: https://github.com/openedx/edx-documentation/blob/master/shared/conf.py
 
-.. _edx-analytics-configuration: https://github.com/edx/edx-analytics-configuration
+.. _edx-analytics-configuration: https://github.com/openedx/edx-analytics-configuration
 
-.. _edx-documentation: https://github.com/edx/edx-documentation
+.. _edx-documentation: https://github.com/openedx/edx-documentation
 
-.. _edx-tools wiki: https://github.com/edx/edx-tools/wiki
+.. _edx-tools wiki: https://github.com/openedx/edx-tools/wiki
 
 .. _custom_form_app: https://github.com/open-craft/custom-form-app
 
-.. _EdX Search: https://github.com/edx/edx-search/
+.. _EdX Search: https://github.com/openedx/edx-search/
 
 .. _GitHub Help: https://help.github.com/articles/set-up-git
 
 .. _PyEnv: https://github.com/yyuu/pyenv
 
-.. _example CSS file for drag and drop problems: https://github.com/edx-solutions/xblock-drag-and-drop-v2/blob/master/drag_and_drop_v2/public/themes/apros.css
+.. _example CSS file for drag and drop problems: https://github.com/openedx/xblock-drag-and-drop-v2/blob/master/drag_and_drop_v2/public/themes/apros.css
 
 .. _VirtualEnv: http://www.virtualenv.org/en/latest/
 
@@ -108,59 +108,59 @@
 
 .. _VirtualEnvWrapper: http://virtualenvwrapper.readthedocs.org/en/latest
 
-.. _XBlock SDK: https://github.com/edx/xblock-sdk
+.. _XBlock SDK: https://github.com/openedx/xblock-sdk
 
-.. _thumbs.py: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/thumbs/thumbs.py
+.. _thumbs.py: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/thumbs/thumbs.py
 
-.. _thumbs.js: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/thumbs/static/js/src/thumbs.js
+.. _thumbs.js: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/thumbs/static/js/src/thumbs.js
 
-.. _Thumbs XBlock:  https://github.com/edx/xblock-sdk/tree/master/sample_xblocks/thumbs
+.. _Thumbs XBlock:  https://github.com/openedx/xblock-sdk/tree/master/sample_xblocks/thumbs
 
-.. _1.js: https://github.com/edx/xblock-sdk/blob/master/workbench/static/workbench/js/runtime/1.js
+.. _1.js: https://github.com/openedx/xblock-sdk/blob/master/workbench/static/workbench/js/runtime/1.js
 
-.. _Problem XBlock: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/basic/problem.py
+.. _Problem XBlock: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/basic/problem.py
 
-.. _Content XBlocks: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/basic/content.py
+.. _Content XBlocks: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/basic/content.py
 
-.. _Slider XBlock: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/basic/slider.py
+.. _Slider XBlock: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/basic/slider.py
 
-.. _Structure XBlocks: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/basic/structure.py
+.. _Structure XBlocks: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/basic/structure.py
 
-.. _View Counter XBlock: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/basic/view_counter.py
+.. _View Counter XBlock: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/basic/view_counter.py
 
-.. _thumbs.html: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/thumbs/static/html/thumbs.html
+.. _thumbs.html: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/thumbs/static/html/thumbs.html
 
-.. _thumbs.css: https://github.com/edx/xblock-sdk/blob/master/sample_xblocks/thumbs/static/css/thumbs.css
+.. _thumbs.css: https://github.com/openedx/xblock-sdk/blob/master/sample_xblocks/thumbs/static/css/thumbs.css
 
-.. _requirements/edx/github.txt: https://github.com/edx/edx-platform/blob/master/requirements/edx/github.txt
+.. _requirements/edx/github.txt: https://github.com/openedx/edx-platform/blob/master/requirements/edx/github.txt
 
-.. _submission_mixin.py: https://github.com/edx/edx-ora2/blob/a4ce7bb00190d7baff60fc90fb613229565ca7ef/openassessment/xblock/submission_mixin.py
+.. _submission_mixin.py: https://github.com/openedx/edx-ora2/blob/a4ce7bb00190d7baff60fc90fb613229565ca7ef/openassessment/xblock/submission_mixin.py
 
-.. _edx-platform: https://github.com/edx/edx-platform
+.. _edx-platform: https://github.com/openedx/edx-platform
 
-.. _edx configuration repository: https://github.com/edx/configuration
+.. _edx configuration repository: https://github.com/openedx/configuration
 
-.. _configuration: https://github.com/edx/configuration
+.. _configuration: https://github.com/openedx/configuration
 
-.. _edx configuration repository wiki: https://github.com/edx/configuration/wiki
+.. _edx configuration repository wiki: https://github.com/openedx/configuration/wiki
 
-.. _The migrate.sh script: https://github.com/edx/configuration/blob/named-release/dogwood.rc/util/vagrant/migrate.sh
+.. _The migrate.sh script: https://github.com/openedx/configuration/blob/named-release/dogwood.rc/util/vagrant/migrate.sh
 
-.. _The upgrade.sh script: https://github.com/edx/configuration/blob/master/util/vagrant/upgrade.sh
+.. _The upgrade.sh script: https://github.com/openedx/configuration/blob/master/util/vagrant/upgrade.sh
 
-.. _Devstack wiki: https://github.com/edx/configuration/wiki/edX-Developer-Stack
+.. _Devstack wiki: https://github.com/openedx/configuration/wiki/edX-Developer-Stack
 
-.. _Developing on Devstack: https://github.com/edx/edx-platform/wiki/Developing-on-the-edX-Developer-Stack
+.. _Developing on Devstack: https://github.com/openedx/edx-platform/wiki/Developing-on-the-edX-Developer-Stack
 
 .. _forum migration described on the Open edX wiki: https://openedx.atlassian.net/wiki/display/TNL/Migrating+the+Discussion+Forums+to+Support+Teams+Discussion+Filtering
 
-.. _Google Drive XBlock: https://github.com/edx-solutions/xblock-google-drive
+.. _Google Drive XBlock: https://github.com/openedx/xblock-google-drive
 
-.. _init file: https://github.com/edx/edx-ora2/blob/a4ce7bb00190d7baff60fc90fb613229565ca7ef/openassessment/fileupload/backends/__init__.py
+.. _init file: https://github.com/openedx/edx-ora2/blob/a4ce7bb00190d7baff60fc90fb613229565ca7ef/openassessment/fileupload/backends/__init__.py
 
-.. _base.py: https://github.com/edx/edx-ora2/blob/a4ce7bb00190d7baff60fc90fb613229565ca7ef/openassessment/fileupload/backends/base.py
+.. _base.py: https://github.com/openedx/edx-ora2/blob/a4ce7bb00190d7baff60fc90fb613229565ca7ef/openassessment/fileupload/backends/base.py
 
-.. _S3.py: https://github.com/edx/edx-ora2/blob/a4ce7bb00190d7baff60fc90fb613229565ca7ef/openassessment/fileupload/backends/s3.py
+.. _S3.py: https://github.com/openedx/edx-ora2/blob/a4ce7bb00190d7baff60fc90fb613229565ca7ef/openassessment/fileupload/backends/s3.py
 
 .. _edX Analytics Installation: https://openedx.atlassian.net/wiki/display/OpenOPS/edX+Analytics+Installation
 
@@ -174,35 +174,35 @@
 
 .. EDX VMs
 
-.. _iOS: http://github.com/edx/edx-app-ios
-.. _Android: http://github.com/edx/edx-app-android
+.. _iOS: http://github.com/openedx/edx-app-ios
+.. _Android: http://github.com/openedx/edx-app-android
 
-.. _Ease: https://github.com/edx/ease
+.. _Ease: https://github.com/openedx/ease
 
-.. _edX Managing the Full Stack: https://github.com/edx/configuration/wiki/edX-Managing-the-Full-Stack
+.. _edX Managing the Full Stack: https://github.com/openedx/configuration/wiki/edX-Managing-the-Full-Stack
 
-.. _OEXPushNotificationManager.m: https://github.com/edx/edx-app-ios/blob/master/Source/OEXPushNotificationManager.m
+.. _OEXPushNotificationManager.m: https://github.com/openedx/edx-app-ios/blob/master/Source/OEXPushNotificationManager.m
 
-.. _OEXParsePushProvider.m: https://github.com/edx/edx-app-ios/blob/master/Source/OEXParsePushProvider.m
+.. _OEXParsePushProvider.m: https://github.com/openedx/edx-app-ios/blob/master/Source/OEXParsePushProvider.m
 
-.. _OEXPushProvider.h: https://github.com/edx/edx-app-ios/blob/master/Source/OEXPushProvider.h
+.. _OEXPushProvider.h: https://github.com/openedx/edx-app-ios/blob/master/Source/OEXPushProvider.h
 
-.. _AndroidManifest.xml: https://github.com/edx/edx-app-android/blob/master/VideoLocker/AndroidManifest.xml#L270
+.. _AndroidManifest.xml: https://github.com/openedx/edx-app-android/blob/master/VideoLocker/AndroidManifest.xml#L270
 
-.. _EdxParsePushBroadcastReceiver.java: https://github.com/edx/edx-app-android/blob/master/VideoLocker/src/main/java/org/edx/mobile/module/notification/EdxParsePushBroadcastReceiver.java
+.. _EdxParsePushBroadcastReceiver.java: https://github.com/openedx/edx-app-android/blob/master/VideoLocker/src/main/java/org/edx/mobile/module/notification/EdxParsePushBroadcastReceiver.java
 
-.. _UserNotificationManager.java: https://github.com/edx/edx-app-android/blob/master/VideoLocker/src/main/java/org/edx/mobile/module/notification/UserNotificationManager.java
+.. _UserNotificationManager.java: https://github.com/openedx/edx-app-android/blob/master/VideoLocker/src/main/java/org/edx/mobile/module/notification/UserNotificationManager.java
 
-.. _ParseNotificationDelegate.java: https://github.com/edx/edx-app-android/blob/master/VideoLocker/src/main/java/org/edx/mobile/module/notification/ParseNotificationDelegate.java
+.. _ParseNotificationDelegate.java: https://github.com/openedx/edx-app-android/blob/master/VideoLocker/src/main/java/org/edx/mobile/module/notification/ParseNotificationDelegate.java
 
 .. _Python SAML Toolkit: https://github.com/onelogin/python-saml
 
 
-.. _Manual Testing: https://github.com/edx/edx-platform/tree/master/common/test/data/manual-testing-complete
+.. _Manual Testing: https://github.com/openedx/edx-platform/tree/master/common/test/data/manual-testing-complete
 
-.. _manual-testing-complete: https://github.com/edx/edx-platform/tree/master/common/test/data/manual-testing-complete
+.. _manual-testing-complete: https://github.com/openedx/edx-platform/tree/master/common/test/data/manual-testing-complete
 
-.. _2014.xml: https://github.com/edx/edx-platform/blob/master/common/test/data/manual-testing-complete/course/2014.xml
+.. _2014.xml: https://github.com/openedx/edx-platform/blob/master/common/test/data/manual-testing-complete/course/2014.xml
 
 .. _edX-Insider: https://github.com/pmitros/edX-Insider
 
@@ -212,7 +212,7 @@
 
 .. _course.xml: https://github.com/pmitros/edX-Insider/blob/master/Ongoing/course.xml
 
-.. _edX Demo Course GitHub: https://github.com/edx/edx-demo-course
+.. _edX Demo Course GitHub: https://github.com/openedx/edx-demo-course
 
 .. EDX WIKI LINKS
 
@@ -227,17 +227,17 @@
 .. THIRD PARTY LINKS
 
 .. _Oscar: https://github.com/django-oscar/django-oscar
-.. _E-Commerce service: https://github.com/edx/ecommerce
+.. _E-Commerce service: https://github.com/openedx/ecommerce
 .. _Transifex: https://www.transifex.com/
 .. _configure the Transifex client: http://docs.transifex.com/client/config/
 .. _Communications API: http://django-oscar.readthedocs.org/en/latest/howto/how_to_customise_oscar_communications.html#communications-api
 .. _django-compressor: http://django-compressor.readthedocs.org/
 .. _RequireJS: http://requirejs.org/
-.. _devstack: https://github.com/edx/devstack
+.. _devstack: https://github.com/openedx/devstack
 .. _Testing in Django: https://docs.djangoproject.com/en/1.8/topics/testing/
 .. _Django sites framework: https://docs.djangoproject.com/en/1.8/ref/contrib/sites
 .. _Jasmine: http://jasmine.github.io/2.3/introduction.html
-.. _edX JavaScript standards: https://github.com/edx/edx-platform/wiki/Javascript-standards-for-the-edx-platform
+.. _edX JavaScript standards: https://github.com/openedx/edx-platform/wiki/Javascript-standards-for-the-edx-platform
 .. _ESLint: http://www.eslint.org
 .. _Waffle: http://waffle.readthedocs.org/en/latest
 .. _Waffle documentation: http://waffle.readthedocs.org/en/latest
@@ -426,7 +426,7 @@
 
 .. _Django 1.8 Upgrade Release Notes: https://openedx.atlassian.net/wiki/display/TNL/Django+1.8+Upgrade+Release+Notes
 
-.. _Django 1.8 pull request: https://github.com/edx/edx-platform/pull/10401
+.. _Django 1.8 pull request: https://github.com/openedx/edx-platform/pull/10401
 
 .. _app_label: https://docs.djangoproject.com/en/1.8/ref/models/options/#app-label
 

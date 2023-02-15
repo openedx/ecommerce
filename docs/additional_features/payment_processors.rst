@@ -27,14 +27,15 @@ Enabling Payment Processors
 ***************************
 Payment processors must be enabled globally and individually for each site/tenant hosted by your installation. At the
 global level, you must specify the Python classes that will be used to process transactions for your processors. Each of
-these classes should inherit from xxx.
+these classes should inherit from `BasePaymentProcessor <https://github.com/openedx/ecommerce/blob/7555353ae972563fd293558eea608ae6151c1186/ecommerce/extensions/payment/processors/__init__.py#L20>`__.
 
 .. code-block:: python
 
-   PAYMENT_PROCESSORS = (
-       'ecommerce.extensions.payment.processors.cybersource.Cybersource',
-       'ecommerce.extensions.payment.processors.paypal.Paypal',
-   )
+    PAYMENT_PROCESSORS = (
+        'ecommerce.extensions.payment.processors.cybersource.CybersourceREST',
+        'ecommerce.extensions.payment.processors.paypal.Paypal',
+        'ecommerce.extensions.payment.processors.stripe.Stripe',
+    )
 
 The secret keys and additional configuration must be specified for each site. The keys of the
 ``PAYMENT_PROCESSOR_CONFIG`` dict correspond to the ``short_code`` field value on the ``Partner`` model linked to each
@@ -44,18 +45,24 @@ site.
 
    PAYMENT_PROCESSOR_CONFIG = {
        'edx': {
-           'cybersource': {
+           'cybersource-rest': {
                ...
            },
            'paypal': {
+               ...
+           },
+           'stripe': {
                ...
            },
        },
        'mitxpro': {
-           'cybersource': {
+           'cybersource-rest': {
                ...
            },
            'paypal': {
+               ...
+           },
+           'stripe': {
                ...
            },
        },
@@ -91,7 +98,7 @@ processors they control.
      - payment_processor_active_paypal
      - True
    * - CyberSource
-     - payment_processor_active_cybersource
+     - payment_processor_active_cybersource-rest
      - True
    * - Stripe
      - payment_processor_active_stripe
@@ -103,6 +110,9 @@ explaining why payment is not currently possible.
 
 Apple Pay
 *********
+
+.. warning:: Apple Pay has been unsupported since 9/2019.
+
 Apple Pay allows learners to checkout quickly without having to manually fill out the payment form. If you are not
 familiar with Apple Pay, please take a moment to read the following documents to understand the user flow and necessary
 configuration. **Apple Pay support is only available when using either the CyberSource or Stripe processors.**
@@ -158,7 +168,7 @@ environment in which you are operating.
 
     PAYMENT_PROCESSOR_CONFIG = {
         'edx': {
-            'cybersource': {
+            'cybersource-rest': {
                 # This is the merchant ID assigned by CyberSource
                 'merchant_id': '',
 
@@ -227,19 +237,18 @@ Settings
 
 Stripe
 ******
-The Stripe integration supports payments via credit cards, Apple Pay, `Pay with Google`_, and the `Payment Request API`_
-which is a W3C browser standard that provides Apple Pay-like behavior across different browsers. Both payment methods
-take advantage of tokenization. Sensitive data--credit card number, card expiration date, CVC--never touches your
-servers. Instead this information is relayed directly to Stripe in exchange for a token. This token is sent to the
-E-Commerce Service and used to make a final call to Stripe, charging the learner and completing the checkout process.
-For additional details regarding Stripe payments, check out the `Stripe quickstart guide`_.
+The Stripe integration supports payments via credit cards. Sensitive data--credit card number, card expiration date, CVC--never touches your servers. Instead this information is relayed directly to Stripe in exchange for a token, which Stripe calls a `Payment Intent`_. This token is sent to the E-Commerce Service and used to make a final call to Stripe, charging the learner and completing the checkout process.
 
-If you wish to use Apple Pay, you must use SSL and verify your domain on your `Stripe Dashboard`_.
+The E-Commerce Service uses `Stripe Custom Actions`_ to send payments through a backend before payment. Ask your Stripe representative to enable this feature on your account. For more information, see `frontend-app-payment ADR-5`_.
 
-.. _Pay with Google: https://stripe.com/docs/pay-with-google
-.. _Payment Request API: https://stripe.com/docs/payment-request-api
-.. _Stripe quickstart guide: https://stripe.com/docs/quickstart
+To set up Ecommerce to use Stripe in frontend-app-payment, enable waffle flag ``enable_stripe_payment_processor``.
 
+To migrate from Cybersource to Stripe, see the example use case of the `frontend-app-payment feature toggle HOWTO`_.
+
+.. _Payment Intent: https://stripe.com/docs/payments/payment-intents
+.. _Stripe Custom Actions: https://stripe.com/docs/payments/run-custom-actions-before-confirmation
+.. _frontend-app-payment ADR-5: https://github.com/openedx/frontend-app-payment/blob/master/docs/decisions/0005-stripe-custom-actions.rst
+.. _frontend-app-payment feature toggle HOWTO: https://github.com/openedx/frontend-app-payment/blob/master/docs/how_tos/feature_toggle.rst#what-is-an-example-use-case
 
 
 Settings
@@ -250,18 +259,22 @@ Settings
     PAYMENT_PROCESSOR_CONFIG = {
         'edx': {
             'stripe': {
+                # Stripe API version to use.
+                'api_version': '',
+                # Send anonymous latency metrics to Stripe.
+                'enable_telemetry': '',
+                # Stripe client logging level. None will default to INFO.
+                'log_level': '',
+                # How many times to automatically retry requests. None means no retries.
+                'max_network_retries': '',
+                # Send requests somewhere else instead of Stripe. May be useful for testing.
+                'proxy': '',
                 # Get your keys from https://dashboard.stripe.com/account/apikeys.
                 # Remember to toggle test data to see keys for use with test mode
                 'publishable_key': '',
                 'secret_key': '',
-
-                # Two-letter ISO 3166 country code for your business/merchant account.
-                # This is required for Apple Pay and the Payment Request API!
-                # https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-                'country': '',
-
-                # Get this from Stripe at https://dashboard.stripe.com/account/apple_pay.
-                'apple_pay_merchant_id_domain_association': '',
+                # Get the signing secret of your webhook from https://dashboard.stripe.com/webhooks
+                'webhook_endpoint_secret': '',
             },
         },
     }

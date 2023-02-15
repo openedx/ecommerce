@@ -8,25 +8,41 @@ CARD_TYPES = {
         'display_name': _('American Express'),
         'cybersource_code': '003',
         'apple_pay_network': 'amex',
-        'stripe_brand': 'American Express',
+        'stripe_brand': 'amex',
+    },
+    'diners': {
+        'display_name': _('Diners'),
+        'stripe_brand': 'diners',
     },
     'discover': {
         'display_name': _('Discover'),
         'cybersource_code': '004',
         'apple_pay_network': 'discover',
-        'stripe_brand': 'Discover',
+        'stripe_brand': 'discover',
+    },
+    'jcb': {
+        'display_name': _('JCB'),
+        'stripe_brand': 'jcb',
     },
     'mastercard': {
         'display_name': _('MasterCard'),
         'cybersource_code': '002',
         'apple_pay_network': 'mastercard',
-        'stripe_brand': 'MasterCard',
+        'stripe_brand': 'mastercard',
+    },
+    'unionpay': {
+        'display_name': _('UnionPay'),
+        'stripe_brand': 'unionpay',
+    },
+    'unknown': {
+        'display_name': _('Unknown'),
+        'stripe_brand': 'unknown',
     },
     'visa': {
         'display_name': _('Visa'),
         'cybersource_code': '001',
         'apple_pay_network': 'visa',
-        'stripe_brand': 'Visa',
+        'stripe_brand': 'visa',
     },
 }
 

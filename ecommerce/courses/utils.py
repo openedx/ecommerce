@@ -154,9 +154,15 @@ def get_certificate_type_display_value(certificate_type):
     return display_values[certificate_type]
 
 
-def get_is_personalized_recommendation(course, request):
+def is_course_recommended_on_user_dashboard(course, request):
     """
-    Returns the personalized recommendation value from the cookie.
+    Tells whether the course was recommended on the user dashboard.
+
+    Return values:
+        Personalized recommendation: Returns whether the course was recommended on user dashboard
+        Control group: Returns the user segmentation group a user belonged in. This is useful when we
+                       show different recommendations based on the group a user belongs in i.e general
+                       vs personalized.
     """
     if request and course:
         recommendations = request.COOKIES.get('edx-user-personalized-recommendation', None)
@@ -165,6 +171,6 @@ def get_is_personalized_recommendation(course, request):
             course_key = CourseKey.from_string(course.id)
             course_key = f'{course_key.org}+{course_key.course}'
             if course_key in recommendations['course_keys']:
-                return recommendations['is_personalized_recommendation']
+                return True, recommendations.get('is_control')
 
-    return None
+    return False, None

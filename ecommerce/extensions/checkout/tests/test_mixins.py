@@ -432,6 +432,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             'total': basket.total_incl_tax,
             'success': True,
             'processor_name': DummyProcessor.NAME,
+            'stripe_enabled': False,
         }
         calls.append(mock.call(user_tracking_id, 'Payment Processor Response', properties, context=context))
 
@@ -476,6 +477,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             'payment_error': 'Exception',
             'success': False,
             'processor_name': DummyProcessor.NAME,
+            'stripe_enabled': False,
         }
         calls.append(mock.call(user_tracking_id, 'Payment Processor Response', properties, context=context))
 

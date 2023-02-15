@@ -62,10 +62,12 @@ def create_or_update_course_entitlement(
     """ Create or Update Course Entitlement Products """
     certificate_type = certificate_type.lower()
     UUID = str(UUID)
+    has_existing_course_entitlement = False
 
     try:
         parent_entitlement, __ = create_parent_course_entitlement(title, UUID)
         course_entitlement = get_entitlement(UUID, certificate_type)
+        has_existing_course_entitlement = True
     except Product.DoesNotExist:
         course_entitlement = Product()
 
@@ -79,6 +81,11 @@ def create_or_update_course_entitlement(
     course_entitlement.parent = parent_entitlement
     if variant_id:
         course_entitlement.attr.variant_id = variant_id
+    if has_existing_course_entitlement:
+        # Calling `save` on the attributes is necessary for any updates to persist. This is not necessary
+        # for new attributes, only for existing attributes. This `save` method must be called before saving
+        # the associated course entitlement below.
+        course_entitlement.attr.save()
     course_entitlement.save()
 
     __, created = StockRecord.objects.update_or_create(

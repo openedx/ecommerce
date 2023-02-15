@@ -47,10 +47,11 @@ from ecommerce.extensions.analytics.utils import (
     translate_basket_line_for_segment
 )
 from ecommerce.extensions.basket import message_utils
-from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
 from ecommerce.extensions.basket.utils import (
     add_invalid_code_message_to_url,
+    add_stripe_flag_to_url,
     add_utm_params_to_url,
     apply_offers_on_basket,
     apply_voucher_on_basket_and_check_discount,
@@ -497,6 +498,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
         redirect_url = get_payment_microfrontend_or_basket_url(request)
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         redirect_url = add_invalid_code_message_to_url(redirect_url, invalid_code)
+        redirect_url = add_stripe_flag_to_url(redirect_url, request)
 
         return HttpResponseRedirect(redirect_url, status=303)
 
@@ -583,7 +585,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             basket view context needs to be updated with.
         """
         site_configuration = self.request.site.siteconfiguration
-        payment_processor_class = site_configuration.get_client_side_payment_processor_class()
+        payment_processor_class = site_configuration.get_client_side_payment_processor_class(self.request)
 
         if payment_processor_class:
             payment_processor = payment_processor_class(self.request.site)
@@ -615,7 +617,8 @@ class CaptureContextApiLogicMixin:  # pragma: no cover
     Business logic for the capture context API.
     """
     def _add_capture_context(self, response):
-        payment_processor_class = self.request.site.siteconfiguration.get_client_side_payment_processor_class()
+        site_configuration = self.request.site.siteconfiguration
+        payment_processor_class = site_configuration.get_client_side_payment_processor_class(self.request)
         if not payment_processor_class:
             return
         payment_processor = payment_processor_class(self.request.site)
@@ -623,7 +626,9 @@ class CaptureContextApiLogicMixin:  # pragma: no cover
             return
 
         try:
-            response['capture_context'] = payment_processor.get_capture_context(self.request.session)
+            capture_context = payment_processor.get_capture_context(self.request)
+            if capture_context is not None:
+                response['capture_context'] = capture_context
         except:  # pylint: disable=bare-except
             logger.exception("Error generating capture_context")
             return
@@ -681,6 +686,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         self._add_total_summary(response, context)
         self._add_offers(response)
         self._add_coupons(response, context)
+        self._add_enable_stripe_payment_processor(response)
         return response
 
     def _add_products(self, response, lines_data):
@@ -738,6 +744,11 @@ class PaymentApiLogicMixin(BasketLogicMixin):
     def _add_messages(self, response):
         response['messages'] = message_utils.serialize(self.request)
 
+    def _add_enable_stripe_payment_processor(self, response):
+        response['enable_stripe_payment_processor'] = waffle.flag_is_active(
+            self.request, ENABLE_STRIPE_PAYMENT_PROCESSOR
+        )
+
     def _get_response_status(self, response):
         return message_utils.get_response_status(response['messages'])
 
@@ -763,6 +774,8 @@ class CaptureContextApiView(CaptureContextApiLogicMixin, APIView):  # pragma: no
         """
         data = {}
         self._add_capture_context(data)
+        if not data:
+            return JsonResponse(data, status=400)
         return Response(data, status=status)
 
 
