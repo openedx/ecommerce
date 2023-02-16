@@ -22,6 +22,7 @@ OSCAR_APPS = [
     'oscar.apps.wishlists',
 
     'ecommerce.extensions',
+    'ecommerce.extensions.iap',
     'ecommerce.extensions.api',
     'ecommerce.extensions.communication.apps.CommunicationConfig',
     'ecommerce.extensions.fulfillment',
@@ -131,6 +132,8 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
+    'ecommerce.extensions.iap.processors.android_iap.AndroidIAP',
+    'ecommerce.extensions.iap.processors.ios_iap.IOSIAP',
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
     'ecommerce.extensions.payment.processors.cybersource.CybersourceREST',
     'ecommerce.extensions.payment.processors.paypal.Paypal',
@@ -180,6 +183,13 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
+        'android-iap': {
+            'google_bundle_id': '<put-value-here>',
+            'google_service_account_key_file': '<put-value-here>'
+        },
+        'ios-iap': {
+            'ios_bundle_id': '<put-value-here>',
+        }
     },
 }
 

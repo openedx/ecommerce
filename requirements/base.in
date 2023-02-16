@@ -33,7 +33,11 @@ edx-opaque-keys
 edx-rbac
 edx-rest-api-client
 getsmarter-api-clients
+google-api-python-client==2.31.0
+httplib2==0.20.2
+inapppy==2.5.2
 jsonfield
+jsonfield2
 libsass==0.9.2
 markdown==2.6.9
 mysqlclient<1.5
