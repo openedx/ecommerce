@@ -14,12 +14,7 @@ from ecommerce.extensions.basket.utils import (
     basket_add_payment_intent_id_attribute,
     get_billing_address_from_payment_intent_data
 )
-from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
-from ecommerce.extensions.payment.processors import (
-    ApplePayMixin,
-    BaseClientSidePaymentProcessor,
-    HandledProcessorResponse
-)
+from ecommerce.extensions.payment.processors import ApplePayMixin, BaseClientSidePaymentProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +161,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             **self._build_payment_intent_parameters(basket),
         )
         try:
-            confirm_api_response = stripe.PaymentIntent.confirm(
+            stripe.PaymentIntent.confirm(
                 payment_intent_id,
                 # stop on complicated payments MFE can't handle yet
                 error_on_requires_action=True,
@@ -176,31 +171,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             self.record_processor_response(err.json_body, transaction_id=payment_intent_id, basket=basket)
             logger.exception('Card Error for basket [%d]: %s}', basket.id, err)
             raise
-
-        # proceed only if payment went through
-        assert confirm_api_response['status'] == "succeeded"
-        self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
-
-        logger.info(
-            'Successfully confirmed Stripe payment intent [%s] for basket [%d] and order number [%s].',
-            payment_intent_id,
-            basket.id,
-            basket.order_number,
-        )
-
-        total = basket.total_incl_tax
-        currency = basket.currency
-        card_object = confirm_api_response['charges']['data'][0]['payment_method_details']['card']
-        card_number = card_object['last4']
-        card_type = STRIPE_CARD_TYPE_MAP.get(card_object['brand'])
-
-        return HandledProcessorResponse(
-            transaction_id=payment_intent_id,
-            total=total,
-            currency=currency,
-            card_number=card_number,
-            card_type=card_type
-        )
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
