@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, 2u/project-theseus]
   pull_request:
-    branches: [master]
+    branches: [master, 2u/project-theseus]
 
 jobs:
   build:
