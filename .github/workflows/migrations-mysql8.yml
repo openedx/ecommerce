@@ -5,7 +5,8 @@ on:
   pull_request:
   push:
     branches:
-      - master, 2u/project-theseus
+      - master
+      - 2u/project-theseus
 
 jobs:
   check_migrations:
