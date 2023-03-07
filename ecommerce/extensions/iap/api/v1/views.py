@@ -1,16 +1,23 @@
+import datetime
 import logging
 import time
 
+# import app_store_notifications_v2_validator as asn2
+import httplib2
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
+from googleapiclient.discovery import build
+from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ecommerce.extensions.analytics.utils import track_segment_event
@@ -49,6 +56,7 @@ from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
+from ecommerce.extensions.refund.api import find_orders_associated_with_course, create_refunds
 
 Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -218,3 +226,72 @@ class MobileCheckoutView(APIView):
             return JsonResponse({'error': response.content.decode()}, status=response.status_code)
 
         return response
+
+
+class BaseRefund(APIView):
+    """ Base refund class for Apple and Android refunds """
+    authentication_classes = ()
+
+    def refund(self, transaction_id, processor_response):
+        """ Get a transaction id and create a refund against that transaction. """
+        transaction = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id,
+                                                              processor_name=self.processor_name).first()
+        if not transaction:
+            msg = "Could not find any transaction to refund for [%s] by processor [%s]"
+            logger.error(msg, transaction_id, self.processor_name)
+            return
+
+        basket = transaction.basket
+        user = basket.owner
+        course_key = basket.all_lines().first().product.attr.course_key
+        orders = find_orders_associated_with_course(user, course_key)
+
+        refunds = create_refunds(orders, course_key)
+        if not refunds:
+            msg = "Could not find any order to refund for [%s] by processor [%s]"
+            logger.error(msg, transaction_id, self.processor_name)
+            return
+
+        refunds[0].approve(revoke_fulfillment=True)
+
+        PaymentProcessorResponse.objects.create(processor_name=self.processor_name,
+                                                transaction_id=transaction_id,
+                                                response=processor_response, basket=basket)
+
+
+class AndroidRefund(BaseRefund):
+    """
+    Create refunds for orders refunded by google and un enroll users from relevant courses
+    """
+    processor_name = AndroidIAP.NAME
+    timeout = 30
+
+    def get(self, request):
+        """
+        Get all refunds in last 3 days from voidedpurchases api
+        and call refund method on every refund.
+        """
+
+        partner_short_code = request.site.siteconfiguration.partner.short_code
+        configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][self.processor_name.lower()]
+        service = self._get_service(request, configuration)
+
+        refunds_time = datetime.datetime.now() - datetime.timedelta(days=3)
+        refunds_time = round(refunds_time.timestamp() * 1000)
+        refund_list = service.purchases().voidedpurchases()
+        refunds = refund_list.list(packageName=configuration['google_bundle_id'], startTime=refunds_time).execute()
+        for refund in refunds.get('voidedPurchases', []):
+            self.refund(refund['orderId'], refund)
+
+        return Response()
+
+    def _get_service(self, request, configuration):
+        """ Create a service to interact with google api. """
+        play_console_credentials = configuration.get('google_service_account_key_file')
+        scope = "https://www.googleapis.com/auth/androidpublisher"
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(play_console_credentials, scope)
+        http = httplib2.Http(timeout=self.timeout)
+        http = credentials.authorize(http)
+
+        service = build("androidpublisher", "v3", http=http)
+        return service

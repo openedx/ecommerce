@@ -1,4 +1,5 @@
 import datetime
+import json
 import urllib.error
 import urllib.parse
 
@@ -8,17 +9,22 @@ import pytz
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
+from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
+from oscar.test.factories import BasketFactory
+from rest_framework import status
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.iap.api.v1.constants import (
     COURSE_ALREADY_PAID_ON_DEVICE,
     ERROR_ALREADY_PURCHASED,
@@ -36,15 +42,18 @@ from ecommerce.extensions.iap.api.v1.constants import (
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
 from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
-from ecommerce.extensions.iap.api.v1.views import MobileCoursePurchaseExecutionView
+from ecommerce.extensions.iap.api.v1.views import MobileCoursePurchaseExecutionView, BaseRefund, AndroidRefund
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
+from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
+from ecommerce.extensions.refund.status import REFUND_LINE, REFUND
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.factories import ProductFactory, StockRecordFactory
-from ecommerce.tests.mixins import LmsApiMockMixin
+from ecommerce.tests.mixins import LmsApiMockMixin, JwtMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -57,6 +66,9 @@ OrderLine = get_model('order', 'Line')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+Option = get_model('catalogue', 'Option')
+Refund = get_model('refund', 'Refund')
+post_refund = get_class('refund.signals', 'post_refund')
 
 
 @ddt.ddt
@@ -516,3 +528,185 @@ class TestMobileCheckoutView(TestCase):
         response_data = response.json()
         self.assertIn(reverse('iap:iap-execute'), response_data['payment_page_url'])
         self.assertEqual(response_data['payment_processor'], self.processor_name)
+
+
+class BaseRefundTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
+    MODEL_LOGGER_NAME = 'ecommerce.core.models'
+    path = reverse('iap:android-refund')
+
+    def setUp(self):
+        super(BaseRefundTests, self).setUp()
+        self.course_id = 'edX/DemoX/Demo_Course'
+        self.invalid_transaction_id = "invalid transaction"
+        self.valid_transaction_id = "123456"
+        self.entitlement_option = Option.objects.get(code='course_entitlement')
+        self.user = self.create_user()
+        self.logger_name = 'ecommerce.extensions.iap.api.v1.views'
+
+    def assert_ok_response(self, response):
+        """ Assert the response has HTTP status 200 and no data. """
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), [])
+
+    def test_transaction_id_not_found(self):
+        """ If the transaction id doesn't match, no refund IDs should be created. """
+        with LogCapture(self.logger_name) as logger:
+            AndroidRefund().refund(self.invalid_transaction_id, {})
+            msg_t = "Could not find any transaction to refund for [{}] by processor [{}]"
+            msg = msg_t.format(self.invalid_transaction_id, AndroidRefund.processor_name)
+            logger.check((self.logger_name, 'ERROR', msg),)
+
+    def assert_refund_and_order(self, refund, order, basket, ppr, refund_ppr):
+        self.assertEqual(refund.order, order)
+        self.assertEqual(refund.user, order.user)
+        self.assertEqual(refund.status, 'Complete')
+        self.assertEqual(refund.total_credit_excl_tax, order.total_excl_tax)
+        self.assertEqual(refund.lines.count(), order.lines.count())
+
+        self.assertEqual(basket, ppr.basket)
+        self.assertEqual(refund_ppr.transaction_id, ppr.transaction_id)
+        self.assertNotEqual(refund_ppr.id, ppr.id)
+
+    def test_valid_order(self):
+        """
+        View should create a refund if an order/line are found eligible for refund.
+        """
+        order = self.create_order()
+        self.assertFalse(Refund.objects.exists())
+        basket = BasketFactory(site=self.site, owner=self.user)
+        basket.add_product(self.verified_product)
+        ppr = PaymentProcessorResponse.objects.create(basket=basket, transaction_id=self.valid_transaction_id,
+                                                      processor_name=AndroidRefund.processor_name,
+                                                      response=json.dumps({'state': 'approved'}))
+
+        def _revoke_lines(r):
+            for line in r.lines.all():
+                line.set_status(REFUND_LINE.COMPLETE)
+
+            r.set_status(REFUND.COMPLETE)
+
+        with mock.patch.object(Refund, '_revoke_lines', side_effect=_revoke_lines, autospec=True):
+            refund_payload = {"state": "refund"}
+            AndroidRefund().refund(self.valid_transaction_id, refund_payload)
+            refund = Refund.objects.latest()
+            refund_ppr = PaymentProcessorResponse.objects.latest()
+
+            self.assert_refund_and_order(refund, order, basket, ppr, refund_ppr)
+
+            # A second call should result in no additional refunds being created
+            with LogCapture(self.logger_name) as logger:
+                AndroidRefund().refund(self.valid_transaction_id, {})
+                msg_t = "Could not find any order to refund for [{}] by processor [{}]"
+                msg = msg_t.format(self.valid_transaction_id, AndroidRefund.processor_name)
+                logger.check((self.logger_name, 'ERROR', msg),)
+
+
+class AndroidRefundTests(BaseRefundTests):
+    MODEL_LOGGER_NAME = 'ecommerce.core.models'
+    path = reverse('iap:android-refund')
+    mock_android_response = {
+                              "voidedPurchases": [
+                                {
+                                  "purchaseToken": "purchase_token",
+                                  "purchaseTimeMillis": "1677275637963",
+                                  "voidedTimeMillis": "1677650787656",
+                                  "orderId": "1234",
+                                  "voidedSource": 1,
+                                  "voidedReason": 1,
+                                  "kind": "androidpublisher#voidedPurchase"
+                                },
+                                {
+                                  "purchaseToken": "purchase_token",
+                                  "purchaseTimeMillis": "1674131262110",
+                                  "voidedTimeMillis": "1677671872090",
+                                  "orderId": "5678",
+                                  "voidedSource": 0,
+                                  "voidedReason": 0,
+                                  "kind": "androidpublisher#voidedPurchase"
+                                }
+                              ]
+                            }
+
+    def assert_ok_response(self, response):
+        """ Assert the response has HTTP status 200 and no data. """
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def check_record_not_found_log(self, logger, record='transaction'):
+        response = self.client.get(self.path)
+        self.assert_ok_response(response)
+        refunds = self.mock_android_response['voidedPurchases']
+        msg_t = "Could not find any {} to refund for [{}] by processor [{}]"
+        msg = msg_t.format(record, refunds[0]['orderId'], AndroidRefund.processor_name)
+        msg2 = msg_t.format(record, refunds[1]['orderId'], AndroidRefund.processor_name)
+
+        logger.check(
+            (self.logger_name, 'ERROR', msg),
+            (self.logger_name, 'ERROR', msg2)
+        )
+
+    def test_transaction_id_not_found(self):
+        """ If the transaction id doesn't match, no refund IDs should be created. """
+
+        with mock.patch.object(ServiceAccountCredentials, 'from_json_keyfile_dict') as sac, \
+                mock.patch('ecommerce.extensions.iap.api.v1.views.build') as mock_build, \
+                LogCapture(self.logger_name) as logger, \
+                mock.patch('httplib2.Http'):
+
+            sac.return_value.authorize.return_value = None
+            mock_build.return_value.purchases.return_value.voidedpurchases.return_value\
+                .list.return_value.execute.return_value = self.mock_android_response
+            self.check_record_not_found_log(logger)
+
+    def test_valid_orders(self):
+        """
+        View should create a refund if an order/line are found eligible for refund.
+        """
+        orders = [self.create_order()]
+        self.assertFalse(Refund.objects.exists())
+        baskets = [BasketFactory(site=self.site, owner=self.user)]
+        baskets[0].add_product(self.verified_product)
+
+        course2 = CourseFactory(
+            id=u'edX/DemoX/Demo_Course2', name=u'edX Demó Course2', partner=self.partner
+        )
+        verified_product_2 = course2.create_or_update_seat('verified', True, 10)
+        basket2 = BasketFactory(site=self.site, owner=self.user)
+        basket2.add_product(verified_product_2)
+        order2 = create_order(basket=basket2, user=self.user)
+        order2.status = ORDER.COMPLETE
+        baskets.append(basket2)
+        orders.append(order2)
+
+        pprs = []
+        for i in range(len(baskets)):
+            transaction_id = self.mock_android_response['voidedPurchases'][i]['orderId']
+            pprs.append(PaymentProcessorResponse.objects.create(basket=baskets[0], transaction_id=transaction_id,
+                                                                processor_name=AndroidRefund.processor_name,
+                                                                response=json.dumps({'state': 'approved'})))
+
+        def _revoke_lines(r):
+            for line in r.lines.all():
+                line.set_status(REFUND_LINE.COMPLETE)
+
+            r.set_status(REFUND.COMPLETE)
+
+        with mock.patch.object(Refund, '_revoke_lines', side_effect=_revoke_lines, autospec=True), \
+             mock.patch.object(ServiceAccountCredentials, 'from_json_keyfile_dict') as sac, \
+                mock.patch('ecommerce.extensions.iap.api.v1.views.build') as mock_build, \
+                mock.patch('httplib2.Http'):
+
+            sac.return_value.authorize.return_value = None
+            mock_build.return_value.purchases.return_value.voidedpurchases.return_value.\
+                list.return_value.execute.return_value = self.mock_android_response
+
+            response = self.client.get(self.path)
+            self.assert_ok_response(response)
+
+            refunds = Refund.objects.all()
+            refund_pprs = PaymentProcessorResponse.objects.all().order_by('-id')[:1]
+            for i in range(len(refunds)):
+                self.assert_refund_and_order(refunds[i], orders[i], baskets[i], pprs[i], refund_pprs[i])
+
+            # A second call should result in no additional refunds being created
+            with LogCapture(self.logger_name) as logger:
+                self.check_record_not_found_log(logger, record='order')

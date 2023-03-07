@@ -170,7 +170,10 @@ class BaseIAP(BasePaymentProcessor):
         return processor_response
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
-        raise NotImplementedError('The {} payment processor does not support credit issuance.'.format(self.NAME))
+        """
+        In case of mobile refund identifier is same as of transaction id or reference number.
+        """
+        return reference_number
 
     def _get_attribute_from_receipt(self, validated_receipt, attribute):
         value = None
