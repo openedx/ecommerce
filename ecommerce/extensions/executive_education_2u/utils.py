@@ -37,7 +37,8 @@ def get_previous_order_for_user(user, product):
     """
     return Order.objects \
         .prefetch_related('refunds') \
-        .filter(user=user, lines__product=product, refunds__isnull=True).first()
+        .filter(user=user, lines__product=product, refunds__isnull=True) \
+        .exists()
 
 
 def get_learner_portal_url(request):
