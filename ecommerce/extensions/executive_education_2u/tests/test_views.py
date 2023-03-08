@@ -132,6 +132,24 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
         )
         self.assertEqual(response.headers['Location'], expected_redirect_url)
 
+    def test_begin_checkout_has_previous_order_refund_error_redirect_to_receipt_page(self):
+        product = self._create_product(is_exec_ed_2u_product=True)
+        sku = product.stockrecords.first().partner_sku
+        order = OrderFactory(user=self.user)
+        OrderLineFactory(order=order, product=product, partner_sku=sku)
+        RefundFactory(order=order, user=self.user, status=REFUND.PAYMENT_REFUND_ERROR)
+
+        response = self.client.get(self.checkout_path, {'sku': sku})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        expected_redirect_url = get_receipt_page_url(
+            response.request,
+            order_number=order.number,
+            site_configuration=order.site.siteconfiguration,
+            disable_back_button=False
+        )
+        self.assertEqual(response.headers['Location'], expected_redirect_url)
+
     @mock.patch('ecommerce.enterprise.conditions.catalog_contains_course_runs')
     @mock.patch('ecommerce.enterprise.conditions.get_course_info_from_catalog')
     @mock.patch('ecommerce.extensions.executive_education_2u.views.get_learner_portal_url')
