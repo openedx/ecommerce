@@ -8,6 +8,7 @@ from oscar.core.loading import get_model
 from ecommerce.courses.constants import CertificateType
 from ecommerce.enterprise.api import get_enterprise_id_for_user
 from ecommerce.enterprise.utils import get_enterprise_customer
+from ecommerce.extensions.refund.status import REFUND
 
 Product = get_model('catalogue', 'Product')
 Order = get_model('order', 'Order')
@@ -32,8 +33,14 @@ def get_executive_education_2u_product(partner, sku):
 
 
 def get_previous_order_for_user(user, product):
-    # TODO: figure out if users can place orders multiple times
-    return Order.objects.filter(user=user, lines__product=product).first()
+    """
+    Find previous non-refunded order for product from user.
+    """
+    return Order.objects \
+        .filter(user=user, lines__product=product) \
+        .prefetch_related('refunds') \
+        .filter(Q(refunds__isnull=True) | ~Q(refunds__status=REFUND.COMPLETE)) \
+        .first()
 
 
 def get_learner_portal_url(request):
