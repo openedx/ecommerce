@@ -579,3 +579,4 @@ class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, EdxOrderPl
         handled_processor_response = self.payment_processor.request_apple_pay_authorization(
             basket, billing_address, token)
         self.record_payment(basket, handled_processor_response)
+        self.handle_commerce_order_create(basket)

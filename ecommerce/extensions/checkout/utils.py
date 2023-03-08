@@ -101,3 +101,20 @@ def add_currency(amount):
         str: Formatted price with currency.
     """
     return format_currency(settings.OSCAR_DEFAULT_CURRENCY, amount, u'#,##0.00')
+
+
+def get_seat_purchase_line(purchase):
+    """
+    Get Line object for non-program purchase.
+
+    Args:
+        purchase: It can be a Basket or Order object
+    Returns:
+        Line: Seat Product Line or None if program purchase
+    """
+    lines = purchase.lines.all()
+    if lines.count() == 1:
+        line = lines.first()
+        if line.product.is_seat_product:
+            return line
+    return None

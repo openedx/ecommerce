@@ -345,6 +345,15 @@ class SiteConfiguration(models.Model):
         """
         return urljoin(settings.ENTERPRISE_SERVICE_URL, path)
 
+    def build_commerce_coordinator_url(self, path=''):
+        """
+        Returns path joined with the appropriate Commerce Coordinator service URL.
+
+        Returns:
+            str: complete URL to coordinator endpoint
+        """
+        return urljoin(settings.COMMERCE_COORDINATOR_SERVICE_URL, path)
+
     def build_program_dashboard_url(self, uuid):
         """ Returns a URL to a specific student program dashboard (hosted by LMS). """
         return self.build_lms_url('/dashboard/programs/{}'.format(uuid))
