@@ -608,27 +608,27 @@ class AndroidRefundTests(BaseRefundTests):
     MODEL_LOGGER_NAME = 'ecommerce.core.models'
     path = reverse('iap:android-refund')
     mock_android_response = {
-                              "voidedPurchases": [
-                                {
-                                  "purchaseToken": "purchase_token",
-                                  "purchaseTimeMillis": "1677275637963",
-                                  "voidedTimeMillis": "1677650787656",
-                                  "orderId": "1234",
-                                  "voidedSource": 1,
-                                  "voidedReason": 1,
-                                  "kind": "androidpublisher#voidedPurchase"
-                                },
-                                {
-                                  "purchaseToken": "purchase_token",
-                                  "purchaseTimeMillis": "1674131262110",
-                                  "voidedTimeMillis": "1677671872090",
-                                  "orderId": "5678",
-                                  "voidedSource": 0,
-                                  "voidedReason": 0,
-                                  "kind": "androidpublisher#voidedPurchase"
-                                }
-                              ]
-                            }
+        "voidedPurchases": [
+            {
+                "purchaseToken": "purchase_token",
+                "purchaseTimeMillis": "1677275637963",
+                "voidedTimeMillis": "1677650787656",
+                "orderId": "1234",
+                "voidedSource": 1,
+                "voidedReason": 1,
+                "kind": "androidpublisher#voidedPurchase"
+            },
+            {
+                "purchaseToken": "purchase_token",
+                "purchaseTimeMillis": "1674131262110",
+                "voidedTimeMillis": "1677671872090",
+                "orderId": "5678",
+                "voidedSource": 0,
+                "voidedReason": 0,
+                "kind": "androidpublisher#voidedPurchase"
+            }
+        ]
+    }
 
     def assert_ok_response(self, response):
         """ Assert the response has HTTP status 200 and no data. """
