@@ -54,40 +54,40 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
             u"IOSInAppPurchase's response was recorded in entry [{entry_id}]."
         )
         self.RETURN_DATA = {
-            'transactionId': '2000000279135357',
-            'originalTransactionId': '2000000279135357',
-            'productId': 'org.edx.mobile.integrationtest',
-            'purchaseToken': 'inapp:org.edx.mobile:ios.test.purchased',
+            'transactionId': 'test_id',
+            'originalTransactionId': 'original_test_id',
+            'productId': 'test_product_id',
+            'purchaseToken': 'inapp:test.edx.edx:ios.test.purchased',
         }
         self.mock_validation_response = {
             'environment': 'Sandbox',
             'receipt': {
-                'bundle_id': 'org.edx.mobile',
+                'bundle_id': 'test_bundle_id',
                 'in_app': [
                     {
                         'in_app_ownership_type': 'PURCHASED',
-                        'original_transaction_id': '2000000279124188',
+                        'original_transaction_id': 'very_old_purchase_id',
                         'product_id': 'org.edx.mobile.test_product1',
                         'purchase_date_ms': '1676562309000',
-                        'transaction_id': '2000000279124188'
+                        'transaction_id': 'vaery_old_purchase_id'
                     },
                     {
                         'in_app_ownership_type': 'PURCHASED',
-                        'original_transaction_id': '2000000279128532',
+                        'original_transaction_id': 'old_purchase_id',
                         'product_id': 'org.edx.mobile.test_product3',
                         'purchase_date_ms': '1676562544000',
-                        'transaction_id': '2000000279128532'
+                        'transaction_id': 'old_purchase_id'
                     },
                     {
                         'in_app_ownership_type': 'PURCHASED',
-                        'original_transaction_id': '2000000279135357',
-                        'product_id': 'org.edx.mobile.integrationtest',
+                        'original_transaction_id': 'original_test_id',
+                        'product_id': 'test_product_id',
                         'purchase_date_ms': '1676562978000',
-                        'transaction_id': '2000000279135357'
+                        'transaction_id': 'test_id'
                     }
                 ],
                 'receipt_creation_date_ms': '1676562978000',
-                }
+            }
         }
 
     def _get_receipt_url(self):

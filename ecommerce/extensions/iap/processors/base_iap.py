@@ -152,7 +152,7 @@ class BaseIAP(BasePaymentProcessor):
 
     def parse_ios_response(self, response, product_id):
         """
-        iOS response have multiple receipts data, and we need to select the purchase we just made
+        iOS response has multiple receipts data, and we need to select the purchase we just made
         with the given product id.
         """
         purchases = response['receipt'].get('in_app', [])
