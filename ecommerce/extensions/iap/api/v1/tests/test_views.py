@@ -703,7 +703,7 @@ class AndroidRefundTests(BaseRefundTests):
 
             refunds = Refund.objects.all()
             refund_responses = PaymentProcessorResponse.objects.all().order_by('-id')[:1]
-            for index in range(len(refunds)):
+            for index, _ in enumerate(refunds):
                 self.assert_refund_and_order(refunds[index], orders[index], baskets[index],
                                              payment_processor_responses[index], refund_responses[index])
 

@@ -236,27 +236,28 @@ class BaseRefund(APIView):
 
     def refund(self, transaction_id, processor_response):
         """ Get a transaction id and create a refund against that transaction. """
-        transaction = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id,
-                                                              processor_name=self.processor_name).first()
-        if not transaction:
+        original_purchase = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id,
+                                                                    processor_name=self.processor_name).first()
+        if not original_purchase:
             logger.error(ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
             return
 
-        basket = transaction.basket
+        basket = original_purchase.basket
         user = basket.owner
         course_key = basket.all_lines().first().product.attr.course_key
         orders = find_orders_associated_with_course(user, course_key)
 
-        refunds = create_refunds(orders, course_key)
-        if not refunds:
-            logger.error(ERROR_ORDER_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
-            return
+        with transaction.atomic():
+            refunds = create_refunds(orders, course_key)
+            if not refunds:
+                logger.error(ERROR_ORDER_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
+                return
 
-        refunds[0].approve(revoke_fulfillment=True)
+            refunds[0].approve(revoke_fulfillment=True)
 
-        PaymentProcessorResponse.objects.create(processor_name=self.processor_name,
-                                                transaction_id=transaction_id,
-                                                response=processor_response, basket=basket)
+            PaymentProcessorResponse.objects.create(processor_name=self.processor_name,
+                                                    transaction_id=transaction_id,
+                                                    response=processor_response, basket=basket)
 
 
 class AndroidRefund(BaseRefund):
@@ -274,7 +275,7 @@ class AndroidRefund(BaseRefund):
 
         partner_short_code = request.site.siteconfiguration.partner.short_code
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][self.processor_name.lower()]
-        service = self._get_service(request, configuration)
+        service = self._get_service(configuration)
 
         refunds_time = datetime.datetime.now() - datetime.timedelta(days=3)
         refunds_time_in_ms = round(refunds_time.timestamp() * 1000)
@@ -286,7 +287,7 @@ class AndroidRefund(BaseRefund):
 
         return Response()
 
-    def _get_service(self, request, configuration):
+    def _get_service(self, configuration):
         """ Create a service to interact with google api. """
         play_console_credentials = configuration.get('google_service_account_key_file')
         credentials = ServiceAccountCredentials.from_json_keyfile_dict(play_console_credentials,
