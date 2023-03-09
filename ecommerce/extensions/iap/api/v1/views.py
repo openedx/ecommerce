@@ -2,7 +2,6 @@ import datetime
 import logging
 import time
 
-# import app_store_notifications_v2_validator as asn2
 import httplib2
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -39,7 +38,10 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_DURING_ORDER_CREATION,
     ERROR_DURING_PAYMENT_HANDLING,
     ERROR_DURING_POST_ORDER_OP,
+    ERROR_ORDER_NOT_FOUND_FOR_REFUND,
+    ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND,
     ERROR_WHILE_OBTAINING_BASKET_FOR_USER,
+    GOOGLE_PUBLISHER_API_SCOPE,
     LOGGER_BASKET_NOT_FOUND,
     LOGGER_PAYMENT_APPROVED,
     LOGGER_PAYMENT_FAILED_FOR_BASKET,
@@ -56,7 +58,7 @@ from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
-from ecommerce.extensions.refund.api import find_orders_associated_with_course, create_refunds
+from ecommerce.extensions.refund.api import create_refunds, find_orders_associated_with_course
 
 Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -229,7 +231,7 @@ class MobileCheckoutView(APIView):
 
 
 class BaseRefund(APIView):
-    """ Base refund class for Apple and Android refunds """
+    """ Base refund class for iOS and Android refunds """
     authentication_classes = ()
 
     def refund(self, transaction_id, processor_response):
@@ -237,8 +239,7 @@ class BaseRefund(APIView):
         transaction = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id,
                                                               processor_name=self.processor_name).first()
         if not transaction:
-            msg = "Could not find any transaction to refund for [%s] by processor [%s]"
-            logger.error(msg, transaction_id, self.processor_name)
+            logger.error(ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
             return
 
         basket = transaction.basket
@@ -248,8 +249,7 @@ class BaseRefund(APIView):
 
         refunds = create_refunds(orders, course_key)
         if not refunds:
-            msg = "Could not find any order to refund for [%s] by processor [%s]"
-            logger.error(msg, transaction_id, self.processor_name)
+            logger.error(ERROR_ORDER_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
             return
 
         refunds[0].approve(revoke_fulfillment=True)
@@ -261,7 +261,7 @@ class BaseRefund(APIView):
 
 class AndroidRefund(BaseRefund):
     """
-    Create refunds for orders refunded by google and un enroll users from relevant courses
+    Create refunds for orders refunded by google and un-enroll users from relevant courses
     """
     processor_name = AndroidIAP.NAME
     timeout = 30
@@ -277,9 +277,10 @@ class AndroidRefund(BaseRefund):
         service = self._get_service(request, configuration)
 
         refunds_time = datetime.datetime.now() - datetime.timedelta(days=3)
-        refunds_time = round(refunds_time.timestamp() * 1000)
+        refunds_time_in_ms = round(refunds_time.timestamp() * 1000)
         refund_list = service.purchases().voidedpurchases()
-        refunds = refund_list.list(packageName=configuration['google_bundle_id'], startTime=refunds_time).execute()
+        refunds = refund_list.list(packageName=configuration['google_bundle_id'],
+                                   startTime=refunds_time_in_ms).execute()
         for refund in refunds.get('voidedPurchases', []):
             self.refund(refund['orderId'], refund)
 
@@ -288,8 +289,8 @@ class AndroidRefund(BaseRefund):
     def _get_service(self, request, configuration):
         """ Create a service to interact with google api. """
         play_console_credentials = configuration.get('google_service_account_key_file')
-        scope = "https://www.googleapis.com/auth/androidpublisher"
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(play_console_credentials, scope)
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(play_console_credentials,
+                                                                       GOOGLE_PUBLISHER_API_SCOPE)
         http = httplib2.Http(timeout=self.timeout)
         http = credentials.authorize(http)
 
