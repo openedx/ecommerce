@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
+from edx_django_utils import monitoring as monitoring_utils
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
@@ -39,6 +40,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_DURING_PAYMENT_HANDLING,
     ERROR_DURING_POST_ORDER_OP,
     ERROR_ORDER_NOT_FOUND_FOR_REFUND,
+    ERROR_REFUND_NOT_COMPLETED,
     ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND,
     ERROR_WHILE_OBTAINING_BASKET_FOR_USER,
     GOOGLE_PUBLISHER_API_SCOPE,
@@ -52,6 +54,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     SEGMENT_MOBILE_BASKET_ADD,
     SEGMENT_MOBILE_PURCHASE_VIEW
 )
+from ecommerce.extensions.iap.api.v1.exceptions import RefundCompletionException
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
@@ -59,6 +62,7 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.refund.api import create_refunds, find_orders_associated_with_course
+from ecommerce.extensions.refund.status import REFUND
 
 Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -246,18 +250,25 @@ class BaseRefund(APIView):
         user = basket.owner
         course_key = basket.all_lines().first().product.attr.course_key
         orders = find_orders_associated_with_course(user, course_key)
+        try:
+            with transaction.atomic():
+                refunds = create_refunds(orders, course_key)
+                if not refunds:
+                    monitoring_utils.set_custom_attribute('iap_no_order_to_refund', transaction_id)
+                    logger.error(ERROR_ORDER_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
+                    return
 
-        with transaction.atomic():
-            refunds = create_refunds(orders, course_key)
-            if not refunds:
-                logger.error(ERROR_ORDER_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
-                return
+                refund = refunds[0]
+                refund.approve(revoke_fulfillment=True)
+                if refund.status != REFUND.COMPLETE:
+                    monitoring_utils.set_custom_attribute('iap_unrefunded_order', transaction_id)
+                    raise RefundCompletionException
 
-            refunds[0].approve(revoke_fulfillment=True)
-
-            PaymentProcessorResponse.objects.create(processor_name=self.processor_name,
-                                                    transaction_id=transaction_id,
-                                                    response=processor_response, basket=basket)
+                PaymentProcessorResponse.objects.create(processor_name=self.processor_name,
+                                                        transaction_id=transaction_id,
+                                                        response=processor_response, basket=basket)
+        except RefundCompletionException:
+            logger.exception(ERROR_REFUND_NOT_COMPLETED, user.username, course_key, self.processor_name)
 
 
 class AndroidRefund(BaseRefund):
@@ -277,7 +288,8 @@ class AndroidRefund(BaseRefund):
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][self.processor_name.lower()]
         service = self._get_service(configuration)
 
-        refunds_time = datetime.datetime.now() - datetime.timedelta(days=3)
+        refunds_age = IAPProcessorConfiguration.get_solo().android_refunds_age_in_days
+        refunds_time = datetime.datetime.now() - datetime.timedelta(days=refunds_age)
         refunds_time_in_ms = round(refunds_time.timestamp() * 1000)
         refund_list = service.purchases().voidedpurchases()
         refunds = refund_list.list(packageName=configuration['google_bundle_id'],

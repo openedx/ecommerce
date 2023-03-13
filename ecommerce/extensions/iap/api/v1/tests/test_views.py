@@ -34,6 +34,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_DURING_PAYMENT_HANDLING,
     ERROR_DURING_POST_ORDER_OP,
     ERROR_ORDER_NOT_FOUND_FOR_REFUND,
+    ERROR_REFUND_NOT_COMPLETED,
     ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND,
     ERROR_WHILE_OBTAINING_BASKET_FOR_USER,
     LOGGER_BASKET_NOT_FOUND,
@@ -558,8 +559,15 @@ class BaseRefundTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
                                                             AndroidRefund.processor_name)
             logger.check((self.logger_name, 'ERROR', msg),)
 
+    @staticmethod
+    def _revoke_lines(refund):
+        for line in refund.lines.all():
+            line.set_status(REFUND_LINE.COMPLETE)
+
+        refund.set_status(REFUND.COMPLETE)
+
     def assert_refund_and_order(self, refund, order, basket, processor_response, refund_response):
-        """ check if we refunded the correct order"""
+        """ Check if we refunded the correct order """
         self.assertEqual(refund.order, order)
         self.assertEqual(refund.user, order.user)
         self.assertEqual(refund.status, 'Complete')
@@ -570,26 +578,54 @@ class BaseRefundTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
         self.assertEqual(refund_response.transaction_id, processor_response.transaction_id)
         self.assertNotEqual(refund_response.id, processor_response.id)
 
+    def test_refund_completion_error(self):
+        """
+        View should create a refund if an order/line are found eligible for refund.
+        """
+        order = self.create_order()
+        processor_response = PaymentProcessorResponse.objects.create(basket=order.basket,
+                                                                     transaction_id=self.valid_transaction_id,
+                                                                     processor_name=AndroidRefund.processor_name,
+                                                                     response=json.dumps({'state': 'approved'}))
+
+        def _revoke_lines(refund):
+            for line in refund.lines.all():
+                line.set_status(REFUND_LINE.COMPLETE)
+
+            refund.set_status(REFUND.REVOCATION_ERROR)
+
+        with mock.patch.object(Refund, '_revoke_lines', side_effect=_revoke_lines, autospec=True):
+            refund_payload = {"state": "refund"}
+            msg = ERROR_REFUND_NOT_COMPLETED % (self.user.username, self.course_id, AndroidRefund.processor_name)
+
+            with LogCapture(self.logger_name) as logger:
+                AndroidRefund().refund(self.valid_transaction_id, refund_payload)
+                self.assertFalse(Refund.objects.exists())
+                self.assertEqual(len(PaymentProcessorResponse.objects.all()), 1)
+                # logger.check((self.logger_name, 'ERROR', msg),)
+
+                # A second call should ensure the atomicity of the refund logic
+                AndroidRefund().refund(self.valid_transaction_id, refund_payload)
+                self.assertFalse(Refund.objects.exists())
+                self.assertEqual(len(PaymentProcessorResponse.objects.all()), 1)
+                logger.check(
+                    (self.logger_name, 'ERROR', msg),
+                    (self.logger_name, 'ERROR', msg)
+                )
+
     def test_valid_order(self):
         """
         View should create a refund if an order/line are found eligible for refund.
         """
         order = self.create_order()
+        basket = order.basket
         self.assertFalse(Refund.objects.exists())
-        basket = BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.verified_product)
         processor_response = PaymentProcessorResponse.objects.create(basket=basket,
                                                                      transaction_id=self.valid_transaction_id,
                                                                      processor_name=AndroidRefund.processor_name,
                                                                      response=json.dumps({'state': 'approved'}))
 
-        def _revoke_lines(r):
-            for line in r.lines.all():
-                line.set_status(REFUND_LINE.COMPLETE)
-
-            r.set_status(REFUND.COMPLETE)
-
-        with mock.patch.object(Refund, '_revoke_lines', side_effect=_revoke_lines, autospec=True):
+        with mock.patch.object(Refund, '_revoke_lines', side_effect=BaseRefundTests._revoke_lines, autospec=True):
             refund_payload = {"state": "refund"}
             AndroidRefund().refund(self.valid_transaction_id, refund_payload)
             refund = Refund.objects.latest()
@@ -683,13 +719,7 @@ class AndroidRefundTests(BaseRefundTests):
                                                         processor_name=AndroidRefund.processor_name,
                                                         response=json.dumps({'state': 'approved'})))
 
-        def _revoke_lines(refund):
-            for line in refund.lines.all():
-                line.set_status(REFUND_LINE.COMPLETE)
-
-            refund.set_status(REFUND.COMPLETE)
-
-        with mock.patch.object(Refund, '_revoke_lines', side_effect=_revoke_lines, autospec=True), \
+        with mock.patch.object(Refund, '_revoke_lines', side_effect=BaseRefundTests._revoke_lines, autospec=True), \
              mock.patch.object(ServiceAccountCredentials, 'from_json_keyfile_dict') as mock_credential_method, \
                 mock.patch('ecommerce.extensions.iap.api.v1.views.build') as mock_build, \
                 mock.patch('httplib2.Http'):

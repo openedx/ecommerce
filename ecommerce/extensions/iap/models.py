@@ -14,6 +14,13 @@ class IAPProcessorConfiguration(SingletonModel):
         )
     )
 
+    android_refunds_age_in_days = models.PositiveSmallIntegerField(
+        default=3,
+        verbose_name=_(
+            'Past number of days to fetch Android refunds for.'
+        )
+    )
+
     class Meta:
         verbose_name = "IAP Processor Configuration"
 
