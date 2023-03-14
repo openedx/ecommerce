@@ -1,15 +1,17 @@
 """
 Tests for the ecommerce.extensions.checkout.mixins module.
 """
-
+import json
 
 import ddt
 import mock
+import pytest
 import responses
 from django.conf import settings
 from mock.mock import MagicMock
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory, ProductFactory
+from requests import HTTPError
 from testfixtures import LogCapture
 from waffle.models import Sample
 from waffle.testutils import override_flag
@@ -17,13 +19,14 @@ from waffle.testutils import override_flag
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import BusinessClient, SegmentClient
 from ecommerce.core.tests import toggle_switch
+from ecommerce.courses.constants import CertificateType
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
     ECOM_TRACKING_ID_FMT,
     parse_tracking_context,
     translate_basket_line_for_segment
 )
-from ecommerce.extensions.api.v2.constants import ENABLE_COORDINATOR_ORDER_CREATE
+from ecommerce.extensions.api.v2.constants import ENABLE_COORDINATOR_FULFILLMENT, ENABLE_COORDINATOR_ORDER_CREATE
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
@@ -121,7 +124,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         self.assert_valid_payment_event_fields(mixin._payment_events[-1], total, paid_type, processor_name, reference)
 
     @ddt.data(True, False)
-    @responses.activate
     def test_handle_commerce_order_create(self, flag_active, __):
         """
         Ensure that we emit a log entry upon receipt of a payment notification, and create Source and PaymentEvent
@@ -136,6 +138,21 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                 mixin.create_commerce_coordinator_order.assert_called()
             else:
                 mixin.create_commerce_coordinator_order.assert_not_called()
+
+    @ddt.data(True, False)
+    def test_coordinator_fulfillment_flag(self, flag_active, __):
+        """
+        Ensure that we emit a log entry upon receipt of a payment notification, and create Source and PaymentEvent
+        objects.
+        """
+        mixin = EdxOrderPlacementMixin()
+        mixin.create_commerce_coordinator_fulfillment = MagicMock()
+        with override_flag(ENABLE_COORDINATOR_FULFILLMENT, active=flag_active):
+            mixin.handle_successful_order(self.order)
+            if flag_active:
+                mixin.create_commerce_coordinator_fulfillment.assert_called()
+            else:
+                mixin.create_commerce_coordinator_fulfillment.assert_not_called()
 
     @ddt.data(200, 500)
     @responses.activate
@@ -157,6 +174,35 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         self.assertIn('email', called_url)
         self.assertIn('product_sku', called_url)
         self.assertIn('coupon_code', called_url)
+
+    @ddt.data(200, 500)
+    @responses.activate
+    def test_coordinator_order_fulfilment(self, response_status, __):
+        """
+        Ensure that Order Create API from commerce coordinator called properly.
+        """
+        mixin = EdxOrderPlacementMixin()
+        self.mock_access_token_response()
+        fulfillment_create_url = f'{settings.COMMERCE_COORDINATOR_SERVICE_URL}/ecommerce/orders/fulfill/'
+        responses.add(responses.POST, fulfillment_create_url, status=response_status)
+        if response_status >= 400:
+            with pytest.raises(HTTPError):
+                mixin.create_commerce_coordinator_fulfillment(self.order)
+        else:
+            mixin.create_commerce_coordinator_fulfillment(self.order)
+        called_url = responses.calls[-1].request.url
+        self.assertEqual(fulfillment_create_url, called_url)
+        request_body = json.loads(responses.calls[-1].request.body)
+        expected_body = {
+            'course_id': self.course.id,
+            'course_mode': CertificateType.VERIFIED,
+            'email_opt_in': True,
+            'order_number': self.order.number,
+            'order_placed': self.order.date_placed.timestamp(),
+            'provider': None,
+            'user': self.user.username
+        }
+        self.assertEqual(request_body, expected_body)
 
     def test_order_number_collision(self, _mock_track):
         """
