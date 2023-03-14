@@ -3,7 +3,6 @@ from solo.admin import SingletonModelAdmin
 
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration, PaymentProcessorResponseExtension
 
-
 admin.site.register(IAPProcessorConfiguration, SingletonModelAdmin)
 
 
