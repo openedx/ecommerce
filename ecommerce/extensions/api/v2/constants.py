@@ -16,6 +16,16 @@ REFUND_ORDER_EMAIL_CLOSING = 'We hope you find a course that meets your learning
 # .. toggle_status: supported
 ENABLE_HOIST_ORDER_HISTORY = 'enable_hoist_order_history'
 
+# .. toggle_name: transition_to_coordinator.order_create
+# .. toggle_type: waffle_flag
+# .. toggle_default: False
+# .. toggle_description: Allows to post order to Commerce Coordinator API
+# .. toggle_use_cases: open_edx
+# .. toggle_creation_date: 2023-03-07
+# .. toggle_tickets: REV-3270
+# .. toggle_status: supported
+ENABLE_COORDINATOR_ORDER_CREATE = 'transition_to_coordinator.order_create'
+
 # .. toggle_name: enable_receipts_via_ecommerce_mfe
 # .. toggle_type: waffle_flag
 # .. toggle_default: False

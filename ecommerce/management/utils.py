@@ -189,6 +189,7 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             # Record Payment and try to place order
             try:
                 self.record_payment(basket=basket, handled_processor_response=handled_response)
+                self.handle_commerce_order_create(basket)
 
                 shipping_method = NoShippingRequired()
                 shipping_charge = shipping_method.calculate(basket)

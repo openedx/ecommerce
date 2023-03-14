@@ -10,13 +10,16 @@ from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
+from requests import HTTPError
 
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
 from ecommerce.extensions.api import data as data_api
+from ecommerce.extensions.api.v2.constants import ENABLE_COORDINATOR_ORDER_CREATE
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.basket.utils import ORGANIZATION_ATTRIBUTE_TYPE
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
+from ecommerce.extensions.checkout.utils import get_seat_purchase_line
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.invoice.models import Invoice
@@ -93,6 +96,18 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
             self._payment_events = []
         self._payment_events.append(event)
 
+    def handle_commerce_order_create(self, basket):
+        """
+        Handle commerce coordinator order creation.
+
+        Calls create_commerce_coordinator_order if flag is active and basket is a non-program purchase.
+        """
+        request = crum.get_current_request()
+        if waffle.flag_is_active(request, ENABLE_COORDINATOR_ORDER_CREATE):
+            line = get_seat_purchase_line(basket)
+            if line:
+                self.create_commerce_coordinator_order(basket, line)
+
     def handle_payment(self, response, basket):  # pylint: disable=arguments-differ
         """
         Handle any payment processing and record payment sources and events.
@@ -118,6 +133,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         else:
             # We only record successful payments in the database.
             self.record_payment(basket, handled_processor_response)
+            self.handle_commerce_order_create(basket)
             properties.update({'total': handled_processor_response.total, 'success': True, })
         finally:
             track_segment_event(basket.site, basket.owner, 'Payment Processor Response', properties)
@@ -135,6 +151,28 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         properties['step'] = 2
         track_segment_event(basket.site, basket.owner, 'Checkout Step Viewed', properties)
         track_segment_event(basket.site, basket.owner, 'Checkout Step Completed', properties)
+
+    def create_commerce_coordinator_order(self, basket, line):
+        """
+        Calls /ecommerce/order API from commerce coordinator.
+        """
+        site_config = basket.site.siteconfiguration
+        api_client = site_config.oauth_api_client
+        api_url = site_config.build_commerce_coordinator_url('/ecommerce/order/')
+        query_params = {
+            'edx_lms_user_id': basket.owner.id,
+            'email': basket.owner.email,
+            'product_sku': line.product.stockrecords.first().partner_sku,
+            'coupon_code': list(basket.vouchers.values_list('code', flat=True)),
+        }
+        try:
+            logger.info('Commerce coordinator Order Create called with params: %s', query_params)
+            response = api_client.get(api_url, params=query_params)
+            response.raise_for_status()
+        except HTTPError as error:
+            logger.exception(
+                'Failed to create order, basket_id: %s, params: %s, response: %s', basket.id, query_params, error
+            )
 
     def record_payment(self, basket, handled_processor_response):
         self.emit_checkout_step_events(basket, handled_processor_response, self.payment_processor)
