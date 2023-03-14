@@ -56,6 +56,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
 )
 from ecommerce.extensions.iap.api.v1.exceptions import RefundCompletionException
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
+from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException

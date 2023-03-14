@@ -583,10 +583,10 @@ class BaseRefundTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
         View should create a refund if an order/line are found eligible for refund.
         """
         order = self.create_order()
-        processor_response = PaymentProcessorResponse.objects.create(basket=order.basket,
-                                                                     transaction_id=self.valid_transaction_id,
-                                                                     processor_name=AndroidRefund.processor_name,
-                                                                     response=json.dumps({'state': 'approved'}))
+        PaymentProcessorResponse.objects.create(basket=order.basket,
+                                                transaction_id=self.valid_transaction_id,
+                                                processor_name=AndroidRefund.processor_name,
+                                                response=json.dumps({'state': 'approved'}))
 
         def _revoke_lines(refund):
             for line in refund.lines.all():
