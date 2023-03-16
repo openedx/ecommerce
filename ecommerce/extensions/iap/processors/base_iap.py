@@ -113,6 +113,9 @@ class BaseIAP(BasePaymentProcessor):
                 )
                 raise GatewayError(validation_response)
 
+        if self.NAME == 'ios-iap':
+            validation_response = self.parse_ios_response(validation_response, product_id)
+
         transaction_id = response.get('transactionId', self._get_transaction_id_from_receipt(validation_response))
         # original_transaction_id is primary identifier for a purchase on iOS
         original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
@@ -146,6 +149,21 @@ class BaseIAP(BasePaymentProcessor):
             card_number=label,
             card_type=None
         )
+
+    def parse_ios_response(self, response, product_id):
+        """
+        iOS response has multiple receipts data, and we need to select the purchase we just made
+        with the given product id.
+        """
+        purchases = response['receipt'].get('in_app', [])
+        for purchase in purchases:
+            if purchase['product_id'] == product_id and \
+                    response['receipt']['receipt_creation_date_ms'] == purchase['purchase_date_ms']:
+
+                response['receipt']['in_app'] = [purchase]
+                break
+
+        return response
 
     def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None):  # pylint: disable=arguments-differ
         """
