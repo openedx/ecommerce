@@ -54,10 +54,40 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
             u"IOSInAppPurchase's response was recorded in entry [{entry_id}]."
         )
         self.RETURN_DATA = {
-            'transactionId': 'transactionId.ios.test.purchased',
-            'originalTransactionId': 'originalTransactionId.ios.test.purchased',
-            'productId': 'ios.test.purchased',
-            'purchaseToken': 'inapp:org.edx.mobile:ios.test.purchased',
+            'transactionId': 'test_id',
+            'originalTransactionId': 'original_test_id',
+            'productId': 'test_product_id',
+            'purchaseToken': 'inapp:test.edx.edx:ios.test.purchased',
+        }
+        self.mock_validation_response = {
+            'environment': 'Sandbox',
+            'receipt': {
+                'bundle_id': 'test_bundle_id',
+                'in_app': [
+                    {
+                        'in_app_ownership_type': 'PURCHASED',
+                        'original_transaction_id': 'very_old_purchase_id',
+                        'product_id': 'org.edx.mobile.test_product1',
+                        'purchase_date_ms': '1676562309000',
+                        'transaction_id': 'vaery_old_purchase_id'
+                    },
+                    {
+                        'in_app_ownership_type': 'PURCHASED',
+                        'original_transaction_id': 'old_purchase_id',
+                        'product_id': 'org.edx.mobile.test_product3',
+                        'purchase_date_ms': '1676562544000',
+                        'transaction_id': 'old_purchase_id'
+                    },
+                    {
+                        'in_app_ownership_type': 'PURCHASED',
+                        'original_transaction_id': 'original_test_id',
+                        'product_id': 'test_product_id',
+                        'purchase_date_ms': '1676562978000',
+                        'transaction_id': 'test_id'
+                    }
+                ],
+                'receipt_creation_date_ms': '1676562978000',
+            }
         }
 
     def _get_receipt_url(self):
@@ -124,14 +154,13 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         Verify that appropriate PaymentError is raised in absence of originalTransactionId parameter.
         """
-        mock_ios_validator.return_value = {
-            'resource': {
-                'orderId': 'orderId.ios.test.purchased'
-            }
-        }
+        modified_validation_response = self.mock_validation_response
+        modified_validation_response['receipt']['in_app'][2].pop('original_transaction_id')
+        mock_ios_validator.return_value = modified_validation_response
         with self.assertRaises(PaymentError):
             modified_return_data = self.RETURN_DATA
             modified_return_data.pop('originalTransactionId')
+
             self.processor.handle_processor_response(modified_return_data, basket=self.basket)
 
     @mock.patch.object(BaseIAP, '_is_payment_redundant')
@@ -141,11 +170,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         Verify that appropriate RedundantPaymentNotificationError is raised in case payment with same
         originalTransactionId exists with another user
         """
-        mock_ios_validator.return_value = {
-            'resource': {
-                'orderId': 'orderId.ios.test.purchased'
-            }
-        }
+        mock_ios_validator.return_value = self.mock_validation_response
         mock_payment_redundant.return_value = True
 
         with self.assertRaises(RedundantPaymentNotificationError):
@@ -156,11 +181,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         Verify that the processor creates the appropriate PaymentEvent and Source objects.
         """
-        mock_ios_validator.return_value = {
-            'resource': {
-                'orderId': 'orderId.ios.test.purchased'
-            }
-        }
+        mock_ios_validator.return_value = self.mock_validation_response
 
         handled_response = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
         self.assertEqual(handled_response.currency, self.basket.currency)

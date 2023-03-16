@@ -387,7 +387,8 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                 'receipt': {
                     'in_app': [{
                         'original_transaction_id': '123456',
-                        'transaction_id': '123456'
+                        'transaction_id': '123456',
+                        'product_id': 'fake_product_id'
                     }]
                 }
             }
