@@ -26,6 +26,16 @@ ENABLE_HOIST_ORDER_HISTORY = 'enable_hoist_order_history'
 # .. toggle_status: supported
 ENABLE_COORDINATOR_ORDER_CREATE = 'transition_to_coordinator.order_create'
 
+# .. toggle_name: transition_to_coordinator.fulfillment
+# .. toggle_type: waffle_flag
+# .. toggle_default: False
+# .. toggle_description: Allows to post order fulfillment to Commerce Coordinator
+# .. toggle_use_cases: open_edx
+# .. toggle_creation_date: 2023-03-10
+# .. toggle_tickets: REV-3279
+# .. toggle_status: supported
+ENABLE_COORDINATOR_FULFILLMENT = 'transition_to_coordinator.fulfillment'
+
 # .. toggle_name: enable_receipts_via_ecommerce_mfe
 # .. toggle_type: waffle_flag
 # .. toggle_default: False

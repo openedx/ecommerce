@@ -15,7 +15,7 @@ from requests import HTTPError
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
 from ecommerce.extensions.api import data as data_api
-from ecommerce.extensions.api.v2.constants import ENABLE_COORDINATOR_ORDER_CREATE
+from ecommerce.extensions.api.v2.constants import ENABLE_COORDINATOR_FULFILLMENT, ENABLE_COORDINATOR_ORDER_CREATE
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.basket.utils import ORGANIZATION_ATTRIBUTE_TYPE
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
@@ -174,6 +174,28 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
                 'Failed to create order, basket_id: %s, params: %s, response: %s', basket.id, query_params, error
             )
 
+    def create_commerce_coordinator_fulfillment(self, order):
+        """
+        Calls /ecommerce/orders/fulfill/ API from commerce coordinator.
+        """
+        site_config = order.site.siteconfiguration
+        api_client = site_config.oauth_api_client
+        api_url = site_config.build_commerce_coordinator_url('/ecommerce/orders/fulfill/')
+        product = order.lines.first().product
+        query_params = {
+            'course_id': product.course.id,
+            'course_mode': product.attr.certificate_type,
+            'email_opt_in': True,
+            'order_number': order.number,
+            'order_placed': order.date_placed.timestamp(),
+            'provider': getattr(product.attr, 'credit_provider', None),
+            'user': order.user.username,
+        }
+        logger.info('Commerce coordinator fulfillment called with params: %s', query_params)
+        response = api_client.post(api_url, json=query_params)
+        # throw error if there is any.
+        response.raise_for_status()
+
     def record_payment(self, basket, handled_processor_response):
         self.emit_checkout_step_events(basket, handled_processor_response, self.payment_processor)
         track_segment_event(basket.site, basket.owner, 'Payment Info Entered', {'checkout_id': basket.order_number})
@@ -267,7 +289,9 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         # update offer assignment with voucher application
         self.update_assigned_voucher_offer_assignment(order)
 
-        if waffle.sample_is_active('async_order_fulfillment'):
+        if waffle.flag_is_active(request, ENABLE_COORDINATOR_FULFILLMENT) and get_seat_purchase_line(order):
+            self.create_commerce_coordinator_fulfillment(order)
+        elif waffle.sample_is_active('async_order_fulfillment'):
             # Always commit transactions before sending tasks depending on state from the current transaction!
             # There's potential for a race condition here if the task starts executing before the active
             # transaction has been committed; the necessary order doesn't exist in the database yet.
