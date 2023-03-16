@@ -193,10 +193,14 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         Tests issuing credit/refund with IOSInAppPurchase processor.
         """
-        self.assertRaises(NotImplementedError, self.processor.issue_credit, None, None, None, None, None)
+        refund_id = "test id"
+        result = self.processor.issue_credit(refund_id, refund_id, refund_id, refund_id, refund_id)
+        self.assertEqual(refund_id, result)
 
     def test_issue_credit_error(self):
         """
-        Tests issuing credit/refund with IOsInAppPurchase processor.
+        Tests issuing credit/refund with IOSInAppPurchase processor.
         """
-        self.assertRaises(NotImplementedError, self.processor.issue_credit, None, None, None, None, None)
+        refund_id = "test id"
+        result = self.processor.issue_credit(refund_id, refund_id, refund_id, refund_id, refund_id)
+        self.assertEqual(refund_id, result)
