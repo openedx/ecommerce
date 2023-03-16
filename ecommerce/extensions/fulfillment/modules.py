@@ -1029,8 +1029,9 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
                     pass
 
                 logger.exception(
-                    'Fulfillment of line [%d] on order [%s] failed. Reason: %s.',
-                    line.id, order.number, reason
+                    '[ExecutiveEducation2UFulfillmentModule] Fulfillment of line [%d] on '
+                    'order [%s] failed. Reason: %s. Fulfillment details: %s.',
+                    line.id, order.number, reason, fulfillment_details,
                 )
                 line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
             else:
