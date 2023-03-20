@@ -56,7 +56,11 @@ from ecommerce.extensions.iap.api.v1.constants import (
 )
 from ecommerce.extensions.iap.api.v1.exceptions import RefundCompletionException
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
+<<<<<<< Updated upstream
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
+=======
+from ecommerce.extensions.iap.api.v1.utils import products_in_basket_already_purchased
+>>>>>>> Stashed changes
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -166,6 +170,9 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         Applicator().apply(basket, basket.owner, self.request)
         basket_add_organization_attribute(basket, self.request.GET)
 
+        if products_in_basket_already_purchased(request.user, basket, request.site):
+            raise AlreadyPlacedOrderException
+
         return basket
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
@@ -191,6 +198,8 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         except ObjectDoesNotExist:
             logger.exception(LOGGER_BASKET_NOT_FOUND, basket_id)
             return JsonResponse({'error': ERROR_BASKET_NOT_FOUND.format(basket_id)}, status=400)
+        except AlreadyPlacedOrderException:
+            return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
         except:  # pylint: disable=bare-except
             error_message = ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(request.user.email)
             logger.exception(error_message)
@@ -228,6 +237,11 @@ class MobileCheckoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+        basket_id = request.data.get('basket_id')
+        basket = request.user.baskets.get(id=basket_id)
+        if products_in_basket_already_purchased(request.user, basket, request.site):
+            return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
+
         response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
         if response.status_code != 200:
             return JsonResponse({'error': response.content.decode()}, status=response.status_code)
