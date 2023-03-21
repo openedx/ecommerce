@@ -56,11 +56,8 @@ from ecommerce.extensions.iap.api.v1.constants import (
 )
 from ecommerce.extensions.iap.api.v1.exceptions import RefundCompletionException
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
-<<<<<<< Updated upstream
-from ecommerce.extensions.iap.models import IAPProcessorConfiguration
-=======
 from ecommerce.extensions.iap.api.v1.utils import products_in_basket_already_purchased
->>>>>>> Stashed changes
+from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -238,7 +235,10 @@ class MobileCheckoutView(APIView):
 
     def post(self, request):
         basket_id = request.data.get('basket_id')
-        basket = request.user.baskets.get(id=basket_id)
+        try:
+            basket = request.user.baskets.get(id=basket_id)
+        except ObjectDoesNotExist:
+            return JsonResponse({'error': ERROR_BASKET_NOT_FOUND.format(basket_id)}, status=400)
         if products_in_basket_already_purchased(request.user, basket, request.site):
             return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
 
