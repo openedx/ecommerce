@@ -151,15 +151,14 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
 
     def _get_basket(self, request, basket_id):
         """
-        Retrieve a basket using a payment ID.
+        Retrieve a basket using a basket ID.
 
         Arguments:
-            payment_id: payment_id received from PayPal.
+            basket_id: basket_id representing basket.
 
         Returns:
-            It will return related basket or log exception and return None if
-            duplicate payment_id received or any other exception occurred.
-
+            It will return related basket or raise AlreadyPlacedOrderException
+            if products in basket have already been purchased.
         """
         basket = request.user.baskets.get(id=basket_id)
         basket.strategy = request.strategy
