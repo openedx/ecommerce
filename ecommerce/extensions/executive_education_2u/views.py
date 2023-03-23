@@ -118,7 +118,8 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
         try:
             # logger 1 for debugging ent-6954
             logger.info(
-                '[ExecutiveEducation2UViewSet] checkout_failure_reason  1: Checking if user [%s] has purchased product [%s] previously from basket [%s].',
+                '[ExecutiveEducation2UViewSet] checkout_failure_reason  1: Checking if user [%s] has '
+                'purchased product [%s] previously from basket [%s].',
                 request.user.id, product, basket)
             enterprise_id = get_enterprise_id_for_user(request.site, request.user)
             course_info = get_course_info_from_catalog(request.site, product)
@@ -126,7 +127,8 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # logger 2 for debugging ent-6954
             logger.info(
-                '[ExecutiveEducation2UViewSet] checkout_failure_reason step 2: User [%s] is attempting to checkout for course [%s] with enterprise id [%s]',
+                '[ExecutiveEducation2UViewSet] checkout_failure_reason step 2: User [%s] is attempting '
+                'to checkout for course [%s] with enterprise id [%s]',
                 request.user.id,
                 course_key,
                 enterprise_id,
@@ -139,7 +141,8 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # logger 3 for debugging ent-6954
             logger.info(
-                '[ExecutiveEducation2UViewSet] checkout_failure_reason step 3: User [%s] is attempting to checkout for course [%s] with enterprise id [%s] and catalog list [%s]',
+                '[ExecutiveEducation2UViewSet] checkout_failure_reason step 3: User [%s] is attempting '
+                'to checkout for course [%s] with enterprise id [%s] and catalog list [%s]',
                 request.user.id,
                 course_key,
                 enterprise_id,
@@ -149,7 +152,9 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # logger 4 for debugging ent-6954
             logger.info(
-                '[ExecutiveEducation2UViewSet] checkout_failure_reason step 4: User [%s] is attempting to checkout for course [%s] with enterprise id [%s] and catalog list [%s] and enterprise offers [%s]',
+                '[ExecutiveEducation2UViewSet] checkout_failure_reason step 4: User [%s] is attempting '
+                'to checkout for course [%s] with enterprise id [%s] and catalog list [%s] and enterprise '
+                'offers [%s]',
                 request.user.id,
                 course_key,
                 enterprise_id,
@@ -168,7 +173,9 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # logger 5 for debugging ent-6954
             logger.info(
-                '[ExecutiveEducation2UViewSet] checkout_failure_reason step 5: User [%s] is attempting to checkout for course [%s] with enterprise id [%s] and catalog list [%s] and enterprise offers [%s] and offers with remaining balance [%s]',
+                '[ExecutiveEducation2UViewSet] checkout_failure_reason step 5: User [%s] is attempting '
+                'to checkout for course [%s] with enterprise id [%s] and catalog list [%s] and enterprise '
+                'offers [%s] and offers with remaining balance [%s]',
                 request.user.id,
                 course_key,
                 enterprise_id,
@@ -231,7 +238,8 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # logger 2 for debugging ent-6954
             logger.info(
-                '[ExecutiveEducation2UViewSet] User [%s] is attempting to checkout for product [%s] with sku [%s] and course_uuid [%s] with query params [%s]',
+                '[ExecutiveEducation2UViewSet] User [%s] is attempting to checkout for product [%s] with ',
+                'sku [%s] and course_uuid [%s] with query params [%s]',
                 request.user.id,
                 product,
                 sku,
@@ -252,7 +260,8 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
             if basket.total_excl_tax != 0:
                 # logger 4 for debugging ent-6954
                 logger.info(
-                    '[ExecutiveEducation2UViewSet] User [%s] is attempting to checkout for product [%s] with sku [%s] and course_uuid [%s] with query params [%s] and basket total [%s]',
+                    '[ExecutiveEducation2UViewSet] User [%s] is attempting to checkout for product [%s] with '
+                    'sku [%s] and course_uuid [%s] with query params [%s] and basket total [%s]',
                     request.user.id,
                     product,
                     sku,
@@ -263,7 +272,11 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
                 failure_reason = self._get_checkout_failure_reason(request, basket, product)
 
                 # logger 5 for debugging ent-6954
-                logger.info('[ExecutiveEducation2UViewSet] User [%s] encountered a failure_reason: %s', request.user.id, failure_reason)
+                logger.info(
+                    '[ExecutiveEducation2UViewSet] User [%s] encountered a failure_reason: %s',
+                    request.user.id,
+                    failure_reason,
+                )
 
                 query_params.update({
                     'failure_reason': failure_reason
