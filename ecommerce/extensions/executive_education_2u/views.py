@@ -228,6 +228,7 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
             )
             # Create basket and see if total cost is $0
             basket = self._prepare_basket(request, product)
+
             course_uuid = getattr(product.attr, 'UUID', '')
 
             # Create the query params that will be used by the learner portal
@@ -238,9 +239,12 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # logger 2 for debugging ent-6954
             logger.info(
-                '[ExecutiveEducation2UViewSet] User [%s] is attempting to checkout for product [%s] with '
-                'sku [%s] and course_uuid [%s] with query params [%s]',
+                '[ExecutiveEducation2UViewSet] User [%s] is attempting to checkout '
+                'basket [%s] (price: [%s]) for product [%s] with sku [%s] and course_uuid [%s] with '
+                'query params [%s]',
                 request.user.id,
+                basket.id,
+                basket.total_excl_tax,
                 product,
                 sku,
                 course_uuid,
