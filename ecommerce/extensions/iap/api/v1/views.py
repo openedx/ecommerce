@@ -56,6 +56,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
 )
 from ecommerce.extensions.iap.api.v1.exceptions import RefundCompletionException
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
+from ecommerce.extensions.iap.api.v1.utils import products_in_basket_already_purchased
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
@@ -150,21 +151,23 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
 
     def _get_basket(self, request, basket_id):
         """
-        Retrieve a basket using a payment ID.
+        Retrieve a basket using a basket ID.
 
         Arguments:
-            payment_id: payment_id received from PayPal.
+            basket_id: basket_id representing basket.
 
         Returns:
-            It will return related basket or log exception and return None if
-            duplicate payment_id received or any other exception occurred.
-
+            It will return related basket or raise AlreadyPlacedOrderException
+            if products in basket have already been purchased.
         """
         basket = request.user.baskets.get(id=basket_id)
         basket.strategy = request.strategy
 
         Applicator().apply(basket, basket.owner, self.request)
         basket_add_organization_attribute(basket, self.request.GET)
+
+        if products_in_basket_already_purchased(request.user, basket, request.site):
+            raise AlreadyPlacedOrderException
 
         return basket
 
@@ -191,6 +194,8 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         except ObjectDoesNotExist:
             logger.exception(LOGGER_BASKET_NOT_FOUND, basket_id)
             return JsonResponse({'error': ERROR_BASKET_NOT_FOUND.format(basket_id)}, status=400)
+        except AlreadyPlacedOrderException:
+            return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
         except:  # pylint: disable=bare-except
             error_message = ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(request.user.email)
             logger.exception(error_message)
@@ -228,6 +233,14 @@ class MobileCheckoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+        basket_id = request.data.get('basket_id')
+        try:
+            basket = request.user.baskets.get(id=basket_id)
+        except ObjectDoesNotExist:
+            return JsonResponse({'error': ERROR_BASKET_NOT_FOUND.format(basket_id)}, status=400)
+        if products_in_basket_already_purchased(request.user, basket, request.site):
+            return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
+
         response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
         if response.status_code != 200:
             return JsonResponse({'error': response.content.decode()}, status=response.status_code)
