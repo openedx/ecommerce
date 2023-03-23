@@ -116,17 +116,46 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
     def _get_checkout_failure_reason(self, request, basket, product):
         try:
+            # logger 1 for debugging ent-6954
+            logger.info(
+                'checkout_failure_reason  1: Checking if user [%s] has purchased product [%s] previously from basket [%s].',
+                request.user, product, basket)
             enterprise_id = get_enterprise_id_for_user(request.site, request.user)
             course_info = get_course_info_from_catalog(request.site, product)
             course_key = course_info['key']
 
+            # logger 2 for debugging ent-6954
+            logger.info(
+                'checkout_failure_reason step 2: User [%s] is attempting to checkout for course [%s] with enterprise id [%s]',
+                request.user,
+                course_key,
+                enterprise_id,
+            )
             catalog_list = fetch_enterprise_catalogs_for_content_items(
                 request.site,
                 course_key,
                 enterprise_id
             )
 
+            # logger 3 for debugging ent-6954
+            logger.info(
+                'checkout_failure_reason step 3: User [%s] is attempting to checkout for course [%s] with enterprise id [%s] and catalog list [%s]',
+                request.user,
+                course_key,
+                enterprise_id,
+                catalog_list,
+            )
             enterprise_offers = get_enterprise_offers_for_catalogs(enterprise_id, catalog_list)
+
+            # logger 4 for debugging ent-6954
+            logger.info(
+                'checkout_failure_reason step 4: User [%s] is attempting to checkout for course [%s] with enterprise id [%s] and catalog list [%s] and enterprise offers [%s]',
+                request.user,
+                course_key,
+                enterprise_id,
+                catalog_list,
+                enterprise_offers,
+            )
             if not enterprise_offers:
                 return ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_AVAILABLE
 
@@ -136,6 +165,18 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
                     basket, offer
                 )
             ]
+
+            # logger 5 for debugging ent-6954
+            logger.info(
+                'checkout_failure_reason step 5: User [%s] is attempting to checkout for course [%s] with enterprise id [%s] and catalog list [%s] and enterprise offers [%s] and offers with remaining balance [%s]',
+                request.user,
+                course_key,
+                enterprise_id,
+                catalog_list,
+                enterprise_offers,
+                offers_with_remaining_balance,
+            )
+
             if not offers_with_remaining_balance:
                 return ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_ENOUGH_BALANCE
 
@@ -145,9 +186,9 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
                     basket, offer
                 )
             ]
-
             if not offers_with_remaining_user_balance:
                 return ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_ENOUGH_USER_BALANCE
+
         except Exception as ex:  # pylint: disable=broad-except
             logger.exception(ex)
 
@@ -171,6 +212,13 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
             return HttpResponseNotFound(f'No Executive Education (2U) product found for SKU {sku}.')
 
         try:
+            # logger 1 for debugging ent-6954
+            logger.info(
+                'User [%s] is attempting to checkout for product [%s] with sku [%s]',
+                request.user,
+                product,
+                sku,
+            )
             # Create basket and see if total cost is $0
             basket = self._prepare_basket(request, product)
             course_uuid = getattr(product.attr, 'UUID', '')
@@ -181,18 +229,54 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
                 'sku': sku
             }
 
+            # logger 2 for debugging ent-6954
+            logger.info(
+                'User [%s] is attempting to checkout for product [%s] with sku [%s] and course_uuid [%s] with query params [%s]',
+                request.user,
+                product,
+                sku,
+                course_uuid,
+                query_params,
+            )
+
             referer = request.headers.get('referer', '')
+
+            # logger 3 for debugging ent-6954
+            logger.info('referer: %s', referer)
+
             if referer:
                 query_params.update({'http_referer': referer})
 
             failure_reason = None
             # Users cannot purchase Exec Ed 2U products directly
             if basket.total_excl_tax != 0:
+                # logger 4 for debugging ent-6954
+                logger.info(
+                    'User [%s] is attempting to checkout for product [%s] with sku [%s] and course_uuid [%s] with query params [%s] and basket total [%s]',
+                    request.user,
+                    product,
+                    sku,
+                    course_uuid,
+                    query_params,
+                    basket.total_excl_tax,
+                )
+
                 failure_reason = self._get_checkout_failure_reason(request, basket, product)
+
+                # logger 5 for debugging ent-6954
+                logger.info('failure_reason: %s', failure_reason)
                 query_params.update({
                     'failure_reason': failure_reason
                 })
+
                 basket.flush()
+
+                # logger 6 for debugging ent-6954
+                logger.info(
+                    'flushed basket [%s] for user [%s]',
+                    basket,
+                    request.user,
+                )
 
             # Redirect users to learner portals for terms & policies or error display
             learner_portal_url = get_learner_portal_url(request)
