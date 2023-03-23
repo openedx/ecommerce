@@ -238,7 +238,7 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             # logger 2 for debugging ent-6954
             logger.info(
-                '[ExecutiveEducation2UViewSet] User [%s] is attempting to checkout for product [%s] with ',
+                '[ExecutiveEducation2UViewSet] User [%s] is attempting to checkout for product [%s] with '
                 'sku [%s] and course_uuid [%s] with query params [%s]',
                 request.user.id,
                 product,
