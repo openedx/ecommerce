@@ -233,6 +233,7 @@ class MobileCheckoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+        # TODO: Add check for products_in_basket_already_purchased
         response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
         if response.status_code != 200:
             return JsonResponse({'error': response.content.decode()}, status=response.status_code)
