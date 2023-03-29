@@ -546,13 +546,6 @@ class TestMobileCheckoutView(TestCase):
         self.assertIn(reverse('iap:iap-execute'), response_data['payment_page_url'])
         self.assertEqual(response_data['payment_processor'], self.processor_name)
 
-    def test_already_purchased_basket(self):
-        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
-            create_order(site=self.site, user=self.user, basket=self.basket)
-            response = self.client.post(self.path, data=self.post_data)
-            self.assertEqual(response.status_code, 406)
-            self.assertEqual(response.json().get('error'), ERROR_ALREADY_PURCHASED)
-
 
 class BaseRefundTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
     MODEL_LOGGER_NAME = 'ecommerce.core.models'

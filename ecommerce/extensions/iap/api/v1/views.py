@@ -233,14 +233,6 @@ class MobileCheckoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        basket_id = request.data.get('basket_id')
-        try:
-            basket = request.user.baskets.get(id=basket_id)
-        except ObjectDoesNotExist:
-            return JsonResponse({'error': ERROR_BASKET_NOT_FOUND.format(basket_id)}, status=400)
-        if products_in_basket_already_purchased(request.user, basket, request.site):
-            return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
-
         response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
         if response.status_code != 200:
             return JsonResponse({'error': response.content.decode()}, status=response.status_code)
