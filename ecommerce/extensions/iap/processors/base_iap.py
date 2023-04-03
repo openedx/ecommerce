@@ -9,7 +9,6 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration, PaymentProcessorResponseExtension
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
-from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 
 logger = logging.getLogger(__name__)
@@ -126,7 +125,7 @@ class BaseIAP(BasePaymentProcessor):
                 raise PaymentError(response)
 
         if not waffle.switch_is_active(DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME):
-            is_redundant_payment = self._is_payment_redundant(original_transaction_id, transaction_id)
+            is_redundant_payment = self.is_payment_redundant(original_transaction_id, transaction_id)
             if is_redundant_payment:
                 raise RedundantPaymentNotificationError(response)
 
@@ -194,6 +193,9 @@ class BaseIAP(BasePaymentProcessor):
         """
         return reference_number
 
+    def is_payment_redundant(self, original_transaction_id=None, transaction_id=None):
+        raise NotImplementedError
+
     def _get_attribute_from_receipt(self, validated_receipt, attribute):
         value = None
 
@@ -207,15 +209,3 @@ class BaseIAP(BasePaymentProcessor):
     def _get_transaction_id_from_receipt(self, validated_receipt):
         transaction_key = 'transaction_id' if self.NAME == 'ios-iap' else 'orderId'
         return self._get_attribute_from_receipt(validated_receipt, transaction_key)
-
-    def _is_payment_redundant(self, original_transaction_id, transaction_id):
-        processor_response = PaymentProcessorResponse.objects.none()
-        if self.NAME == 'ios-iap':
-            processor_response = PaymentProcessorResponse.objects.filter(
-                processor_name=self.NAME,
-                extension__original_transaction_id=original_transaction_id)
-        elif self.NAME == 'android-iap':
-            processor_response = PaymentProcessorResponse.objects.filter(
-                processor_name=self.NAME,
-                transaction_id=transaction_id)
-        return processor_response.exists()

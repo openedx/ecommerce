@@ -18,7 +18,6 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
-from ecommerce.extensions.iap.processors.base_iap import BaseIAP
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
@@ -125,7 +124,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                     ),
                 )
 
-    @mock.patch.object(BaseIAP, '_is_payment_redundant')
+    @mock.patch.object(AndroidIAP, 'is_payment_redundant')
     @mock.patch.object(GooglePlayValidator, 'validate')
     def test_handle_processor_response_redundant_error(self, mock_android_validator, mock_payment_redundant):
         """

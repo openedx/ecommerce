@@ -17,7 +17,6 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
 from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
-from ecommerce.extensions.iap.processors.base_iap import BaseIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
@@ -165,7 +164,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
 
             self.processor.handle_processor_response(modified_return_data, basket=self.basket)
 
-    @mock.patch.object(BaseIAP, '_is_payment_redundant')
+    @mock.patch.object(IOSIAP, 'is_payment_redundant')
     @mock.patch.object(IOSValidator, 'validate')
     def test_handle_processor_response_redundant_error(self, mock_ios_validator, mock_payment_redundant):
         """
