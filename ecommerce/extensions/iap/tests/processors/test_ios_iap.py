@@ -12,10 +12,11 @@ from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
 from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
-from ecommerce.extensions.iap.processors.base_iap import BaseIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
@@ -163,15 +164,16 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
 
             self.processor.handle_processor_response(modified_return_data, basket=self.basket)
 
-    @mock.patch.object(BaseIAP, '_is_payment_redundant')
+    @mock.patch.object(IOSIAP, 'is_payment_redundant')
     @mock.patch.object(IOSValidator, 'validate')
     def test_handle_processor_response_redundant_error(self, mock_ios_validator, mock_payment_redundant):
         """
         Verify that appropriate RedundantPaymentNotificationError is raised in case payment with same
-        originalTransactionId exists with another user
+        originalTransactionId exists for any edx user.
         """
         mock_ios_validator.return_value = self.mock_validation_response
         mock_payment_redundant.return_value = True
+        toggle_switch(DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME, False)
 
         with self.assertRaises(RedundantPaymentNotificationError):
             self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
