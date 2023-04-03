@@ -1,7 +1,8 @@
 """ Constants for iap extension apis v1 """
 
 COURSE_ADDED_TO_BASKET = "Course added to the basket successfully"
-COURSE_ALREADY_PAID_ON_DEVICE = "The course has already been paid for on this device by the associated Apple ID."
+COURSE_ALREADY_PAID_ON_DEVICE = "The course upgrade has already been paid for by the user."
+DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME = "disable_redundant_payment_check_for_mobile"
 ERROR_ALREADY_PURCHASED = "You have already purchased these products"
 ERROR_BASKET_NOT_FOUND = "Basket [{}] not found."
 ERROR_BASKET_ID_NOT_PROVIDED = "Basket id is not provided"
