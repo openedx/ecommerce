@@ -2,11 +2,11 @@ import logging
 from urllib.parse import urljoin
 
 import waffle
-from django.db.models import Q
 from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError, PaymentError
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration, PaymentProcessorResponseExtension
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
@@ -124,8 +124,9 @@ class BaseIAP(BasePaymentProcessor):
         if self.NAME == 'ios-iap':
             if not original_transaction_id:
                 raise PaymentError(response)
-            # Check for multiple edx users using same iOS device/iOS account for purchase
-            is_redundant_payment = self._is_payment_redundant(basket.owner, original_transaction_id)
+
+        if not waffle.switch_is_active(DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME):
+            is_redundant_payment = self._is_payment_redundant(original_transaction_id, transaction_id)
             if is_redundant_payment:
                 raise RedundantPaymentNotificationError(response)
 
@@ -207,6 +208,14 @@ class BaseIAP(BasePaymentProcessor):
         transaction_key = 'transaction_id' if self.NAME == 'ios-iap' else 'orderId'
         return self._get_attribute_from_receipt(validated_receipt, transaction_key)
 
-    def _is_payment_redundant(self, basket_owner, original_transaction_id):
-        return PaymentProcessorResponse.objects.filter(
-            ~Q(basket__owner=basket_owner), extension__original_transaction_id=original_transaction_id).exists()
+    def _is_payment_redundant(self, original_transaction_id, transaction_id):
+        processor_response = PaymentProcessorResponse.objects.none()
+        if self.NAME == 'ios-iap':
+            processor_response = PaymentProcessorResponse.objects.filter(
+                processor_name=self.NAME,
+                extension__original_transaction_id=original_transaction_id)
+        elif self.NAME == 'android-iap':
+            processor_response = PaymentProcessorResponse.objects.filter(
+                processor_name=self.NAME,
+                transaction_id=transaction_id)
+        return processor_response.exists()
