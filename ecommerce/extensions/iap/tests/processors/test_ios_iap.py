@@ -2,6 +2,7 @@
 """Unit tests of IOS IAP payment processor implementation."""
 
 
+import uuid
 from urllib.parse import urljoin
 
 import ddt
@@ -17,6 +18,7 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
 from ecommerce.extensions.iap.api.v1.ios_validator import IOSValidator
+from ecommerce.extensions.iap.models import PaymentProcessorResponseExtension
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
@@ -106,6 +108,22 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         }
         actual = self.processor.get_transaction_parameters(self.basket)
         self.assertEqual(actual, expected)
+
+    def test_is_payment_redundant(self):
+        """
+        Test that True is returned only if no PaymentProcessorResponseExtension entry is found with
+        the given original_transaction_id.
+        """
+        original_transaction_id = str(uuid.uuid4())
+        result = self.processor.is_payment_redundant(original_transaction_id=original_transaction_id)
+        self.assertFalse(result)
+
+        processor_response = PaymentProcessorResponse.objects.create(
+            transaction_id=original_transaction_id, processor_name=self.processor_name)
+        PaymentProcessorResponseExtension.objects.create(
+            processor_response=processor_response, original_transaction_id=original_transaction_id)
+        result = self.processor.is_payment_redundant(original_transaction_id=original_transaction_id)
+        self.assertTrue(result)
 
     @mock.patch.object(IOSValidator, 'validate')
     def test_handle_processor_response_gateway_error(self, mock_ios_validator):
