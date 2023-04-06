@@ -464,6 +464,15 @@ class EnterpriseServiceMockMixin:
             ec_uuid
         )
 
+    def mock_consent_post(self, username, course_id, ec_uuid):
+        self.mock_consent_response(
+            username,
+            course_id,
+            ec_uuid,
+            method=responses.POST,
+            granted=True
+        )
+
     def mock_consent_missing(self, username, course_id, ec_uuid):
         self.mock_consent_response(
             username,
