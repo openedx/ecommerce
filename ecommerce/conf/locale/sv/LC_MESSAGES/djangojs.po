@@ -9,16 +9,17 @@
 # Translators:
 # Translators:
 # Translators:
+# Emil Örberg <emil.orberg@live.se>, 2023
 # Kristoffer Grundström <lovaren@gmail.com>, 2015
 # Thomas Ochman <thomas@nocebo.se>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2023-04-09 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
-"Last-Translator: Thomas Ochman <thomas@nocebo.se>, 2018\n"
-"Language-Team: Swedish (http://www.transifex.com/open-edx/edx-platform/language/sv/)\n"
+"Last-Translator: Emil Örberg <emil.orberg@live.se>, 2023\n"
+"Language-Team: Swedish (http://app.transifex.com/open-edx/edx-platform/language/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
