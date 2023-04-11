@@ -49,9 +49,9 @@ class JWTDecodeHandlerTests(TestCase):
             'JWT_VERIFY_AUDIENCE': False,
         }
     )
-    @mock.patch('edx_django_utils.monitoring.set_custom_metric')
+    @mock.patch('edx_django_utils.monitoring.increment')
     @mock.patch('ecommerce.extensions.api.handlers._ecommerce_jwt_decode_handler_multiple_issuers')
-    def test_decode_success_edx_drf_extensions(self, mock_multiple_issuer_decoder, mock_set_custom_metric):
+    def test_decode_success_edx_drf_extensions(self, mock_multiple_issuer_decoder, mock_increment):
         """
         Should pass using the edx-drf-extensions jwt_decode_handler.
 
@@ -63,7 +63,7 @@ class JWTDecodeHandlerTests(TestCase):
         payload = generate_jwt_payload(self.user, issuer_name=first_issuer['ISSUER'])
         token = generate_jwt_token(payload, first_issuer['SECRET_KEY'])
         self.assertDictContainsSubset(payload, jwt_decode_handler(token))
-        mock_set_custom_metric.assert_called_with('ecom_jwt_decode_handler', 'edx-drf-extensions')
+        mock_increment.assert_called_with('ecom_jwt_decode_standard')
 
     @override_settings(
         JWT_AUTH={
@@ -87,9 +87,9 @@ class JWTDecodeHandlerTests(TestCase):
             'JWT_VERIFY_AUDIENCE': False,
         }
     )
-    @mock.patch('edx_django_utils.monitoring.set_custom_metric')
+    @mock.patch('edx_django_utils.monitoring.increment')
     @mock.patch('ecommerce.extensions.api.handlers.logger')
-    def test_decode_success_multiple_issuers(self, mock_logger, mock_set_custom_metric):
+    def test_decode_success_multiple_issuers(self, mock_logger, mock_increment):
         """
         Should pass using ``_ecommerce_jwt_decode_handler_multiple_issuers``.
 
@@ -101,7 +101,7 @@ class JWTDecodeHandlerTests(TestCase):
         payload = generate_jwt_payload(self.user, issuer_name=non_first_issuer['ISSUER'])
         token = generate_jwt_token(payload, non_first_issuer['SECRET_KEY'])
         self.assertDictContainsSubset(payload, jwt_decode_handler(token))
-        mock_set_custom_metric.assert_called_with('ecom_jwt_decode_handler', 'ecommerce-multiple-issuers')
+        mock_increment.assert_called_with('ecom_jwt_decode_custom')
         mock_logger.exception.assert_not_called()
         mock_logger.warning.assert_not_called()
         mock_logger.error.assert_not_called()
@@ -141,6 +141,6 @@ class JWTDecodeHandlerTests(TestCase):
 
         mock_logger.exception.assert_called_with('Custom config JWT decode failed!')
         mock_logger.info.assert_has_calls(calls=[
-            mock.call('Failed to use ecommerce multiple issuer jwt_decode_handler.', exc_info=True),
             mock.call('Failed to use edx-drf-extensions jwt_decode_handler.', exc_info=True),
+            mock.call('Failed to use ecommerce multiple issuer jwt_decode_handler.', exc_info=True),
         ])
