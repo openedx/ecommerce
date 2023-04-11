@@ -214,16 +214,14 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
             return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
 
         try:
-            with transaction.atomic():
-                order = self.create_order(request, basket)
+            order = self.create_order(request, basket)
         except Exception:  # pylint: disable=broad-except
             # Any errors here will be logged in the create_order method. If we wanted any
             # IAP specific logging for this error, we would do that here.
             return JsonResponse({'error': ERROR_DURING_ORDER_CREATION}, status=400)
 
         try:
-            with transaction.atomic():
-                self.handle_post_order(order)
+            self.handle_post_order(order)
         except Exception:  # pylint: disable=broad-except
             self.log_order_placement_exception(basket.order_number, basket.id)
             return JsonResponse({'error': ERROR_DURING_POST_ORDER_OP}, status=200)
