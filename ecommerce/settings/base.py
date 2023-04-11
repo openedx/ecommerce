@@ -223,6 +223,7 @@ MIDDLEWARE = (
     'corsheaders.middleware.CorsMiddleware',
     'edx_django_utils.monitoring.DeploymentMonitoringMiddleware',
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
+    'edx_django_utils.monitoring.CachedCustomMonitoringMiddleware',
     'edx_django_utils.monitoring.CookieMonitoringMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
