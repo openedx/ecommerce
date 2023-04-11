@@ -45,9 +45,12 @@ class ManagementViewTests(TestCase):
         self.assert_first_message(response, messages.ERROR, 'invalid-action is not a valid action.')
 
     def test_refund_basket_transactions(self):
-        with mock.patch('ecommerce.management.utils.refund_basket_transactions') as mock_refund:
+        success_count = 0
+        failed_count = 0
+        result = (success_count, failed_count)
+        with mock.patch('ecommerce.management.views.refund_basket_transactions', return_value=result) as mock_refund:
             response = self.client.post(self.path, {'action': 'refund_basket_transactions', 'basket_ids': '1,2,3'})
-            assert mock_refund.called_once_with(self.site, [1, 2, 3])
+            mock_refund.assert_called_once_with(self.site, [1, 2, 3])
 
         assert response.status_code == 200
         expected = 'Finished refunding basket transactions. [0] transactions were successfully refunded. ' \

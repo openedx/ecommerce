@@ -19,14 +19,14 @@ from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import create_order
-from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
+from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
 Option = get_model('catalogue', 'Option')
 Refund = get_model('refund', 'Refund')
 
 
-class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
+class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, TestCase):
     MODEL_LOGGER_NAME = 'ecommerce.core.models'
     path = reverse('api:v2:refunds:create')
 
@@ -104,7 +104,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         self.client.logout()
 
         data = self._get_data(self.user.username, self.course_id)
-        auth_header = 'JWT ' + self.generate_token({'username': self.user.username})
+        auth_header = self.generate_jwt_token_header(self.user)
 
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
         self.assert_ok_response(response)

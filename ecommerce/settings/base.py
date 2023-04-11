@@ -446,7 +446,7 @@ JWT_AUTH = {
     'JWT_AUTH_COOKIE': 'edx-jwt-cookie',
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 1,
-    'JWT_DECODE_HANDLER': 'ecommerce.extensions.api.handlers.jwt_decode_handler',
+    'JWT_DECODE_HANDLER': 'edx_rest_framework_extensions.auth.jwt.decoder.jwt_decode_handler',
     # These settings are NOT part of DRF-JWT's defaults.
     'JWT_ISSUERS': [
         {
