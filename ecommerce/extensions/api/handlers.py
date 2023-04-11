@@ -5,8 +5,6 @@ See ARCH-276 for details of removing additional issuers and retiring this
 custom jwt_decode_handler.
 
 """
-
-
 import logging
 
 import jwt
@@ -17,8 +15,6 @@ from edx_rest_framework_extensions.auth.jwt.decoder import jwt_decode_handler as
 from rest_framework_jwt.settings import api_settings
 
 logger = logging.getLogger(__name__)
-
-JWT_DECODE_HANDLER_METRIC_KEY = 'ecom_jwt_decode_handler'
 
 
 def _ecommerce_jwt_decode_handler_multiple_issuers(token):
@@ -94,26 +90,31 @@ def jwt_decode_handler(token):
 
     """
 
-    # First, try ecommerce decoder that handles multiple issuers.
-    # See ARCH-276 for details of removing additional issuers and retiring this
-    # custom jwt_decode_handler.
-    try:
-        jwt_payload = _ecommerce_jwt_decode_handler_multiple_issuers(token)
-        monitoring_utils.set_custom_metric(JWT_DECODE_HANDLER_METRIC_KEY, 'ecommerce-multiple-issuers')
-        return jwt_payload
-    except Exception:  # pylint: disable=broad-except
-        if waffle.switch_is_active('jwt_decode_handler.log_exception.ecommerce-multiple-issuers'):
-            logger.info('Failed to use ecommerce multiple issuer jwt_decode_handler.', exc_info=True)
-
-    # Next, try jwt_decode_handler from edx_drf_extensions
+    # First, try jwt_decode_handler from edx_drf_extensions
     # Note: this jwt_decode_handler can handle asymmetric keys, but only a
     #   single issuer. Therefore, the LMS must be the first configured issuer.
     try:
         jwt_payload = edx_drf_extensions_jwt_decode_handler(token)
-        monitoring_utils.set_custom_metric(JWT_DECODE_HANDLER_METRIC_KEY, 'edx-drf-extensions')
+        # Note: use increment in case there are multiple calls for different JWTs in the same transaction.
+        monitoring_utils.increment("ecom_jwt_decode_standard")
         return jwt_payload
     except Exception:  # pylint: disable=broad-except
         # continue and try again
         if waffle.switch_is_active('jwt_decode_handler.log_exception.edx-drf-extensions'):
             logger.info('Failed to use edx-drf-extensions jwt_decode_handler.', exc_info=True)
+
+    # Next, try ecommerce decoder that handles multiple issuers.
+    # See ARCH-276 for details of removing additional issuers and retiring this
+    # custom jwt_decode_handler.
+    try:
+        jwt_payload = _ecommerce_jwt_decode_handler_multiple_issuers(token)
+        # Ultimately we want there to be no JWTs that aren't handled by the first case.
+        #   This enables monitoring to see if there are still cases where the custom JWT
+        #   decoder is in use.
+        monitoring_utils.increment("ecom_jwt_decode_custom")
+        return jwt_payload
+    except Exception:  # pylint: disable=broad-except
+        if waffle.switch_is_active('jwt_decode_handler.log_exception.ecommerce-multiple-issuers'):
+            logger.info('Failed to use ecommerce multiple issuer jwt_decode_handler.', exc_info=True)
+        monitoring_utils.increment("ecom_jwt_decode_failed")
         raise
