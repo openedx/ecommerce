@@ -26,3 +26,4 @@ class CheckoutActionSerializer(serializers.Serializer):  # pylint: disable=abstr
     address = AddressSerializer(required=False)
     user_details = UserDetailsSerializer()
     terms_accepted_at = serializers.CharField()
+    data_share_consent = serializers.BooleanField(required=False)

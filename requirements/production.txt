@@ -268,7 +268,7 @@ future==0.18.2
     # via
     #   django-ses
     #   pyjwkest
-getsmarter-api-clients==0.4.0
+getsmarter-api-clients==0.5.0
     # via -r requirements/base.in
     # via
     #   django-ses

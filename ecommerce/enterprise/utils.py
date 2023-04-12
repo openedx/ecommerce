@@ -355,6 +355,34 @@ def enterprise_customer_user_needs_consent(site, enterprise_customer_uuid, cours
     return response.json()['consent_required']
 
 
+def create_enterprise_customer_user_consent(site, enterprise_customer_uuid, course_id, username):
+    """
+    Create a new consent for a particular username/EC UUID/course ID combination if one doesn't already exist.
+
+    Args:
+        site (Site): The site which is handling the consent-sensitive request
+        enterprise_customer_uuid (str): The UUID of the relevant EnterpriseCustomer
+        course_id (str): The ID of the relevant course for enrollment
+        username (str): The username of the user attempting to enroll into the course
+
+    Returns:
+        bool: consent recorded for the user specified by the username argument
+        for the EnterpriseCustomer specified by the enterprise_customer_uuid
+        argument and the course specified by the course_id argument.
+    """
+    data = {
+        "username": username,
+        "enterprise_customer_uuid": enterprise_customer_uuid,
+        "course_id": course_id
+    }
+    api_client = site.siteconfiguration.oauth_api_client
+    consent_url = urljoin(f"{site.siteconfiguration.consent_api_url}/", "data_sharing_consent")
+
+    response = api_client.post(consent_url, json=data)
+    response.raise_for_status()
+    return response.json()['consent_provided']
+
+
 def get_enterprise_customer_uuid_from_voucher(voucher):
     """
     Given a Voucher, find the associated Enterprise Customer UUID, if it exists.
