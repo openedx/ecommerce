@@ -310,6 +310,7 @@ DJANGO_APPS = [
     'django_filters',
     'release_util',
     'crispy_forms',
+    'crispy_bootstrap3',
     'solo',
     'social_django',
     'drf_yasg',
@@ -663,6 +664,7 @@ ENROLLMENT_FULFILLMENT_TIMEOUT = 7
 # Affiliate cookie key
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap3'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # ENTERPRISE CONFIGURATION

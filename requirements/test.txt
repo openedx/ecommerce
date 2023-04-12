@@ -129,6 +129,8 @@ coverage[toml]==7.2.3
     #   -r requirements/test.in
     #   cybersource-rest-client-python
     #   pytest-cov
+crispy-bootstrap3==2022.1
+    # via -r requirements/base.txt
 crypto==1.4.1
     # via
     #   -r requirements/base.txt
@@ -171,6 +173,7 @@ diff-cover==7.5.0
     #   -c requirements/common_constraints.txt
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
+    #   crispy-bootstrap3
     #   django-appconf
     #   django-config-models
     #   django-cors-headers
@@ -213,7 +216,9 @@ django-config-models==2.3.0
 django-cors-headers==3.14.0
     # via -r requirements/base.txt
 django-crispy-forms==2.0
-    # via -r requirements/base.txt
+    # via
+    #   -r requirements/base.txt
+    #   crispy-bootstrap3
 django-crum==0.7.9
     # via
     #   -r requirements/base.txt

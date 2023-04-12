@@ -78,6 +78,8 @@ coreschema==0.0.4
     #   drf-yasg
 coverage==7.2.3
     # via cybersource-rest-client-python
+crispy-bootstrap3==2022.1
+    # via -r requirements/base.in
 crypto==1.4.1
     # via cybersource-rest-client-python
 cryptography==40.0.1
@@ -105,6 +107,7 @@ django==3.2.18
     # via
     #   -c requirements/common_constraints.txt
     #   -r requirements/base.in
+    #   crispy-bootstrap3
     #   django-appconf
     #   django-config-models
     #   django-cors-headers
@@ -144,7 +147,9 @@ django-config-models==2.3.0
 django-cors-headers==3.14.0
     # via -r requirements/base.in
 django-crispy-forms==2.0
-    # via -r requirements/base.in
+    # via
+    #   -r requirements/base.in
+    #   crispy-bootstrap3
 django-crum==0.7.9
     # via
     #   edx-django-utils
