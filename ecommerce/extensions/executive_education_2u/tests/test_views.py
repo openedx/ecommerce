@@ -348,6 +348,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
                 'mobile_phone': '1234567890'
             },
             'terms_accepted_at': '2022-08-05T15:28:46.493Z',
+            'data_share_consent': True,
         }
 
     def _create_basket(self, product, has_offer=False):

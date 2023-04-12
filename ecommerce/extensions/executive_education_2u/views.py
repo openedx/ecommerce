@@ -355,6 +355,7 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
                 address=request.data.get('address', {}),
                 user_details={**request.data['user_details'], 'email': request.user.email},
                 terms_accepted_at=request.data['terms_accepted_at'],
+                data_share_consent=request.data.get('data_share_consent', None),
                 request=request
             )
 
