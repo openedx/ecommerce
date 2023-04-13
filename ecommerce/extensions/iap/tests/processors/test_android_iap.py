@@ -2,6 +2,7 @@
 """Unit tests of Android IAP payment processor implementation."""
 
 
+import uuid
 from urllib.parse import urljoin
 
 import ddt
@@ -80,6 +81,19 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         }
         actual = self.processor.get_transaction_parameters(self.basket)
         self.assertEqual(actual, expected)
+
+    def test_is_payment_redundant(self):
+        """
+        Test that True is returned only if no PaymentProcessorResponse entry is found with
+        the given transaction_id.
+        """
+        transaction_id = str(uuid.uuid4())
+        result = self.processor.is_payment_redundant(transaction_id=transaction_id)
+        self.assertFalse(result)
+
+        PaymentProcessorResponse.objects.create(transaction_id=transaction_id, processor_name=self.processor_name)
+        result = self.processor.is_payment_redundant(transaction_id=transaction_id)
+        self.assertTrue(result)
 
     @mock.patch.object(GooglePlayValidator, 'validate')
     def test_handle_processor_response_error(self, mock_google_validator):
