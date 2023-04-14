@@ -89,7 +89,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
         product.attr.save()
         return product
 
-    def _create_enterprise_offer(self, max_discount=None, max_user_discount=None):
+    def _create_enterprise_offer(self, max_discount=None, max_user_discount=None, **kwargs):
         condition = factories.EnterpriseCustomerConditionFactory(
             enterprise_customer_uuid=self.enterprise_customer_uuid
         )
@@ -100,7 +100,8 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             condition=condition,
             offer_type=ConditionalOffer.SITE,
             max_discount=max_discount,
-            max_user_discount=max_user_discount
+            max_user_discount=max_user_discount,
+            **kwargs,
         )
         return offer
 
@@ -302,6 +303,41 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             'course_uuid': product.attr.UUID,
             'sku': sku,
             'failure_reason': ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_ENOUGH_USER_BALANCE
+        }
+        expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
+        self.assertEqual(response.headers['Location'], expected_redirect_url)
+
+    @mock.patch('ecommerce.extensions.executive_education_2u.views.fetch_enterprise_catalogs_for_content_items')
+    @mock.patch('ecommerce.extensions.executive_education_2u.views.get_course_info_from_catalog')
+    @mock.patch('ecommerce.extensions.executive_education_2u.views.get_learner_portal_url')
+    def test_begin_checkout_no_offer_with_remaining_applications(
+        self,
+        mock_get_learner_portal_url,
+        mock_get_course_info_from_catalog,
+        mock_fetch_enterprise_catalogs_for_content_items
+    ):
+        mock_get_learner_portal_url.return_value = self.learner_portal_url
+        offer = self._create_enterprise_offer(max_user_applications=1)
+        mock_fetch_enterprise_catalogs_for_content_items.return_value = [
+            offer.condition.enterprise_customer_catalog_uuid
+        ]
+        product = self._create_product(is_exec_ed_2u_product=True)
+        sku = product.stockrecords.first().partner_sku
+        mock_get_course_info_from_catalog.return_value = {
+            'key': product.attr.UUID
+        }
+
+        # Create order discounts
+        order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
+        OrderDiscountFactory(order=order, offer_id=offer.id, frequency=1)
+
+        response = self.client.get(self.checkout_path, {'sku': sku})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        expected_query_params = {
+            'course_uuid': product.attr.UUID,
+            'sku': sku,
+            'failure_reason': ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_REMAINING_APPLICATIONS
         }
         expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
         self.assertEqual(response.headers['Location'], expected_redirect_url)

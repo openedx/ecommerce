@@ -54,11 +54,6 @@ jobs:
         with:
           python-version: "3.8"
           architecture: x64
-      - name: Report coverage
-        if: matrix.testname == 'test-python'
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
 
   docs:
     runs-on: ubuntu-latest
