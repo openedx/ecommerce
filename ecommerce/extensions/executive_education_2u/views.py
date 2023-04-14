@@ -196,6 +196,14 @@ class ExecutiveEducation2UViewSet(viewsets.ViewSet, ExecutiveEducation2UOrderPla
 
             if not offers_with_remaining_user_balance:
                 return ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_ENOUGH_USER_BALANCE
+
+            offers_with_remaining_enrollment_space = [
+                offer for offer in offers_with_remaining_user_balance
+                if offer.is_available(user=request.user)
+            ]
+
+            if not offers_with_remaining_enrollment_space:
+                return ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_REMAINING_APPLICATIONS
         except Exception as ex:  # pylint: disable=broad-except
             logger.exception(ex)
 
