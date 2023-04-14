@@ -52,9 +52,9 @@ jobs:
           architecture: x64
       - name: Report coverage
         if: matrix.testname == 'test-python'
-        run: |
-          pip install codecov
-          codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
 
   docs:
     runs-on: ubuntu-latest
