@@ -160,7 +160,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         api_client = site_config.oauth_api_client
         api_url = site_config.build_commerce_coordinator_url('/ecommerce/order/')
         query_params = {
-            'edx_lms_user_id': basket.owner.id,
+            'edx_lms_user_id': basket.owner.lms_user_id,
             'email': basket.owner.email,
             'product_sku': line.product.stockrecords.first().partner_sku,
             'coupon_code': list(basket.vouchers.values_list('code', flat=True)),
