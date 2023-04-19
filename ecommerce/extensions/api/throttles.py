@@ -14,7 +14,8 @@ class ServiceUserThrottle(UserRateThrottle):
         service_users = [
             settings.ECOMMERCE_SERVICE_WORKER_USERNAME,
             settings.PROSPECTUS_WORKER_USERNAME,
-            settings.DISCOVERY_WORKER_USERNAME
+            settings.DISCOVERY_WORKER_USERNAME,
+            settings.SUBSCRIPTIONS_SERVICE_WORKER_USERNAME
         ]
         if request.user.username in service_users:
             return True
