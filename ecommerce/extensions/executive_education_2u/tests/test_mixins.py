@@ -45,6 +45,7 @@ class EdxOrderPlacementMixinTests(
         }
         self.mock_terms_accepted_at = '2022-08-05T15:28:46.493Z',
         self.mock_data_share_consent = True
+        self.expected_data_share_consent = 'true'
 
         # Ensure that the basket attribute type exists for these tests
         self.basket_attribute_type, _ = BasketAttributeType.objects.get_or_create(
@@ -58,7 +59,7 @@ class EdxOrderPlacementMixinTests(
             'address': self.mock_address,
             'user_details': self.mock_user_details,
             'terms_accepted_at': self.mock_terms_accepted_at,
-            'data_share_consent': self.mock_data_share_consent,
+            'data_share_consent': self.expected_data_share_consent,
         })
         order = ExecutiveEducation2UOrderPlacementMixin().place_free_order(
             basket,
