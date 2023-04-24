@@ -1,4 +1,4 @@
-⛔️ DEPRECATION WARNING 
+⛔️ DEPRECATION WARNING
 ======================
 This repository is deprecated and in maintainence-only operation while we work on a replacement, please see `this announcement <https://discuss.openedx.org/t/deprecation-removal-ecommerce-service-depr-22/6839>`__ for more information.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ How To Contribute
 
 Anyone merging to this repository is expected to `release and monitor their changes <https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories>`__; if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
 
-Please also read `How To Contribute <https://github.com/openedx/edx-platform/blob/master/CONTRIBUTING.rst>`__. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
+Please also read `How To Contribute <https://github.com/openedx/.github/blob/master/CONTRIBUTING.md>`__.
 
 Reporting Security Issues
 -------------------------
