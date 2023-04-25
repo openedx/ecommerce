@@ -371,3 +371,17 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         ec_expires = now() - timedelta(days=365)
         self.assertEqual(course.get_enrollment_code().expires, ec_expires)
         self.assertIsNone(course.enrollment_code_product)
+
+    def test_toggle_enrollment_code_with_multiple_seats(self):
+        """Verify enrollment code expiration date is set when course has multiple seats"""
+        seat_one_expires = now() + timedelta(days=365)
+        seat_two_expires = now() + timedelta(days=366)
+        course, _, enrollment_code = self.create_course_seat_and_enrollment_code(expires=seat_one_expires)
+        seat_two = course.create_or_update_seat(
+            "verified", False, 10, expires=seat_two_expires, create_enrollment_code=False
+        )
+        course.toggle_enrollment_code_status(True)
+        ec_expires = seat_two.expires
+
+        self.assertEqual(course.get_enrollment_code().expires, ec_expires)
+        self.assertEqual(course.enrollment_code_product, enrollment_code)

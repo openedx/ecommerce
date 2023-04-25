@@ -58,7 +58,8 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
         certificate_type = 'audit'
         product = course.create_or_update_seat(certificate_type, False, 0)
 
-        _hash = '{} {} {} {} {}'.format(certificate_type, course_id, 'False', '', self.partner.id).encode('utf-8')
+        _hash = '{} {} {} {} {} {}'.format(certificate_type, course_id, 'False', '', product.id,
+                                           self.partner.id).encode('utf-8')
         _hash = md5(_hash.lower()).hexdigest()[-7:]
         # verify that generated sku has partner 'short_code' as prefix
         expected = _hash.upper()
