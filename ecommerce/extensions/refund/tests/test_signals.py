@@ -106,4 +106,4 @@ class RefundTrackingTests(RefundTestMixin, TransactionTestCase):
         self.assertTrue(mock_track.called)
 
         # Verify that an error message was logged.
-        self.assertTrue(mock_log_exc.called_with('Failed to emit tracking event upon refund completion.'))
+        mock_log_exc.assert_called_with('Failed to emit tracking event upon refund completion.')

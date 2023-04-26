@@ -2,9 +2,7 @@
 
 import json
 
-import jwt
 import mock
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from oscar.core.loading import get_class, get_model
@@ -16,6 +14,7 @@ from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.tests.mixins import JwtMixin
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
@@ -24,7 +23,7 @@ Selector = get_class('partner.strategy', 'Selector')
 User = get_user_model()
 
 
-class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
+class CourseViewSetTests(JwtMixin, ProductSerializerMixin, DiscoveryTestMixin, TestCase):
     list_path = reverse('api:v2:course-list')
 
     def setUp(self):
@@ -75,14 +74,9 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         """ Verify the endpoint supports JWT authentication and user creation. """
         username = 'some-user'
         email = 'some-user@example.com'
-        payload = {
-            'administrator': True,
-            'username': username,
-            'email': email,
-            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
-        }
-        auth_header = "JWT {token}".format(
-            token=jwt.encode(payload, settings.JWT_AUTH['JWT_SECRET_KEY']).decode('utf-8'))
+        is_staff = True
+
+        auth_header = f'JWT {self.generate_new_user_token(username, email, is_staff)}'
         self.assertFalse(User.objects.filter(username=username).exists())
 
         response = self.client.get(
