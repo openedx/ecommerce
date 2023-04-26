@@ -43,7 +43,7 @@ class DynamicPercentageDiscountBenefitTests(BenefitTestMixin, TestCase):
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
     @patch('crum.get_current_request')
-    @patch('ecommerce.extensions.offer.dynamic_conditional_offer.jwt_decode_handler',
+    @patch('ecommerce.extensions.offer.dynamic_conditional_offer.configured_jwt_decode_handler',
            side_effect=_mock_jwt_decode_handler)
     @patch('ecommerce.enterprise.utils.get_decoded_jwt',
            side_effect=_mock_get_decoded_jwt)
@@ -104,7 +104,7 @@ class DynamicConditionTests(TestCase):
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
     @patch('crum.get_current_request')
-    @patch('ecommerce.extensions.offer.dynamic_conditional_offer.jwt_decode_handler',
+    @patch('ecommerce.extensions.offer.dynamic_conditional_offer.configured_jwt_decode_handler',
            side_effect=_mock_jwt_decode_handler)
     @ddt.data(
         {'discount_applicable': True, 'discount_percent': 15},

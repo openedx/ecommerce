@@ -310,6 +310,7 @@ DJANGO_APPS = [
     'django_filters',
     'release_util',
     'crispy_forms',
+    'crispy_bootstrap3',
     'solo',
     'social_django',
     'drf_yasg',
@@ -446,7 +447,7 @@ JWT_AUTH = {
     'JWT_AUTH_COOKIE': 'edx-jwt-cookie',
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 1,
-    'JWT_DECODE_HANDLER': 'ecommerce.extensions.api.handlers.jwt_decode_handler',
+    'JWT_DECODE_HANDLER': 'edx_rest_framework_extensions.auth.jwt.decoder.jwt_decode_handler',
     # These settings are NOT part of DRF-JWT's defaults.
     'JWT_ISSUERS': [
         {
@@ -667,6 +668,7 @@ ENROLLMENT_FULFILLMENT_TIMEOUT = 7
 # Affiliate cookie key
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap3'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # ENTERPRISE CONFIGURATION
