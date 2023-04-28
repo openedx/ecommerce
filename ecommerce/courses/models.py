@@ -345,10 +345,10 @@ class Course(models.Model):
         enrollment_code = self.get_enrollment_code()
         if enrollment_code:
             if is_active:
-                seat = self.seat_products.get(
+                seat = self.seat_products.filter(
                     attributes__name='certificate_type',
                     attribute_values__value_text=enrollment_code.attr.seat_type
-                )
+                ).order_by('-expires').first()
                 enrollment_code.expires = seat.expires if seat.expires else now() + timedelta(days=365)
             else:
                 enrollment_code.expires = now() - timedelta(days=365)
