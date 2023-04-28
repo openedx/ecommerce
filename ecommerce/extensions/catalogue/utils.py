@@ -204,6 +204,7 @@ def generate_sku(product, partner):
             str(product.attr.course_key),
             str(product.attr.id_verification_required),
             getattr(product.attr, 'credit_provider', ''),
+            str(product.id),
             str(partner.id)
         )).encode('utf-8')
     elif product.is_course_entitlement_product:
