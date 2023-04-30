@@ -1,0 +1,42 @@
+version: "3"
+services:
+  db:
+    image: mysql:5.6
+    container_name: ecommerce.db
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: "ecommerce"
+    networks:
+      - devstack_default
+    volumes:
+      - ecommerce_mysql:/var/lib/mysql
+
+  memcache:
+    image: memcached:1.4.24
+    container_name: ecommerce.memcache
+    networks:
+      - devstack_default
+  ecommerce:
+    image: openedx/ecommerce:devstack
+    build: .
+    container_name: ecommerce.app
+    command: bash -c 'while true; do gunicorn --reload --workers=2 --name ecommerce -b :18130 -c /edx/app/ecommerce/ecommerce/docker_gunicorn_configuration.py --log-file - --max-requests=1000 ecommerce.wsgi:application; sleep 2; done'
+    environment:
+      DJANGO_SETTINGS_MODULE: ecommerce.settings.devstack
+    ports:
+      - "18130:18130"
+    depends_on:
+      - db
+      - memcache
+    volumes:
+      - .:/edx/app/ecommerce
+    networks:
+      - devstack_default
+
+networks:
+  devstack_default:
+    external: true
+
+volumes:
+  ecommerce_mysql:
