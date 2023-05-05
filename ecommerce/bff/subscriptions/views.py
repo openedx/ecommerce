@@ -1,7 +1,6 @@
 import logging
 
-from django.http import HttpResponseBadRequest
-from django.utils.html import escape
+from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -12,24 +11,40 @@ from ecommerce.bff.subscriptions.serializers import CourseEntitlementInfoSeriali
 from ecommerce.extensions.api.exceptions import BadRequestException
 from ecommerce.extensions.api.throttles import ServiceUserThrottle
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
+from ecommerce.extensions.payment.utils import embargo_check
 
 logger = logging.getLogger(__name__)
 
 Product = get_model('catalogue', 'Product')
+User = get_user_model()
 
 
 class ProductEntitlementInfoView(generics.GenericAPIView):
 
     serializer_class = CourseEntitlementInfoSerializer
-    permission_classes = (IsAuthenticated, CanGetProductEntitlementInfo,)
+    permission_classes = (IsAuthenticated, CanGetProductEntitlementInfo)
     throttle_classes = [ServiceUserThrottle]
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
-            skus = self._get_skus(self.request)
+            skus = request.POST.getlist('skus', [])
+            username = request.POST.get('username', None)
+            site = request.site
+            user_ip_address = request.POST.get('user_ip_address', None)
+
             products = self._get_products_by_skus(skus)
             available_products = self._get_available_products(products)
             data = []
+            if request.site.siteconfiguration.enable_embargo_check:
+                if not embargo_check(username, site, available_products, user_ip_address):
+                    logger.error(
+                        'B2C_SUBSCRIPTIONS: User [%s] blocked by embargo, not continuing with the checkout process.',
+                        username
+                    )
+                    return Response({'error': 'User blocked by embargo check',
+                                     'error_code': 'embargo_failed'},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
             for product in available_products:
                 mode = self._mode_for_product(product)
                 if hasattr(product.attr, 'UUID') and mode is not None:
@@ -37,8 +52,8 @@ class ProductEntitlementInfoView(generics.GenericAPIView):
                                  'sku': product.stockrecords.first().partner_sku})
                 else:
                     logger.error(f"B2C_SUBSCRIPTIONS: Product {product}"
-                                 "does not have a UUID attribute or mode is None")
-            return Response(data)
+                                 " does not have a UUID attribute or mode is None")
+            return Response({'data': data})
         except BadRequestException as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -56,6 +71,9 @@ class ProductEntitlementInfoView(generics.GenericAPIView):
         return available_products
 
     def _get_products_by_skus(self, skus):
+        if not skus:
+            raise BadRequestException(('No SKUs provided.'))
+
         partner = get_partner_for_site(self.request)
         products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
         if not products:
@@ -74,9 +92,3 @@ class ProductEntitlementInfoView(generics.GenericAPIView):
         if mode == 'professional' and not getattr(product.attr, 'id_verification_required', False):
             return 'no-id-professional'
         return mode
-
-    def _get_skus(self, request):
-        skus = [escape(sku) for sku in request.GET.getlist('sku')]
-        if not skus:
-            raise BadRequestException(('No SKUs provided.'))
-        return skus
