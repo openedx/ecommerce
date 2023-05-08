@@ -14,9 +14,24 @@ ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND = "Could not find any transaction to refu
 ERROR_DURING_POST_ORDER_OP = "An error occurred during post order operations."
 ERROR_WHILE_OBTAINING_BASKET_FOR_USER = "An unexpected exception occurred while obtaining basket for user [{}]."
 GOOGLE_PUBLISHER_API_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
-LOGGER_BASKET_NOT_FOUND = "Basket [%s] not found."
-LOGGER_PAYMENT_APPROVED = "Payment [%s] approved by payer [%s]"
-LOGGER_PAYMENT_FAILED_FOR_BASKET = "Attempts to handle payment for basket [%d] failed."
+LOGGER_BASKET_ALREADY_PURCHASED = "Basket creation failed for user [%s] with SKUS [%s]. Products already purchased"
+LOGGER_BASKET_CREATED = "Basket created for user [%s] with SKUS [%s]"
+LOGGER_BASKET_CREATION_FAILED = "Basket creation failed for user [%s]. Error: [%s]"
+LOGGER_BASKET_NOT_FOUND = "Basket [%s] not found for user [%s]."
+LOGGER_EXECUTE_ALREADY_PURCHASED = "Execute payment failed for user [%s] and basket [%s]. " \
+                                   "Products already purchased."
+LOGGER_EXECUTE_ERROR_WHILE_OBTAINING_BASKET = "Execute payment failed for user [%s] and basket [%s]. " \
+                                              "Fetching basket failed with error [%s]."
+LOGGER_EXECUTE_ORDER_CREATION_FAILED = "Execute payment failed for user [%s] and basket [%s]. " \
+                                       "Order Creation failed with error [%s]."
+LOGGER_EXECUTE_PAYMENT_ERROR = "Execute payment failed for user [%s] and basket [%s]. " \
+                               "Payment error [%s]."
+LOGGER_EXECUTE_REDUNDANT_PAYMENT = "Execute payment failed for user [%s] and basket [%s]. " \
+                                   "Redundant payment."
+LOGGER_EXECUTE_STARTED = "Beginning Payment execution for user [%s], basket [%s], processor [%s]"
+LOGGER_EXECUTE_SUCCESSFUL = "Payment execution successful for user [%s], basket [%s], processor [%s]"
+LOGGER_PAYMENT_FAILED_FOR_BASKET = "Attempts to handle payment for basket [%s] failed with error [%s]."
+LOGGER_REFUND_SUCCESSFUL = "Refund successful. OrderId: [%s] Processor: [%s] "
 LOGGER_STARTING_PAYMENT_FLOW = "Starting payment flow for user [%s] for products [%s]."
 NO_PRODUCT_AVAILABLE = "No product is available to buy."
 PRODUCTS_DO_NOT_EXIST = "Products with SKU(s) [{skus}] do not exist."
