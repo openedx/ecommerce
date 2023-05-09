@@ -1144,6 +1144,7 @@ def _serialize_remaining_balance_value(conditional_offer):
         remaining_balance = str(remaining_balance)
     return remaining_balance
 
+
 def _serialize_remaining_balance_for_user(conditional_offer, request):
     """
     Determines the remaining balance for the user.
@@ -1152,6 +1153,7 @@ def _serialize_remaining_balance_for_user(conditional_offer, request):
         return str(conditional_offer.max_user_discount - sum_user_discounts_for_offer(request.user, conditional_offer))
     return None
 
+
 def _serialize_remaining_applications_value(conditional_offer):
     """
     Calculate and return remaining number of applications on the offer.
@@ -1159,6 +1161,7 @@ def _serialize_remaining_applications_value(conditional_offer):
     if conditional_offer.max_global_applications is not None:
         return conditional_offer.max_global_applications - conditional_offer.num_applications
     return None
+
 
 def _serialize_remaining_applications_for_user(conditional_offer, request):
     """
