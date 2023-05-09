@@ -1135,15 +1135,6 @@ class CouponListSerializer(serializers.ModelSerializer):
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
 
 
-def _serialize_remaining_balance_value(conditional_offer):
-    """
-    Calculate and return remaining balance on the offer.
-    """
-    remaining_balance = calculate_remaining_offer_balance(conditional_offer)
-    if remaining_balance is not None:
-        remaining_balance = str(remaining_balance)
-    return remaining_balance
-
 
 class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
     """
@@ -1152,15 +1143,22 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
     Uses serializers.BaseSerializer to keep this lightweight.
     """
 
+    def _serialize_remaining_balance_value(self, conditional_offer):
+        """
+        Calculate and return remaining balance on the offer.
+        """
+        remaining_balance = calculate_remaining_offer_balance(conditional_offer)
+        if remaining_balance is not None:
+            remaining_balance = str(remaining_balance)
+        return remaining_balance
+
     def _serialize_remaining_balance_for_user(self, instance):
         """
         Determines the remaining balance for the user.
         """
         request = self.context.get('request')
-
         if request and instance.max_user_discount is not None:
             return str(instance.max_user_discount - sum_user_discounts_for_offer(request.user, instance))
-
         return None
 
     def _serialize_remaining_applications_value(self, instance):
@@ -1169,7 +1167,6 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         """
         if instance.max_global_applications is not None:
             return instance.max_global_applications - instance.num_applications
-
         return None
 
     def _serialize_remaining_applications_for_user(self, instance):
@@ -1177,10 +1174,8 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         Determines the remaining number of applications (enrollments) for the user.
         """
         request = self.context.get('request')
-
         if request and instance.max_user_applications is not None:
             return instance.max_user_applications - instance.get_num_user_applications(request.user)
-
         return None
 
     def to_representation(self, instance):
@@ -1200,7 +1195,7 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
         representation['max_user_applications'] = instance.max_user_applications
         representation['max_user_discount'] = instance.max_user_discount
         representation['num_applications'] = instance.num_applications
-        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
+        representation['remaining_balance'] = self._serialize_remaining_balance_value(instance)
         representation['remaining_applications'] = self._serialize_remaining_applications_value(instance)
         representation['remaining_balance_for_user'] = self._serialize_remaining_balance_for_user(instance)
         representation['remaining_applications_for_user'] = self._serialize_remaining_applications_for_user(instance)
