@@ -1135,7 +1135,6 @@ class CouponListSerializer(serializers.ModelSerializer):
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
 
 
-
 class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
     """
     Serializer for EnterpriseOffer learner endpoint.
