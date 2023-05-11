@@ -11,8 +11,11 @@ from oscar.core.loading import get_model
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
-HandledProcessorResponse = namedtuple('HandledProcessorResponse',
-                                      ['transaction_id', 'total', 'currency', 'card_number', 'card_type'])
+HandledProcessorResponse = namedtuple(
+    'HandledProcessorResponse', ['transaction_id', 'total', 'currency', 'card_number', 'card_type'])
+
+RequiresActionProcessorResponse = namedtuple(
+    'RequiresActionProcessorResponse', ['transaction_id', 'requires_action', 'client_secret', 'total'])
 
 logger = logging.getLogger(__name__)
 
