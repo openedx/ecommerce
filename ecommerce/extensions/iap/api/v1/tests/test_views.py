@@ -37,8 +37,20 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_REFUND_NOT_COMPLETED,
     ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND,
     ERROR_WHILE_OBTAINING_BASKET_FOR_USER,
+    LOGGER_BASKET_ALREADY_PURCHASED,
+    LOGGER_BASKET_CREATED,
+    LOGGER_BASKET_CREATION_FAILED,
     LOGGER_BASKET_NOT_FOUND,
+    LOGGER_EXECUTE_ALREADY_PURCHASED,
+    LOGGER_EXECUTE_ERROR_WHILE_OBTAINING_BASKET,
+    LOGGER_EXECUTE_ORDER_CREATION_FAILED,
+    LOGGER_EXECUTE_PAYMENT_ERROR,
+    LOGGER_EXECUTE_REDUNDANT_PAYMENT,
+    LOGGER_EXECUTE_STARTED,
+    LOGGER_EXECUTE_SUCCESSFUL,
     LOGGER_PAYMENT_FAILED_FOR_BASKET,
+    LOGGER_REFUND_SUCCESSFUL,
+    LOGGER_STARTING_PAYMENT_FLOW,
     NO_PRODUCT_AVAILABLE,
     PRODUCTS_DO_NOT_EXIST
 )
@@ -79,6 +91,7 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
                                     EnterpriseServiceMockMixin, TestCase):
     """ MobileBasketAddItemsView view tests. """
     path = reverse('iap:mobile-basket-add')
+    logger_name = 'ecommerce.extensions.iap.api.v1.views'
 
     def setUp(self):
         super(MobileBasketAddItemsViewTests, self).setUp()
@@ -100,9 +113,13 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
 
     def test_add_multiple_products_to_basket(self):
         """ Verify the basket accepts multiple products. """
-        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        response = self._get_response([product.stockrecords.first().partner_sku for product in products])
-        self.assertEqual(response.status_code, 200)
+        with LogCapture(self.logger_name) as logger:
+            products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+            skus = [product.stockrecords.first().partner_sku for product in products]
+            response = self._get_response(skus)
+            self.assertEqual(response.status_code, 200)
+            logger.check((self.logger_name, 'INFO', LOGGER_STARTING_PAYMENT_FLOW % (self.user.username, skus)),
+                         (self.logger_name, 'INFO', LOGGER_BASKET_CREATED % (self.user.username, skus)))
 
         request = response.wsgi_request
         basket = Basket.get_basket(request.user, request.site)
@@ -111,9 +128,12 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
 
     def test_add_multiple_products_no_skus_provided(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], 'No SKUs provided.')
+        with LogCapture(self.logger_name) as logger:
+            error = 'No SKUs provided.'
+            response = self.client.get(self.path)
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.json()['error'], error)
+            logger.check((self.logger_name, 'ERROR', LOGGER_BASKET_CREATION_FAILED % (self.user.username, error)))
 
     def test_add_multiple_products_no_available_products(self):
         """
@@ -137,12 +157,26 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
         stock_record = StockRecordFactory(product=product2, partner=self.partner)
         catalog.stock_records.add(stock_record)
 
-        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
+        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True), \
+                LogCapture(self.logger_name) as logger:
             response = self._get_response(
                 [product.stockrecords.first().partner_sku for product in [product1, product2]],
             )
             self.assertEqual(response.status_code, 406)
             self.assertEqual(response.json()['error'], ERROR_ALREADY_PURCHASED)
+            expected_skus = [product.stockrecords.first().partner_sku for product in [product1, product2]]
+            logger.check(
+                (
+                    self.logger_name,
+                    'INFO',
+                    LOGGER_STARTING_PAYMENT_FLOW % (self.user.username, expected_skus)
+                ),
+                (
+                    self.logger_name,
+                    'ERROR',
+                    LOGGER_BASKET_ALREADY_PURCHASED % (self.user.username, expected_skus)
+                ),
+            )
 
     def test_not_already_purchased_products(self):
         """
@@ -269,7 +303,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         page when payment execution fails.
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_payment',
-                               side_effect=PaymentError) as fake_handle_payment:
+                               side_effect=PaymentError('Test Error')) as fake_handle_payment:
             with LogCapture(self.logger_name) as logger:
                 self._assert_response({'error': ERROR_DURING_PAYMENT_HANDLING})
                 self.assertTrue(fake_handle_payment.called)
@@ -278,10 +312,13 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                     (
                         self.logger_name,
                         'INFO',
-                        'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
-                            payment_id=self.post_data.get('transactionId'),
-                            payer_id=self.user.id
-                        )
+                        LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id, self.processor_name)
+                    ),
+                    (
+                        self.logger_name,
+                        'ERROR',
+                        LOGGER_EXECUTE_PAYMENT_ERROR % (self.user.username, self.basket.id,
+                                                        str(fake_handle_payment.side_effect))
                     ),
                 )
 
@@ -291,7 +328,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         page when payment execution fails in an unanticipated manner.
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_payment',
-                               side_effect=KeyError) as fake_handle_payment:
+                               side_effect=KeyError('Test Error')) as fake_handle_payment:
             with LogCapture(self.logger_name) as logger:
                 self._assert_response({'error': ERROR_DURING_PAYMENT_HANDLING})
                 self.assertTrue(fake_handle_payment.called)
@@ -300,7 +337,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                     (
                         self.logger_name,
                         'ERROR',
-                        LOGGER_PAYMENT_FAILED_FOR_BASKET % (self.basket.id)
+                        LOGGER_PAYMENT_FAILED_FOR_BASKET % (self.basket.id, str(fake_handle_payment.side_effect))
                     ),
                 )
 
@@ -310,9 +347,10 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         page when the payment is executed but an order cannot be placed.
         """
         with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_order_placement',
-                               side_effect=UnableToPlaceOrder) as fake_handle_order_placement, \
+                               side_effect=UnableToPlaceOrder('Test Error')) as fake_handle_order_placement, \
                 mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
-                LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger:
+                LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger_one, \
+                LogCapture(self.logger_name) as logger_two:
             fake_google_validation.return_value = {
                 'resource': {
                     'orderId': 'orderId.android.test.purchased'
@@ -321,9 +359,21 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             self._assert_response({'error': ERROR_DURING_ORDER_CREATION})
             self.assertTrue(fake_google_validation.called)
             self.assertTrue(fake_handle_order_placement.called)
-            logger.check(
-                (self.DUPLICATE_ORDER_LOGGER_NAME, 'ERROR', self.order_placement_error_message)
+            logger_one.check(
+                (self.DUPLICATE_ORDER_LOGGER_NAME, 'ERROR', self.order_placement_error_message),
             )
+            logger_two.check(
+                (
+                    self.logger_name,
+                    'INFO',
+                    LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id, self.processor_name)
+                ),
+                (
+                    self.logger_name,
+                    'ERROR',
+                    LOGGER_EXECUTE_ORDER_CREATION_FAILED % (self.user.username, self.basket.id,
+                                                            str(fake_handle_order_placement.side_effect))
+                ))
 
     def test_unanticipated_error_during_order_placement(self):
         """
@@ -372,21 +422,39 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         self.post_data['basket_id'] = dummy_basket_id
         with LogCapture(self.logger_name) as logger:
             self._assert_response({'error': ERROR_BASKET_NOT_FOUND.format(dummy_basket_id)})
-            logger.check_present((self.logger_name, 'ERROR', LOGGER_BASKET_NOT_FOUND % dummy_basket_id))
+            logger.check(
+                (
+                    self.logger_name,
+                    'INFO',
+                    LOGGER_EXECUTE_STARTED % (self.user.username, dummy_basket_id, self.processor_name)
+                ),
+                (
+                    self.logger_name,
+                    'ERROR',
+                    LOGGER_BASKET_NOT_FOUND % (dummy_basket_id, self.user.username)
+                )
+            )
 
     def test_payment_error_with_unanticipated_error_while_getting_basket(self):
         """
         Verify that we fail gracefully when an unanticipated Exception occurred while
         getting the basket.
         """
-        with mock.patch.object(MobileCoursePurchaseExecutionView, '_get_basket', side_effect=KeyError), \
+        with mock.patch.object(MobileCoursePurchaseExecutionView, '_get_basket', side_effect=KeyError('Test error')) \
+                as fake_get_basket, \
                 LogCapture(self.logger_name) as logger:
             self._assert_response({'error': ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(self.user.email)})
             logger.check_present(
                 (
                     self.logger_name,
+                    'INFO',
+                    LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id, self.processor_name)
+                ),
+                (
+                    self.logger_name,
                     'ERROR',
-                    ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(self.user.email)
+                    LOGGER_EXECUTE_ERROR_WHILE_OBTAINING_BASKET % (self.user.username, self.basket.id,
+                                                                   str(fake_get_basket.side_effect))
                 ),
             )
 
@@ -398,25 +466,41 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         ios_post_data = self.post_data
         ios_post_data['payment_processor'] = IOSIAP(self.site).NAME
         with mock.patch.object(IOSValidator, 'validate') as fake_ios_validation:
-            fake_ios_validation.return_value = {
-                'receipt': {
-                    'in_app': [{
-                        'original_transaction_id': '123456',
-                        'transaction_id': '123456',
-                        'product_id': 'fake_product_id'
-                    }]
+            with LogCapture(self.logger_name) as logger:
+                fake_ios_validation.return_value = {
+                    'receipt': {
+                        'in_app': [{
+                            'original_transaction_id': '123456',
+                            'transaction_id': '123456',
+                            'product_id': 'fake_product_id'
+                        }]
+                    }
                 }
-            }
-            response = self.client.post(self.path, data=ios_post_data)
-            order = Order.objects.get(number=self.basket.order_number)
-            self.assertEqual(response.json(), {'order_data': MobileOrderSerializer(order).data})
+                response = self.client.post(self.path, data=ios_post_data)
+                order = Order.objects.get(number=self.basket.order_number)
+                self.assertEqual(response.json(), {'order_data': MobileOrderSerializer(order).data})
+                logger.check(
+                    (
+                        self.logger_name,
+                        'INFO',
+                        LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id,
+                                                  ios_post_data['payment_processor'])
+                    ),
+                    (
+                        self.logger_name,
+                        'INFO',
+                        LOGGER_EXECUTE_SUCCESSFUL % (self.user.username, self.basket.id,
+                                                     ios_post_data['payment_processor'])
+                    )
+                )
 
     def test_iap_payment_execution_android(self):
         """
         Verify that a user gets successful response if payment is handled correctly and
         order is created successfully for Android.
         """
-        with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
+        with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
+                LogCapture(self.logger_name) as logger:
             fake_google_validation.return_value = {
                 'resource': {
                     'orderId': 'orderId.android.test.purchased'
@@ -425,6 +509,18 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             response = self.client.post(self.path, data=self.post_data)
             order = Order.objects.get(number=self.basket.order_number)
             self.assertEqual(response.json(), {'order_data': MobileOrderSerializer(order).data})
+            logger.check(
+                (
+                    self.logger_name,
+                    'INFO',
+                    LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id, self.processor_name)
+                ),
+                (
+                    self.logger_name,
+                    'INFO',
+                    LOGGER_EXECUTE_SUCCESSFUL % (self.user.username, self.basket.id, self.processor_name)
+                )
+            )
 
     def test_iap_payment_execution_basket_id_error(self):
         """
@@ -452,7 +548,8 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         expected_response_status_code = 409
         error_message = COURSE_ALREADY_PAID_ON_DEVICE.encode('UTF-8')
         expected_response_content = b'{"error": "%s"}' % error_message
-        with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
+        with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
+                LogCapture(self.logger_name) as logger:
             fake_google_validation.return_value = {
                 'resource': {
                     'orderId': 'orderId.android.test.purchased'
@@ -462,6 +559,18 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
             self.assertTrue(mock_handle_payment.called)
             self.assertEqual(response.status_code, expected_response_status_code)
             self.assertEqual(response.content, expected_response_content)
+            logger.check(
+                (
+                    self.logger_name,
+                    'INFO',
+                    LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id, self.processor_name)
+                ),
+                (
+                    self.logger_name,
+                    'ERROR',
+                    LOGGER_EXECUTE_REDUNDANT_PAYMENT % (self.user.username, self.basket.id)
+                ),
+            )
 
     @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order')
     def test_post_order_exception(self, mock_handle_post_order):
@@ -487,11 +596,24 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                     'orderId': 'orderId.android.test.purchased'
                 }
             }
-            with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
+            with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True), \
+                    LogCapture(self.logger_name) as logger:
                 create_order(site=self.site, user=self.user, basket=self.basket)
                 response = self.client.post(self.path, data=self.post_data)
                 self.assertEqual(response.status_code, 406)
                 self.assertEqual(response.json().get('error'), ERROR_ALREADY_PURCHASED)
+                logger.check(
+                    (
+                        self.logger_name,
+                        'INFO',
+                        LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id, self.processor_name)
+                    ),
+                    (
+                        self.logger_name,
+                        'ERROR',
+                        LOGGER_EXECUTE_ALREADY_PURCHASED % (self.user.username, self.basket.id)
+                    ),
+                )
 
 
 class TestMobileCheckoutView(TestCase):
@@ -657,13 +779,15 @@ class BaseRefundTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
 class AndroidRefundTests(BaseRefundTests):
     MODEL_LOGGER_NAME = 'ecommerce.core.models'
     path = reverse('iap:android-refund')
+    order_id_one = "1234"
+    order_id_two = "5678"
     mock_android_response = {
         "voidedPurchases": [
             {
                 "purchaseToken": "purchase_token",
                 "purchaseTimeMillis": "1677275637963",
                 "voidedTimeMillis": "1677650787656",
-                "orderId": "1234",
+                "orderId": order_id_one,
                 "voidedSource": 1,
                 "voidedReason": 1,
                 "kind": "androidpublisher#voidedPurchase"
@@ -672,13 +796,15 @@ class AndroidRefundTests(BaseRefundTests):
                 "purchaseToken": "purchase_token",
                 "purchaseTimeMillis": "1674131262110",
                 "voidedTimeMillis": "1677671872090",
-                "orderId": "5678",
+                "orderId": order_id_two,
                 "voidedSource": 0,
                 "voidedReason": 0,
                 "kind": "androidpublisher#voidedPurchase"
             }
         ]
     }
+    logger_name = 'ecommerce.extensions.iap.api.v1.views'
+    processor_name = AndroidRefund.processor_name
 
     def assert_ok_response(self, response):
         """ Assert the response has HTTP status 200 and no data. """
@@ -688,7 +814,7 @@ class AndroidRefundTests(BaseRefundTests):
         response = self.client.get(self.path)
         self.assert_ok_response(response)
         refunds = self.mock_android_response['voidedPurchases']
-        msgs = [msg_t % (refund['orderId'], AndroidRefund.processor_name) for refund in refunds]
+        msgs = [msg_t % (refund['orderId'], self.processor_name) for refund in refunds]
         logger.check(
             (self.logger_name, 'ERROR', msgs[0]),
             (self.logger_name, 'ERROR', msgs[1])
@@ -736,7 +862,8 @@ class AndroidRefundTests(BaseRefundTests):
         with mock.patch.object(Refund, '_revoke_lines', side_effect=BaseRefundTests._revoke_lines, autospec=True), \
              mock.patch.object(ServiceAccountCredentials, 'from_json_keyfile_dict') as mock_credential_method, \
                 mock.patch('ecommerce.extensions.iap.api.v1.views.build') as mock_build, \
-                mock.patch('httplib2.Http'):
+                mock.patch('httplib2.Http'), \
+                LogCapture(self.logger_name) as logger:
 
             mock_credential_method.return_value.authorize.return_value = None
             mock_build.return_value.purchases.return_value.voidedpurchases.return_value.\
@@ -744,6 +871,19 @@ class AndroidRefundTests(BaseRefundTests):
 
             response = self.client.get(self.path)
             self.assert_ok_response(response)
+            logger.check(
+                (
+                    self.logger_name,
+                    'INFO',
+                    LOGGER_REFUND_SUCCESSFUL % (self.order_id_one, self.processor_name)
+                ),
+                (
+                    self.logger_name,
+                    'ERROR',
+                    ERROR_ORDER_NOT_FOUND_FOR_REFUND % (self.order_id_two, self.processor_name)
+                )
+
+            )
 
             refunds = Refund.objects.all()
             refund_responses = PaymentProcessorResponse.objects.all().order_by('-id')[:1]
