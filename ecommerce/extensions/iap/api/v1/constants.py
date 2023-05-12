@@ -12,7 +12,6 @@ ERROR_ORDER_NOT_FOUND_FOR_REFUND = "Could not find any order to refund for [%s] 
 ERROR_REFUND_NOT_COMPLETED = "Could not complete refund for user [%s] in course [%s] by processor [%s]"
 ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND = "Could not find any transaction to refund for [%s] by processor [%s]"
 ERROR_DURING_POST_ORDER_OP = "An error occurred during post order operations."
-ERROR_WHILE_OBTAINING_BASKET_FOR_USER = "An unexpected exception occurred while obtaining basket for user [{}]."
 GOOGLE_PUBLISHER_API_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
 LOGGER_BASKET_ALREADY_PURCHASED = "Basket creation failed for user [%s] with SKUS [%s]. Products already purchased"
 LOGGER_BASKET_CREATED = "Basket created for user [%s] with SKUS [%s]"
