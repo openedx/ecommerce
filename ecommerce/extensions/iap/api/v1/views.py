@@ -14,7 +14,7 @@ from edx_django_utils import monitoring as monitoring_utils
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
-from oscar.apps.payment.exceptions import PaymentError
+from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from oscar.core.loading import get_class, get_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -49,7 +49,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     LOGGER_BASKET_CREATION_FAILED,
     LOGGER_BASKET_NOT_FOUND,
     LOGGER_EXECUTE_ALREADY_PURCHASED,
-    LOGGER_EXECUTE_ERROR_WHILE_OBTAINING_BASKET,
+    LOGGER_EXECUTE_GATEWAY_ERROR,
     LOGGER_EXECUTE_ORDER_CREATION_FAILED,
     LOGGER_EXECUTE_PAYMENT_ERROR,
     LOGGER_EXECUTE_REDUNDANT_PAYMENT,
@@ -224,23 +224,22 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         except AlreadyPlacedOrderException:
             logger.exception(LOGGER_EXECUTE_ALREADY_PURCHASED, request.user.username, basket_id)
             return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.exception(LOGGER_EXECUTE_ERROR_WHILE_OBTAINING_BASKET, request.user.username, basket_id, str(exc))
-            return JsonResponse({'error': ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(request.user.email)}, status=400)
 
-        try:
-            with transaction.atomic():
-                try:
-                    self.handle_payment(receipt, basket)
-                except RedundantPaymentNotificationError:
-                    logger.exception(LOGGER_EXECUTE_REDUNDANT_PAYMENT, request.user.username, basket_id)
-                    return JsonResponse({'error': COURSE_ALREADY_PAID_ON_DEVICE}, status=409)
-                except PaymentError as exception:
-                    logger.exception(LOGGER_EXECUTE_PAYMENT_ERROR, request.user.username, basket_id, str(exception))
-                    return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
-        except Exception as exception:  # pylint: disable=broad-except
-            logger.exception(LOGGER_PAYMENT_FAILED_FOR_BASKET, basket_id, str(exception))
-            return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
+        with transaction.atomic():
+            try:
+                self.handle_payment(receipt, basket)
+            except GatewayError as exception:
+                logger.exception(LOGGER_EXECUTE_GATEWAY_ERROR, request.user.username, basket_id, str(exception))
+                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
+            except KeyError as exception:
+                logger.exception(LOGGER_PAYMENT_FAILED_FOR_BASKET, basket_id, str(exception))
+                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
+            except RedundantPaymentNotificationError:
+                logger.exception(LOGGER_EXECUTE_REDUNDANT_PAYMENT, request.user.username, basket_id)
+                return JsonResponse({'error': COURSE_ALREADY_PAID_ON_DEVICE}, status=409)
+            except PaymentError as exception:
+                logger.exception(LOGGER_EXECUTE_PAYMENT_ERROR, request.user.username, basket_id, str(exception))
+                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
 
         try:
             order = self.create_order(request, basket)
@@ -250,7 +249,7 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
 
         try:
             self.handle_post_order(order)
-        except Exception:  # pylint: disable=broad-except
+        except AttributeError:
             self.log_order_placement_exception(basket.order_number, basket.id)
             return JsonResponse({'error': ERROR_DURING_POST_ORDER_OP}, status=200)
 

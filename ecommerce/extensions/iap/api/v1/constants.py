@@ -20,8 +20,7 @@ LOGGER_BASKET_CREATION_FAILED = "Basket creation failed for user [%s]. Error: [%
 LOGGER_BASKET_NOT_FOUND = "Basket [%s] not found for user [%s]."
 LOGGER_EXECUTE_ALREADY_PURCHASED = "Execute payment failed for user [%s] and basket [%s]. " \
                                    "Products already purchased."
-LOGGER_EXECUTE_ERROR_WHILE_OBTAINING_BASKET = "Execute payment failed for user [%s] and basket [%s]. " \
-                                              "Fetching basket failed with error [%s]."
+LOGGER_EXECUTE_GATEWAY_ERROR = "Execute payment validation failed for user [%s] and basket [%s]. Error: [%s]"
 LOGGER_EXECUTE_ORDER_CREATION_FAILED = "Execute payment failed for user [%s] and basket [%s]. " \
                                        "Order Creation failed with error [%s]."
 LOGGER_EXECUTE_PAYMENT_ERROR = "Execute payment failed for user [%s] and basket [%s]. " \
