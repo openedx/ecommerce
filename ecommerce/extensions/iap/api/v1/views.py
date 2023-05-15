@@ -14,7 +14,7 @@ from edx_django_utils import monitoring as monitoring_utils
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
-from oscar.apps.payment.exceptions import PaymentError
+from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from oscar.core.loading import get_class, get_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -42,11 +42,20 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_ORDER_NOT_FOUND_FOR_REFUND,
     ERROR_REFUND_NOT_COMPLETED,
     ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND,
-    ERROR_WHILE_OBTAINING_BASKET_FOR_USER,
     GOOGLE_PUBLISHER_API_SCOPE,
+    LOGGER_BASKET_ALREADY_PURCHASED,
+    LOGGER_BASKET_CREATED,
+    LOGGER_BASKET_CREATION_FAILED,
     LOGGER_BASKET_NOT_FOUND,
-    LOGGER_PAYMENT_APPROVED,
+    LOGGER_EXECUTE_ALREADY_PURCHASED,
+    LOGGER_EXECUTE_GATEWAY_ERROR,
+    LOGGER_EXECUTE_ORDER_CREATION_FAILED,
+    LOGGER_EXECUTE_PAYMENT_ERROR,
+    LOGGER_EXECUTE_REDUNDANT_PAYMENT,
+    LOGGER_EXECUTE_STARTED,
+    LOGGER_EXECUTE_SUCCESSFUL,
     LOGGER_PAYMENT_FAILED_FOR_BASKET,
+    LOGGER_REFUND_SUCCESSFUL,
     LOGGER_STARTING_PAYMENT_FLOW,
     NO_PRODUCT_AVAILABLE,
     PRODUCT_IS_NOT_AVAILABLE,
@@ -95,15 +104,19 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
             try:
                 basket = prepare_basket(request, available_products)
             except AlreadyPlacedOrderException:
+                logger.exception(LOGGER_BASKET_ALREADY_PURCHASED, request.user.username, skus)
                 return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
 
             set_email_preference_on_basket(request, basket)
 
+            logger.info(LOGGER_BASKET_CREATED, request.user.username, skus)
+
             return JsonResponse({'success': _(COURSE_ADDED_TO_BASKET), 'basket_id': basket.id},
                                 status=200)
 
-        except BadRequestException as e:
-            return JsonResponse({'error': str(e)}, status=400)
+        except BadRequestException as exc:
+            logger.exception(LOGGER_BASKET_CREATION_FAILED, request.user.username, str(exc))
+            return JsonResponse({'error': str(exc)}, status=400)
 
     def _get_skus(self, request):
         skus = [escape(sku) for sku in request.GET.getlist('sku')]
@@ -134,6 +147,19 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
             raise BadRequestException(_(NO_PRODUCT_AVAILABLE))
 
         return available_products
+
+
+class MobileCheckoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        # TODO: Add check for products_in_basket_already_purchased
+        # TODO: Add logging for api/user_info after reading from request obj
+        response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
+        if response.status_code != 200:
+            return JsonResponse({'error': response.content.decode()}, status=response.status_code)
+
+        return response
 
 
 class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
@@ -187,58 +213,47 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
         basket_id = receipt.get('basket_id')
         if not basket_id:
             return JsonResponse({'error': ERROR_BASKET_ID_NOT_PROVIDED}, status=400)
-        logger.info(LOGGER_PAYMENT_APPROVED, receipt.get('transactionId'), request.user.id)
+        logger.info(LOGGER_EXECUTE_STARTED, request.user.username, basket_id, self.payment_processor.NAME)
 
         try:
             basket = self._get_basket(request, basket_id)
         except ObjectDoesNotExist:
-            logger.exception(LOGGER_BASKET_NOT_FOUND, basket_id)
+            logger.exception(LOGGER_BASKET_NOT_FOUND, basket_id, request.user.username)
             return JsonResponse({'error': ERROR_BASKET_NOT_FOUND.format(basket_id)}, status=400)
         except AlreadyPlacedOrderException:
+            logger.exception(LOGGER_EXECUTE_ALREADY_PURCHASED, request.user.username, basket_id)
             return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
-        except:  # pylint: disable=bare-except
-            error_message = ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(request.user.email)
-            logger.exception(error_message)
-            return JsonResponse({'error': error_message}, status=400)
 
-        try:
-            with transaction.atomic():
-                try:
-                    self.handle_payment(receipt, basket)
-                except RedundantPaymentNotificationError:
-                    return JsonResponse({'error': COURSE_ALREADY_PAID_ON_DEVICE}, status=409)
-                except PaymentError:
-                    return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
-        except:  # pylint: disable=bare-except
-            logger.exception(LOGGER_PAYMENT_FAILED_FOR_BASKET, basket.id)
-            return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
+        with transaction.atomic():
+            try:
+                self.handle_payment(receipt, basket)
+            except GatewayError as exception:
+                logger.exception(LOGGER_EXECUTE_GATEWAY_ERROR, request.user.username, basket_id, str(exception))
+                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
+            except KeyError as exception:
+                logger.exception(LOGGER_PAYMENT_FAILED_FOR_BASKET, basket_id, str(exception))
+                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
+            except RedundantPaymentNotificationError:
+                logger.exception(LOGGER_EXECUTE_REDUNDANT_PAYMENT, request.user.username, basket_id)
+                return JsonResponse({'error': COURSE_ALREADY_PAID_ON_DEVICE}, status=409)
+            except PaymentError as exception:
+                logger.exception(LOGGER_EXECUTE_PAYMENT_ERROR, request.user.username, basket_id, str(exception))
+                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
 
         try:
             order = self.create_order(request, basket)
-        except Exception:  # pylint: disable=broad-except
-            # Any errors here will be logged in the create_order method. If we wanted any
-            # IAP specific logging for this error, we would do that here.
+        except Exception as exception:  # pylint: disable=broad-except
+            logger.exception(LOGGER_EXECUTE_ORDER_CREATION_FAILED, request.user.username, basket_id, str(exception))
             return JsonResponse({'error': ERROR_DURING_ORDER_CREATION}, status=400)
 
         try:
             self.handle_post_order(order)
-        except Exception:  # pylint: disable=broad-except
+        except AttributeError:
             self.log_order_placement_exception(basket.order_number, basket.id)
             return JsonResponse({'error': ERROR_DURING_POST_ORDER_OP}, status=200)
 
+        logger.info(LOGGER_EXECUTE_SUCCESSFUL, request.user.username, basket_id, self.payment_processor.NAME)
         return JsonResponse({'order_data': MobileOrderSerializer(order, context={'request': request}).data}, status=200)
-
-
-class MobileCheckoutView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request):
-        # TODO: Add check for products_in_basket_already_purchased
-        response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
-        if response.status_code != 200:
-            return JsonResponse({'error': response.content.decode()}, status=response.status_code)
-
-        return response
 
 
 class BaseRefund(APIView):
@@ -274,6 +289,8 @@ class BaseRefund(APIView):
                 PaymentProcessorResponse.objects.create(processor_name=self.processor_name,
                                                         transaction_id=transaction_id,
                                                         response=processor_response, basket=basket)
+                logger.info(LOGGER_REFUND_SUCCESSFUL, transaction_id, self.processor_name)
+
         except RefundCompletionException:
             logger.exception(ERROR_REFUND_NOT_COMPLETED, user.username, course_key, self.processor_name)
 
