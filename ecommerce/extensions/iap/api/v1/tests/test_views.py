@@ -11,7 +11,7 @@ from django.test import override_settings
 from django.urls import reverse
 from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.order.exceptions import UnableToPlaceOrder
-from oscar.apps.payment.exceptions import PaymentError
+from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory
 from rest_framework import status
@@ -36,13 +36,12 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_ORDER_NOT_FOUND_FOR_REFUND,
     ERROR_REFUND_NOT_COMPLETED,
     ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND,
-    ERROR_WHILE_OBTAINING_BASKET_FOR_USER,
     LOGGER_BASKET_ALREADY_PURCHASED,
     LOGGER_BASKET_CREATED,
     LOGGER_BASKET_CREATION_FAILED,
     LOGGER_BASKET_NOT_FOUND,
     LOGGER_EXECUTE_ALREADY_PURCHASED,
-    LOGGER_EXECUTE_ERROR_WHILE_OBTAINING_BASKET,
+    LOGGER_EXECUTE_GATEWAY_ERROR,
     LOGGER_EXECUTE_ORDER_CREATION_FAILED,
     LOGGER_EXECUTE_PAYMENT_ERROR,
     LOGGER_EXECUTE_REDUNDANT_PAYMENT,
@@ -322,6 +321,30 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                     ),
                 )
 
+    def test_gateway_error(self):
+        """
+        Verify that an error is thrown when an approved payment fails to execute
+        """
+        with mock.patch.object(MobileCoursePurchaseExecutionView, 'handle_payment',
+                               side_effect=GatewayError('Test Error')) as fake_handle_payment:
+            with LogCapture(self.logger_name) as logger:
+                self._assert_response({'error': ERROR_DURING_PAYMENT_HANDLING})
+                self.assertTrue(fake_handle_payment.called)
+
+                logger.check(
+                    (
+                        self.logger_name,
+                        'INFO',
+                        LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id, self.processor_name)
+                    ),
+                    (
+                        self.logger_name,
+                        'ERROR',
+                        LOGGER_EXECUTE_GATEWAY_ERROR % (self.user.username, self.basket.id,
+                                                        str(fake_handle_payment.side_effect))
+                    ),
+                )
+
     def test_unanticipated_error_during_payment_handling(self):
         """
         Verify that a user who has approved payment is redirected to the configured receipt
@@ -433,29 +456,6 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                     'ERROR',
                     LOGGER_BASKET_NOT_FOUND % (dummy_basket_id, self.user.username)
                 )
-            )
-
-    def test_payment_error_with_unanticipated_error_while_getting_basket(self):
-        """
-        Verify that we fail gracefully when an unanticipated Exception occurred while
-        getting the basket.
-        """
-        with mock.patch.object(MobileCoursePurchaseExecutionView, '_get_basket', side_effect=KeyError('Test error')) \
-                as fake_get_basket, \
-                LogCapture(self.logger_name) as logger:
-            self._assert_response({'error': ERROR_WHILE_OBTAINING_BASKET_FOR_USER.format(self.user.email)})
-            logger.check_present(
-                (
-                    self.logger_name,
-                    'INFO',
-                    LOGGER_EXECUTE_STARTED % (self.user.username, self.basket.id, self.processor_name)
-                ),
-                (
-                    self.logger_name,
-                    'ERROR',
-                    LOGGER_EXECUTE_ERROR_WHILE_OBTAINING_BASKET % (self.user.username, self.basket.id,
-                                                                   str(fake_get_basket.side_effect))
-                ),
             )
 
     def test_iap_payment_execution_ios(self):
@@ -574,7 +574,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
 
     @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order')
     def test_post_order_exception(self, mock_handle_post_order):
-        mock_handle_post_order.side_effect = ValueError()
+        mock_handle_post_order.side_effect = AttributeError()
         expected_response_status_code = 200
         error_message = ERROR_DURING_POST_ORDER_OP.encode('UTF-8')
         expected_response_content = b'{"error": "%s"}' % error_message
