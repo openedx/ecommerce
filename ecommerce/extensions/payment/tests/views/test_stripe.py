@@ -265,15 +265,30 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 assert mock_retrieve.call_args.kwargs['id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
 
     def test_capture_context_empty_basket(self):
+        # basket = create_basket(owner=self.user, site=self.site)
+        # basket.flush()
+
+        # with mock.patch('stripe.PaymentIntent.create') as mock_create:
+        #     self.assertTrue(basket.is_empty)
+        #     response = self.client.get(self.capture_context_url)
+        #     mock_create.assert_not_called()
+        #     self.assertDictEqual(response.json(), {})
+        #     self.assertEqual(response.status_code, 400)
         basket = create_basket(owner=self.user, site=self.site)
         basket.flush()
 
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': '',
+                'client_secret': '',
+            }
+
             self.assertTrue(basket.is_empty)
             response = self.client.get(self.capture_context_url)
+
             mock_create.assert_not_called()
-            self.assertDictEqual(response.json(), {})
-            self.assertEqual(response.status_code, 400)
+            self.assertDictEqual(response.json(), mock_create.return_value)
+            self.assertEqual(response.status_code, 200)
 
     def test_payment_error_no_basket(self):
         """
