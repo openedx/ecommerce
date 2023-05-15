@@ -110,8 +110,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 'Stripe capture-context called with empty basket [%d] and order number [%s].',
                 basket.id,
                 basket.order_number,
-            )
-             
+            )             
             # Create a default stripe_response object with the necessary fields to combat 400 errors
             stripe_response = {
                 'id': '',
