@@ -225,6 +225,7 @@ class Command(BaseCommand):
             'current_usage_str': current_usage if is_enrollment_limit_offer else money_template.format(current_usage),
             'remaining_balance': remaining_balance,
             'remaining_balance_str': remaining_balance_str,
+            'enterprise_customer_name': offer.condition.enterprise_customer_name,
         }
 
     @staticmethod
