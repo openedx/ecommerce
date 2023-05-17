@@ -148,6 +148,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_type': 'Booking', 'offer_name': offer_with_low_balance.name,
                         'current_usage': 7500.0, 'current_usage_str': '$7,500.00',
                         'remaining_balance': 2500.0, 'remaining_balance_str': '$2,500.00',
+                        'enterprise_customer_name': offer_with_low_balance.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.LOW_BALANCE]
                 ),
@@ -160,6 +161,8 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_type': 'Booking', 'offer_name': offer_with_low_balance_email_sent_before.name,
                         'current_usage': 7500.0, 'current_usage_str': '$7,500.00',
                         'remaining_balance': 2500.0, 'remaining_balance_str': '$2,500.00',
+                        'enterprise_customer_name':
+                            offer_with_low_balance_email_sent_before.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -173,6 +176,8 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_name': replenished_offer_with_low_balance_email_sent_before.name,
                         'current_usage': 15000.0, 'current_usage_str': '$15,000.00',
                         'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
+                        'enterprise_customer_name':
+                            replenished_offer_with_low_balance_email_sent_before.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.LOW_BALANCE]
                 ),
@@ -254,6 +259,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_type': 'Booking', 'offer_name': offer_with_no_balance.name,
                         'current_usage': 9900.0, 'current_usage_str': '$9,900.00',
                         'remaining_balance': 100.0, 'remaining_balance_str': '$100.00',
+                        'enterprise_customer_name': offer_with_no_balance.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.OUT_OF_BALANCE]
                 ),
@@ -266,6 +272,8 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_type': 'Booking', 'offer_name': replenished_offer_with_no_balance_email_sent_before.name,
                         'current_usage': 19900.0, 'current_usage_str': '$19,900.00',
                         'remaining_balance': 100.0, 'remaining_balance_str': '$100.00',
+                        'enterprise_customer_name':
+                            replenished_offer_with_no_balance_email_sent_before.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.OUT_OF_BALANCE]
                 ),
@@ -343,6 +351,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'total_limit': 10000.0, 'offer_name': offer_1.name, 'current_usage': 5000.0,
                         'current_usage_str': '$5,000.00',
                         'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
+                        'enterprise_customer_name': offer_1.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -355,6 +364,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_type': 'Booking', 'offer_name': offer_2.name, 'current_usage': 5000.0,
                         'current_usage_str': '$5,000.00',
                         'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
+                        'enterprise_customer_name': offer_2.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -367,6 +377,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_type': 'Enrollment', 'offer_name': offer_with_daily_frequency.name, 'current_usage': 0,
                         'current_usage_str': 0,
                         'remaining_balance': 10, 'remaining_balance_str': '10',
+                        'enterprise_customer_name': offer_with_daily_frequency.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -379,6 +390,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_type': 'Enrollment', 'offer_name': offer_with_weekly_frequency.name, 'current_usage': 0,
                         'current_usage_str': 0,
                         'remaining_balance': 10, 'remaining_balance_str': '10',
+                        'enterprise_customer_name': offer_with_weekly_frequency.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -391,6 +403,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_name': offer_with_monthly_frequency.name,
                         'current_usage': 0, 'current_usage_str': 0,
                         'remaining_balance': 10, 'remaining_balance_str': '10',
+                        'enterprise_customer_name': offer_with_monthly_frequency.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
@@ -434,6 +447,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase, SiteMixin, EnterpriseService
                         'offer_type': 'Booking', 'offer_name': offer_1.name, 'current_usage': 5000.0,
                         'current_usage_str': '$5,000.00',
                         'remaining_balance': 5000.0, 'remaining_balance_str': '$5,000.00',
+                        'enterprise_customer_name': offer_1.condition.enterprise_customer_name,
                     },
                     campaign_id=settings.CAMPAIGN_IDS_BY_EMAIL_TYPE[OfferUsageEmailTypes.DIGEST]
                 ),
