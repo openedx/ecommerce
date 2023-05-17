@@ -2,6 +2,7 @@ import logging
 import re
 from urllib.parse import urljoin
 
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+User = get_user_model()
 
 
 def get_basket_program_uuid(basket):
@@ -99,7 +101,7 @@ def clean_field_value(value):
     return re.sub(r'[\^:"\']', '', value)
 
 
-def embargo_check(user, site, products):
+def embargo_check(user, site, products, ip=None):
     """ Checks if the user has access to purchase products by calling the LMS embargo API.
 
     Args:
@@ -109,8 +111,11 @@ def embargo_check(user, site, products):
     Returns:
         Bool
     """
+
     courses = []
-    _, _, ip = parse_tracking_context(user, usage='embargo')
+
+    if not ip and isinstance(user, User):
+        _, _, ip = parse_tracking_context(user, usage='embargo')
 
     for product in products:
         # We only are checking Seats
