@@ -99,7 +99,7 @@ defusedxml==0.7.1
     #   social-auth-core
 deprecated==1.2.13
     # via redis
-django==3.2.15
+django==3.2.19
     # via
     #   -c requirements/common_constraints.txt
     #   -r requirements/base.in
