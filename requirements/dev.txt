@@ -26,7 +26,7 @@ amqp==2.6.1
     #   kombu
 analytics-python==1.4.post1
     # via -r requirements/test.txt
-asgiref==3.6.0
+asgiref==3.7.1
     # via
     #   -r requirements/test.txt
     #   django
@@ -43,7 +43,7 @@ async-timeout==4.0.2
     #   -r requirements/test.txt
     #   aiohttp
     #   redis
-attrs==22.2.0
+attrs==23.1.0
     # via
     #   -r requirements/test.txt
     #   aiohttp
@@ -78,11 +78,11 @@ billiard==3.6.4.0
     #   celery
 bleach==6.0.0
     # via -r requirements/test.txt
-bok-choy==1.1.1
+bok-choy==2.0.2
     # via -r requirements/test.txt
-boto3==1.26.111
+boto3==1.26.140
     # via -r requirements/test.txt
-botocore==1.29.111
+botocore==1.29.140
     # via
     #   -r requirements/test.txt
     #   boto3
@@ -95,7 +95,7 @@ celery==4.4.7
     # via
     #   -r requirements/test.txt
     #   edx-ecommerce-worker
-certifi==2022.12.7
+certifi==2023.5.7
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -135,7 +135,7 @@ coreschema==0.0.4
     #   -r requirements/test.txt
     #   coreapi
     #   drf-yasg
-coverage[toml]==7.2.3
+coverage[toml]==7.2.6
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -146,7 +146,7 @@ crypto==1.4.1
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-cryptography==40.0.1
+cryptography==40.0.2
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -177,7 +177,7 @@ defusedxml==0.7.1
     #   social-auth-core
 diff-cover==7.5.0
     # via -r requirements/test.txt
-django==3.2.18
+django==3.2.19
     # via
     #   -r requirements/test.txt
     #   crispy-bootstrap3
@@ -221,7 +221,7 @@ django-compressor==4.3.1
     #   django-libsass
 django-config-models==2.3.0
     # via -r requirements/test.txt
-django-cors-headers==3.14.0
+django-cors-headers==4.0.0
     # via -r requirements/test.txt
 django-crispy-forms==2.0
     # via
@@ -232,7 +232,7 @@ django-crum==0.7.9
     #   -r requirements/test.txt
     #   edx-django-utils
     #   edx-rbac
-django-debug-toolbar==4.0.0
+django-debug-toolbar==4.1.0
     # via -r requirements/dev.in
 django-extensions==3.2.1
     # via -r requirements/test.txt
@@ -240,7 +240,7 @@ django-extra-views==0.13.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
-django-filter==23.1
+django-filter==23.2
     # via -r requirements/test.txt
 django-haystack==3.2.1
     # via
@@ -327,11 +327,11 @@ edx-django-utils==5.4.0
     #   edx-drf-extensions
     #   edx-rest-api-client
     #   getsmarter-api-clients
-edx-drf-extensions==8.5.3
+edx-drf-extensions==8.8.0
     # via
     #   -r requirements/test.txt
     #   edx-rbac
-edx-ecommerce-worker==3.3.2
+edx-ecommerce-worker==3.3.3
     # via -r requirements/test.txt
 edx-i18n-tools==0.9.2
     # via -r requirements/test.txt
@@ -341,7 +341,7 @@ edx-opaque-keys==2.3.0
     #   edx-drf-extensions
 edx-rbac==1.7.0
     # via -r requirements/test.txt
-edx-rest-api-client==5.5.0
+edx-rest-api-client==5.5.2
     # via
     #   -r requirements/test.txt
     #   edx-ecommerce-worker
@@ -358,11 +358,11 @@ factory-boy==2.12.0
     # via
     #   -r requirements/test.txt
     #   django-oscar
-faker==18.4.0
+faker==18.9.0
     # via
     #   -r requirements/test.txt
     #   factory-boy
-filelock==3.11.0
+filelock==3.12.0
     # via
     #   -r requirements/test.txt
     #   tox
@@ -382,11 +382,7 @@ funcsigs==1.0.2
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-future==0.18.3
-    # via
-    #   -r requirements/test.txt
-    #   pyjwkest
-getsmarter-api-clients==0.5.0
+getsmarter-api-clients==0.5.4
     # via -r requirements/test.txt
 gitdb==4.0.10
     # via gitpython
@@ -400,7 +396,7 @@ google-api-python-client==2.31.0
     # via
     #   -r requirements/test.txt
     #   inapppy
-google-auth==2.17.2
+google-auth==2.18.1
     # via
     #   -r requirements/test.txt
     #   google-api-core
@@ -431,7 +427,7 @@ imagesize==1.4.1
     # via
     #   -r requirements/docs.txt
     #   sphinx
-importlib-metadata==6.3.0
+importlib-metadata==6.6.0
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -528,7 +524,7 @@ mccabe==0.6.1
     # via
     #   -r requirements/test.txt
     #   pylint
-mock==5.0.1
+mock==5.0.2
     # via -r requirements/test.txt
 monotonic==1.6
     # via
@@ -594,7 +590,7 @@ pbr==5.11.1
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.13.9
+phonenumbers==8.13.11
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -606,7 +602,7 @@ pkgutil-resolve-name==1.3.10
     # via
     #   -r requirements/test.txt
     #   jsonschema
-platformdirs==3.2.0
+platformdirs==3.5.1
     # via
     #   -r requirements/test.txt
     #   pylint
@@ -623,12 +619,12 @@ polib==1.2.0
     #   edx-i18n-tools
 premailer==2.9.2
     # via -r requirements/test.txt
-protobuf==4.22.1
+protobuf==4.23.1
     # via
     #   -r requirements/test.txt
     #   google-api-core
     #   googleapis-common-protos
-psutil==5.9.4
+psutil==5.9.5
     # via
     #   -r requirements/test.txt
     #   edx-django-utils
@@ -644,7 +640,7 @@ py==1.11.0
     #   pytest
     #   pytest-html
     #   tox
-pyasn1==0.4.8
+pyasn1==0.5.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -653,7 +649,7 @@ pyasn1==0.4.8
     #   pyasn1-modules
     #   rsa
     #   x509
-pyasn1-modules==0.2.8
+pyasn1-modules==0.3.0
     # via
     #   -r requirements/test.txt
     #   google-auth
@@ -667,20 +663,19 @@ pycparser==2.21
     #   -r requirements/test.txt
     #   cffi
     #   cybersource-rest-client-python
-pycryptodome==3.17
+pycryptodome==3.18.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-pycryptodomex==3.17
+pycryptodomex==3.18.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-    #   pyjwkest
 pydata-sphinx-theme==0.13.3
     # via
     #   -r requirements/docs.txt
     #   sphinx-book-theme
-pygments==2.15.0
+pygments==2.15.1
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -688,11 +683,7 @@ pygments==2.15.0
     #   diff-cover
     #   pydata-sphinx-theme
     #   sphinx
-pyjwkest==1.4.2
-    # via
-    #   -r requirements/test.txt
-    #   edx-drf-extensions
-pyjwt[crypto]==2.6.0
+pyjwt[crypto]==2.7.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -747,7 +738,7 @@ pytest-base-url==1.4.2
     # via
     #   -r requirements/test.txt
     #   pytest-selenium
-pytest-cov==4.0.0
+pytest-cov==4.1.0
     # via -r requirements/test.txt
 pytest-django==4.5.2
     # via -r requirements/test.txt
@@ -827,11 +818,11 @@ rcssmin==1.1.1
     # via
     #   -r requirements/test.txt
     #   django-compressor
-redis==4.5.4
+redis==4.5.5
     # via
     #   -r requirements/test.txt
     #   edx-ecommerce-worker
-requests==2.28.2
+requests==2.31.0
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -844,7 +835,6 @@ requests==2.28.2
     #   inapppy
     #   naked
     #   paypalrestsdk
-    #   pyjwkest
     #   pytest-base-url
     #   pytest-selenium
     #   requests-file
@@ -866,7 +856,7 @@ requests-oauthlib==1.3.1
     #   -r requirements/test.txt
     #   getsmarter-api-clients
     #   social-auth-core
-requests-toolbelt==0.10.1
+requests-toolbelt==1.0.0
     # via
     #   -r requirements/test.txt
     #   zeep
@@ -883,7 +873,7 @@ rsa==4.9
     #   google-auth
     #   inapppy
     #   oauth2client
-ruamel-yaml==0.17.21
+ruamel-yaml==0.17.26
     # via
     #   -r requirements/test.txt
     #   drf-yasg
@@ -893,7 +883,7 @@ ruamel-yaml-clib==0.2.7
     #   ruamel-yaml
 rules==3.3
     # via -r requirements/test.txt
-s3transfer==0.6.0
+s3transfer==0.6.1
     # via
     #   -r requirements/test.txt
     #   boto3
@@ -918,7 +908,6 @@ six==1.16.0
     #   -r requirements/test.txt
     #   analytics-python
     #   bleach
-    #   bok-choy
     #   cybersource-rest-client-python
     #   django-extra-views
     #   djangorestframework-csv
@@ -934,7 +923,6 @@ six==1.16.0
     #   oauth2client
     #   paypalrestsdk
     #   purl
-    #   pyjwkest
     #   python-dateutil
     #   python-memcached
     #   requests-file
@@ -955,14 +943,14 @@ social-auth-app-django==5.2.0
     # via
     #   -r requirements/test.txt
     #   edx-auth-backends
-social-auth-core==4.4.1
+social-auth-core==4.4.2
     # via
     #   -r requirements/test.txt
     #   edx-auth-backends
     #   social-auth-app-django
 sorl-thumbnail==12.9.0
     # via -r requirements/test.txt
-soupsieve==2.4
+soupsieve==2.4.1
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
@@ -998,12 +986,12 @@ sphinxcontrib-serializinghtml==1.1.5
     # via
     #   -r requirements/docs.txt
     #   sphinx
-sqlparse==0.4.3
+sqlparse==0.4.4
     # via
     #   -r requirements/test.txt
     #   django
     #   django-debug-toolbar
-stevedore==5.0.0
+stevedore==5.1.0
     # via
     #   -r requirements/test.txt
     #   edx-django-utils
@@ -1045,7 +1033,7 @@ traceback2==1.4.0
     #   cybersource-rest-client-python
 transifex-client==0.14.4
     # via -r requirements/dev.in
-types-pyyaml==6.0.12.9
+types-pyyaml==6.0.12.10
     # via
     #   -r requirements/test.txt
     #   responses
@@ -1053,10 +1041,11 @@ typing==3.7.4.3
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-typing-extensions==4.5.0
+typing-extensions==4.6.1
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
+    #   asgiref
     #   astroid
     #   pydata-sphinx-theme
     #   pylint
@@ -1070,12 +1059,13 @@ uritemplate==4.1.1
     #   coreapi
     #   drf-yasg
     #   google-api-python-client
-urllib3==1.26.15
+urllib3==1.26.16
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
     #   botocore
     #   cybersource-rest-client-python
+    #   google-auth
     #   requests
     #   responses
     #   selenium
@@ -1119,7 +1109,7 @@ x509==0.1
     #   cybersource-rest-client-python
 xss-utils==0.4.0
     # via -r requirements/test.txt
-yarl==1.8.2
+yarl==1.9.2
     # via
     #   -r requirements/test.txt
     #   aiohttp
