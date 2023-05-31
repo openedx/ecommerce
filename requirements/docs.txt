@@ -14,7 +14,7 @@ babel==2.12.1
     #   sphinx
 beautifulsoup4==4.12.2
     # via pydata-sphinx-theme
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 charset-normalizer==3.1.0
     # via requests
@@ -28,7 +28,7 @@ idna==2.7
     #   requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==6.3.0
+importlib-metadata==6.6.0
     # via sphinx
 jinja2==3.1.2
     # via sphinx
@@ -40,18 +40,18 @@ packaging==23.1
     #   sphinx
 pydata-sphinx-theme==0.13.3
     # via sphinx-book-theme
-pygments==2.15.0
+pygments==2.15.1
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
     #   sphinx
 pytz==2023.3
     # via babel
-requests==2.28.2
+requests==2.30.0
     # via sphinx
 snowballstemmer==2.2.0
     # via sphinx
-soupsieve==2.4
+soupsieve==2.4.1
     # via beautifulsoup4
 sphinx==5.3.0
     # via
