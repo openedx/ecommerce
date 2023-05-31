@@ -214,6 +214,7 @@ class ConditionalOffer(AbstractConditionalOffer):
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
     email_domains = models.CharField(max_length=255, blank=True, null=True)
     sales_force_id = models.CharField(max_length=30, blank=True, null=True)
+    salesforce_opportunity_line_item = models.CharField(max_length=30, blank=True, null=True)
     max_user_discount = models.DecimalField(
         verbose_name='Max user discount',
         max_digits=12,
