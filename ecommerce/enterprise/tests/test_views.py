@@ -109,6 +109,7 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'contract_discount_value': 200,
             'prepaid_invoice_amount': 2000,
             'sales_force_id': '006abcde0123456789',
+            'salesforce_opportunity_line_item': '000abcde9876543210',
             'usage_email_frequency': ConditionalOffer.DAILY
         }
         response = self.client.post(self.path, data, follow=False)
@@ -130,6 +131,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         expected_discount_type = 'Absolute'
         expected_prepaid_invoice_amount = 12345
         sales_force_id = '006abcde0123456789'
+        salesforce_opportunity_line_item = '000abcde9876543210'
         data = {
             'enterprise_customer_uuid': expected_ec_uuid,
             'enterprise_customer_catalog_uuid': expected_ec_catalog_uuid,
@@ -139,6 +141,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'contract_discount_type': expected_discount_type,
             'prepaid_invoice_amount': expected_prepaid_invoice_amount,
             'sales_force_id': sales_force_id,
+            'salesforce_opportunity_line_item': salesforce_opportunity_line_item,
             'usage_email_frequency': ConditionalOffer.DAILY
         }
 
@@ -151,6 +154,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         self.assertIsNone(enterprise_offer.start_datetime)
         self.assertIsNone(enterprise_offer.end_datetime)
         self.assertEqual(enterprise_offer.sales_force_id, sales_force_id)
+        self.assertEqual(enterprise_offer.salesforce_opportunity_line_item, salesforce_opportunity_line_item)
         self.assertEqual(enterprise_offer.condition.enterprise_customer_uuid, expected_ec_uuid)
         self.assertEqual(enterprise_offer.condition.enterprise_customer_catalog_uuid, expected_ec_catalog_uuid)
         self.assertEqual(enterprise_offer.benefit.type, '')

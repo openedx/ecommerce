@@ -323,6 +323,7 @@ class EnterpriseCouponViewSetRbacTests(
             'contract_discount_value': '12.35',
             'notify_learners': True,
             'sales_force_id': '006ABCDE0123456789',
+            'salesforce_opportunity_line_item': '000ABCDE9876543210',
         }
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
@@ -394,7 +395,6 @@ class EnterpriseCouponViewSetRbacTests(
         ('006abcde0123456789', 200, None),
         ('006ABCDE0123456789', 200, None),
         ('none', 200, None),
-        (None, 400, 'This field is required.'),
         (
             '006ABCDE012345678123143',
             400,
@@ -412,8 +412,81 @@ class EnterpriseCouponViewSetRbacTests(
         self._test_sales_force_id_on_create_coupon(sales_force_id, expected_status_code, error_mesg)
         self._test_sales_force_id_on_update_coupon(sales_force_id, expected_status_code, error_mesg)
 
-    def test_sales_force_id_missing_sales_force_id(self):
-        self._test_sales_force_id_on_create_coupon('', 400, 'This field is required.', add_sales_forces_id_param=False)
+    def _test_salesforce_opportunity_line_item_on_create_coupon(self, salesforce_opportunity_line_item,
+                                                                expected_status_code, expected_error,
+                                                                add_sales_forces_id_param=True):
+        """
+        Test sales force id with creating the Enterprise Coupon.
+        """
+        data = {**self.data}
+        del data['salesforce_opportunity_line_item']
+        if add_sales_forces_id_param:
+            data['salesforce_opportunity_line_item'] = salesforce_opportunity_line_item
+        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, data)
+        self.assertEqual(response.status_code, expected_status_code)
+        response = response.json()
+        if expected_status_code == status.HTTP_400_BAD_REQUEST:
+            self.assertEqual(response['salesforce_opportunity_line_item'][0], expected_error)
+        else:
+            coupon = Product.objects.get(pk=response['coupon_id'])
+            self.assertEqual(coupon.attr.salesforce_opportunity_line_item, salesforce_opportunity_line_item)
+
+    def _test_salesforce_opportunity_line_item_on_update_coupon(
+            self, salesforce_opportunity_line_item, expected_status_code, expected_error):
+        """
+        Test sales force id with updating the Enterprise Coupon.
+        """
+        coupon_response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
+        coupon_response = coupon_response.json()
+        coupon_id = coupon_response['coupon_id']
+        coupon = Product.objects.get(pk=coupon_id)
+
+        response = self.get_response(
+            'PUT',
+            reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon.id}),
+            data={
+                'salesforce_opportunity_line_item': salesforce_opportunity_line_item
+            }
+        )
+        self.assertEqual(response.status_code, expected_status_code)
+
+        response = response.json()
+        if expected_status_code == status.HTTP_400_BAD_REQUEST:
+            self.assertEqual(response['salesforce_opportunity_line_item'][0], expected_error)
+        else:
+            coupon.refresh_from_db()
+            self.assertEqual(coupon.attr.salesforce_opportunity_line_item, salesforce_opportunity_line_item)
+
+    @ddt.data(
+        ('006abcde0123456789', 200, None),
+        ('006ABCDE0123456789', 200, None),
+        ('none', 200, None),
+        (None, 400, 'This field is required.'),
+        (
+            '006ABCDE012345678123143',
+            400,
+            'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'
+        ),
+        ('006ABCDE01234', 400,
+         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+        ('a07ABCDE0123456789', 400,
+         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+        ('006ABCDE0 12345678', 400,
+         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+    )
+    @ddt.unpack
+    def test_salesforce_opportunity_line_item(self, salesforce_opportunity_line_item, expected_status_code, error_mesg):
+        """
+        Test sales force id.
+        """
+        self._test_salesforce_opportunity_line_item_on_create_coupon(
+            salesforce_opportunity_line_item, expected_status_code, error_mesg)
+        self._test_salesforce_opportunity_line_item_on_update_coupon(
+            salesforce_opportunity_line_item, expected_status_code, error_mesg)
+
+    def test_salesforce_opportunity_line_item_missing_salesforce_opportunity_line_item(self):
+        self._test_salesforce_opportunity_line_item_on_create_coupon(
+            '', 400, 'This field is required.', add_sales_forces_id_param=False)
 
     def get_coupon_data(self, coupon_title):
         """
