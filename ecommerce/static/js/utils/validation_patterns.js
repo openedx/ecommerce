@@ -33,5 +33,15 @@ define([
         _.extend(Backbone.Validation.messages, {
             sales_force_id: gettext('Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006')
         });
+
+        _.extend(Backbone.Validation.patterns, {
+            salesforce_opportunity_line_item: /^[0-9]{1}[a-zA-Z0-9]{17}$|^none$/
+        });
+
+        _.extend(Backbone.Validation.messages, {
+            salesforce_opportunity_line_item: gettext(
+                'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number'
+                )
+        });
     }
 );

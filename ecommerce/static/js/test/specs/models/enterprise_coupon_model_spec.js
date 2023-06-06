@@ -73,6 +73,24 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
                 });
+
+                it('should validate salesforce_opportunity_line_item is correct', function() {
+                    model.set('salesforce_opportunity_line_item', 'Invalid_ID');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                });
+
+                it('should validate salesforce_opportunity_line_item with "none" value', function() {
+                    model.set('salesforce_opportunity_line_item', 'none');
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+                });
+
+                it('should validate salesforce_opportunity_line_item is required', function() {
+                    model.set('salesforce_opportunity_line_item', '');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                });
             });
 
             describe('save', function() {
