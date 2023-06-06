@@ -263,6 +263,7 @@ define([], function() {
             contract_discount_value: 30,
             prepaid_invoice_amount: 10000,
             sales_force_id: '006ABCDE0123456789',
+            salesforce_opportunity_line_item: '000ABCDE9876543210',
             invoice_type: 'Not-Applicable'
         },
         couponAPIResponseData = {

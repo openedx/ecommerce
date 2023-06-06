@@ -44,6 +44,7 @@ define([
 
             it('should submit enterprise coupon form with valid fields', function() {
                 view.$('[name=sales_force_id]').val('006ABCDE0123456789').trigger('change');
+                view.$('[name=salesforce_opportunity_line_item]').val('000ABCDE9876543210').trigger('change');
                 view.$('[name=contract_discount_value]').val(30).trigger('change');
                 view.$('[name=prepaid_invoice_amount]').val(10000).trigger('change');
                 view.$('[name=title]').val('Test Enrollment').trigger('change');
@@ -112,6 +113,9 @@ define([
                     );
                     expect(view.$el.find('[name=sales_force_id]').val()).toEqual(
                         model.get('sales_force_id')
+                    );
+                    expect(view.$el.find('[name=salesforce_opportunity_line_item]').val()).toEqual(
+                        model.get('salesforce_opportunity_line_item')
                     );
                     expect(view.$el.find('[name=contract_discount_value]').val()).toEqual(
                         model.get('contract_discount_value').toString()

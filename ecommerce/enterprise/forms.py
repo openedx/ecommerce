@@ -15,7 +15,10 @@ from oscar.core.loading import get_model
 
 from ecommerce.enterprise.benefits import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
-from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
+from ecommerce.enterprise.constants import (
+    ENTERPRISE_SALES_FORCE_ID_REGEX,
+    ENTERPRISE_SALESFORCE_OPPORTUNITY_LINE_ITEM_REGEX
+)
 from ecommerce.enterprise.utils import convert_comma_separated_string_to_list, get_enterprise_customer
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
@@ -47,7 +50,9 @@ class EnterpriseOfferForm(forms.ModelForm):
     prepaid_invoice_amount = forms.DecimalField(
         required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Prepaid Invoice Amount')
     )
-    sales_force_id = forms.CharField(max_length=30, required=True, label=_('Salesforce Opportunity ID'))
+    sales_force_id = forms.CharField(max_length=30, required=False, label=_('Salesforce Opportunity ID'))
+    salesforce_opportunity_line_item = forms.CharField(
+        max_length=30, required=False, label=_('Salesforce Opportunity Line Item'))
     emails_for_usage_alert = forms.CharField(
         required=False,
         label=_("Emails Addresses"),
@@ -65,6 +70,7 @@ class EnterpriseOfferForm(forms.ModelForm):
             'enterprise_customer_uuid', 'enterprise_customer_catalog_uuid', 'start_datetime',
             'end_datetime', 'benefit_type', 'benefit_value', 'contract_discount_type',
             'contract_discount_value', 'prepaid_invoice_amount', 'sales_force_id',
+            'salesforce_opportunity_line_item',
             'max_global_applications', 'max_discount', 'max_user_applications', 'max_user_discount',
             'emails_for_usage_alert', 'usage_email_frequency'
         ]
@@ -154,12 +160,22 @@ class EnterpriseOfferForm(forms.ModelForm):
     def clean_sales_force_id(self):
         # validate sales_force_id format
         sales_force_id = self.cleaned_data.get('sales_force_id')
-        if not re.match(ENTERPRISE_SALES_FORCE_ID_REGEX, sales_force_id):
+        if sales_force_id and not re.match(ENTERPRISE_SALES_FORCE_ID_REGEX, sales_force_id):
             self.add_error(
                 'sales_force_id',
                 _('Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.')
             )
         return self.cleaned_data.get('sales_force_id')
+
+    def clean_salesforce_opportunity_line_item(self):
+        # validate salesforce_opportunity_line_item format
+        salesforce_opportunity_line_item = self.cleaned_data.get('salesforce_opportunity_line_item')
+        if not re.match(ENTERPRISE_SALESFORCE_OPPORTUNITY_LINE_ITEM_REGEX, salesforce_opportunity_line_item):
+            self.add_error(
+                'salesforce_opportunity_line_item',
+                _('The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.')
+            )
+        return self.cleaned_data.get('salesforce_opportunity_line_item')
 
     def clean_max_discount(self):
         max_discount = self.cleaned_data.get('max_discount')
@@ -303,6 +319,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         enterprise_customer_uuid = self.cleaned_data['enterprise_customer_uuid']
         enterprise_customer_catalog_uuid = self.cleaned_data['enterprise_customer_catalog_uuid']
         sales_force_id = self.cleaned_data['sales_force_id']
+        salesforce_opportunity_line_item = self.cleaned_data['salesforce_opportunity_line_item']
         site = self.request.site
 
         contract_discount_value = self.cleaned_data['contract_discount_value']
@@ -330,6 +347,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         self.instance.partner = site.siteconfiguration.partner
         self.instance.priority = OFFER_PRIORITY_ENTERPRISE
         self.instance.sales_force_id = sales_force_id
+        self.instance.salesforce_opportunity_line_item = salesforce_opportunity_line_item
 
         self.instance.max_global_applications = self.cleaned_data.get('max_global_applications')
         self.instance.max_discount = self.cleaned_data.get('max_discount')

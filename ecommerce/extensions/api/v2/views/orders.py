@@ -125,6 +125,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             >>>             "discount_percentage": 75.0,
             >>>             "date_placed": '2020-02-11T09:38:47.634561+00:00',  # optional param, only for old records.
             >>>             "sales_force_id": '252F0060L00000ppWfu',
+            >>>             "salesforce_opportunity_line_item": 'abcF0060L00000ppWfu',
             >>>             "mode": 'verified',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
@@ -152,6 +153,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             >>>             "discount_percentage": 75.0,
             >>>             "date_placed": '2020-02-11T09:38:47.634561+00:00',
             >>>             "sales_force_id": '252F0060L00000ppWfu',
+            >>>             "salesforce_opportunity_line_item": 'abcF0060L00000ppWfu',
             >>>             "mode": 'verified',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
@@ -232,6 +234,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
                     "course_run_key": <string>,
                     "discount_percentage": <float>,
                     "sales_force_id": <string>,
+                    "salesforce_opportunity_line_item": <string>,
                     "mode": <string>,
                     "enterprise_customer_name": <string>,
                     "enterprise_customer_uuid": <string>,
@@ -251,19 +254,21 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
                 mode,
                 discount_percentage,
                 sales_force_id,
+                salesforce_opportunity_line_item,
             ) = self._get_enrollment_data(enrollment)
         except ValidationError as ex:
             return dict(enrollment, status=self.FAILURE, detail=ex.message, new_order_created=None)
 
         logger.info(
             '[Manual Order Creation] Request received. User: %s, Email: %s, Course: %s, RequestUser: %s, '
-            'Discount Percentage: %s, Salesforce Opportunity Id: %s',
+            'Discount Percentage: %s, Salesforce Opportunity Id: %s, Salesforce Opportunity Line Item Id: %s',
             learner_username,
             learner_email,
             course_run_key,
             request_user.username,
             discount_percentage,
             sales_force_id,
+            salesforce_opportunity_line_item,
         )
 
         learner_user = self._get_learner_user(lms_user_id, learner_username, learner_email)
@@ -308,7 +313,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         discount_offer = self._get_or_create_discount_offer(
             enterprise_customer_name,
             enterprise_customer_uuid,
-            sales_force_id
+            sales_force_id,
+            salesforce_opportunity_line_item
         )
         Applicator().apply_offers(basket, [discount_offer])
         try:
@@ -399,6 +405,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         Optional Parameters:
             discount_percentage: Discounted percentage for manual enrollment.
             sales_force_id: Salesforce opportunity id.
+            salesforce_opportunity_line_item: Salesforce opportunity line item id.
 
         Raises:
             ValidationError: If any required parameter is not present in enrollment.
@@ -410,6 +417,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         course_run_key = enrollment.get('course_run_key')
         discount_percentage = enrollment.get('discount_percentage')
         sales_force_id = enrollment.get('sales_force_id')
+        salesforce_opportunity_line_item = enrollment.get('salesforce_opportunity_line_item')
         mode = enrollment.get('mode')
         if not (lms_user_id and learner_username and learner_email and course_run_key and mode):
             enrollment_parameters_state = [
@@ -431,7 +439,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         if discount_percentage is not None:
             if not isinstance(discount_percentage, float) or (discount_percentage < 0.0 or discount_percentage > 100.0):
                 raise ValidationError('Discount percentage should be a float from 0 to 100.')
-        return lms_user_id, learner_username, learner_email, course_run_key, mode, discount_percentage, sales_force_id
+        return lms_user_id, learner_username, learner_email, course_run_key, mode, discount_percentage,\
+            sales_force_id, salesforce_opportunity_line_item
 
     def _get_learner_user(self, lms_user_id, learner_username, learner_email):
         """
@@ -447,7 +456,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
 
         return learner_user
 
-    def _get_or_create_discount_offer(self, enterprise_customer_name, enterprise_customer_uuid, sales_force_id):
+    def _get_or_create_discount_offer(
+            self, enterprise_customer_name, enterprise_customer_uuid, sales_force_id, salesforce_opportunity_line_item):
         """
         Get or Create 100% discount offer for `Manual Enrollment Order`.
         """
@@ -479,6 +489,11 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         )
         if sales_force_id and offer.sales_force_id != sales_force_id:
             offer.sales_force_id = sales_force_id
+            offer.save()
+
+        if salesforce_opportunity_line_item and\
+                offer.salesforce_opportunity_line_item != salesforce_opportunity_line_item:
+            offer.salesforce_opportunity_line_item = salesforce_opportunity_line_item
             offer.save()
 
         return offer
