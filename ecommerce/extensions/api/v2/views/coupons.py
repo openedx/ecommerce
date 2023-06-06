@@ -171,6 +171,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             program_uuid=cleaned_voucher_data['program_uuid'],
             site=self.request.site,
             sales_force_id=cleaned_voucher_data['sales_force_id'],
+            salesforce_opportunity_line_item=cleaned_voucher_data['salesforce_opportunity_line_item'],
         )
 
     def validate_access_for_enterprise(self, request_data):
@@ -274,6 +275,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'contract_discount_value': request_data.get('contract_discount_value'),
             'prepaid_invoice_amount': request_data.get('prepaid_invoice_amount'),
             'sales_force_id': request_data.get('sales_force_id'),
+            'salesforce_opportunity_line_item': request_data.get('salesforce_opportunity_line_item'),
         }
 
     @classmethod
@@ -477,6 +479,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         sales_force_id = request_data.get('sales_force_id')
         if sales_force_id is not None:
             coupon.attr.sales_force_id = sales_force_id
+
+        salesforce_opportunity_line_item = request_data.get('salesforce_opportunity_line_item')
+        if salesforce_opportunity_line_item is not None:
+            coupon.attr.salesforce_opportunity_line_item = salesforce_opportunity_line_item
 
         if 'inactive' in request_data:
             coupon.attr.inactive = request_data.get('inactive')

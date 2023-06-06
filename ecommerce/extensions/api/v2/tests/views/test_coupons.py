@@ -88,6 +88,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'email_domains': None,
             'program_uuid': None,
             'sales_force_id': None,
+            'salesforce_opportunity_line_item': None,
         }
 
     def test_clean_voucher_request_data(self):
@@ -107,6 +108,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'max_uses': 1,
             'notify_email': 'batman@gotham.comics',
             'sales_force_id': 'salesforceid123',
+            'salesforce_opportunity_line_item': 'salesforcelineitem123',
         })
         view = CouponViewSet()
         cleaned_voucher_data = view.clean_voucher_request_data(self.coupon_data, self.site.siteconfiguration.partner)
@@ -139,6 +141,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'contract_discount_type',
             'contract_discount_value',
             'sales_force_id',
+            'salesforce_opportunity_line_item',
         ]
         self.assertEqual(sorted(expected_cleaned_voucher_data_keys), sorted(cleaned_voucher_data.keys()))
 
@@ -245,6 +248,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'title': 'Tešt čoupon',
             'voucher_type': Voucher.SINGLE_USE,
             'sales_force_id': '006ABCDE0123456789',
+            'salesforce_opportunity_line_item': '000ABCDE9876543210',
         }
         self.response = self.get_response('POST', COUPONS_LINK, self.data)
         self.coupon = Product.objects.get(title=self.data['title'])
@@ -1257,7 +1261,6 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             enterprise_name,
             ENTERPRISE_COUPONS_LINK
         )
-
         coupon = Product.objects.get(id=response.json()['coupon_id'])
         assert coupon.attr.enterprise_contract_metadata.discount_value == Decimal('12.34000')
         assert coupon.attr.enterprise_contract_metadata.discount_type == 'Percentage'
