@@ -1,233 +1,337 @@
 <div class="row">
     <% if(editing) {%>
-    <div class="fields col-md-12">
-        <div class="form-group">
-            <label><%= gettext('Status') %> *</label>
-            <div class="Status row">
-                <div class="form-inline col-md-3">
-                    <input id="active" type="radio" name="inactive" value="active">
-                    <label for="active" class="normal-font-weight"><%= gettext('Active') %></label>
-                </div>
-                <div class="form-inline col-md-3">
-                    <input id="inactive" type="radio" name="inactive" value="inactive">
-                    <label for="inactive" class="normal-font-weight"><%= gettext('Inactive') %></label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <%}%>
-    <div class="fields col-md-6">
-        <div class="form-group">
-            <label for="title"><%= gettext('Coupon Name') %> *</label>
-            <input id="title" type="text" class="form-control" name="title" maxlength="30">
-            <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-            <label for="code-type"><%= gettext('Code Type') %></label>
-            <select id="code-type" class="form-control non-editable" name="code_type"></select>
-            <p class="help-block"></p>
-        </div>
-      <div class="form-group">
-        <label for="category"><%= gettext('Category') %></label>
-        <select id="category" class="form-control" name="category"></select>
-        <p class="help-block"></p>
-      </div>
-
-        <div class="row">
-            <div class="form-group col-md-6">
-                <label for="start-date"><%= gettext('Valid from') %> *</label>
-                <div class="input-group">
-                    <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
-                    <input id="start-date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>" class="form-control add-pikaday" name="start_date">
-                </div>
-                <p class="help-block"></p>
-            </div>
-            <div class="form-group col-md-6">
-                <label for="end-date"><%= gettext('Valid until') %> *</label>
-                <div class="input-group">
-                    <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
-                    <input id="end-date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>" class="form-control add-pikaday" name="end_date">
-                </div>
-                <p class="help-block"></p>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="voucher-type"><%= gettext('Usage Limitations') %></label>
-            <select id="voucher-type" class="form-control non-editable" name="voucher_type"></select>
-            <p class="help-block"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="code"><%= gettext('Code') %></label>
-            <input id="code" type="text" class="form-control non-editable" name="code" placeholder="<%= gettext('optional') %>">
-            <p class="help-block"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="quantity"><%= gettext('Number of Codes') %> *</label>
-            <input id="quantity" type="number" step="1" class="form-control non-editable" name="quantity" value="1" min="1" max="5000">
-            <p class="help-block"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="max-uses"><%= gettext('Maximum Number of Uses') %></label>
-            <input id="max-uses" type="number" step="1" class="form-control" name="max_uses" value="1" min="1" placeholder="Defaults to 10000">
-            <p class="help-block"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="contract-discount-value"><%= gettext('Discount on contract') %> *</label>
-            <div class="input-group">
-                <div class="contract-discount-addon input-group-addon"></div>
-                <input id="contract-discount-value" type="number" step="0.01" class="form-control contract-discount-value" name="contract_discount_value">
-            </div>
-            <div class="form-inline contract-discount-type">
-                <input id="contract-discount-percent" type="radio" name="contract_discount_type" value="Percentage">
-                <label for="contract-discount-percent" class="normal-font-weight"><%= gettext('Percent') %></label>
-                <input id="contract-discount-fixed" type="radio" name="contract_discount_type" value="Absolute">
-                <label for="contract-discount-fixed" class="normal-font-weight"><%= gettext('Fixed ($USD)') %></label>
-            </div>
-            <p class="help-block"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="prepaid-invoice-amount"><%= gettext('Prepaid invoice amount') %> *</label>
-            <div class="input-group">
-                <div class="prepaid-invoice-amount-addon input-group-addon"></div>
-                <input id="prepaid-invoice-amount" type="number" step="0.01" class="form-control prepaid-invoice-amount" name="prepaid_invoice_amount">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="benefit-value"><%= gettext('Discount Value') %> *</label>
-            <div class="input-group">
-                <div class="benefit-addon input-group-addon"></div>
-                <input id="benefit-value" type="number" step="0.01" class="form-control benefit-value" name="benefit_value">
-            </div>
-            <div class="form-inline benefit-type">
-                <input id="benefit-percent" type="radio" class="non-editable" name="benefit_type" value="Percentage">
-                <label for="benefit-percent" class="normal-font-weight"><%= gettext('Percent') %></label>
-                <input id="benefit-fixed" type="radio" class="non-editable" name="benefit_type" value="Absolute">
-                <label for="benefit-fixed" class="normal-font-weight"><%= gettext('Fixed ($USD)') %></label>
-            </div>
-            <p class="help-block"></p>
-        </div>
-        <hr>
-
-        <div class="form-group">
-            <label><%= gettext('Invoice Type') %> *</label>
-            <div class="invoice-type row">
-                <div class="form-inline col-md-4">
-                    <input id="already-invoiced" type="radio" name="invoice_type" value="Prepaid">
-                    <label for="already-invoiced" class="normal-font-weight"><%= gettext('Already invoiced') %></label>
-                </div>
-                <div class="form-inline col-md-6">
-                    <input id="invoice-after-redemption" type="radio" name="invoice_type" value="Postpaid">
-                    <label for="invoice-after-redemption" class="normal-font-weight"><%= gettext('Invoice after redemption') %></label>
-                </div>
-                <div class="form-inline col-md-2">
-                    <input id="not-applicable" type="radio" name="invoice_type" value="Not-Applicable">
-                    <label for="not-applicable" class="normal-font-weight"><%= gettext('N/A') %></label>
+        <div class="fields col-md-12">
+            <div class="form-group">
+                <label>
+                    <%= gettext('Status') %> *
+                </label>
+                <div class="Status row">
+                    <div class="form-inline col-md-3">
+                        <input id="active" type="radio" name="inactive" value="active">
+                        <label for="active" class="normal-font-weight">
+                            <%= gettext('Active') %>
+                        </label>
+                    </div>
+                    <div class="form-inline col-md-3">
+                        <input id="inactive" type="radio" name="inactive" value="inactive">
+                        <label for="inactive" class="normal-font-weight">
+                            <%= gettext('Inactive') %>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
+        <%}%>
+            <div class="fields col-md-6">
+                <div class="form-group">
+                    <label for="title">
+                        <%= gettext('Coupon Name') %> *
+                    </label>
+                    <input id="title" type="text" class="form-control" name="title" maxlength="30">
+                    <p class="help-block"></p>
+                </div>
+                <div class="form-group">
+                    <label for="code-type">
+                        <%= gettext('Code Type') %>
+                    </label>
+                    <select id="code-type" class="form-control non-editable" name="code_type"></select>
+                    <p class="help-block"></p>
+                </div>
+                <div class="form-group">
+                    <label for="category">
+                        <%= gettext('Category') %>
+                    </label>
+                    <select id="category" class="form-control" name="category"></select>
+                    <p class="help-block"></p>
+                </div>
 
-        <div class="form-group">
-            <label for="invoice-number"><%= gettext('Invoice Number') %> *</label>
-            <input id="invoice-number" class="form-control" type="text" name="invoice_number">
-            <p class="help-block"></p>
-        </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="start-date">
+                            <%= gettext('Valid from') %> *
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+                            <input id="start-date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>"
+                                class="form-control add-pikaday" name="start_date">
+                        </div>
+                        <p class="help-block"></p>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="end-date">
+                            <%= gettext('Valid until') %> *
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+                            <input id="end-date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>"
+                                class="form-control add-pikaday" name="end_date">
+                        </div>
+                        <p class="help-block"></p>
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <label for="price"><%= gettext('Invoiced Amount') %> *</label>
-            <div class="input-group">
-                <div class="input-group-addon">$</div>
-                <input id="price" type="number" step="0.01" min="0" class="form-control" name="price">
+                <div class="form-group">
+                    <label for="voucher-type">
+                        <%= gettext('Usage Limitations') %>
+                    </label>
+                    <select id="voucher-type" class="form-control non-editable" name="voucher_type"></select>
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="code">
+                        <%= gettext('Code') %>
+                    </label>
+                    <input id="code" type="text" class="form-control non-editable" name="code"
+                        placeholder="<%= gettext('optional') %>">
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">
+                        <%= gettext('Number of Codes') %> *
+                    </label>
+                    <input id="quantity" type="number" step="1" class="form-control non-editable" name="quantity"
+                        value="1" min="1" max="5000">
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="max-uses">
+                        <%= gettext('Maximum Number of Uses') %>
+                    </label>
+                    <input id="max-uses" type="number" step="1" class="form-control" name="max_uses" value="1" min="1"
+                        placeholder="Defaults to 10000">
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="contract-discount-value">
+                        <%= gettext('Discount on contract') %> *
+                    </label>
+                    <div class="input-group">
+                        <div class="contract-discount-addon input-group-addon"></div>
+                        <input id="contract-discount-value" type="number" step="0.01"
+                            class="form-control contract-discount-value" name="contract_discount_value">
+                    </div>
+                    <div class="form-inline contract-discount-type">
+                        <input id="contract-discount-percent" type="radio" name="contract_discount_type"
+                            value="Percentage">
+                        <label for="contract-discount-percent" class="normal-font-weight">
+                            <%= gettext('Percent') %>
+                        </label>
+                        <input id="contract-discount-fixed" type="radio" name="contract_discount_type" value="Absolute">
+                        <label for="contract-discount-fixed" class="normal-font-weight">
+                            <%= gettext('Fixed ($USD)') %>
+                        </label>
+                    </div>
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="prepaid-invoice-amount">
+                        <%= gettext('Prepaid invoice amount') %> *
+                    </label>
+                    <div class="input-group">
+                        <div class="prepaid-invoice-amount-addon input-group-addon"></div>
+                        <input id="prepaid-invoice-amount" type="number" step="0.01"
+                            class="form-control prepaid-invoice-amount" name="prepaid_invoice_amount">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="benefit-value">
+                        <%= gettext('Discount Value') %> *
+                    </label>
+                    <div class="input-group">
+                        <div class="benefit-addon input-group-addon"></div>
+                        <input id="benefit-value" type="number" step="0.01" class="form-control benefit-value"
+                            name="benefit_value">
+                    </div>
+                    <div class="form-inline benefit-type">
+                        <input id="benefit-percent" type="radio" class="non-editable" name="benefit_type"
+                            value="Percentage">
+                        <label for="benefit-percent" class="normal-font-weight">
+                            <%= gettext('Percent') %>
+                        </label>
+                        <input id="benefit-fixed" type="radio" class="non-editable" name="benefit_type"
+                            value="Absolute">
+                        <label for="benefit-fixed" class="normal-font-weight">
+                            <%= gettext('Fixed ($USD)') %>
+                        </label>
+                    </div>
+                    <p class="help-block"></p>
+                </div>
+                <hr>
+
+                <div class="form-group">
+                    <label>
+                        <%= gettext('Invoice Type') %> *
+                    </label>
+                    <div class="invoice-type row">
+                        <div class="form-inline col-md-4">
+                            <input id="already-invoiced" type="radio" name="invoice_type" value="Prepaid">
+                            <label for="already-invoiced" class="normal-font-weight">
+                                <%= gettext('Already invoiced') %>
+                            </label>
+                        </div>
+                        <div class="form-inline col-md-6">
+                            <input id="invoice-after-redemption" type="radio" name="invoice_type" value="Postpaid">
+                            <label for="invoice-after-redemption" class="normal-font-weight">
+                                <%= gettext('Invoice after redemption') %>
+                            </label>
+                        </div>
+                        <div class="form-inline col-md-2">
+                            <input id="not-applicable" type="radio" name="invoice_type" value="Not-Applicable">
+                            <label for="not-applicable" class="normal-font-weight">
+                                <%= gettext('N/A') %>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="invoice-number">
+                        <%= gettext('Invoice Number') %> *
+                    </label>
+                    <input id="invoice-number" class="form-control" type="text" name="invoice_number">
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">
+                        <%= gettext('Invoiced Amount') %> *
+                    </label>
+                    <div class="input-group">
+                        <div class="input-group-addon">$</div>
+                        <input id="price" type="number" step="0.01" min="0" class="form-control" name="price">
+                    </div>
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="invoice-payment-date">
+                        <%= gettext('Payment Date') %> *
+                    </label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><span class="fa fa-calendar" aria-hidden="true"></span></div>
+                        <input id="invoice-payment-date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>"
+                            class="form-control add-pikaday" name="invoice_payment_date">
+                    </div>
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group hidden">
+                    <label for="invoice-discount-value">
+                        <%= gettext('Discount per Code') %> *
+                    </label>
+                    <div class="input-group">
+                        <div class="invoice-discount-addon input-group-addon"></div>
+                        <input id="invoice-discount-value" type="number" step="0.01"
+                            class="form-control invoice-discount-value" name="invoice_discount_value">
+                    </div>
+                    <div class="form-inline invoice-discount-type">
+                        <input id="invoice-discount-percent" type="radio" name="invoice_discount_type"
+                            value="Percentage">
+                        <label for="invoice-discount-percent" class="normal-font-weight">
+                            <%= gettext('Percent') %>
+                        </label>
+                        <input id="invoice-discount-fixed" type="radio" name="invoice_discount_type" value="Absolute">
+                        <label for="invoice-discount-fixed" class="normal-font-weight">
+                            <%= gettext('Fixed ($USD)') %>
+                        </label>
+                    </div>
+                    <p class="help-block"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="tax-deducted-source">
+                        <%= gettext('Tax Deducted Source (TDS)') %>
+                    </label>
+                    <div class="form-inline tax-deduction">
+                        <input id="tax-deducted" type="radio" name="tax_deduction" value="Yes">
+                        <label for="tax-deducted" class="normal-font-weight">
+                            <%= gettext('Yes') %>
+                        </label>
+                        <input id="non-tax-deducted" type="radio" name="tax_deduction" value="No" checked>
+                        <label for="non-tax-deducted" class="normal-font-weight">
+                            <%= gettext('No') %>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group hidden">
+                    <div class="input-group tax-deducted-source-value">
+                        <input id="tax-deducted-source-value" type="number" step="1" min="1" max="100"
+                            class="form-control" name="tax_deducted_source_value">
+                        <div class="input-group-addon">%</div>
+                    </div>
+                    <p class="help-block"></p>
+                </div>
             </div>
-            <p class="help-block"></p>
-        </div>
 
-        <div class="form-group">
-            <label for="invoice-payment-date"><%= gettext('Payment Date') %> *</label>
-            <div class="input-group">
-                <div class="input-group-addon"><span class="fa fa-calendar" aria-hidden="true"></span></div>
-                <input id="invoice-payment-date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>" class="form-control add-pikaday" name="invoice_payment_date">
+            <div class="fields col-md-6">
+                <div class="form-group enterprise-customer">
+                    <label for="enterprise-customer">
+                        <%= gettext('Enterprise Customer:') %>
+                    </label>
+                    <input id="enterprise-customer" class="form-control" name="enterprise_customer"
+                        placeholder="<%- gettext('Enterprise Customer Name') %>" />
+                    <p class="help-block"></p>
+                </div>
+                <div class="form-group enterprise-customer-catalog">
+                    <label for="enterprise-customer-catalog">
+                        <%= gettext('Enterprise Customer Catalog') %>
+                    </label>
+                    <select id="enterprise-customer-catalog" class="form-control" name="enterprise_customer_catalog"
+                        disabled></select>
+                    <a id="enterprise-catalog-details" aria-label="View enterprise catalog details.">Enterprise Catalog
+                        Details</a>
+                    <p class="help-block"></p>
+                </div>
+                <div class="form-group email-domains">
+                    <label for="email-domains">
+                        <%= gettext('Email domains:') %>
+                    </label>
+                    <input id="email-domains" class="form-control" name="email_domains" maxlength="255">
+                    <p class="help-block"></p>
+                </div>
+                <div class="form-group">
+                    <label for="note">
+                        <%= gettext('Note') %>
+                    </label>
+                    <input id="note" type="text" class="form-control" name="note" maxlength="100">
+                    <p class="help-block"></p>
+                </div>
+                <div class="form-group">
+                    <label for="notify-email">
+                        <%= gettext('Notification Email') %>
+                    </label>
+                    <input id="notify-email" class="form-control" type="text" name="notify_email">
+                    <p class="help-block"></p>
+                </div>
+                <div class="form-group">
+                    <label for="sales-force-id">
+                        <%= gettext('Salesforce Opportunity ID') %> *
+                    </label>
+                    <input id="sales-force-id" class="form-control" type="text" name="sales_force_id" disabled>
+                    <p class="help-block"></p>
+                </div>
+                <div class="form-group">
+                    <label for="salesforce-opportunity-line-item">
+                        <%= gettext('Salesforce Opportunity Line Item') %> *
+                    </label>
+                    <input id="salesforce-opportunity-line-item" class="form-control" type="text"
+                        name="salesforce_opportunity_line_item">
+                    <p class="help-block"></p>
+                </div>
             </div>
-            <p class="help-block"></p>
-        </div>
-
-        <div class="form-group hidden">
-            <label for="invoice-discount-value"><%= gettext('Discount per Code') %> *</label>
-            <div class="input-group">
-                <div class="invoice-discount-addon input-group-addon"></div>
-                <input id="invoice-discount-value" type="number" step="0.01" class="form-control invoice-discount-value" name="invoice_discount_value">
-            </div>
-            <div class="form-inline invoice-discount-type">
-                <input id="invoice-discount-percent" type="radio" name="invoice_discount_type" value="Percentage">
-                <label for="invoice-discount-percent" class="normal-font-weight"><%= gettext('Percent') %></label>
-                <input id="invoice-discount-fixed" type="radio" name="invoice_discount_type" value="Absolute">
-                <label for="invoice-discount-fixed" class="normal-font-weight"><%= gettext('Fixed ($USD)') %></label>
-            </div>
-            <p class="help-block"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="tax-deducted-source"><%= gettext('Tax Deducted Source (TDS)') %></label>
-            <div class="form-inline tax-deduction">
-                <input id="tax-deducted" type="radio" name="tax_deduction" value="Yes">
-                <label for="tax-deducted" class="normal-font-weight"><%= gettext('Yes') %></label>
-                <input id="non-tax-deducted" type="radio" name="tax_deduction" value="No" checked>
-                <label for="non-tax-deducted" class="normal-font-weight"><%= gettext('No') %></label>
-            </div>
-        </div>
-
-        <div class="form-group hidden">
-            <div class="input-group tax-deducted-source-value">
-                <input id="tax-deducted-source-value" type="number" step="1" min="1" max="100" class="form-control" name="tax_deducted_source_value">
-                <div class="input-group-addon">%</div>
-            </div>
-            <p class="help-block"></p>
-        </div>
-    </div>
-
-    <div class="fields col-md-6">
-        <div class="form-group enterprise-customer">
-            <label for="enterprise-customer"><%= gettext('Enterprise Customer:') %></label>
-            <input id="enterprise-customer" class="form-control" name="enterprise_customer" placeholder="<%- gettext('Enterprise Customer Name') %>"/>
-            <p class="help-block"></p>
-        </div>
-        <div class="form-group enterprise-customer-catalog">
-            <label for="enterprise-customer-catalog"><%= gettext('Enterprise Customer Catalog') %></label>
-            <select id="enterprise-customer-catalog" class="form-control" name="enterprise_customer_catalog" disabled></select>
-            <a id="enterprise-catalog-details" aria-label="View enterprise catalog details.">Enterprise Catalog Details</a>
-            <p class="help-block"></p>
-        </div>
-        <div class="form-group email-domains">
-            <label for="email-domains"><%= gettext('Email domains:') %> </label>
-            <input id="email-domains" class="form-control" name="email_domains" maxlength="255">
-            <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-            <label for="note"><%= gettext('Note') %></label>
-            <input id="note" type="text" class="form-control" name="note" maxlength="100">
-            <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-            <label for="notify-email"><%= gettext('Notification Email') %></label>
-            <input id="notify-email" class="form-control" type="text" name="notify_email">
-            <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-            <label for="sales-force-id"><%= gettext('Salesforce Opportunity ID') %> *</label>
-            <input id="sales-force-id" class="form-control" type="text" name="sales_force_id">
-            <p class="help-block"></p>
-        </div>
-    </div>
 </div>
 
 <div class="form-actions">
     <button type="submit" class="btn btn-primary"></button>
     <button class="btn btn-primary submit-add-more"></button>
-    <a id="cancel-button" class="btn btn-default" href="/enterprise/coupons/<% if(id){ print(id + '/'); } %>"><%= gettext('Cancel') %></a>
+    <a id="cancel-button" class="btn btn-default" href="/enterprise/coupons/<% if(id){ print(id + '/'); } %>">
+        <%= gettext('Cancel') %>
+    </a>
 </div>

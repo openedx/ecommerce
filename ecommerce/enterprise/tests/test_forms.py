@@ -46,6 +46,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             'contract_discount_value': self.contract_discount_value,
             'prepaid_invoice_amount': self.prepaid_invoice_amount,
             'sales_force_id': '006abcde0123456789',
+            'salesforce_opportunity_line_item': '000abcde9876543210',
             'max_global_applications': 2,
             'max_discount': 300,
             'max_user_discount': 50,
@@ -59,13 +60,14 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
                                            enterprise_customer_catalog_uuid, expected_benefit_value,
                                            expected_benefit_type, expected_name, expected_contract_discount_type,
                                            expected_contract_discount_value, expected_prepaid_invoice_amount,
-                                           expected_sales_force_id, expected_max_global_applications,
-                                           expected_max_discount, expected_max_user_applications,
-                                           expected_max_user_discount):
+                                           expected_sales_force_id, expected_salesforce_opportunity_line_item,
+                                           expected_max_global_applications, expected_max_discount,
+                                           expected_max_user_applications, expected_max_user_discount):
         """ Assert the given offer's parameters match the expected values. """
         self.assertEqual(str(offer.name), expected_name)
         self.assertEqual(offer.offer_type, ConditionalOffer.SITE)
         self.assertEqual(offer.sales_force_id, expected_sales_force_id)
+        self.assertEqual(offer.salesforce_opportunity_line_item, expected_salesforce_opportunity_line_item)
         self.assertEqual(offer.status, ConditionalOffer.OPEN)
         self.assertEqual(offer.max_basket_applications, 1)
         self.assertEqual(offer.partner, self.partner)
@@ -256,6 +258,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
             data['sales_force_id'],
+            data['salesforce_opportunity_line_item'],
             data['max_global_applications'],
             data['max_discount'],
             data['max_user_applications'],
@@ -288,6 +291,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
             data['sales_force_id'],
+            data['salesforce_opportunity_line_item'],
             data['max_global_applications'],
             data['max_discount'],
             data['max_user_applications'],
@@ -330,6 +334,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
             data['sales_force_id'],
+            data['salesforce_opportunity_line_item'],
             data['max_global_applications'],
             data['max_discount'],
             data['max_user_applications'],
@@ -372,6 +377,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
             data['sales_force_id'],
+            data['salesforce_opportunity_line_item'],
             data['max_global_applications'],
             data['max_discount'],
             data['max_user_applications'],
@@ -460,7 +466,6 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         ('006ABCDE0123456789', None),
         ('none', None),
         # Invalid Cases
-        (None, 'This field is required.'),
         ('006ABCDE012345678123143', 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
         ('006ABCDE01234', 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
         ('007ABCDE0123456789', 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'),
@@ -473,6 +478,46 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         """
         self._test_sales_force_id(sales_force_id, expected_error, is_update_view=False)
         self._test_sales_force_id(sales_force_id, expected_error, is_update_view=True)
+
+    def _test_salesforce_opportunity_line_item(self, salesforce_opportunity_line_item, expected_error, is_update_view):
+        """
+        Verify that `clean` for `salesforce_opportunity_line_item` field is working as expected.
+        """
+        instance = None
+        if is_update_view:
+            instance = factories.EnterpriseOfferFactory()
+        data = self.generate_data(salesforce_opportunity_line_item=salesforce_opportunity_line_item)
+        if expected_error:
+            expected_errors = {'salesforce_opportunity_line_item': [expected_error]}
+            self.assert_form_errors(data, expected_errors, instance)
+        else:
+            form = EnterpriseOfferForm(data=data, instance=instance)
+            self.assertTrue(form.is_valid())
+
+    @ddt.data(
+        # Valid Cases
+        ('006abcde0123456789', None),
+        ('006ABCDE0123456789', None),
+        ('none', None),
+        # Invalid Cases
+        ('006ABCDE012345678123143',
+         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+        ('006ABCDE01234',
+         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+        ('a07ABCDE0123456789',
+         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+        ('006ABCDE0 12345678',
+         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+    )
+    @ddt.unpack
+    def test_salesforce_opportunity_line_item(self, salesforce_opportunity_line_item, expected_error):
+        """
+        Verify that `clean` for `salesforce_opportunity_line_item` field is working as expected.
+        """
+        self._test_salesforce_opportunity_line_item(
+            salesforce_opportunity_line_item, expected_error, is_update_view=False)
+        self._test_salesforce_opportunity_line_item(
+            salesforce_opportunity_line_item, expected_error, is_update_view=True)
 
     def test_max_discount_clean_with_negative_value(self):
         """

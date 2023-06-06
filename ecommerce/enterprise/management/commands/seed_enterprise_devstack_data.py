@@ -127,6 +127,7 @@ class Command(BaseCommand):
             "end_datetime": str(now() + datetime.timedelta(days=10)),
             "benefit_value": 100,
             "sales_force_id": '006aaaaaaaaaaaaaaa',
+            "sales_force_opportunity_line_item": '01aaaaaaaaaaaaaaaa',
         }
         url = urljoin(f"{ecommerce_api_url}/", "enterprise/coupons/")
         response = api_client.post(url, json=request_obj)

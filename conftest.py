@@ -195,6 +195,13 @@ def django_db_setup(django_db_setup, django_db_blocker, django_db_use_migrations
         )
         ProductAttribute.objects.create(
             product_class=coupon,
+            name='Salesforce Opportunity Line Item',
+            code='salesforce_opportunity_line_item',
+            type='text',
+            required=False
+        )
+        ProductAttribute.objects.create(
+            product_class=coupon,
             name='Is Public Code?',
             code='is_public_code',
             type='boolean',
