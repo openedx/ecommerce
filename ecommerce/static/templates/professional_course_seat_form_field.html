@@ -9,7 +9,7 @@
             <label for="price"><%= gettext('Price (in USD)') %></label>
 
             <div class="input-group">
-                <div class="input-group-addon">$</div>
+                <div class="input-group-addon">{{ currency_symbol_ }}</div>
                 <input type="number" class="form-control" name="price" id="price" min="5" step="1" pattern="\d+"
                        value="<%= price %>">
             </div>

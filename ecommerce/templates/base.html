@@ -35,7 +35,12 @@
       <script src="{{ optimizely_snippet_src }}"></script>
     {% endif %}
 
-    {% block extrahead %}{% endblock %}
+    {% block extrahead %}
+      <script>
+        const currencyCode = "{{ currency_code_ }}"
+        const currencySymbol = "{{ currency_symbol_ }}"
+      </script>    
+    {% endblock %}
 
     {% block tracking %}
       {# Default to using Google analytics #}
