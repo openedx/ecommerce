@@ -3,12 +3,7 @@
 from django.conf import settings
 from django.conf.urls import include, url
 
-from ecommerce.extensions.payment.views import (
-    PaymentFailedView,
-    cybersource,
-    paypal,
-    stripe
-)
+from ecommerce.extensions.payment.views import PaymentFailedView, cybersource, paypal, stripe
 from ecommerce.extensions.payment.views.sdn import SDNCheckView, SDNFailure
 
 CYBERSOURCE_APPLE_PAY_URLS = [

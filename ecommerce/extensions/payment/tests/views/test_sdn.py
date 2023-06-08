@@ -1,6 +1,5 @@
 
 import mock
-
 from django.urls import reverse
 from requests.exceptions import HTTPError
 

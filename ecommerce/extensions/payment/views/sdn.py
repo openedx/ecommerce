@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, View
 from requests.exceptions import HTTPError, Timeout
 
-from ecommerce.extensions.payment.core.sdn import checkSDNFallback, SDNClient
+from ecommerce.extensions.payment.core.sdn import SDNClient, checkSDNFallback
 
 logger = logging.getLogger(__name__)
 
