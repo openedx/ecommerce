@@ -3,7 +3,13 @@
 from django.conf import settings
 from django.conf.urls import include, url
 
-from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource, paypal, stripe
+from ecommerce.extensions.payment.views import (
+    PaymentFailedView,
+    cybersource,
+    paypal,
+    stripe
+)
+from ecommerce.extensions.payment.views.sdn import SDNCheckView, SDNFailure
 
 CYBERSOURCE_APPLE_PAY_URLS = [
     url(r'^authorize/$', cybersource.CybersourceApplePayAuthorizationView.as_view(), name='authorize'),
@@ -20,6 +26,7 @@ PAYPAL_URLS = [
 ]
 
 SDN_URLS = [
+    url(r'^check/$', SDNCheckView.as_view(), name='check'),
     url(r'^failure/$', SDNFailure.as_view(), name='failure'),
 ]
 
