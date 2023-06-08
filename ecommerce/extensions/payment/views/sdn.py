@@ -25,7 +25,7 @@ class SDNFailure(TemplateView):
 class SDNCheckView(View):
     """
     View for external services to use to run SDN checks against.
-    
+
     While this endpoint uses a lot of logic from sdn.py, this endpoint is
     not called during a normal checkout flow (as of 6/8/2023).
     """
@@ -35,7 +35,7 @@ class SDNCheckView(View):
     def post(self, request):
         """
         Use data provided to check against SDN list.
-        
+
         Return a count of hits.
         """
         payload = request.POST
@@ -46,7 +46,7 @@ class SDNCheckView(View):
             if not payload.get(expected_arg):
                 missing_args.append(expected_arg)
 
-        if missing_args:            
+        if missing_args:
             return JsonResponse({
                 'missing_args': ', '.join(missing_args)
             }, status=400)
