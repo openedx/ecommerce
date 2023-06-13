@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from ecommerce.extensions.payment.models import SDNCheckFailure
 
+
 class SDNCheckFailureSerializer(serializers.ModelSerializer):
     """
     Serializer for SDNCheckFailure model.
