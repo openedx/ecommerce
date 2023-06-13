@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 
 from ecommerce.extensions.payment.views import PaymentFailedView, cybersource, paypal, stripe
-from ecommerce.extensions.payment.views.sdn import SDNCheckView, SDNFailure
+from ecommerce.extensions.payment.views.sdn import SDNCheckView, SDNCheckFailureViewSet, SDNFailure
 
 CYBERSOURCE_APPLE_PAY_URLS = [
     url(r'^authorize/$', cybersource.CybersourceApplePayAuthorizationView.as_view(), name='authorize'),
@@ -23,9 +23,10 @@ PAYPAL_URLS = [
 SDN_URLS = [
     url(r'^check/$', SDNCheckView.as_view(), name='check'),
     url(r'^failure/$', SDNFailure.as_view(), name='failure'),
+    url(r'^metadata/$', SDNCheckFailureViewSet.as_view(), name='metadata'),
 ]
 
-STRIPE_URLS = [
+STRIPE_URLS = [ # "stripe-customer", views.StripeCustomerViewSet, 'stripe-customer'
     url(r'^submit/$', stripe.StripeSubmitView.as_view(), name='submit'),
     url(r'^checkout', stripe.StripeCheckoutView.as_view(), name='checkout'),
 ]

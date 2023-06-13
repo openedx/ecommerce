@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.conf import settings
@@ -6,10 +7,72 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, View
 from requests.exceptions import HTTPError, Timeout
+from rest_framework import status, views
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from ecommerce.extensions.payment.core.sdn import SDNClient, checkSDNFallback
+from ecommerce.extensions.payment.models import SDNCheckFailure
+from ecommerce.extensions.payment.serializers import SDNCheckFailureSerializer
 
 logger = logging.getLogger(__name__)
+
+
+class SDNCheckFailureViewSet(views.APIView):
+    """
+    REST API for SDNCheckFailure class.
+    """
+    http_method_names = ['post', 'options']
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    serializer_class = SDNCheckFailureSerializer
+
+    def _validate_arguments(self, payload):
+
+        invalid = False
+        reasons = []
+        # Check for presence of required variables
+        for arg in ['full_name', 'username', 'city', 'country', 'sdn_check_response']:
+            if not payload.get(arg):
+                reason = f'{arg} is missing or blank.'
+                reasons.append(reason)
+        if reasons:
+            invalid = True
+            return invalid, reasons
+
+        return invalid, reasons
+
+    def post(self, request, *args, **kwargs):
+        payload = request.data
+        invalid, reasons = self._validate_arguments(payload)
+        if invalid is True:
+            logger.warning(
+                'Invalid payload for request user %s against SDNCheckFailureViewSet endpoint. Reasons: %s',
+                request.user,
+                reasons,
+            )
+            return JsonResponse(
+                {'error': ' '.join(reasons)},
+                status=400,
+            )
+
+        sdn_check_failure = SDNCheckFailure.objects.create(
+            full_name=payload['full_name'],
+            username=payload['username'],
+            city=payload['city'],
+            country=payload['country'],
+            site=request.site,
+            sdn_check_response=payload['sdn_check_response'],
+        )
+
+        # This is the point where we would add the products to the SDNCheckFailure obj.
+        # We, however, do not know whether the products themselves are relevant to the flow
+        # calling this endpoint. If you wanted to attach products to the failure record, you
+        # can use skus handed to this endpoint to filter Products using their stockrecords:
+        # Product.objects.filter(stockrecords__partner_sku__in=['C92A142','ABC123'])
+
+        # Return a response
+        data = self.serializer_class(sdn_check_failure, context={'request': request}).data
+        return JsonResponse(data, status=status.HTTP_201_CREATED)
 
 
 class SDNFailure(TemplateView):
