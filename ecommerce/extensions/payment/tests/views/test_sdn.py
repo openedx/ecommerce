@@ -67,7 +67,7 @@ class SDNCheckFailureViewSetTests(TestCase):
             'full_name': 'Princess Peach',
             'username': 'toadstool_is_cool',
             'city': 'Mushroom Castle',
-            'country': 'Mushroom Kingdom',
+            'country': 'US',
             'sdn_check_response': {  # This will be a large JSON blob when returned from SDN API
                 'total': 1,
             },
@@ -103,5 +103,5 @@ class SDNCheckFailureViewSetTests(TestCase):
         assert check_failure_object.full_name == 'Princess Peach'
         assert check_failure_object.username == 'toadstool_is_cool'
         assert check_failure_object.city == 'Mushroom Castle'
-        assert check_failure_object.country == 'Mushroom Kingdom'
+        assert check_failure_object.country == 'US'
         assert check_failure_object.sdn_check_response == {'total': 1}
