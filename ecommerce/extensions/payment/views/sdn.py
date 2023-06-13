@@ -1,4 +1,3 @@
-import json
 import logging
 
 from django.conf import settings
@@ -8,7 +7,6 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, View
 from requests.exceptions import HTTPError, Timeout
 from rest_framework import status, views
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from ecommerce.extensions.payment.core.sdn import SDNClient, checkSDNFallback
@@ -41,7 +39,7 @@ class SDNCheckFailureViewSet(views.APIView):
 
         return invalid, reasons
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         payload = request.data
         invalid, reasons = self._validate_arguments(payload)
         if invalid is True:

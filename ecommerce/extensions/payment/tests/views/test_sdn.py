@@ -93,7 +93,6 @@ class SDNCheckFailureViewSetTests(TestCase):
 
     def test_happy_path_create(self):
         assert SDNCheckFailure.objects.count() == 0
-        headers = {'content-type': 'application/json'}
         json_payload = json.dumps(self.post_params)
         response = self.client.post(self.sdn_check_path, data=json_payload, content_type='application/json')
 
