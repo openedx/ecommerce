@@ -26,7 +26,7 @@ SDN_URLS = [
     url(r'^metadata/$', SDNCheckFailureViewSet.as_view(), name='metadata'),
 ]
 
-STRIPE_URLS = [ # "stripe-customer", views.StripeCustomerViewSet, 'stripe-customer'
+STRIPE_URLS = [
     url(r'^submit/$', stripe.StripeSubmitView.as_view(), name='submit'),
     url(r'^checkout', stripe.StripeCheckoutView.as_view(), name='checkout'),
 ]
