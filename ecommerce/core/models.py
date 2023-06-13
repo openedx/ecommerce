@@ -609,7 +609,7 @@ class User(AbstractUser):
                     lms_user_id_social_auth = auth_entry.extra_data.get(u'user_id')
                     if lms_user_id_social_auth:
                         return lms_user_id_social_auth, auth_entry.id
-        except Exception:  # : disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             log.warning(u'Exception retrieving lms_user_id from social_auth for user %s.', self.id, exc_info=True)
         return None, None
 

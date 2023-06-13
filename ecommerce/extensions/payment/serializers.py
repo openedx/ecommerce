@@ -1,7 +1,5 @@
 """Payment Extension Serializers. """
 
-from datetime import datetime
-
 from rest_framework import serializers
 
 from ecommerce.extensions.payment.models import SDNCheckFailure
