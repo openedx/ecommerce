@@ -1,4 +1,4 @@
-"""API V1 Serializers. """
+"""Payment Extension Serializers. """
 
 from datetime import datetime
 
