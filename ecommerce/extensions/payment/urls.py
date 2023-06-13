@@ -23,7 +23,7 @@ PAYPAL_URLS = [
 SDN_URLS = [
     url(r'^check/$', SDNCheckView.as_view(), name='check'),
     url(r'^failure/$', SDNFailure.as_view(), name='failure'),
-    url(r'^metadata/$', SDNCheckFailureViewSet.as_view(), name='metadata'),
+    url(r'^metadata/$', SDNCheckFailureView.as_view(), name='metadata'),
 ]
 
 STRIPE_URLS = [

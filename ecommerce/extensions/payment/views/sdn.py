@@ -16,7 +16,7 @@ from ecommerce.extensions.payment.serializers import SDNCheckFailureSerializer
 logger = logging.getLogger(__name__)
 
 
-class SDNCheckFailureViewSet(views.APIView):
+class SDNCheckFailureView(views.APIView):
     """
     REST API for SDNCheckFailure class.
     """
