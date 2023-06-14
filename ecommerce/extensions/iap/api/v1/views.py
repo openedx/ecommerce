@@ -2,6 +2,7 @@ import datetime
 import logging
 import time
 
+import app_store_notifications_v2_validator as asn2
 import httplib2
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -17,6 +18,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from oscar.core.loading import get_class, get_model
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -44,6 +46,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_REFUND_NOT_COMPLETED,
     ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND,
     GOOGLE_PUBLISHER_API_SCOPE,
+    IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE,
     LOGGER_BASKET_ALREADY_PURCHASED,
     LOGGER_BASKET_CREATED,
     LOGGER_BASKET_CREATION_FAILED,
@@ -61,6 +64,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     NO_PRODUCT_AVAILABLE,
     PRODUCT_IS_NOT_AVAILABLE,
     PRODUCTS_DO_NOT_EXIST,
+    RECEIVED_NOTIFICATION_FROM_APPLE,
     SEGMENT_MOBILE_BASKET_ADD,
     SEGMENT_MOBILE_PURCHASE_VIEW
 )
@@ -106,18 +110,18 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
                 basket = prepare_basket(request, available_products)
             except AlreadyPlacedOrderException:
                 logger.exception(LOGGER_BASKET_ALREADY_PURCHASED, request.user.username, skus)
-                return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
+                return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
             set_email_preference_on_basket(request, basket)
 
             logger.info(LOGGER_BASKET_CREATED, request.user.username, skus)
 
             return JsonResponse({'success': _(COURSE_ADDED_TO_BASKET), 'basket_id': basket.id},
-                                status=200)
+                                status=status.HTTP_200_OK)
 
         except BadRequestException as exc:
             logger.exception(LOGGER_BASKET_CREATION_FAILED, request.user.username, str(exc))
-            return JsonResponse({'error': str(exc)}, status=400)
+            return JsonResponse({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
     def _get_skus(self, request):
         skus = [escape(sku) for sku in request.GET.getlist('sku')]
@@ -179,10 +183,8 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
     def _get_basket(self, request, basket_id):
         """
         Retrieve a basket using a basket ID.
-
         Arguments:
             basket_id: basket_id representing basket.
-
         Returns:
             It will return related basket or raise AlreadyPlacedOrderException
             if products in basket have already been purchased.
@@ -263,11 +265,12 @@ class BaseRefund(APIView):
 
     def refund(self, transaction_id, processor_response):
         """ Get a transaction id and create a refund against that transaction. """
+        is_refunded = False
         original_purchase = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id,
                                                                     processor_name=self.processor_name).first()
         if not original_purchase:
             logger.error(ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
-            return
+            return is_refunded
 
         basket = original_purchase.basket
         user = basket.owner
@@ -279,7 +282,7 @@ class BaseRefund(APIView):
                 if not refunds:
                     monitoring_utils.set_custom_attribute('iap_no_order_to_refund', transaction_id)
                     logger.error(ERROR_ORDER_NOT_FOUND_FOR_REFUND, transaction_id, self.processor_name)
-                    return
+                    return is_refunded
 
                 refund = refunds[0]
                 refund.approve(revoke_fulfillment=True)
@@ -291,12 +294,15 @@ class BaseRefund(APIView):
                                                         transaction_id=transaction_id,
                                                         response=processor_response, basket=basket)
                 logger.info(LOGGER_REFUND_SUCCESSFUL, transaction_id, self.processor_name)
+                is_refunded = True
 
         except RefundCompletionException:
             logger.exception(ERROR_REFUND_NOT_COMPLETED, user.username, course_key, self.processor_name)
 
+        return is_refunded
 
-class AndroidRefund(BaseRefund):
+
+class AndroidRefundView(BaseRefund):
     """
     Create refunds for orders refunded by google and un-enroll users from relevant courses
     """
@@ -334,3 +340,31 @@ class AndroidRefund(BaseRefund):
 
         service = build("androidpublisher", "v3", http=http)
         return service
+
+
+class IOSRefundView(BaseRefund):
+    processor_name = IOSIAP.NAME
+
+    def post(self, request):
+        """
+        This endpoint is registered as a callback for every refund made in Appstore.
+        It receives refund data and un enrolls user from the related course.
+        If we don't send back 200 response to the Appstore, it will retry this url multiple times.
+        """
+        is_refunded = False
+        try:
+            apple_cert_file_path = "ecommerce/extensions/iap/api/v1/AppleRootCA-G3.cer"
+            refund_data = asn2.parse(request.body, apple_root_cert_path=apple_cert_file_path)
+            logger.info(RECEIVED_NOTIFICATION_FROM_APPLE, refund_data['notificationType'])
+            if refund_data['notificationType'] == 'REFUND':
+                original_transaction_id = refund_data['data']['signedTransactionInfo']['originalTransactionId']
+                is_refunded = self.refund(original_transaction_id, refund_data)
+            else:
+                logger.info(IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE)
+                return Response(status=status.HTTP_200_OK)
+
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+        status_code = status.HTTP_200_OK if is_refunded else status.HTTP_500_INTERNAL_SERVER_ERROR
+        return Response(status=status_code)
