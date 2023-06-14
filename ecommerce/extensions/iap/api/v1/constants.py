@@ -13,6 +13,8 @@ ERROR_REFUND_NOT_COMPLETED = "Could not complete refund for user [%s] in course 
 ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND = "Could not find any transaction to refund for [%s] by processor [%s]"
 ERROR_DURING_POST_ORDER_OP = "An error occurred during post order operations."
 GOOGLE_PUBLISHER_API_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
+IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE = "Ignoring notification from apple since we are only expecting" \
+                                            " refund notifications"
 LOGGER_BASKET_ALREADY_PURCHASED = "Basket creation failed for user [%s] with SKUS [%s]. Products already purchased"
 LOGGER_BASKET_CREATED = "Basket created for user [%s] with SKUS [%s]"
 LOGGER_BASKET_CREATION_FAILED = "Basket creation failed for user [%s]. Error: [%s]"
@@ -34,5 +36,6 @@ LOGGER_STARTING_PAYMENT_FLOW = "Starting payment flow for user [%s] for products
 NO_PRODUCT_AVAILABLE = "No product is available to buy."
 PRODUCTS_DO_NOT_EXIST = "Products with SKU(s) [{skus}] do not exist."
 PRODUCT_IS_NOT_AVAILABLE = "Product [%s] is not available to buy."
+RECEIVED_NOTIFICATION_FROM_APPLE = "Received notification from apple with notification type [%s]"
 SEGMENT_MOBILE_BASKET_ADD = "Mobile Basket Add Items View Called"
 SEGMENT_MOBILE_PURCHASE_VIEW = "Mobile Course Purchase View Called"

@@ -12,6 +12,8 @@ amqp==2.6.1
     # via kombu
 analytics-python==1.4.post1
     # via -r requirements/base.in
+app-store-notifications-v2-validator==0.0.7
+    # via -r requirements/base.in
 asgiref==3.6.0
     # via django
 asn1crypto==1.5.1
@@ -57,6 +59,7 @@ certifi==2023.5.7
     #   requests
 cffi==1.15.1
     # via
+    #   app-store-notifications-v2-validator
     #   cryptography
     #   cybersource-rest-client-python
     #   pynacl
@@ -86,6 +89,7 @@ crypto==1.4.1
     # via cybersource-rest-client-python
 cryptography==40.0.2
     # via
+    #   app-store-notifications-v2-validator
     #   cybersource-rest-client-python
     #   paramiko
     #   pyjwt
@@ -422,6 +426,7 @@ pycountry==17.1.8
     # via -r requirements/base.in
 pycparser==2.21
     # via
+    #   app-store-notifications-v2-validator
     #   cffi
     #   cybersource-rest-client-python
 pycryptodome==3.17
@@ -436,6 +441,7 @@ pyjwkest==1.4.2
     # via edx-drf-extensions
 pyjwt[crypto]==2.7.0
     # via
+    #   app-store-notifications-v2-validator
     #   cybersource-rest-client-python
     #   drf-jwt
     #   edx-auth-backends
@@ -451,6 +457,7 @@ pynacl==1.5.0
     #   paramiko
 pyopenssl==23.1.1
     # via
+    #   app-store-notifications-v2-validator
     #   cybersource-rest-client-python
     #   ndg-httpsclient
     #   paypalrestsdk
