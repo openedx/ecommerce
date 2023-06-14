@@ -151,4 +151,8 @@ class SDNCheckView(View):
                 'SDNCheck function called for lms user [%s]. It did not receive a hit.',
                 lms_user_id,
             )
-        return JsonResponse({'hit_count': hit_count}, status=200)
+        json_data = {
+            'hit_count': hit_count,
+            'sdn_response': response,
+        }
+        return JsonResponse(json_data, status=200)

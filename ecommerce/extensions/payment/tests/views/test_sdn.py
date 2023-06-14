@@ -53,6 +53,7 @@ class SDNCheckViewTests(TestCase):
         response = self.client.post(self.sdn_check_path, data=self.post_params)
         assert response.status_code == 200
         assert response.json()['hit_count'] == 4
+        assert response.json()['sdn_response'] == {'total': 4}
         mock_fallback.assert_not_called()
 
 
