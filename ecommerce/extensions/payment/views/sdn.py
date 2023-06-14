@@ -44,7 +44,7 @@ class SDNCheckFailureView(views.APIView):
         invalid, reasons = self._validate_arguments(payload)
         if invalid is True:
             logger.warning(
-                'Invalid payload for request user %s against SDNCheckFailureViewSet endpoint. Reasons: %s',
+                'Invalid payload for request user %s against SDNCheckFailureView endpoint. Reasons: %s',
                 request.user,
                 reasons,
             )

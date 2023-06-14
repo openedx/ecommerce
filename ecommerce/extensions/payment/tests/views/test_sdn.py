@@ -56,7 +56,7 @@ class SDNCheckViewTests(TestCase):
         mock_fallback.assert_not_called()
 
 
-class SDNCheckFailureViewSetTests(TestCase):
+class SDNCheckFailureViewTests(TestCase):
     sdn_check_path = reverse('sdn:metadata')
 
     def setUp(self):
