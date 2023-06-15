@@ -33,9 +33,15 @@ idna==2.7
 # TODO : Pinning this until we are sure there aren't any breaking changes, then we'll upgrade.
 celery<5.0.0
 
-# bok-choy 1.1.1 requires <4 (can remove once we have a version without that requirement)
+# bok-choy 2.0.1 still requires selenium<4
+# (bok-choy is now deprecated; updates unlikely)
+# - pytest-selenium v3 has inconsistent pytest dependency requirements
+#   (see pytest-selenium/issues/294)
+# - pytest-variables v3 uses pytest.stash instead of _variables. This
+#   conflicts with how pytest-selenium uses variables prior to v3.
 selenium<4.0.0
-pytest-selenium<4.0.0
+pytest-selenium<3.0.0
+pytest-variables<3.0.0
 
 # pylint>2.12.2 requires a lot of quality fixes. Can be resolved later on.
 pylint==2.12.2
