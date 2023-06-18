@@ -21,10 +21,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2023-06-18 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: ifLab <webmaster@iflab.org>, 2018-2019\n"
-"Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
+"Language-Team: Chinese (China) (http://app.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -323,11 +323,11 @@ msgstr "选课码"
 msgid "Discount Code"
 msgstr "折扣码"
 
-#: ecommerce/static/js/views/coupon_form_view.js:781
+#: ecommerce/static/js/views/coupon_form_view.js:787
 msgid "Save Changes"
 msgstr "保存更改"
 
-#: ecommerce/static/js/views/coupon_form_view.js:796
+#: ecommerce/static/js/views/coupon_form_view.js:802
 msgid "Create Coupon"
 msgstr "创建优惠券"
 
@@ -469,7 +469,7 @@ msgstr "坐席类型"
 msgid "Can be used multiple times by one customer"
 msgstr "能被一位顾客使用多次"
 
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:280
 msgid "Create and Add More"
 msgstr ""
 
