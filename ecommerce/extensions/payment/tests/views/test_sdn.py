@@ -24,7 +24,7 @@ class SDNCheckViewTests(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.user = self.create_user()
+        self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.post_params = {
             'lms_user_id': 1337,
