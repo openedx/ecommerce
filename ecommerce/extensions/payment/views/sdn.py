@@ -1,10 +1,9 @@
 import logging
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
+from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 from requests.exceptions import HTTPError, Timeout
 from rest_framework import status, views
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -21,6 +20,7 @@ class SDNCheckFailureView(views.APIView):
     REST API for SDNCheckFailure class.
     """
     http_method_names = ['post', 'options']
+    authentication_classes = (JwtAuthentication,)
     permission_classes = [IsAuthenticated, IsAdminUser]
     serializer_class = SDNCheckFailureSerializer
 
@@ -83,7 +83,7 @@ class SDNFailure(TemplateView):
         return context
 
 
-class SDNCheckView(View):
+class SDNCheckView(views.APIView):
     """
     View for external services to use to run SDN checks against.
 
@@ -91,8 +91,10 @@ class SDNCheckView(View):
     not called during a normal checkout flow (as of 6/8/2023).
     """
     http_method_names = ['post', 'options']
+    authentication_classes = (JwtAuthentication,)
+    permission_classes = [IsAuthenticated, IsAdminUser]
+        
 
-    @method_decorator(login_required)
     def post(self, request):
         """
         Use data provided to check against SDN list.
