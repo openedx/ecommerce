@@ -26,6 +26,7 @@ class SDNCheckViewTests(AccessTokenMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.user = self.create_user(is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
         self.token = self.generate_jwt_token_header(self.user)
         self.post_params = {
             'lms_user_id': 1337,
@@ -64,6 +65,7 @@ class SDNCheckFailureViewTests(TestCase):
     def setUp(self):
         super().setUp()
         self.user = self.create_user(is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
         self.token = self.generate_jwt_token_header(self.user)
         self.post_params = {
             'full_name': 'Princess Peach',
