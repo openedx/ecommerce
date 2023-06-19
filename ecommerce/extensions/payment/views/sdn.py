@@ -21,7 +21,7 @@ class SDNCheckFailureView(views.APIView):
     """
     http_method_names = ['post', 'options']
     authentication_classes = (JwtAuthentication,)
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = (IsAuthenticated, IsAdminUser)
     serializer_class = SDNCheckFailureSerializer
 
     def _validate_arguments(self, payload):
@@ -92,7 +92,7 @@ class SDNCheckView(views.APIView):
     """
     http_method_names = ['post', 'options']
     authentication_classes = (JwtAuthentication,)
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = (IsAuthenticated, IsAdminUser)
         
 
     def post(self, request):
