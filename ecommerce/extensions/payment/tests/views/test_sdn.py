@@ -5,6 +5,7 @@ import mock
 from django.urls import reverse
 from requests.exceptions import HTTPError
 
+from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.payment.models import SDNCheckFailure
 from ecommerce.tests.testcases import TestCase
 
@@ -19,7 +20,7 @@ class SDNFailureTests(TestCase):
         self.assertEqual(response.context['logout_url'], logout_url)
 
 
-class SDNCheckViewTests(TestCase):
+class SDNCheckViewTests(AccessTokenMixin, TestCase):
     sdn_check_path = reverse('sdn:check')
 
     def setUp(self):
