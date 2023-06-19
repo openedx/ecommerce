@@ -77,14 +77,12 @@ class SDNCheckFailureViewTests(TestCase):
     def test_non_staff_cannot_access_endpoint(self):
         self.user.is_staff = False
         self.user.save()
-        jwt_header = self.build_jwt_header()
         response = self.client.post(self.sdn_check_path, data=self.post_params, content_type='application/json',
                                     headers=self.token)
         assert response.status_code == 403
 
     def test_missing_payload_arg_400(self):
         del self.post_params['full_name']
-        jwt_header = self.build_jwt_header()
         response = self.client.post(self.sdn_check_path, data=self.post_params, content_type='application/json',
                                     headers=self.token)
         assert response.status_code == 400
@@ -93,7 +91,6 @@ class SDNCheckFailureViewTests(TestCase):
         del self.post_params['sdn_check_response']['total']
         assert 'sdn_check_response' in self.post_params  # so it's clear we deleted the sub dict's key
 
-        jwt_header = self.build_jwt_header()
         response = self.client.post(self.sdn_check_path, data=self.post_params, content_type='application/json',
                                     headers=self.token)
         assert response.status_code == 400
@@ -101,8 +98,7 @@ class SDNCheckFailureViewTests(TestCase):
     def test_happy_path_create(self):
         assert SDNCheckFailure.objects.count() == 0
         json_payload = json.dumps(self.post_params)
-        jwt_header = self.build_jwt_header()
-        response = self.client.post(self.sdn_check_path, data=self.post_params, content_type='application/json',
+        response = self.client.post(self.sdn_check_path, data=json_payload, content_type='application/json',
                                     headers=self.token)
 
         assert response.status_code == 201
