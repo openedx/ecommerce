@@ -93,7 +93,6 @@ class SDNCheckView(views.APIView):
     http_method_names = ['post', 'options']
     authentication_classes = (JwtAuthentication,)
     permission_classes = (IsAuthenticated, IsAdminUser)
-        
 
     def post(self, request):
         """
