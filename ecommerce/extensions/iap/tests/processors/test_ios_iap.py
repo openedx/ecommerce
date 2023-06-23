@@ -61,6 +61,8 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
             'originalTransactionId': 'original_test_id',
             'productId': 'test_product_id',
             'purchaseToken': 'inapp:test.edx.edx:ios.test.purchased',
+            'price': 40.25,
+            'currency_code': 'USD',
         }
         self.mock_validation_response = {
             'environment': 'Sandbox',
@@ -224,3 +226,36 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         refund_id = "test id"
         result = self.processor.issue_credit(refund_id, refund_id, refund_id, refund_id, refund_id)
         self.assertEqual(refund_id, result)
+
+    @mock.patch.object(IOSValidator, 'validate')
+    def test_payment_processor_response_created(self, mock_ios_validator):
+        """
+        Verify that the PaymentProcessor object is created as expected.
+        """
+        mock_ios_validator.return_value = self.mock_validation_response
+        transaction_id = self.RETURN_DATA.get('transactionId')
+
+        self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+        payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id)
+        self.assertTrue(payment_processor_response.exists())
+        self.assertEqual(payment_processor_response.first().processor_name, self.processor_name)
+        self.assertEqual(payment_processor_response.first().response, self.mock_validation_response)
+
+    @mock.patch.object(IOSValidator, 'validate')
+    def test_payment_processor_response_extension_created(self, mock_ios_validator):
+        """
+        Verify that the PaymentProcessorExtension object is created as expected.
+        """
+        mock_ios_validator.return_value = self.mock_validation_response
+        transaction_id = self.RETURN_DATA.get('transactionId')
+        original_transaction_id = self.RETURN_DATA.get('originalTransactionId')
+        price = str(self.RETURN_DATA.get('price'))
+        currency_code = self.RETURN_DATA.get('currency_code')
+
+        self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+        payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id)
+        payment_processor_response_extension = payment_processor_response.first().extension
+        self.assertIsNotNone(payment_processor_response_extension)
+        self.assertEqual(payment_processor_response_extension.original_transaction_id, original_transaction_id)
+        self.assertEqual(payment_processor_response_extension.meta_data.get('price'), price)
+        self.assertEqual(payment_processor_response_extension.meta_data.get('currency_code'), currency_code)
