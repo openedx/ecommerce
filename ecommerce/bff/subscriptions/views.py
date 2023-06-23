@@ -43,7 +43,7 @@ class ProductEntitlementInfoView(generics.GenericAPIView):
                     )
                     return Response({'error': 'User blocked by embargo check',
                                      'error_code': 'embargo_failed'},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_200_OK)
 
             for product in available_products:
                 mode = self._mode_for_product(product)

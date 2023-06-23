@@ -138,6 +138,6 @@ class ProductEntitlementInfoViewTestCase(DiscoveryTestMixin, DiscoveryMockMixin,
                                                'user_ip_address': self.ip_address, 'username': self.user.username
                                                })
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data = {'error': 'User blocked by embargo check', 'error_code': 'embargo_failed'}
         self.assertCountEqual(json.loads(response.content.decode('utf-8')), expected_data)
