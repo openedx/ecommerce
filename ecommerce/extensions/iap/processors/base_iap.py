@@ -119,6 +119,8 @@ class BaseIAP(BasePaymentProcessor):
         # original_transaction_id is primary identifier for a purchase on iOS
         original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
             validation_response, 'original_transaction_id'))
+        currency_code = str(response.get('currency_code', ''))
+        price = str(response.get('price', ''))
 
         if self.NAME == 'ios-iap':
             if not original_transaction_id:
@@ -133,7 +135,9 @@ class BaseIAP(BasePaymentProcessor):
             validation_response,
             transaction_id=transaction_id,
             basket=basket,
-            original_transaction_id=original_transaction_id
+            original_transaction_id=original_transaction_id,
+            currency_code=currency_code,
+            price=price
         )
         logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
 
@@ -165,7 +169,8 @@ class BaseIAP(BasePaymentProcessor):
 
         return response
 
-    def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None):  # pylint: disable=arguments-differ
+    def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None,  # pylint: disable=arguments-differ
+                                  currency_code=None, price=None):  # pylint: disable=arguments-differ
         """
         Save the processor's response to the database for auditing.
 
@@ -176,15 +181,20 @@ class BaseIAP(BasePaymentProcessor):
             transaction_id (string): Identifier for the transaction on the payment processor's servers
             original_transaction_id (string): Identifier for the transaction for purchase action only
             basket (Basket): Basket associated with the payment event (e.g., being purchased)
+            currency_code (string): (USD, PKR, AED etc)
+            price (string): Price paid by end user
 
         Return
             PaymentProcessorResponse
         """
         processor_response = super(BaseIAP, self).record_processor_response(response, transaction_id=transaction_id,
                                                                             basket=basket)
-        if original_transaction_id:
-            PaymentProcessorResponseExtension.objects.create(processor_response=processor_response,
-                                                             original_transaction_id=original_transaction_id)
+
+        meta_data = self._get_metadata(currency_code=currency_code, price=price)
+        PaymentProcessorResponseExtension.objects.create(
+            processor_response=processor_response, original_transaction_id=original_transaction_id,
+            meta_data=meta_data)
+
         return processor_response
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
@@ -209,3 +219,11 @@ class BaseIAP(BasePaymentProcessor):
     def _get_transaction_id_from_receipt(self, validated_receipt):
         transaction_key = 'transaction_id' if self.NAME == 'ios-iap' else 'orderId'
         return self._get_attribute_from_receipt(validated_receipt, transaction_key)
+
+    def _get_metadata(self, price=None, currency_code=None):
+        meta_data = {}
+        if currency_code:
+            meta_data['currency_code'] = currency_code
+        if price:
+            meta_data['price'] = price
+        return meta_data
