@@ -46,7 +46,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             'contract_discount_value': self.contract_discount_value,
             'prepaid_invoice_amount': self.prepaid_invoice_amount,
             'sales_force_id': '006abcde0123456789',
-            'salesforce_opportunity_line_item': '000abcde9876543210',
+            'salesforce_opportunity_line_item': '00kabcde9876543210',
             'max_global_applications': 2,
             'max_discount': 300,
             'max_user_discount': 50,
@@ -496,18 +496,18 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
 
     @ddt.data(
         # Valid Cases
-        ('006abcde0123456789', None),
-        ('006ABCDE0123456789', None),
+        ('00kabcde0123456789', None),
+        ('00kABCDE0123456789', None),
         ('none', None),
         # Invalid Cases
         ('006ABCDE012345678123143',
-         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'),
         ('006ABCDE01234',
-         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'),
         ('a07ABCDE0123456789',
-         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'),
         ('006ABCDE0 12345678',
-         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+         'The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'),
     )
     @ddt.unpack
     def test_salesforce_opportunity_line_item(self, salesforce_opportunity_line_item, expected_error):

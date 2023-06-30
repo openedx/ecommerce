@@ -18,6 +18,6 @@ SENDER_ALIAS = 'edX Support Team'
 # potential edge case).
 ENTERPRISE_SALES_FORCE_ID_REGEX = r'^006[a-zA-Z0-9]{15}$|^none$'
 
-# Salesforce Opportunity Opportunity Line item must be 18 alphanumeric characters
+# Salesforce Opportunity Line item must be 18 alphanumeric characters
 # and begin with a number OR be "none" (to accommodate potential edge case).
-ENTERPRISE_SALESFORCE_OPPORTUNITY_LINE_ITEM_REGEX = r'^[0-9]{1}[a-zA-Z0-9]{17}$|^none$'
+ENTERPRISE_SALESFORCE_OPPORTUNITY_LINE_ITEM_REGEX = r'^00k[a-zA-Z0-9]{15}$|^none$'

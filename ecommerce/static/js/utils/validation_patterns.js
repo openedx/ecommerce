@@ -35,12 +35,12 @@ define([
         });
 
         _.extend(Backbone.Validation.patterns, {
-            salesforce_opportunity_line_item: /^[0-9]{1}[a-zA-Z0-9]{17}$|^none$/
+            salesforce_opportunity_line_item: /^00k[a-zA-Z0-9]{15}$|^none$/
         });
 
         _.extend(Backbone.Validation.messages, {
             salesforce_opportunity_line_item: gettext(
-                'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number'
+                'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\''
                 )
         });
     }
