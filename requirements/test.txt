@@ -65,9 +65,9 @@ bleach==6.0.0
     # via -r requirements/base.txt
 bok-choy==2.0.2
     # via -r requirements/test.in
-boto3==1.26.155
+boto3==1.26.165
     # via -r requirements/base.txt
-botocore==1.29.155
+botocore==1.29.165
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -206,7 +206,7 @@ django-appconf==1.0.5
     # via
     #   -r requirements/base.txt
     #   django-compressor
-django-compressor==4.3.1
+django-compressor==4.4
     # via
     #   -r requirements/base.txt
     #   django-libsass
@@ -355,7 +355,7 @@ factory-boy==2.12.0
     #   -r requirements/base.txt
     #   -r requirements/test.in
     #   django-oscar
-faker==18.10.1
+faker==18.11.2
     # via
     #   -r requirements/base.txt
     #   factory-boy
@@ -393,7 +393,7 @@ google-api-python-client==2.31.0
     # via
     #   -r requirements/base.txt
     #   inapppy
-google-auth==2.20.0
+google-auth==2.21.0
     # via
     #   -r requirements/base.txt
     #   google-api-core
@@ -530,7 +530,7 @@ naked==0.1.32
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.txt
-newrelic==8.8.0
+newrelic==8.8.1
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -575,7 +575,7 @@ pbr==5.11.1
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.13.14
+phonenumbers==8.13.15
     # via
     #   -r requirements/base.txt
     #   django-oscar
@@ -587,7 +587,7 @@ pkgutil-resolve-name==1.3.10
     # via
     #   -r requirements/base.txt
     #   jsonschema
-platformdirs==3.6.0
+platformdirs==3.8.0
     # via
     #   -r requirements/base.txt
     #   pylint
@@ -710,7 +710,7 @@ pyrsistent==0.19.3
     # via
     #   -r requirements/base.txt
     #   jsonschema
-pytest==7.3.2
+pytest==7.4.0
     # via
     #   -r requirements/e2e.txt
     #   -r requirements/test.in
@@ -807,7 +807,7 @@ rcssmin==1.1.1
     # via
     #   -r requirements/base.txt
     #   django-compressor
-redis==4.5.5
+redis==4.6.0
     # via
     #   -r requirements/base.txt
     #   edx-ecommerce-worker
@@ -983,7 +983,7 @@ typing==3.7.4.3
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-typing-extensions==4.6.3
+typing-extensions==4.7.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt

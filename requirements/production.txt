@@ -39,11 +39,11 @@ billiard==3.6.4.0
     # via celery
 bleach==6.0.0
     # via -r requirements/base.in
-boto3==1.26.155
+boto3==1.26.165
     # via
     #   -r requirements/base.in
     #   django-ses
-botocore==1.29.155
+botocore==1.29.165
     # via
     #   boto3
     #   s3transfer
@@ -141,7 +141,7 @@ django==3.2.19
     #   xss-utils
 django-appconf==1.0.5
     # via django-compressor
-django-compressor==4.3.1
+django-compressor==4.4
     # via
     #   -r requirements/base.in
     #   django-libsass
@@ -255,7 +255,7 @@ extras==1.0.0
     #   python-subunit
 factory-boy==2.12.0
     # via django-oscar
-faker==18.10.1
+faker==18.11.2
     # via factory-boy
 fixtures==4.1.0
     # via
@@ -275,7 +275,7 @@ google-api-python-client==2.31.0
     # via
     #   -r requirements/base.in
     #   inapppy
-google-auth==2.20.0
+google-auth==2.21.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -386,13 +386,13 @@ pbr==5.11.1
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.13.14
+phonenumbers==8.13.15
     # via django-oscar
 pillow==9.5.0
     # via django-oscar
 pkgutil-resolve-name==1.3.10
     # via jsonschema
-platformdirs==3.6.0
+platformdirs==3.8.0
     # via zeep
 premailer==2.9.2
     # via -r requirements/base.in
@@ -499,7 +499,7 @@ pyyaml==6.0
     #   naked
 rcssmin==1.1.1
     # via django-compressor
-redis==4.5.5
+redis==4.6.0
     # via
     #   -r requirements/production.in
     #   edx-ecommerce-worker
@@ -600,7 +600,7 @@ traceback2==1.4.0
     # via cybersource-rest-client-python
 typing==3.7.4.3
     # via cybersource-rest-client-python
-typing-extensions==4.6.3
+typing-extensions==4.7.0
     # via asgiref
 unicodecsv==0.14.1
     # via
