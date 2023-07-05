@@ -227,36 +227,32 @@ class MobileCoursePurchaseExecutionView(EdxOrderPlacementMixin, APIView):
             logger.exception(LOGGER_EXECUTE_ALREADY_PURCHASED, request.user.username, basket_id)
             return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=406)
 
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 self.handle_payment(receipt, basket)
-            except GatewayError as exception:
-                logger.exception(LOGGER_EXECUTE_GATEWAY_ERROR, request.user.username, basket_id, str(exception))
-                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
-            except KeyError as exception:
-                logger.exception(LOGGER_PAYMENT_FAILED_FOR_BASKET, basket_id, str(exception))
-                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
-            except RedundantPaymentNotificationError:
-                logger.exception(LOGGER_EXECUTE_REDUNDANT_PAYMENT, request.user.username, basket_id)
-                return JsonResponse({'error': COURSE_ALREADY_PAID_ON_DEVICE}, status=409)
-            except PaymentError as exception:
-                logger.exception(LOGGER_EXECUTE_PAYMENT_ERROR, request.user.username, basket_id, str(exception))
-                return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
-
-        try:
-            order = self.create_order(request, basket)
-        except Exception as exception:  # pylint: disable=broad-except
-            logger.exception(LOGGER_EXECUTE_ORDER_CREATION_FAILED, request.user.username, basket_id, str(exception))
-            return JsonResponse({'error': ERROR_DURING_ORDER_CREATION}, status=400)
-
-        try:
-            self.handle_post_order(order)
+                order = self.create_order(request, basket)
+                self.handle_post_order(order)
+                logger.info(LOGGER_EXECUTE_SUCCESSFUL, request.user.username, basket_id, self.payment_processor.NAME)
+                response = {'order_data': MobileOrderSerializer(order, context={'request': request}).data}
+                return JsonResponse(response, status=200)
+        except GatewayError as exception:
+            logger.exception(LOGGER_EXECUTE_GATEWAY_ERROR, request.user.username, basket_id, str(exception))
+            return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
+        except KeyError as exception:
+            logger.exception(LOGGER_PAYMENT_FAILED_FOR_BASKET, basket_id, str(exception))
+            return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
+        except RedundantPaymentNotificationError:
+            logger.exception(LOGGER_EXECUTE_REDUNDANT_PAYMENT, request.user.username, basket_id)
+            return JsonResponse({'error': COURSE_ALREADY_PAID_ON_DEVICE}, status=409)
+        except PaymentError as exception:
+            logger.exception(LOGGER_EXECUTE_PAYMENT_ERROR, request.user.username, basket_id, str(exception))
+            return JsonResponse({'error': ERROR_DURING_PAYMENT_HANDLING}, status=400)
         except AttributeError:
             self.log_order_placement_exception(basket.order_number, basket.id)
             return JsonResponse({'error': ERROR_DURING_POST_ORDER_OP}, status=200)
-
-        logger.info(LOGGER_EXECUTE_SUCCESSFUL, request.user.username, basket_id, self.payment_processor.NAME)
-        return JsonResponse({'order_data': MobileOrderSerializer(order, context={'request': request}).data}, status=200)
+        except Exception as exception:  # pylint: disable=broad-except
+            logger.exception(LOGGER_EXECUTE_ORDER_CREATION_FAILED, request.user.username, basket_id, str(exception))
+            return JsonResponse({'error': ERROR_DURING_ORDER_CREATION}, status=400)
 
 
 class BaseRefund(APIView):
