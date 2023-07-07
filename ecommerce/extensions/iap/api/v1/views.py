@@ -51,6 +51,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     LOGGER_BASKET_CREATED,
     LOGGER_BASKET_CREATION_FAILED,
     LOGGER_BASKET_NOT_FOUND,
+    LOGGER_CHECKOUT_ERROR,
     LOGGER_EXECUTE_ALREADY_PURCHASED,
     LOGGER_EXECUTE_GATEWAY_ERROR,
     LOGGER_EXECUTE_ORDER_CREATION_FAILED,
@@ -158,10 +159,9 @@ class MobileCheckoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        # TODO: Add check for products_in_basket_already_purchased
-        # TODO: Add logging for api/user_info after reading from request obj
         response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
         if response.status_code != 200:
+            logger.exception(LOGGER_CHECKOUT_ERROR, response.content.decode(), response.status_code)
             return JsonResponse({'error': response.content.decode()}, status=response.status_code)
 
         return response

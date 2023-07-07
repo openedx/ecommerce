@@ -12,10 +12,9 @@ class IOSValidator:
         Apple for the mentioned productId.
         """
         bundle_id = configuration.get('ios_bundle_id')
-        # If True, automatically query sandbox endpoint if validation fails on production endpoint
-        # TODO: Add auto_retry_wrong_env_request to environment variables
-        auto_retry_wrong_env_request = True
-        validator = AppStoreValidator(bundle_id, auto_retry_wrong_env_request=auto_retry_wrong_env_request)
+        # auto_retry_wrong_env_request = True automatically queries sandbox endpoint if
+        # validation fails on production endpoint
+        validator = AppStoreValidator(bundle_id, auto_retry_wrong_env_request=True)
 
         try:
             validation_result = validator.validate(
