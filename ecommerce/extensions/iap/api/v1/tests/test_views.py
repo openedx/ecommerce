@@ -42,6 +42,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     LOGGER_BASKET_CREATED,
     LOGGER_BASKET_CREATION_FAILED,
     LOGGER_BASKET_NOT_FOUND,
+    LOGGER_CHECKOUT_ERROR,
     LOGGER_EXECUTE_ALREADY_PURCHASED,
     LOGGER_EXECUTE_GATEWAY_ERROR,
     LOGGER_EXECUTE_ORDER_CREATION_FAILED,
@@ -641,6 +642,7 @@ class TestMobileCheckoutView(TestCase):
             'basket_id': self.basket.id,
             'payment_processor': 'android-iap'
         }
+        self.logger_name = 'ecommerce.extensions.iap.api.v1.views'
 
     def test_authentication_required(self):
         """ Verify the endpoint requires authentication. """
@@ -651,10 +653,20 @@ class TestMobileCheckoutView(TestCase):
     def test_no_basket(self):
         """ Verify the endpoint returns HTTP 400 if the user has no associated baskets. """
         self.user.baskets.all().delete()
+        expected_status = 400
+        expected_error = "Basket [%s] not found." % str(self.post_data['basket_id'])
         expected_content = b'{"error": "Basket [%s] not found."}' % str(self.post_data['basket_id']).encode()
-        response = self.client.post(self.path, data=self.post_data)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, expected_content)
+        with LogCapture(self.logger_name) as logger:
+            response = self.client.post(self.path, data=self.post_data)
+            logger.check(
+                (
+                    self.logger_name,
+                    'ERROR',
+                    LOGGER_CHECKOUT_ERROR % (expected_error, expected_status)
+                ),
+            )
+            self.assertEqual(response.status_code, expected_status)
+            self.assertEqual(response.content, expected_content)
 
     @override_settings(
         PAYMENT_PROCESSORS=['ecommerce.extensions.iap.processors.android_iap.AndroidIAP']

@@ -19,6 +19,7 @@ LOGGER_BASKET_ALREADY_PURCHASED = "Basket creation failed for user [%s] with SKU
 LOGGER_BASKET_CREATED = "Basket created for user [%s] with SKUS [%s]"
 LOGGER_BASKET_CREATION_FAILED = "Basket creation failed for user [%s]. Error: [%s]"
 LOGGER_BASKET_NOT_FOUND = "Basket [%s] not found for user [%s]."
+LOGGER_CHECKOUT_ERROR = "Checkout failed with the error [%s] and status code [%s]."
 LOGGER_EXECUTE_ALREADY_PURCHASED = "Execute payment failed for user [%s] and basket [%s]. " \
                                    "Products already purchased."
 LOGGER_EXECUTE_GATEWAY_ERROR = "Execute payment validation failed for user [%s] and basket [%s]. Error: [%s]"
