@@ -12,6 +12,7 @@ RUN apt update && \
   python3-virtualenv \
   python3.8-distutils \
   libmysqlclient-dev \
+  pkg-config \
   libssl-dev \
   libcairo2-dev && \
   rm -rf /var/lib/apt/lists/*
