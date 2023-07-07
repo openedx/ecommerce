@@ -177,7 +177,7 @@ defusedxml==0.7.1
     #   social-auth-core
 diff-cover==7.6.0
     # via -r requirements/test.txt
-django==3.2.19
+django==3.2.20
     # via
     #   -r requirements/test.txt
     #   crispy-bootstrap3
