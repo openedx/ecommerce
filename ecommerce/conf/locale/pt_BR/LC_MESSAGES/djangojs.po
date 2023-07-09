@@ -24,10 +24,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2023-07-09 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Gabriel José, 2021\n"
-"Language-Team: Portuguese (Brazil) (http://www.transifex.com/open-edx/edx-platform/language/pt_BR/)\n"
+"Language-Team: Portuguese (Brazil) (http://app.transifex.com/open-edx/edx-platform/language/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -326,11 +326,11 @@ msgstr "Código de Matrícula"
 msgid "Discount Code"
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_form_view.js:781
+#: ecommerce/static/js/views/coupon_form_view.js:787
 msgid "Save Changes"
 msgstr "Salvar alterações"
 
-#: ecommerce/static/js/views/coupon_form_view.js:796
+#: ecommerce/static/js/views/coupon_form_view.js:802
 msgid "Create Coupon"
 msgstr ""
 
@@ -472,7 +472,7 @@ msgstr ""
 msgid "Can be used multiple times by one customer"
 msgstr ""
 
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:280
 msgid "Create and Add More"
 msgstr ""
 
