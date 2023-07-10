@@ -248,7 +248,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'title': 'Tešt čoupon',
             'voucher_type': Voucher.SINGLE_USE,
             'sales_force_id': '006ABCDE0123456789',
-            'salesforce_opportunity_line_item': '000ABCDE9876543210',
+            'salesforce_opportunity_line_item': '00kABCDE9876543210',
         }
         self.response = self.get_response('POST', COUPONS_LINK, self.data)
         self.coupon = Product.objects.get(title=self.data['title'])
@@ -697,7 +697,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(new_coupon.attr.note, note)
 
     @ddt.data(
-        '006abcde0123456789', 'otherSalesForce', ''
+        '00kabcde0123456789', 'otherSalesForce', ''
     )
     def test_update_sales_force_id(self, sales_force_id):
         """

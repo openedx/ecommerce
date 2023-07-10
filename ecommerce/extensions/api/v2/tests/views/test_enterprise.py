@@ -323,7 +323,7 @@ class EnterpriseCouponViewSetRbacTests(
             'contract_discount_value': '12.35',
             'notify_learners': True,
             'sales_force_id': '006ABCDE0123456789',
-            'salesforce_opportunity_line_item': '000ABCDE9876543210',
+            'salesforce_opportunity_line_item': '00kABCDE9876543210',
         }
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
@@ -458,21 +458,21 @@ class EnterpriseCouponViewSetRbacTests(
             self.assertEqual(coupon.attr.salesforce_opportunity_line_item, salesforce_opportunity_line_item)
 
     @ddt.data(
-        ('006abcde0123456789', 200, None),
-        ('006ABCDE0123456789', 200, None),
+        ('00kabcde0123456789', 200, None),
+        ('00kABCDE0123456789', 200, None),
         ('none', 200, None),
         (None, 400, 'This field is required.'),
         (
             '006ABCDE012345678123143',
             400,
-            'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'
+            'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'
         ),
         ('006ABCDE01234', 400,
-         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
-        ('a07ABCDE0123456789', 400,
-         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'),
+        ('a0KABCDE0123456789', 400,
+         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'),
         ('006ABCDE0 12345678', 400,
-         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'),
+         'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'),
     )
     @ddt.unpack
     def test_salesforce_opportunity_line_item(self, salesforce_opportunity_line_item, expected_status_code, error_mesg):
