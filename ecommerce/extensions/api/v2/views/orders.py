@@ -125,7 +125,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             >>>             "discount_percentage": 75.0,
             >>>             "date_placed": '2020-02-11T09:38:47.634561+00:00',  # optional param, only for old records.
             >>>             "sales_force_id": '252F0060L00000ppWfu',
-            >>>             "salesforce_opportunity_line_item": 'abcF0060L00000ppWfu',
+            >>>             "salesforce_opportunity_line_item": '00kF0060L00000ppWfu',
             >>>             "mode": 'verified',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
@@ -153,7 +153,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             >>>             "discount_percentage": 75.0,
             >>>             "date_placed": '2020-02-11T09:38:47.634561+00:00',
             >>>             "sales_force_id": '252F0060L00000ppWfu',
-            >>>             "salesforce_opportunity_line_item": 'abcF0060L00000ppWfu',
+            >>>             "salesforce_opportunity_line_item": '00kF0060L00000ppWfu',
             >>>             "mode": 'verified',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",

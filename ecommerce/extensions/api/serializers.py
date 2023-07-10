@@ -1697,7 +1697,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
                 re.match(ENTERPRISE_SALESFORCE_OPPORTUNITY_LINE_ITEM_REGEX, salesforce_opportunity_line_item):
             raise ValidationError({
                 'salesforce_opportunity_line_item':
-                'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.'
+                'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'
             })
 
 

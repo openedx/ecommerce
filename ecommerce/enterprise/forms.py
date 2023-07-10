@@ -173,7 +173,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         if not re.match(ENTERPRISE_SALESFORCE_OPPORTUNITY_LINE_ITEM_REGEX, salesforce_opportunity_line_item):
             self.add_error(
                 'salesforce_opportunity_line_item',
-                _('The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with a number.')
+                _('The Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.')
             )
         return self.cleaned_data.get('salesforce_opportunity_line_item')
 
