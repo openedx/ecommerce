@@ -43,11 +43,11 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
           target: dev
           repository: edxops/ecommerce-dev
-          tags: ${{ steps.get-tag-name.outputs.result }},${{ github.sha }}
+          tags: |
+            edxops/ecommerce-dev:${{ steps.get-tag-name.outputs.result }}
+            edxops/ecommerce-dev:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
 
       # The current priority is to get the devstack off of Ansible based Images. Once that is done, we can come back to this part to get
@@ -56,9 +56,9 @@ jobs:
       #   uses: docker/build-push-action@v4
       #   with:
       #     push: true
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
       #     target: prod
       #     repository: edxops/ecommerce-prod
-      #     tags: ${{ steps.get-tag-name.outputs.result }},${{ github.sha }}
+      #     tags: |
+      #       edxops/ecommerce-prod:${{ steps.get-tag-name.outputs.result }}
+      #       edxops/ecommerce-prod:${{ github.sha }}
       #     platforms: linux/amd64,linux/arm64
