@@ -2529,7 +2529,7 @@ msgstr "\n                                            Applicato codice coupon %(
 msgid "Apply a coupon code"
 msgstr "Applica un codice coupon"
 
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:164
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:163
 #, python-format
 msgid "Checkout with %(title)s"
 msgstr "Paga con %(title)s"
@@ -2540,12 +2540,12 @@ msgstr "Paga"
 
 #. Translators: <strong></strong> tags will bold the text within. Keep the
 #. tags and translate the text within.
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:179
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:175
 #, python-brace-format
 msgid ""
-"{strong_start}Note:{strong_end} To complete your enrollment, select Checkout"
-" or Checkout with PayPal."
-msgstr "{strong_start}Nota:{strong_end} Per completare la tua iscrizione, seleziona Paga o Paga con PayPal."
+"{strong_start}Note:{strong_end} To complete your enrollment,"
+" please choose one of the payment methods."
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:185
 msgid "Have questions?"
