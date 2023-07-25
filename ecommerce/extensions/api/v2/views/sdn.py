@@ -15,7 +15,7 @@ class SDNView(APIView):
     """A class that act as a dedicated SDN service."""
 
     http_method_names = ['get']
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         """
