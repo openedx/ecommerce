@@ -3,13 +3,11 @@ from urllib.parse import urlencode
 
 import requests
 from django.conf import settings
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 logger = logging.getLogger(__name__)
-
 
 class SDNView(APIView):
     """A class that act as a dedicated SDN service."""
@@ -62,6 +60,8 @@ class SDNView(APIView):
                 'msg': error_msg
             })
 
+        sdn_response = response.json()
+        
         if response.status_code != 200:
             logger.warning(
                 'Unable to connect to US Treasury SDN API for [%s]. Status code [%d] with message: [%s]',
@@ -69,7 +69,7 @@ class SDNView(APIView):
             )
             return Response({
                 'msg': f'Unable to connect to US Treasury SDN API for {name}. Status code {response.status_code}',
-                'response': response.json()
+                'response': sdn_response
             })
 
-        return Response(response.json())
+        return Response(sdn_response)
