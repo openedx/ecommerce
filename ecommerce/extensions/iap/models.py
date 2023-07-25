@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from jsonfield.fields import JSONField
 from solo.models import SingletonModel
 
 
@@ -34,3 +35,4 @@ class PaymentProcessorResponseExtension(models.Model):
                                               related_name='extension')
     original_transaction_id = models.CharField(max_length=255, verbose_name=_('Original Transaction ID'), null=True,
                                                blank=True)
+    meta_data = JSONField(default={})

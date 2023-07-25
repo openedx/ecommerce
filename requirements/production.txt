@@ -12,7 +12,9 @@ amqp==2.6.1
     # via kombu
 analytics-python==1.4.post1
     # via -r requirements/base.in
-asgiref==3.6.0
+app-store-notifications-v2-validator==0.0.7
+    # via -r requirements/base.in
+asgiref==3.7.2
     # via django
 asn1crypto==1.5.1
     # via cybersource-rest-client-python
@@ -37,15 +39,15 @@ billiard==3.6.4.0
     # via celery
 bleach==6.0.0
     # via -r requirements/base.in
-boto3==1.26.133
+boto3==1.26.155
     # via
     #   -r requirements/base.in
     #   django-ses
-botocore==1.29.133
+botocore==1.29.155
     # via
     #   boto3
     #   s3transfer
-cachetools==5.3.0
+cachetools==5.3.1
     # via google-auth
 celery==4.4.7
     # via
@@ -57,6 +59,7 @@ certifi==2023.5.7
     #   requests
 cffi==1.15.1
     # via
+    #   app-store-notifications-v2-validator
     #   cryptography
     #   cybersource-rest-client-python
     #   pynacl
@@ -71,21 +74,18 @@ click==8.1.3
 configparser==5.3.0
     # via cybersource-rest-client-python
 coreapi==2.3.3
-    # via
-    #   -r requirements/base.in
-    #   drf-yasg
+    # via -r requirements/base.in
 coreschema==0.0.4
-    # via
-    #   coreapi
-    #   drf-yasg
-coverage==7.2.5
+    # via coreapi
+coverage==7.2.7
     # via cybersource-rest-client-python
 crispy-bootstrap3==2022.1
     # via -r requirements/base.in
 crypto==1.4.1
     # via cybersource-rest-client-python
-cryptography==40.0.2
+cryptography==41.0.1
     # via
+    #   app-store-notifications-v2-validator
     #   cybersource-rest-client-python
     #   paramiko
     #   pyjwt
@@ -93,7 +93,7 @@ cryptography==40.0.2
     #   social-auth-core
 cssselect==1.2.0
     # via premailer
-cssutils==2.6.0
+cssutils==2.7.1
     # via premailer
 cybersource-rest-client-python==0.0.21
     # via
@@ -105,7 +105,7 @@ defusedxml==0.7.1
     # via
     #   python3-openid
     #   social-auth-core
-django==3.2.19
+django==3.2.20
     # via
     #   -c requirements/common_constraints.txt
     #   -r requirements/base.in
@@ -147,7 +147,7 @@ django-compressor==4.3.1
     #   django-libsass
 django-config-models==2.3.0
     # via -r requirements/base.in
-django-cors-headers==3.14.0
+django-cors-headers==4.1.0
     # via -r requirements/base.in
 django-crispy-forms==2.0
     # via
@@ -157,7 +157,7 @@ django-crum==0.7.9
     # via
     #   edx-django-utils
     #   edx-rbac
-django-extensions==3.2.1
+django-extensions==3.2.3
     # via -r requirements/base.in
 django-extra-views==0.13.0
     # via django-oscar
@@ -175,13 +175,13 @@ django-oscar==2.2
     #   -r requirements/base.in
 django-phonenumber-field==5.0.0
     # via django-oscar
-django-ses==3.4.1
+django-ses==3.5.0
     # via -r requirements/production.in
 django-simple-history==3.0.0
     # via
     #   -c requirements/common_constraints.txt
     #   -r requirements/base.in
-django-solo==2.0.0
+django-solo==2.1.0
     # via -r requirements/base.in
 django-tables2==2.4.1
     # via django-oscar
@@ -214,7 +214,7 @@ drf-extensions==0.7.1
     # via -r requirements/base.in
 drf-jwt==1.19.2
     # via edx-drf-extensions
-drf-yasg==1.21.5
+drf-yasg==1.21.6
     # via -r requirements/base.in
 edx-auth-backends==4.1.0
     # via -r requirements/base.in
@@ -224,18 +224,18 @@ edx-django-release-util==1.2.0
     # via -r requirements/base.in
 edx-django-sites-extensions==4.0.0
     # via -r requirements/base.in
-edx-django-utils==5.4.0
+edx-django-utils==5.5.0
     # via
     #   -r requirements/base.in
     #   django-config-models
     #   edx-drf-extensions
     #   edx-rest-api-client
     #   getsmarter-api-clients
-edx-drf-extensions==8.7.0
+edx-drf-extensions==8.8.0
     # via
     #   -r requirements/base.in
     #   edx-rbac
-edx-ecommerce-worker==3.3.3
+edx-ecommerce-worker==3.3.4
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -243,7 +243,7 @@ edx-opaque-keys==2.3.0
     #   edx-drf-extensions
 edx-rbac==1.7.0
     # via -r requirements/base.in
-edx-rest-api-client==5.5.0
+edx-rest-api-client==5.5.2
     # via
     #   -r requirements/base.in
     #   edx-ecommerce-worker
@@ -255,9 +255,9 @@ extras==1.0.0
     #   python-subunit
 factory-boy==2.12.0
     # via django-oscar
-faker==18.7.0
+faker==18.10.1
     # via factory-boy
-fixtures==4.0.1
+fixtures==4.1.0
     # via
     #   cybersource-rest-client-python
     #   testtools
@@ -267,24 +267,22 @@ frozenlist==1.3.3
     #   aiosignal
 funcsigs==1.0.2
     # via cybersource-rest-client-python
-future==0.18.3
-    # via pyjwkest
-getsmarter-api-clients==0.5.4
+getsmarter-api-clients==0.6.0
     # via -r requirements/base.in
-google-api-core==2.11.0
+google-api-core==2.11.1
     # via google-api-python-client
 google-api-python-client==2.31.0
     # via
     #   -r requirements/base.in
     #   inapppy
-google-auth==2.18.0
+google-auth==2.20.0
     # via
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-googleapis-common-protos==1.59.0
+googleapis-common-protos==1.59.1
     # via google-api-core
 gunicorn==19.7.1
     # via -r requirements/production.in
@@ -342,7 +340,7 @@ lxml==4.9.2
     #   zeep
 markdown==2.6.9
     # via -r requirements/base.in
-markupsafe==2.1.2
+markupsafe==2.1.3
     # via jinja2
 monotonic==1.6
     # via analytics-python
@@ -376,7 +374,7 @@ oauthlib==3.2.2
     #   social-auth-core
 packaging==23.1
     # via drf-yasg
-paramiko==3.1.0
+paramiko==3.2.0
     # via cybersource-rest-client-python
 path-py==7.2
     # via -r requirements/base.in
@@ -388,17 +386,17 @@ pbr==5.11.1
     #   fixtures
     #   stevedore
     #   testtools
-phonenumbers==8.13.11
+phonenumbers==8.13.14
     # via django-oscar
 pillow==9.5.0
     # via django-oscar
 pkgutil-resolve-name==1.3.10
     # via jsonschema
-platformdirs==3.5.1
+platformdirs==3.6.0
     # via zeep
 premailer==2.9.2
     # via -r requirements/base.in
-protobuf==4.23.0
+protobuf==4.23.3
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -422,20 +420,18 @@ pycountry==17.1.8
     # via -r requirements/base.in
 pycparser==2.21
     # via
+    #   app-store-notifications-v2-validator
     #   cffi
     #   cybersource-rest-client-python
-pycryptodome==3.17
+pycryptodome==3.18.0
     # via cybersource-rest-client-python
-pycryptodomex==3.17
-    # via
-    #   cybersource-rest-client-python
-    #   pyjwkest
+pycryptodomex==3.18.0
+    # via cybersource-rest-client-python
 pygments==2.15.1
     # via -r requirements/base.in
-pyjwkest==1.4.2
-    # via edx-drf-extensions
 pyjwt[crypto]==2.7.0
     # via
+    #   app-store-notifications-v2-validator
     #   cybersource-rest-client-python
     #   drf-jwt
     #   edx-auth-backends
@@ -449,12 +445,13 @@ pynacl==1.5.0
     #   cybersource-rest-client-python
     #   edx-django-utils
     #   paramiko
-pyopenssl==23.1.1
+pyopenssl==23.2.0
     # via
+    #   app-store-notifications-v2-validator
     #   cybersource-rest-client-python
     #   ndg-httpsclient
     #   paypalrestsdk
-pyparsing==3.0.9
+pyparsing==3.1.0
     # via httplib2
 pypi==2.1
     # via cybersource-rest-client-python
@@ -497,6 +494,7 @@ pyyaml==6.0
     # via
     #   -r requirements/production.in
     #   cybersource-rest-client-python
+    #   drf-yasg
     #   edx-django-release-util
     #   naked
 rcssmin==1.1.1
@@ -505,7 +503,7 @@ redis==4.5.5
     # via
     #   -r requirements/production.in
     #   edx-ecommerce-worker
-requests==2.30.0
+requests==2.31.0
     # via
     #   -r requirements/base.in
     #   analytics-python
@@ -517,7 +515,6 @@ requests==2.30.0
     #   inapppy
     #   naked
     #   paypalrestsdk
-    #   pyjwkest
     #   requests-file
     #   requests-oauthlib
     #   requests-toolbelt
@@ -541,10 +538,6 @@ rsa==4.9
     #   google-auth
     #   inapppy
     #   oauth2client
-ruamel-yaml==0.17.26
-    # via drf-yasg
-ruamel-yaml-clib==0.2.7
-    # via ruamel-yaml
 rules==3.3
     # via -r requirements/base.in
 s3transfer==0.6.1
@@ -576,7 +569,6 @@ six==1.16.0
     #   oauth2client
     #   paypalrestsdk
     #   purl
-    #   pyjwkest
     #   python-dateutil
     #   python-memcached
     #   requests-file
@@ -594,7 +586,7 @@ sorl-thumbnail==12.9.0
     # via -r requirements/base.in
 sqlparse==0.4.4
     # via django
-stevedore==5.0.0
+stevedore==5.1.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
@@ -608,6 +600,8 @@ traceback2==1.4.0
     # via cybersource-rest-client-python
 typing==3.7.4.3
     # via cybersource-rest-client-python
+typing-extensions==4.6.3
+    # via asgiref
 unicodecsv==0.14.1
     # via
     #   -r requirements/base.in
@@ -617,7 +611,7 @@ uritemplate==4.1.1
     #   coreapi
     #   drf-yasg
     #   google-api-python-client
-urllib3==1.26.15
+urllib3==1.26.16
     # via
     #   -c requirements/constraints.txt
     #   botocore

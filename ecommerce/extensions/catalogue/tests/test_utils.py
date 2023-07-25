@@ -147,7 +147,7 @@ class CouponCreationTests(CouponMixin, TestCase):
         self.catalog = Catalog.objects.create(partner=self.partner)
 
     def create_custom_coupon(self, benefit_value=100, code='', max_uses=None, note=None, quantity=1,
-                             title='Tešt Čoupon', sales_force_id=None):
+                             title='Tešt Čoupon', sales_force_id=None, salesforce_opportunity_line_item=None):
         """Create a custom test coupon product."""
 
         return create_coupon_product(
@@ -173,7 +173,8 @@ class CouponCreationTests(CouponMixin, TestCase):
             voucher_type=Voucher.ONCE_PER_CUSTOMER,
             program_uuid=None,
             site=self.site,
-            sales_force_id=sales_force_id
+            sales_force_id=sales_force_id,
+            salesforce_opportunity_line_item=salesforce_opportunity_line_item
         )
 
     def test_custom_code_integrity_error(self):
@@ -224,4 +225,13 @@ class CouponCreationTests(CouponMixin, TestCase):
         title = 'Coupon'
         note_coupon = self.create_custom_coupon(sales_force_id=sales_force_id, title=title)
         self.assertEqual(note_coupon.attr.sales_force_id, sales_force_id)
+        self.assertEqual(note_coupon.title, title)
+
+    def test_coupon_salesforce_opportunity_line_item(self):
+        """Test creating a coupon with sales force opprtunity id."""
+        salesforce_opportunity_line_item = 'salesforcelineItem123'
+        title = 'Coupon'
+        note_coupon = self.create_custom_coupon(
+            salesforce_opportunity_line_item=salesforce_opportunity_line_item, title=title)
+        self.assertEqual(note_coupon.attr.salesforce_opportunity_line_item, salesforce_opportunity_line_item)
         self.assertEqual(note_coupon.title, title)
