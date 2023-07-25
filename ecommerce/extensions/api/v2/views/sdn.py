@@ -12,10 +12,26 @@ logger = logging.getLogger(__name__)
 
 
 class SDNView(APIView):
+    """A class that act as a dedicated SDN service."""
+
     http_method_names = ['get']
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
+        """
+        Searches the OFAC list for an individual with the specified details.
+        The check returns zero hits if:
+            * request to the SDN API times out
+            * SDN API returns a non-200 status code response
+            * user is not found on the SDN list
+
+        URL params:
+            name (str): Individual's full name.
+            city (str): Individual's city.
+            country (str): ISO 3166-1 alpha-2 country code where the individual is from.
+        Returns:
+            dict: SDN API response.
+        """
         name = request.GET.get('name')
         city = request.GET.get('city')
         country = request.GET.get('country')
