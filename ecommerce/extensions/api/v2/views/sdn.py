@@ -5,6 +5,7 @@ import requests
 from django.conf import settings
 
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 logger = logging.getLogger(__name__)
@@ -39,15 +40,20 @@ class SDNView(APIView):
                 timeout=settings.SDN_CHECK_REQUEST_TIMEOUT
             )
         except requests.exceptions.Timeout:
-            logger.warning('Connection to US Treasury SDN API timed out for [%s].', name)
-            raise
+            error_msg = f'Connection to US Treasury SDN API timed out for {name}.'
+            logger.warning(error_msg)
+            return Response({
+                'msg': error_msg
+            })
 
         if response.status_code != 200:
-            print(response)
             logger.warning(
                 'Unable to connect to US Treasury SDN API for [%s]. Status code [%d] with message: [%s]',
                 name, response.status_code, response.content
             )
-            raise requests.exceptions.HTTPError('Unable to connect to SDN API')
+            return Response({
+                'msg': f'Unable to connect to US Treasury SDN API for {name}. Status code {response.status_code}',
+                'response': response.json()
+            })
 
-        return response.json()
+        return Response(response.json())
