@@ -46,6 +46,8 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_uuid_from_voucher
 )
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.api.constatnts import MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE
+from ecommerce.extensions.api.utils import send_mail_to_mobile_team_for_change_in_course
 from ecommerce.extensions.api.v2.constants import (
     ENABLE_HOIST_ORDER_HISTORY,
     REFUND_ORDER_EMAIL_CLOSING,
@@ -820,6 +822,13 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
         return products
 
+    def _get_seats_offered_on_mobile(self, course):
+        certificate_type_query = Q(attributes__name='certificate_type', attribute_values__value_text='verified')
+        mobile_query = Q(title__contains='iOS') | Q(title__contains='Android')
+        mobile_seats = course.seat_products.filter(certificate_type_query & mobile_query)
+
+        return mobile_seats
+
     def get_partner(self):
         """Validate partner"""
         if not self.partner:
@@ -879,6 +888,10 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 published = (resp_message is None)
 
                 if published:
+                    mobile_seats = self._get_seats_offered_on_mobile(course)
+                    if waffle.switch_is_active(MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE) and mobile_seats:
+                        send_mail_to_mobile_team_for_change_in_course(course, mobile_seats)
+
                     return created, None, None
                 raise Exception(resp_message)
 

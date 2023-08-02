@@ -66,6 +66,9 @@ Waffle offers the following feature gates.
    * - disable_redundant_payment_check_for_mobile
      - Switch
      - Enable returning an error for duplicate transaction_id for mobile in-app purchases.
+   * - mail_mobile_team_for_change_in_course
+     - Switch
+     - Alert mobile team for a change in a course having mobile seats, so that they can adjust prices on mobile platforms.
    * - enable_stripe_payment_processor
      - Flag
      - Ignore client side payment processor setting and use Stripe. For background, see `frontend-app-payment 0005-stripe-custom-actions <https://github.com/openedx/frontend-app-payment/blob/master/docs/decisions/0005-stripe-custom-actions.rst>`_.
