@@ -5,8 +5,8 @@ Command is run by Jenkins job daily.
 """
 import logging
 
-from django.core.management.base import BaseCommand
 import requests
+from django.core.management.base import BaseCommand
 from rest_framework import status
 
 from ecommerce.core.models import SiteConfiguration
