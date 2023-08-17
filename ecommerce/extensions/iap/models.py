@@ -22,6 +22,12 @@ class IAPProcessorConfiguration(SingletonModel):
         )
     )
 
+    mobile_team_email = models.EmailField(
+        default='',
+        verbose_name=_('mobile team email'),
+        max_length=254
+    )
+
     class Meta:
         verbose_name = "IAP Processor Configuration"
 
