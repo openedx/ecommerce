@@ -824,7 +824,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
     def _get_seats_offered_on_mobile(self, course):
         certificate_type_query = Q(attributes__name='certificate_type', attribute_values__value_text='verified')
-        mobile_query = Q(title__contains='iOS') | Q(title__contains='Android')
+        mobile_query = Q(stockrecords__partner_sku__contains='mobile')
         mobile_seats = course.seat_products.filter(certificate_type_query & mobile_query)
 
         return mobile_seats
