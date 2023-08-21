@@ -15,7 +15,7 @@
     "eslint": "^8.47.0",
     "eslint-config-edx-es5": "^4.0.1",
     "geckodriver": "^1.22.3",
-    "gulp": "^3.9.1",
+    "gulp": "4.0.2",
     "gulp-eslint": "^6.0.0",
     "jasmine-core": "2.6.1",
     "jasmine-jquery": "2.1.1",
