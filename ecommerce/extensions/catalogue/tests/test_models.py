@@ -19,7 +19,8 @@ ProductClass = get_model('catalogue', 'ProductClass')
 class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
     COUPON_PRODUCT_TITLE = 'Some test title.'
 
-    def _create_coupon_product_with_attributes(self, note='note', notify_email=None, sales_force_id=None):
+    def _create_coupon_product_with_attributes(
+            self, note='note', notify_email=None, sales_force_id=None, salesforce_opportunity_line_item=None):
         """Helper method that creates a coupon product with note, notify_email and sales_force_id attributes."""
         coupon_product = factories.ProductFactory(
             title=self.COUPON_PRODUCT_TITLE,
@@ -35,6 +36,8 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
             coupon_product.attr.notify_email = notify_email
         if sales_force_id:
             coupon_product.attr.sales_force_id = sales_force_id
+        if salesforce_opportunity_line_item:
+            coupon_product.attr.salesforce_opportunity_line_item = salesforce_opportunity_line_item
         coupon_product.save()
         return coupon_product
 
@@ -87,6 +90,13 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         sales_force_id = 'salesforceid123'
         coupon = self._create_coupon_product_with_attributes(sales_force_id=sales_force_id)
         self.assertEqual(coupon.attr.sales_force_id, sales_force_id)
+
+    def test_create_product_with_salesforce_opportunity_line_item(self):
+        """Verify creating a product with salesforce_opportunity_line_item."""
+        salesforce_opportunity_line_item = 'salesforceopportunitylineitem123'
+        coupon = self._create_coupon_product_with_attributes(
+            salesforce_opportunity_line_item=salesforce_opportunity_line_item)
+        self.assertEqual(coupon.attr.salesforce_opportunity_line_item, salesforce_opportunity_line_item)
 
     @ddt.data(1, {'some': 'dict'}, ['array'])
     def test_incorrect_note_value_raises_exception(self, note):

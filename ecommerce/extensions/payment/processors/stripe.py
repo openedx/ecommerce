@@ -111,39 +111,46 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 basket.id,
                 basket.order_number,
             )
-            return None
-        try:
-            stripe_response = stripe.PaymentIntent.create(
-                **self._build_payment_intent_parameters(basket),
-                # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
-                secret_key_confirmation='required',
-                # don't create a new intent for the same basket
-                idempotency_key=self.generate_basket_pi_idempotency_key(basket),
-            )
-            # id is the payment_intent_id from Stripe
-            transaction_id = stripe_response['id']
+            # Create a default stripe_response object with the necessary fields to combat 400 errors
+            stripe_response = {
+                'id': '',
+                'client_secret': '',
+            }
+        else:
+            try:
+                logger.info("*** GETTING STRIPE RESPONSE ***")
+                stripe_response = stripe.PaymentIntent.create(
+                    **self._build_payment_intent_parameters(basket),
+                    # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
+                    secret_key_confirmation='required',
+                    # don't create a new intent for the same basket
+                    idempotency_key=self.generate_basket_pi_idempotency_key(basket),
+                )
+                logger.info("*** STRIPE RESPONSE %s ***", stripe_response)
+                # id is the payment_intent_id from Stripe
+                transaction_id = stripe_response['id']
 
-            basket_add_payment_intent_id_attribute(basket, transaction_id)
-        # for when basket was already created, but with different amount
-        except stripe.error.IdempotencyError:
-            # if this PI has been created before, we should be able to retrieve
-            # it from Stripe using the payment_intent_id BasketAttribute.
-            # Note that we update the PI's price in handle_processor_response
-            # before hitting the confirm endpoint, so we don't need to do that here
-            payment_intent_id_attribute = BasketAttributeType.objects.get(name=PAYMENT_INTENT_ID_ATTRIBUTE)
-            payment_intent_attr = BasketAttribute.objects.get(
-                basket=basket,
-                attribute_type=payment_intent_id_attribute
-            )
-            transaction_id = payment_intent_attr.value_text.strip()
-            logger.info(
-                'Idempotency Error: Retrieving existing Payment Intent for basket [%d]'
-                ' with transaction ID [%s] and order number [%s].',
-                basket.id,
-                transaction_id,
-                basket.order_number,
-            )
-            stripe_response = stripe.PaymentIntent.retrieve(id=transaction_id)
+                basket_add_payment_intent_id_attribute(basket, transaction_id)
+            # for when basket was already created, but with different amount
+            except stripe.error.IdempotencyError:
+                # if this PI has been created before, we should be able to retrieve
+                # it from Stripe using the payment_intent_id BasketAttribute.
+                # Note that we update the PI's price in handle_processor_response
+                # before hitting the confirm endpoint, so we don't need to do that here
+                payment_intent_id_attribute = BasketAttributeType.objects.get(name=PAYMENT_INTENT_ID_ATTRIBUTE)
+                payment_intent_attr = BasketAttribute.objects.get(
+                    basket=basket,
+                    attribute_type=payment_intent_id_attribute
+                )
+                transaction_id = payment_intent_attr.value_text.strip()
+                logger.info(
+                    'Idempotency Error: Retrieving existing Payment Intent for basket [%d]'
+                    ' with transaction ID [%s] and order number [%s].',
+                    basket.id,
+                    transaction_id,
+                    basket.order_number,
+                )
+                stripe_response = stripe.PaymentIntent.retrieve(id=transaction_id)
 
         new_capture_context = {
             'key_id': stripe_response['client_secret'],

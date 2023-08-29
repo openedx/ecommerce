@@ -18,6 +18,7 @@ from ecommerce.enterprise.api import get_enterprise_id_for_user
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
     CUSTOMER_CATALOGS_DEFAULT_RESPONSE,
+    create_enterprise_customer_user_consent,
     enterprise_customer_user_needs_consent,
     find_active_enterprise_customer_user,
     get_enterprise_catalog,
@@ -143,6 +144,23 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(enterprise_customer_user_needs_consent(**kw), True)
         self.mock_consent_not_required(**opts)
         self.assertEqual(enterprise_customer_user_needs_consent(**kw), False)
+
+    @responses.activate
+    def test_ecu_create_consent(self):
+        opts = {
+            'ec_uuid': 'fake-uuid',
+            'course_id': 'course-v1:real+course+id',
+            'username': 'johnsmith',
+        }
+        kw = {
+            'enterprise_customer_uuid': 'fake-uuid',
+            'course_id': 'course-v1:real+course+id',
+            'username': 'johnsmith',
+            'site': self.site
+        }
+        self.mock_access_token_response()
+        self.mock_consent_post(**opts)
+        self.assertEqual(create_enterprise_customer_user_consent(**kw), True)
 
     def test_get_enterprise_customer_uuid(self):
         """

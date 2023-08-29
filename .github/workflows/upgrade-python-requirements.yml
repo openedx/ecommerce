@@ -2,7 +2,7 @@ name: Upgrade Requirements
 
 on:
   schedule:
-     - cron: "15 1 * * 4"
+     - cron: "15 1 1 * *"
   workflow_dispatch:
      inputs:
        branch:
@@ -13,8 +13,9 @@ jobs:
    call-upgrade-python-requirements-workflow:
     with:
        branch: ${{ github.event.inputs.branch }}
-       team_reviewers: "revenue-squad"
-       email_address: revenue-tasks@edx.org  
+       user_reviewers: edx-revenue-tasks
+       team_reviewers: ""
+       email_address: revenue-tasks@edx.org
        send_success_notification: false
     secrets:
        requirements_bot_github_token: ${{ secrets.REQUIREMENTS_BOT_GITHUB_TOKEN }}

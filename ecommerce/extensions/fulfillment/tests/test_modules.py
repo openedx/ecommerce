@@ -1253,6 +1253,7 @@ class ExecutiveEducation2UFulfillmentModuleTests(
                 'mobile_phone': '+12015551234',
             },
             'terms_accepted_at': '2022-07-25T10:29:56Z',
+            'data_share_consent': True
         })
 
         self.mock_settings = {
@@ -1304,37 +1305,59 @@ class ExecutiveEducation2UFulfillmentModuleTests(
             self.exec_ed_2u_entitlement_line.order.number
         )
 
+    @mock.patch('ecommerce.extensions.fulfillment.modules.create_enterprise_customer_user_consent')
+    @mock.patch('ecommerce.extensions.fulfillment.modules.get_course_info_from_catalog')
     @mock.patch('ecommerce.extensions.fulfillment.modules.GetSmarterEnterpriseApiClient')
-    def test_fulfill_product_success(self, mock_geag_client):
+    def test_fulfill_product_success(
+        self,
+        mock_geag_client,
+        mock_get_course_info_from_catalog,
+        mock_create_enterprise_customer_user_consent
+    ):
         with self.settings(**self.mock_settings):
             mock_create_enterprise_allocation = mock.MagicMock()
             mock_geag_client.return_value = mock.MagicMock(
                 create_enterprise_allocation=mock_create_enterprise_allocation
             )
+            mock_get_course_info_from_catalog.return_value = {
+                'key': 'test_course_key1'
+            }
             self.order.notes.create(message=self.fulfillment_details, note_type='Fulfillment Details')
             ExecutiveEducation2UFulfillmentModule().fulfill_product(
                 self.order,
                 [self.exec_ed_2u_entitlement_line, self.exec_ed_2u_entitlement_line_2]
             )
             self.assertEqual(mock_create_enterprise_allocation.call_count, 2)
+            self.assertEqual(mock_create_enterprise_customer_user_consent.call_count, 2)
             self.assertEqual(self.exec_ed_2u_entitlement_line.status, LINE.COMPLETE)
             self.assertEqual(self.exec_ed_2u_entitlement_line_2.status, LINE.COMPLETE)
             self.assertFalse(self.order.notes.exists())
 
+    @mock.patch('ecommerce.extensions.fulfillment.modules.create_enterprise_customer_user_consent')
+    @mock.patch('ecommerce.extensions.fulfillment.modules.get_course_info_from_catalog')
     @mock.patch('ecommerce.extensions.fulfillment.modules.GetSmarterEnterpriseApiClient')
-    def test_fulfill_product_error(self, mock_geag_client):
+    def test_fulfill_product_error(
+        self,
+        mock_geag_client,
+        mock_get_course_info_from_catalog,
+        mock_create_enterprise_customer_user_consent
+    ):
         with self.settings(**self.mock_settings):
             mock_create_enterprise_allocation = mock.MagicMock()
             mock_create_enterprise_allocation.side_effect = [None, Exception("Uh oh.")]
             mock_geag_client.return_value = mock.MagicMock(
                 create_enterprise_allocation=mock_create_enterprise_allocation
             )
+            mock_get_course_info_from_catalog.return_value = {
+                'key': 'test_course_key1'
+            }
             self.order.notes.create(message=self.fulfillment_details, note_type='Fulfillment Details')
             ExecutiveEducation2UFulfillmentModule().fulfill_product(
                 self.order,
                 [self.exec_ed_2u_entitlement_line, self.exec_ed_2u_entitlement_line_2]
             )
             self.assertEqual(mock_create_enterprise_allocation.call_count, 2)
+            self.assertEqual(mock_create_enterprise_customer_user_consent.call_count, 2)
             self.assertEqual(self.exec_ed_2u_entitlement_line.status, LINE.COMPLETE)
             self.assertEqual(self.exec_ed_2u_entitlement_line_2.status, LINE.FULFILLMENT_SERVER_ERROR)
             self.assertTrue(self.order.notes.exists())

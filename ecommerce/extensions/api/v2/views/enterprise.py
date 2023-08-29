@@ -298,7 +298,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             cleaned_voucher_data['note'],
             cleaned_voucher_data.get('notify_email'),
             cleaned_voucher_data['enterprise_customer'],
-            cleaned_voucher_data['sales_force_id']
+            cleaned_voucher_data['sales_force_id'],
+            cleaned_voucher_data['salesforce_opportunity_line_item'],
         )
         logger.info(
             "Calling attach_or_update_contract_metadata_on_coupon "

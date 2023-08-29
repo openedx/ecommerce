@@ -42,8 +42,10 @@ class CourseTests(DiscoveryTestMixin, TestCase):
 
         # Create the seat products
         seats = [course.create_or_update_seat('honor', False, 0),
-                 course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)]
-        self.assertEqual(course.products.count(), 4)
+                 course.create_or_update_seat('verified', True, 50, create_enrollment_code=True),
+                 course.create_or_update_seat('verified', True, 60),
+                 course.create_or_update_seat('verified', True, 70)]
+        self.assertEqual(course.products.count(), 6)
 
         # The property should return only the child seats.
         self.assertEqual(set(course.seat_products), set(seats))
@@ -371,3 +373,18 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         ec_expires = now() - timedelta(days=365)
         self.assertEqual(course.get_enrollment_code().expires, ec_expires)
         self.assertIsNone(course.enrollment_code_product)
+
+    def test_toggle_enrollment_code_with_multiple_seats(self):
+        """Verify enrollment code expiration date is set when course has multiple seats"""
+        seat_one_expires = now() + timedelta(days=365)
+        seat_two_expires = now() + timedelta(days=366)
+        seat_three_expires = now() + timedelta(days=367)
+        course, _, enrollment_code = self.create_course_seat_and_enrollment_code(expires=seat_one_expires)
+        course.create_or_update_seat("honor", False, 0)
+        course.create_or_update_seat("verified", True, 10, expires=seat_two_expires)
+        course.create_or_update_seat("verified", True, 10, expires=seat_three_expires)
+        course.toggle_enrollment_code_status(True)
+        ec_expires = seat_three_expires
+
+        self.assertEqual(course.get_enrollment_code().expires, ec_expires)
+        self.assertEqual(course.enrollment_code_product, enrollment_code)

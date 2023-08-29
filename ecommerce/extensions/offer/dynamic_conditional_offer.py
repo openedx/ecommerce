@@ -4,9 +4,10 @@ for a discount elsewhere, and pass it in. We pass this information through a jwt
 """
 import crum
 import waffle
+from edx_django_utils.monitoring import set_custom_attribute
+from edx_rest_framework_extensions.auth.jwt.decoder import configured_jwt_decode_handler
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.extensions.api.handlers import jwt_decode_handler
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.mixins import (
     BenefitWithoutRangeMixin,
@@ -30,9 +31,11 @@ def get_decoded_jwt_discount_from_request():
     else:
         discount_jwt = request.POST.get('discount_jwt')
     if not discount_jwt:
+        set_custom_attribute('ecom_discount_jwt', 'not-found')
         return None
 
-    return jwt_decode_handler(discount_jwt)
+    set_custom_attribute('ecom_discount_jwt', 'found')
+    return configured_jwt_decode_handler(discount_jwt)
 
 
 def get_percentage_from_request():

@@ -2,6 +2,7 @@
 """Unit tests of Android IAP payment processor implementation."""
 
 
+import uuid
 from urllib.parse import urljoin
 
 import ddt
@@ -15,8 +16,10 @@ from testfixtures import LogCapture
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
+from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -56,6 +59,13 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
             'transactionId': 'transactionId.android.test.purchased',
             'productId': 'android.test.purchased',
             'purchaseToken': 'inapp:org.edx.mobile:android.test.purchased',
+            'price': 40.25,
+            'currency_code': 'USD',
+        }
+        self.mock_validation_response = {
+            'resource': {
+                'orderId': 'orderId.android.test.purchased'
+            }
         }
 
     def _get_receipt_url(self):
@@ -73,6 +83,19 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         }
         actual = self.processor.get_transaction_parameters(self.basket)
         self.assertEqual(actual, expected)
+
+    def test_is_payment_redundant(self):
+        """
+        Test that True is returned only if no PaymentProcessorResponse entry is found with
+        the given transaction_id.
+        """
+        transaction_id = str(uuid.uuid4())
+        result = self.processor.is_payment_redundant(transaction_id=transaction_id)
+        self.assertFalse(result)
+
+        PaymentProcessorResponse.objects.create(transaction_id=transaction_id, processor_name=self.processor_name)
+        result = self.processor.is_payment_redundant(transaction_id=transaction_id)
+        self.assertTrue(result)
 
     @mock.patch.object(GooglePlayValidator, 'validate')
     def test_handle_processor_response_error(self, mock_google_validator):
@@ -117,16 +140,26 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                     ),
                 )
 
+    @mock.patch.object(AndroidIAP, 'is_payment_redundant')
+    @mock.patch.object(GooglePlayValidator, 'validate')
+    def test_handle_processor_response_redundant_error(self, mock_android_validator, mock_payment_redundant):
+        """
+        Verify that appropriate RedundantPaymentNotificationError is raised in case payment with same
+        transaction_id/orderId already exists for any edx user.
+        """
+        mock_android_validator.return_value = self.mock_validation_response
+        mock_payment_redundant.return_value = True
+        toggle_switch(DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME, False)
+
+        with self.assertRaises(RedundantPaymentNotificationError):
+            self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+
     @mock.patch.object(GooglePlayValidator, 'validate')
     def test_handle_processor_response(self, mock_google_validator):  # pylint: disable=arguments-differ
         """
         Verify that the processor creates the appropriate PaymentEvent and Source objects.
         """
-        mock_google_validator.return_value = {
-            'resource': {
-                'orderId': 'orderId.android.test.purchased'
-            }
-        }
+        mock_google_validator.return_value = self.mock_validation_response
         toggle_switch('IAP_RETRY_ATTEMPTS', True)
 
         handled_response = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
@@ -139,10 +172,46 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         Tests issuing credit/refund with AndroidInAppPurchase processor.
         """
-        self.assertRaises(NotImplementedError, self.processor.issue_credit, None, None, None, None, None)
+        refund_id = "test id"
+        result = self.processor.issue_credit(refund_id, refund_id, refund_id, refund_id, refund_id)
+        self.assertEqual(refund_id, result)
 
     def test_issue_credit_error(self):
         """
         Tests issuing credit/refund with AndroidInAppPurchase processor.
         """
-        self.assertRaises(NotImplementedError, self.processor.issue_credit, None, None, None, None, None)
+        refund_id = "test id"
+        result = self.processor.issue_credit(refund_id, refund_id, refund_id, refund_id, refund_id)
+        self.assertEqual(refund_id, result)
+
+    @mock.patch.object(GooglePlayValidator, 'validate')
+    def test_payment_processor_response_created(self, mock_google_validator):
+        """
+        Verify that the PaymentProcessor object is created as expected.
+        """
+        mock_google_validator.return_value = self.mock_validation_response
+        transaction_id = self.RETURN_DATA.get('transactionId')
+
+        self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+        payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id)
+        self.assertTrue(payment_processor_response.exists())
+        self.assertEqual(payment_processor_response.first().processor_name, self.processor_name)
+        self.assertEqual(payment_processor_response.first().response, self.mock_validation_response)
+
+    @mock.patch.object(GooglePlayValidator, 'validate')
+    def test_payment_processor_response_extension_created(self, mock_google_validator):
+        """
+        Verify that the PaymentProcessorExtension object is created as expected.
+        """
+        mock_google_validator.return_value = self.mock_validation_response
+        transaction_id = self.RETURN_DATA.get('transactionId')
+        price = str(self.RETURN_DATA.get('price'))
+        currency_code = self.RETURN_DATA.get('currency_code')
+
+        self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+
+        payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).first()
+        payment_processor_response_extension = payment_processor_response.extension
+        self.assertIsNotNone(payment_processor_response_extension)
+        self.assertEqual(payment_processor_response_extension.meta_data.get('price'), str(price))
+        self.assertEqual(payment_processor_response_extension.meta_data.get('currency_code'), currency_code)

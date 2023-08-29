@@ -252,7 +252,8 @@ define([
                     'contract_discount_value',
                     'contract_discount_type',
                     'prepaid_invoice_amount',
-                    'sales_force_id'
+                    'sales_force_id',
+                    'salesforce_opportunity_line_item'
                 ];
             },
 

@@ -1,9 +1,11 @@
 -c constraints.txt
 
 analytics-python
+app-store-notifications-v2-validator==0.0.7
 bleach
 boto3>=1.17.80
 coreapi
+crispy-bootstrap3
 cybersource-rest-client-python
 django>=3.2,<4.0
 django-compressor

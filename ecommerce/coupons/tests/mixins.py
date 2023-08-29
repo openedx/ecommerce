@@ -472,13 +472,21 @@ class CouponMixin(SiteMixin):
                 type='text'
             )
 
+            factories.ProductAttributeFactory(
+                product_class=pc,
+                name='Salesforce Opportunity Line Item',
+                code='salesforce_opportunity_line_item',
+                type='text'
+            )
+
         return pc
 
     def create_coupon(self, benefit_type=Benefit.PERCENTAGE, benefit_value=100, catalog=None, catalog_query=None,
                       client=None, code='', course_seat_types=None, email_domains=None, enterprise_customer=None,
                       enterprise_customer_catalog=None, max_uses=None, note=None, partner=None, price=100, quantity=5,
                       title='Test coupon', voucher_type=Voucher.SINGLE_USE, course_catalog=None, program_uuid=None,
-                      start_datetime=None, end_datetime=None, sales_force_id=None):
+                      start_datetime=None, end_datetime=None, sales_force_id=None,
+                      salesforce_opportunity_line_item=None):
         """Helper method for creating a coupon.
 
         Arguments:
@@ -502,6 +510,7 @@ class CouponMixin(SiteMixin):
             voucher_type (str): Voucher type
             program_uuid (str): Program UUID
             sales_force_id (str): Sales Force Opprtunity ID
+            salesforce_opportunity_line_item (str): Sales Force Opportunity Line Item ID
 
         Returns:
             coupon (Coupon)
@@ -544,6 +553,7 @@ class CouponMixin(SiteMixin):
                 program_uuid=program_uuid,
                 site=self.site,
                 sales_force_id=sales_force_id,
+                salesforce_opportunity_line_item=salesforce_opportunity_line_item,
             )
 
         request = RequestFactory()
