@@ -34,7 +34,10 @@ from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import sum_user_discounts_for_offer
-from ecommerce.enterprise.constants import ENTERPRISE_SALES_FORCE_ID_REGEX
+from ecommerce.enterprise.constants import (
+    ENTERPRISE_SALES_FORCE_ID_REGEX,
+    ENTERPRISE_SALESFORCE_OPPORTUNITY_LINE_ITEM_REGEX
+)
 from ecommerce.enterprise.utils import (
     calculate_remaining_offer_balance,
     generate_offer_display_name,
@@ -43,6 +46,8 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_uuid_from_voucher
 )
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.api.constatnts import MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE
+from ecommerce.extensions.api.utils import send_mail_to_mobile_team_for_change_in_course
 from ecommerce.extensions.api.v2.constants import (
     ENABLE_HOIST_ORDER_HISTORY,
     REFUND_ORDER_EMAIL_CLOSING,
@@ -817,6 +822,13 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
         return products
 
+    def _get_seats_offered_on_mobile(self, course):
+        certificate_type_query = Q(attributes__name='certificate_type', attribute_values__value_text='verified')
+        mobile_query = Q(stockrecords__partner_sku__contains='mobile')
+        mobile_seats = course.seat_products.filter(certificate_type_query & mobile_query)
+
+        return mobile_seats
+
     def get_partner(self):
         """Validate partner"""
         if not self.partner:
@@ -876,6 +888,10 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 published = (resp_message is None)
 
                 if published:
+                    mobile_seats = self._get_seats_offered_on_mobile(course)
+                    if waffle.switch_is_active(MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE) and mobile_seats:
+                        send_mail_to_mobile_team_for_change_in_course(course, mobile_seats)
+
                     return created, None, None
                 raise Exception(resp_message)
 
@@ -1137,12 +1153,39 @@ class CouponListSerializer(serializers.ModelSerializer):
 
 def _serialize_remaining_balance_value(conditional_offer):
     """
-    Change value into string and return it unless it is None.
+    Calculate and return remaining balance on the offer.
     """
     remaining_balance = calculate_remaining_offer_balance(conditional_offer)
     if remaining_balance is not None:
         remaining_balance = str(remaining_balance)
     return remaining_balance
+
+
+def _serialize_remaining_balance_for_user(conditional_offer, request):
+    """
+    Determines the remaining balance for the user.
+    """
+    if request and conditional_offer.max_user_discount is not None:
+        return str(conditional_offer.max_user_discount - sum_user_discounts_for_offer(request.user, conditional_offer))
+    return None
+
+
+def _serialize_remaining_applications_value(conditional_offer):
+    """
+    Calculate and return remaining number of applications on the offer.
+    """
+    if conditional_offer.max_global_applications is not None:
+        return conditional_offer.max_global_applications - conditional_offer.num_applications
+    return None
+
+
+def _serialize_remaining_applications_for_user(conditional_offer, request):
+    """
+    Determines the remaining number of applications (enrollments) for the user.
+    """
+    if request and conditional_offer.max_user_applications is not None:
+        return conditional_offer.max_user_applications - conditional_offer.get_num_user_applications(request.user)
+    return None
 
 
 class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
@@ -1152,31 +1195,29 @@ class EnterpriseLearnerOfferApiSerializer(serializers.BaseSerializer):  # pylint
     Uses serializers.BaseSerializer to keep this lightweight.
     """
 
-    def _serialize_remaining_balance_for_user(self, instance):
-        request = self.context.get('request')
-
-        if request and instance.max_user_discount is not None:
-            return str(instance.max_user_discount - sum_user_discounts_for_offer(request.user, instance))
-
-        return None
-
     def to_representation(self, instance):
         representation = OrderedDict()
 
         representation['id'] = instance.id
-        representation['max_discount'] = instance.max_discount
+        representation['enterprise_customer_uuid'] = instance.condition.enterprise_customer_uuid
+        representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
+        representation['is_current'] = instance.is_current
+        representation['status'] = instance.status
         representation['start_datetime'] = instance.start_datetime
         representation['end_datetime'] = instance.end_datetime
-        representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
         representation['usage_type'] = get_benefit_type(instance.benefit)
         representation['discount_value'] = instance.benefit.value
-        representation['status'] = instance.status
-        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
-        representation['is_current'] = instance.is_current
+        representation['max_discount'] = instance.max_discount
         representation['max_global_applications'] = instance.max_global_applications
+        representation['max_user_applications'] = instance.max_user_applications
         representation['max_user_discount'] = instance.max_user_discount
         representation['num_applications'] = instance.num_applications
-        representation['remaining_balance_for_user'] = self._serialize_remaining_balance_for_user(instance)
+        representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
+        representation['remaining_applications'] = _serialize_remaining_applications_value(instance)
+        representation['remaining_balance_for_user'] = \
+            _serialize_remaining_balance_for_user(instance, request=self.context.get('request'))
+        representation['remaining_applications_for_user'] = \
+            _serialize_remaining_applications_for_user(instance, request=self.context.get('request'))
 
         return representation
 
@@ -1199,6 +1240,7 @@ class EnterpriseAdminOfferApiSerializer(serializers.ModelSerializer):  # pylint:
         representation['enterprise_catalog_uuid'] = instance.condition.enterprise_customer_catalog_uuid
         representation['display_name'] = generate_offer_display_name(instance)
         representation['remaining_balance'] = _serialize_remaining_balance_value(instance)
+        representation['remaining_applications'] = _serialize_remaining_applications_value(instance)
         representation['is_current'] = instance.is_current
 
         return representation
@@ -1464,6 +1506,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
     contract_discount_type = serializers.SerializerMethodField()
     prepaid_invoice_amount = serializers.SerializerMethodField()
     sales_force_id = serializers.SerializerMethodField()
+    salesforce_opportunity_line_item = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -1473,7 +1516,8 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
             'end_date', 'enterprise_catalog_content_metadata_url', 'enterprise_customer', 'enterprise_customer_catalog',
             'id', 'inactive', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
             'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
-            'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount', 'sales_force_id',
+            'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount',
+            'sales_force_id', 'salesforce_opportunity_line_item',
         )
 
     def get_prepaid_invoice_amount(self, obj):
@@ -1601,6 +1645,13 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
         except AttributeError:
             return None
 
+    def get_salesforce_opportunity_line_item(self, obj):
+        """ Get the Salesforce Opportunity Line Item attached to the coupon. """
+        try:
+            return obj.attr.salesforce_opportunity_line_item
+        except AttributeError:
+            return None
+
     def get_num_uses(self, obj):
         offer = retrieve_offer(obj)
         return offer.num_applications
@@ -1650,6 +1701,18 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
                 'sales_force_id': 'Salesforce Opportunity ID must be 18 alphanumeric characters and begin with 006.'
             })
 
+    def validate_salesforce_opportunity_line_item_format(self):
+        """
+        Validate salesforce_opportunity_line_item format
+        """
+        salesforce_opportunity_line_item = self.initial_data.get('salesforce_opportunity_line_item')
+        if salesforce_opportunity_line_item and not\
+                re.match(ENTERPRISE_SALESFORCE_OPPORTUNITY_LINE_ITEM_REGEX, salesforce_opportunity_line_item):
+            raise ValidationError({
+                'salesforce_opportunity_line_item':
+                'Salesforce Opportunity Line Item must be 18 alphanumeric characters and begin with \'00k\'.'
+            })
+
 
 class CouponUpdateSerializer(CouponSerializer):
     """
@@ -1689,13 +1752,19 @@ class EnterpriseCouponCreateSerializer(CouponSerializer):
         """
         validated_data = super(EnterpriseCouponCreateSerializer, self).validate(attrs)
 
-        # Validate sales_force_id
-        sales_force_id = self.initial_data.get('sales_force_id')
-        if not sales_force_id:
+        # Validate salesforce_opportunity_line_item
+        salesforce_opportunity_line_item = self.initial_data.get('salesforce_opportunity_line_item')
+        if not salesforce_opportunity_line_item:
             raise ValidationError({
-                'sales_force_id': 'This field is required.'
+                'salesforce_opportunity_line_item': 'This field is required.'
             })
-        self.validate_sales_force_id_format()
+        self.validate_salesforce_opportunity_line_item_format()
+
+        # Validate sales_force_id if it exists
+        sales_force_id = self.initial_data.get('sales_force_id')
+        if sales_force_id:
+            self.validate_sales_force_id_format()
+
         return validated_data
 
 
@@ -1709,13 +1778,18 @@ class EnterpriseCouponUpdateSerializer(CouponUpdateSerializer):
         """
         validated_data = super(EnterpriseCouponUpdateSerializer, self).validate(attrs)
 
-        # Validate sales_force_id
-        sales_force_id = self.initial_data.get('sales_force_id')
-        if 'sales_force_id' in self.initial_data and not sales_force_id:
+        # Validate salesforce_opportunity_line_item
+        salesforce_opportunity_line_item = self.initial_data.get('salesforce_opportunity_line_item')
+        if 'salesforce_opportunity_line_item' in self.initial_data and not salesforce_opportunity_line_item:
             raise ValidationError({
-                'sales_force_id': 'This field is required.'
+                'salesforce_opportunity_line_item': 'This field is required.'
             })
-        self.validate_sales_force_id_format()
+        self.validate_salesforce_opportunity_line_item_format()
+
+        # Validate sales_force_id if it exists
+        sales_force_id = self.initial_data.get('sales_force_id')
+        if sales_force_id:
+            self.validate_sales_force_id_format()
         return validated_data
 
 

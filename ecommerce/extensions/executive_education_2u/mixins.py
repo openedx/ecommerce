@@ -17,6 +17,7 @@ class ExecutiveEducation2UOrderPlacementMixin(EdxOrderPlacementMixin):
         address,
         user_details,
         terms_accepted_at,
+        data_share_consent,
         request=None,
     ):  # pylint: disable=arguments-differ
         """
@@ -44,11 +45,12 @@ class ExecutiveEducation2UOrderPlacementMixin(EdxOrderPlacementMixin):
             order_metadata['number'],
             basket.id,
         )
-
+        dsc = str(data_share_consent).lower()
         fulfillment_details = json.dumps({
             'address': address,
             'user_details': user_details,
             'terms_accepted_at': terms_accepted_at,
+            'data_share_consent': dsc,
         })
 
         # Place an order. If order placement succeeds, the order is committed

@@ -5,8 +5,8 @@
 import datetime
 import json
 from decimal import Decimal
+from unittest.mock import Mock
 
-import jwt
 import responses
 from crum import set_current_request
 from django.conf import settings
@@ -17,7 +17,11 @@ from django.utils.timezone import now
 from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import _get_oauth_url
 from edx_rest_framework_extensions.auth.jwt.cookies import jwt_cookie_name
-from edx_rest_framework_extensions.auth.jwt.tests.utils import generate_jwt_token, generate_unversioned_payload
+from edx_rest_framework_extensions.auth.jwt.tests.utils import (
+    generate_jwt,
+    generate_jwt_token,
+    generate_unversioned_payload
+)
 from mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -82,26 +86,9 @@ class UserMixin:
         user_id = user_id or self.user_id
         UserSocialAuth.objects.create(user=user, extra_data={'user_id': user_id})
 
-    def generate_jwt_token_header(self, user, secret=None):
+    def generate_jwt_token_header(self, user):
         """Generate a valid JWT token header for authenticated requests."""
-        secret = secret or settings.JWT_AUTH['JWT_SECRET_KEY']
-
-        # WARNING:
-        #   If any test that uses this function fails with an error about a missing 'exp' or 'iat' or
-        #     'is_restricted' claim in the payload, then do one of the following:
-        #
-        #   1. If Ecommerce's JWT_DECODE_HANDLER setting still points to a custom decoder inside Ecommerce,
-        #      then a bug was introduced and the setting is no longer respected. If this is the case, do not
-        #      add the claims to this test, and instead fix the bug. Or,
-        #   2. If Ecommerce is being updated to no longer use a custom JWT_DECODE_HANDLER from Ecommerce, but is
-        #      instead using the decode handler directly from edx-drf-extensions, any required claims can be
-        #      added to this test and this warning can be removed.
-        payload = {
-            'username': user.username,
-            'email': user.email,
-            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
-        }
-        return "JWT {token}".format(token=jwt.encode(payload, secret).decode('utf-8'))
+        return "JWT {token}".format(token=generate_jwt(user))
 
 
 class ThrottlingMixin:
@@ -116,14 +103,13 @@ class ThrottlingMixin:
 
 class JwtMixin:
     """ Mixin with JWT-related helper functions. """
-    JWT_SECRET_KEY = settings.JWT_AUTH['JWT_SECRET_KEY']
+    JWT_SECRET_KEY = settings.JWT_AUTH['JWT_ISSUERS'][0]['SECRET_KEY']
     issuer = settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
 
     def generate_token(self, payload, secret=None):
         """Generate a JWT token with the provided payload."""
         secret = secret or self.JWT_SECRET_KEY
-        token = jwt.encode(dict(payload, iss=self.issuer), secret).decode('utf-8')
-        return token
+        return generate_jwt_token(payload, secret)
 
     def set_jwt_cookie(self, system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context='some_context'):
         """
@@ -140,6 +126,26 @@ class JwtMixin:
         jwt_token = generate_jwt_token(payload)
 
         self.client.cookies[jwt_cookie_name()] = jwt_token
+
+    def generate_new_user_token(self, username, email, is_staff):
+        """
+        Generates a JWT token for a user with provided attributes.
+
+        Note: Doesn't actually create the user object, so it can be created
+            during JWT authentication.
+        """
+        # create a mock user, and not the actual user, because we want to confirm that
+        #   the user is created during JWT authentication
+        user = Mock()
+        user.username = username
+        user.email = email
+        user.is_staff = is_staff
+
+        payload = generate_unversioned_payload(user)
+        # At this time, generate_unversioned_payload isn't setting 'administrator', but
+        #   it should.
+        payload['administrator'] = is_staff
+        return self.generate_token(payload)
 
 
 class BasketCreationMixin(UserMixin, JwtMixin):
@@ -209,7 +215,7 @@ class BasketCreationMixin(UserMixin, JwtMixin):
         # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
         ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
 
-        with patch('ecommerce.extensions.analytics.utils.audit_log') as mock_audit_log:
+        with patch('ecommerce.extensions.api.v2.views.baskets.audit_log') as mock_audit_log:
             response = self.create_basket(skus=skus, checkout=checkout, payment_processor_name=payment_processor_name)
 
             self.assertEqual(response.status_code, 200)
@@ -219,13 +225,13 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             self.assertEqual(response.data['id'], basket.id)
 
             if checkout:
-                self.assertTrue(mock_audit_log.called_with(
+                mock_audit_log.assert_called_with(
                     'basket_frozen',
                     amount=basket.total_excl_tax,
                     basket_id=basket.id,
                     currency=basket.currency,
                     user_id=basket.owner.id
-                ))
+                )
 
                 if requires_payment:
                     self.assertIsNone(response.data['order'])

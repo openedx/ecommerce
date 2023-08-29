@@ -2,14 +2,13 @@ import logging
 from urllib.parse import urljoin
 
 import waffle
-from django.db.models import Q
 from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError, PaymentError
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration, PaymentProcessorResponseExtension
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
-from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 
 logger = logging.getLogger(__name__)
@@ -113,16 +112,22 @@ class BaseIAP(BasePaymentProcessor):
                 )
                 raise GatewayError(validation_response)
 
+        if self.NAME == 'ios-iap':
+            validation_response = self.parse_ios_response(validation_response, product_id)
+
         transaction_id = response.get('transactionId', self._get_transaction_id_from_receipt(validation_response))
         # original_transaction_id is primary identifier for a purchase on iOS
         original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
             validation_response, 'original_transaction_id'))
+        currency_code = str(response.get('currency_code', ''))
+        price = str(response.get('price', ''))
 
         if self.NAME == 'ios-iap':
             if not original_transaction_id:
                 raise PaymentError(response)
-            # Check for multiple edx users using same iOS device/iOS account for purchase
-            is_redundant_payment = self._is_payment_redundant(basket.owner, original_transaction_id)
+
+        if not waffle.switch_is_active(DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME):
+            is_redundant_payment = self.is_payment_redundant(original_transaction_id, transaction_id)
             if is_redundant_payment:
                 raise RedundantPaymentNotificationError(response)
 
@@ -130,7 +135,9 @@ class BaseIAP(BasePaymentProcessor):
             validation_response,
             transaction_id=transaction_id,
             basket=basket,
-            original_transaction_id=original_transaction_id
+            original_transaction_id=original_transaction_id,
+            currency_code=currency_code,
+            price=price
         )
         logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
 
@@ -147,7 +154,23 @@ class BaseIAP(BasePaymentProcessor):
             card_type=None
         )
 
-    def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None):  # pylint: disable=arguments-differ
+    def parse_ios_response(self, response, product_id):
+        """
+        iOS response has multiple receipts data, and we need to select the purchase we just made
+        with the given product id.
+        """
+        purchases = response['receipt'].get('in_app', [])
+        for purchase in purchases:
+            if purchase['product_id'] == product_id and \
+                    response['receipt']['receipt_creation_date_ms'] == purchase['purchase_date_ms']:
+
+                response['receipt']['in_app'] = [purchase]
+                break
+
+        return response
+
+    def record_processor_response(self, response, transaction_id=None, basket=None, original_transaction_id=None,  # pylint: disable=arguments-differ
+                                  currency_code=None, price=None):  # pylint: disable=arguments-differ
         """
         Save the processor's response to the database for auditing.
 
@@ -158,19 +181,30 @@ class BaseIAP(BasePaymentProcessor):
             transaction_id (string): Identifier for the transaction on the payment processor's servers
             original_transaction_id (string): Identifier for the transaction for purchase action only
             basket (Basket): Basket associated with the payment event (e.g., being purchased)
+            currency_code (string): (USD, PKR, AED etc)
+            price (string): Price paid by end user
 
         Return
             PaymentProcessorResponse
         """
         processor_response = super(BaseIAP, self).record_processor_response(response, transaction_id=transaction_id,
                                                                             basket=basket)
-        if original_transaction_id:
-            PaymentProcessorResponseExtension.objects.create(processor_response=processor_response,
-                                                             original_transaction_id=original_transaction_id)
+
+        meta_data = self._get_metadata(currency_code=currency_code, price=price)
+        PaymentProcessorResponseExtension.objects.create(
+            processor_response=processor_response, original_transaction_id=original_transaction_id,
+            meta_data=meta_data)
+
         return processor_response
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
-        raise NotImplementedError('The {} payment processor does not support credit issuance.'.format(self.NAME))
+        """
+        In case of mobile refund identifier is same as of transaction id or reference number.
+        """
+        return reference_number
+
+    def is_payment_redundant(self, original_transaction_id=None, transaction_id=None):
+        raise NotImplementedError
 
     def _get_attribute_from_receipt(self, validated_receipt, attribute):
         value = None
@@ -186,6 +220,10 @@ class BaseIAP(BasePaymentProcessor):
         transaction_key = 'transaction_id' if self.NAME == 'ios-iap' else 'orderId'
         return self._get_attribute_from_receipt(validated_receipt, transaction_key)
 
-    def _is_payment_redundant(self, basket_owner, original_transaction_id):
-        return PaymentProcessorResponse.objects.filter(
-            ~Q(basket__owner=basket_owner), extension__original_transaction_id=original_transaction_id).exists()
+    def _get_metadata(self, price=None, currency_code=None):
+        meta_data = {}
+        if currency_code:
+            meta_data['currency_code'] = currency_code
+        if price:
+            meta_data['price'] = price
+        return meta_data

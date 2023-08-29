@@ -29,10 +29,11 @@ from ecommerce.core.constants import (
 )
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.models import Course
-from ecommerce.courses.utils import mode_for_product
+from ecommerce.courses.utils import get_course_info_from_catalog, mode_for_product
 from ecommerce.enterprise.conditions import BasketAttributeType
 from ecommerce.enterprise.mixins import EnterpriseDiscountMixin
 from ecommerce.enterprise.utils import (
+    create_enterprise_customer_user_consent,
     get_enterprise_customer_uuid_from_voucher,
     get_or_create_enterprise_customer_user
 )
@@ -949,8 +950,9 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
         # This will be the offer that was applied. We will let an error be thrown if this doesn't exist.
         discount = order.discounts.first()
         enterprise_customer_uuid = str(discount.offer.condition.enterprise_customer_uuid)
+        data_share_consent = fulfillment_details.get('data_share_consent', None)
 
-        return {
+        payload = {
             'payment_reference': order.number,
             'enterprise_customer_uuid': enterprise_customer_uuid,
             'currency': currency,
@@ -966,8 +968,30 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
             ],
             **fulfillment_details.get('address', {}),
             **fulfillment_details.get('user_details', {}),
-            'terms_accepted_at': fulfillment_details.get('terms_accepted_at', '')
+            'terms_accepted_at': fulfillment_details.get('terms_accepted_at', ''),
         }
+        if data_share_consent:
+            payload['data_share_consent'] = data_share_consent
+
+        return payload
+
+    def _create_enterprise_customer_user_consent(
+        self,
+        order,
+        line,
+        fulfillment_details
+    ):
+        data_share_consent = fulfillment_details.get('data_share_consent', None)
+        course_info = get_course_info_from_catalog(order.site, line.product)
+        if data_share_consent and course_info:
+            discount = order.discounts.first()
+            enterprise_customer_uuid = str(discount.offer.condition.enterprise_customer_uuid)
+            create_enterprise_customer_user_consent(
+                site=order.site,
+                enterprise_customer_uuid=enterprise_customer_uuid,
+                course_id=course_info['key'],
+                username=order.user.username
+            )
 
     def _get_fulfillment_details(self, order):
         fulfillment_details_note = order.notes.filter(note_type='Fulfillment Details').first()
@@ -1020,6 +1044,11 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
             )
 
             try:
+                self._create_enterprise_customer_user_consent(
+                    order=order,
+                    line=line,
+                    fulfillment_details=fulfillment_details
+                )
                 self.get_smarter_client.create_enterprise_allocation(**allocation_payload)
             except Exception as ex:  # pylint: disable=broad-except
                 reason = ''
@@ -1029,8 +1058,9 @@ class ExecutiveEducation2UFulfillmentModule(BaseFulfillmentModule):
                     pass
 
                 logger.exception(
-                    'Fulfillment of line [%d] on order [%s] failed. Reason: %s.',
-                    line.id, order.number, reason
+                    '[ExecutiveEducation2UFulfillmentModule] Fulfillment of line [%d] on '
+                    'order [%s] failed. Reason: %s. Fulfillment details: %s.',
+                    line.id, order.number, reason, fulfillment_details,
                 )
                 line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
             else:
