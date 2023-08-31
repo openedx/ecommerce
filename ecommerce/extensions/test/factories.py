@@ -68,7 +68,7 @@ def create_basket(owner=None, site=None, empty=False, price='10.00', product_cla
             product = create_product(product_class=product_class_instance)
         else:
             product = create_product()
-        create_stockrecord(product, num_in_stock=2, price_excl_tax=D(price))
+        create_stockrecord(product, num_in_stock=2, price=D(price))
         basket.add_product(product)
     return basket
 

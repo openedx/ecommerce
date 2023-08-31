@@ -192,5 +192,5 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         course = Course.objects.get(id='course-v1:test-course-generator+1+1')
         seats = course.seat_products
         seat = seats[0]
-        self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, price)
+        self.assertEqual(seat.stockrecords.get(partner=self.partner).price, price)
         mock_logger.info.assert_any_call("%s has been set to %s", seat_type, True)

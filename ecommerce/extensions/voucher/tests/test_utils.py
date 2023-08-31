@@ -76,7 +76,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.catalog = Catalog.objects.create(partner=self.partner)
 
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
-        self.seat_price = self.stock_record.price_excl_tax
+        self.seat_price = self.stock_record.price
         self.catalog.stock_records.add(self.stock_record)
 
         self.coupon = self.create_coupon(
@@ -374,7 +374,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         if offer.condition.range.catalog:
             discount_data = get_voucher_discount_info(
                 offer.benefit,
-                offer.condition.range.catalog.stock_records.first().price_excl_tax
+                offer.condition.range.catalog.stock_records.first().price
             )
             coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
             discount_percentage = _('{percentage} %').format(percentage=discount_data['discount_percentage'])

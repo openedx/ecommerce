@@ -682,7 +682,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         new_coupon = Product.objects.get(id=self.coupon.id)
         stock_records = StockRecord.objects.filter(product=new_coupon).all()
         for stock_record in stock_records:
-            self.assertEqual(stock_record.price_excl_tax, 77)
+            self.assertEqual(stock_record.price, 77)
 
     def test_update_note(self):
         path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
