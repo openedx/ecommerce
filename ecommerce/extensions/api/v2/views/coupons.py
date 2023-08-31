@@ -467,7 +467,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         coupon_price = request_data.get('price')
         if coupon_price:
-            StockRecord.objects.filter(product=coupon).update(price_excl_tax=coupon_price)
+            StockRecord.objects.filter(product=coupon).update(price=coupon_price)
 
         note = request_data.get('note')
         if note is not None:

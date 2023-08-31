@@ -138,9 +138,9 @@ PAYMENT_PROCESSOR_CONFIG = {
             'log_level': 'debug',
             'max_network_retries': 0,
             'proxy': None,
-            'publishable_key': 'SET-ME-PLEASE',
-            'secret_key': 'SET-ME-PLEASE',
-            'webhook_endpoint_secret': 'SET-ME-PLEASE',
+            'publishable_key': 'pk_test_51Li2KoIadiFyUl1xYMoIUrFL8pcuX4OS61jIbedNXjdqt61JH5ws8owZ9ds3qQ3Gu18cpieLf1UUBPFaoFvWoRxq00I6TPM9cL',
+            'secret_key': 'sk_test_51Li2KoIadiFyUl1xx3EfzsxDimQyeR7IzvVBYlpjW4XvLfZ2X9MpDtwexGMaN1eSFOvjxN0zkd1XNWtQGP1NXlgh00kfylIjxu',
+            'webhook_endpoint_secret': 'whsec_OH9xwVllArdshfRi08Yyq6bU9eUZnyYK',
         },
     },
 }

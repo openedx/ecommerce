@@ -129,7 +129,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         expected = {
             'name': 'verified',
             'currency': 'USD',
-            'price': int(stock_record.price_excl_tax),
+            'price': int(stock_record.price),
             'sku': stock_record.partner_sku,
             'bulk_sku': None,
             'expires': None,
@@ -161,7 +161,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         expected = {
             'name': expected_mode,
             'currency': 'USD',
-            'price': int(stock_record.price_excl_tax),
+            'price': int(stock_record.price),
             'sku': stock_record.partner_sku,
             'bulk_sku': None,
             'expires': None,
@@ -177,7 +177,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         expected = {
             'name': 'verified',
             'currency': 'USD',
-            'price': int(stock_record.price_excl_tax),
+            'price': int(stock_record.price),
             'sku': stock_record.partner_sku,
             'bulk_sku': ec_stock_record.partner_sku,
             'expires': None,
