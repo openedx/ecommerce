@@ -22,6 +22,7 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.api.constatnts import MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -152,11 +153,39 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
                 },
             ]
         }
+        self.mobile_sku = {
+            'product_class': SEAT_PRODUCT_CLASS_NAME,
+            'title': 'Android seat verified certificate',
+            'expires': EXPIRES_STRING,
+            'price': 10.00,
+            'mobile_sku': 'mobile.android.test',
+            'stockrecords': [{'partner_sku': 'mobile.android.test'}],
+            'attribute_values': [
+                {
+                    'name': 'certificate_type',
+                    'value': 'verified'
+                },
+                {
+                    'name': 'id_verification_required',
+                    'value': True
+                }
+            ],
+            'course': {
+                'honor_mode': True,
+                'id': self.course_id,
+                'name': self.course_name,
+                'type': 'verified',
+                'verification_deadline': None
+            }
+        }
 
+        self.data_with_mobile_sku = deepcopy(self.data)
+        self.data_with_mobile_sku['products'].append(self.mobile_sku)
         self.user = self.create_user(is_staff=True, username=settings.DISCOVERY_WORKER_USERNAME)
         self.client.login(username=self.user.username, password=self.password)
 
         self.publication_switch = toggle_switch('publish_course_modes_to_lms', True)
+        self.mail_mobile_team_switch = toggle_switch(MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE, False)
 
     def _toggle_publication(self, is_enabled):
         """Toggle LMS publication."""
@@ -176,7 +205,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         )
 
         # Create associated products.
-        for product in self.data['products']:
+        for product in self.data_with_mobile_sku['products']:
             attrs = {'certificate_type': ''}
             attrs.update({attr['name']: attr['value'] for attr in product['attribute_values']})
 
@@ -195,9 +224,15 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
                 # The stockrecord partner sku is used for updates
                 product['stockrecords'] = [{'partner_sku': seat.stockrecords.first().partner_sku}]
 
+                if product.get('mobile_sku'):
+                    stock_record = seat.stockrecords.all()[0]
+                    stock_record.partner_sku = product['mobile_sku']
+                    stock_record.save()
+                    product['stockrecords'] = [{'partner_sku': product['mobile_sku']}]
+
     def generate_update_payload(self):
         """ Returns dictionary representing the data payload sent for an update request. """
-        updated_data = deepcopy(self.data)
+        updated_data = deepcopy(self.data_with_mobile_sku)
         for product in updated_data['products']:
             attrs = {attr['name']: attr['value'] for attr in product['attribute_values']}
 
@@ -245,8 +280,15 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         if certificate_type:
             seat_title += ' with {certificate_type} certificate'.format(certificate_type=certificate_type)
 
-        # If the seat does not exist, an error will be raised.
-        seat = course.seat_products.get(title=seat_title)
+        if expected.get('stockrecords'):
+            sku = expected['stockrecords'][0]['partner_sku']
+            # If the seat does not exist, an error will be raised.
+            # In case of mobile sku, there will be two verified seats with same name, therefore need another check
+            seat = course.seat_products.get(title=seat_title, stockrecords__partner_sku=sku)
+
+        else:
+            # If the seat does not exist, an error will be raised.
+            seat = course.seat_products.get(title=seat_title)
 
         # Verify product price and expiration time.
         expires = EXPIRES if expected['expires'] else None
@@ -320,21 +362,51 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         """Verify that a Course and associated products can be updated and published."""
         self.create_course_and_seats()
         updated_data = self.generate_update_payload()
-
-        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+        email_sender = 'ecommerce.extensions.api.serializers.send_mail_to_mobile_team_for_change_in_course'
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish,\
+                mock.patch(email_sender) as mock_send_email:
             # If publication fails, the view should return a 500 and data should NOT be saved.
             error_msg = 'Test publication failed.'
             mock_publish.return_value = error_msg
             response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 500)
             self.assertEqual(response.data.get('error'), error_msg)
-            self.assert_course_saved(self.course_id, expected=self.data)
+            self.assert_course_saved(self.course_id, expected=self.data_with_mobile_sku)
+            mock_send_email.call_count == 0
 
             # If publication succeeds, the view should return a 200 and data should be saved.
             mock_publish.return_value = None
             response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 200)
             self.assert_course_saved(self.course_id, expected=updated_data, enrollment_code_count=1)
+            # Since the switch MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE is off email shouldn't be sent
+            mock_send_email.call_count == 0
+
+    def test_update_with_mobile_skus(self):
+        """Verify that a Course and associated products can be updated and published."""
+        self.create_course_and_seats()
+        updated_data = self.generate_update_payload()
+        self.mail_mobile_team_switch.active = True
+        self.mail_mobile_team_switch.save()
+
+        email_sender = 'ecommerce.extensions.api.serializers.send_mail_to_mobile_team_for_change_in_course'
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish,\
+                mock.patch(email_sender) as mock_send_email:
+            # If publication fails, the view should return a 500, data should NOT be saved and email shouldn't be sent.
+            error_msg = 'Test publication failed.'
+            mock_publish.return_value = error_msg
+            response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
+            self.assertEqual(response.status_code, 500)
+            self.assertEqual(response.data.get('error'), error_msg)
+            self.assert_course_saved(self.course_id, expected=self.data_with_mobile_sku)
+            assert mock_send_email.call_count == 0
+
+            # If publication succeeds, the view should return a 200 and data should be saved.
+            mock_publish.return_value = None
+            response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
+            self.assertEqual(response.status_code, 200)
+            self.assert_course_saved(self.course_id, expected=updated_data, enrollment_code_count=1)
+            assert mock_send_email.call_count == 1
 
     def test_sku_returned(self):
         """Verify that the newly created product SKU is returned in the response."""
