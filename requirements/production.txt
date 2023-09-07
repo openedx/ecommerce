@@ -231,7 +231,7 @@ edx-django-utils==5.5.0
     #   edx-drf-extensions
     #   edx-rest-api-client
     #   getsmarter-api-clients
-edx-drf-extensions==8.8.0
+edx-drf-extensions==8.12.0
     # via
     #   -r requirements/base.in
     #   edx-rbac
@@ -462,7 +462,6 @@ python-dateutil==2.8.2
     #   -r requirements/base.in
     #   analytics-python
     #   botocore
-    #   edx-drf-extensions
     #   faker
 python-memcached==1.59
     # via -r requirements/production.in
@@ -559,7 +558,6 @@ six==1.16.0
     #   djangorestframework-csv
     #   edx-auth-backends
     #   edx-django-release-util
-    #   edx-drf-extensions
     #   edx-ecommerce-worker
     #   edx-rbac
     #   google-auth
