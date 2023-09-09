@@ -33,7 +33,7 @@ cryptography==38.0.1
     # via
     #   -c requirements/base.txt
     #   pyjwt
-django==3.2.20
+django==3.2.21
     # via
     #   -c requirements/base.txt
     #   -c requirements/common_constraints.txt
