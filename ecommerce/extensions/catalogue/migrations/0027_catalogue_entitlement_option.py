@@ -32,5 +32,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='option',
+            name='required',
+            field=models.BooleanField(default=False, verbose_name='Is this option required?'),
+        ),
         migrations.RunPython(create_entitlement_option, remove_entitlement_option),
     ]

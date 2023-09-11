@@ -81,11 +81,11 @@ class Migration(migrations.Migration):
             name='order',
             field=models.IntegerField(blank=True, db_index=True, help_text='Controls the ordering of product options on product detail pages', null=True, verbose_name='Ordering'),
         ),
-        migrations.AddField(
-            model_name='option',
-            name='required',
-            field=models.BooleanField(default=False, verbose_name='Is this option required?'),
-        ),
+        # migrations.AddField(
+        #     model_name='option',
+        #     name='required',
+        #     field=models.BooleanField(default=False, verbose_name='Is this option required?'),
+        # ),
         migrations.AddField(
             model_name='product',
             name='meta_description',
