@@ -180,6 +180,7 @@ class Option(AbstractOption):
     # Do not record the code field in the history table because AutoSlugField is not compatible with
     # django-simple-history.  Background: https://github.com/openedx/course-discovery/pull/332
     history = CreateSafeHistoricalRecords(excluded_fields=['code'])
+    OPTIONAL = "Optional"
 
 
 class ProductClass(AbstractProductClass):
