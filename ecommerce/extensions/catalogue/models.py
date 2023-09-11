@@ -182,6 +182,7 @@ class Option(AbstractOption):
     history = CreateSafeHistoricalRecords(excluded_fields=['code'])
     OPTIONAL =  'Optional'
 
+
 class ProductClass(AbstractProductClass):
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
     # django-simple-history.  Background: https://github.com/openedx/course-discovery/pull/332
