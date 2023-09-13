@@ -338,7 +338,7 @@ lxml==4.9.2
     # via
     #   premailer
     #   zeep
-markdown==2.6.9
+markdown==3.4.3
     # via -r requirements/base.in
 markupsafe==2.1.3
     # via jinja2
