@@ -60,7 +60,13 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
     def _decide(self, approve, confirm=True):
         """Click the Approve or Deny button and wait for the AJAX call to finish."""
         selector = self.approve_button_selector if approve else self.deny_button_selector
+        print('zzzzzzzzz')
+        print(selector)
+        print(dir(selector))
         button = self.selenium.find_element_by_css_selector(selector)
+        print(button)
+        print(dir(button))
+        print('yyyyyyyyyyyyy')
         button.click()
 
         # Wait for the modal to display, demanding confirmation
