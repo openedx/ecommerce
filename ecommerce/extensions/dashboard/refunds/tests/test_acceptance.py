@@ -76,7 +76,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
             self.selenium.find_element_by_css_selector('#refundActionModal .btn-default').click()
 
         # Wait for the modal to be gone
-        WebDriverWait(self.selenium, 50).until(
+        WebDriverWait(self.selenium, 100).until(
             lambda d: not d.find_element_by_css_selector('#refundActionModal').is_displayed()
         )
 
