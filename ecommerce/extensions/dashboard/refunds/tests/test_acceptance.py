@@ -77,7 +77,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
 
         # Wait for the modal to be gone
         WebDriverWait(self.selenium, 80).until(
-            lambda d: not d.find_element_by_css_selector('#refundActionModal').is_displayed()
+            lambda d: not d.find_element_by_id('refundActionModal').is_displayed()
         )
 
     def assert_alert_displayed(self, alert_class, text):
