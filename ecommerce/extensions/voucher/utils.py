@@ -579,14 +579,14 @@ def create_vouchers_and_attach_offers(
     vouchers = []
     voucher_offers = []
     enterprise_voucher_offers = []
-    
+
     for i in range(quantity):
         voucher = create_new_voucher(
             end_datetime=end_datetime,
             start_datetime=start_datetime,
             voucher_type=voucher_type,
             code=code,
-            name=name+str(i)
+            name=name + str(i)
         )
         voucher_offers.append(
             VoucherOffer(voucher=voucher, conditionaloffer=offers[i] if len(offers) > 1 else offers[0])

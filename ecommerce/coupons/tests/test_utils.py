@@ -117,7 +117,7 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
             'end_datetime': datetime(2012, 11, 15, 1, 40, tzinfo=UTC),
             'timezone_now': datetime(2012, 11, 15, 1, 35, tzinfo=UTC),
             'coupon_available': True,
-            },
+        },
     )
     @ddt.unpack
     def test_is_coupon_available(self, start_datetime, end_datetime, timezone_now, coupon_available):
@@ -127,4 +127,4 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
         coupon = self.create_coupon(start_datetime=start_datetime, end_datetime=end_datetime)
         with patch.object(timezone, 'now', return_value=timezone_now):
             self.assertEqual(is_coupon_available(coupon), coupon_available)
-        
+   
