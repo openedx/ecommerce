@@ -51,8 +51,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
             type='Absolute',
             value=47,
         )
-        
-        
+
         for i in range(2):
             code = '{}EntUserPercentBenefit'.format(i)
             name = 'My voucher{}'.format(i)
