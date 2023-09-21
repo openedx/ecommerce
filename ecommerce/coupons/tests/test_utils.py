@@ -127,4 +127,3 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
         coupon = self.create_coupon(start_datetime=start_datetime, end_datetime=end_datetime)
         with patch.object(timezone, 'now', return_value=timezone_now):
             self.assertEqual(is_coupon_available(coupon), coupon_available)
-   
