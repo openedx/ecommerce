@@ -93,42 +93,38 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
             'end_datetime': datetime(2013, 7, 10, 6, 2, tzinfo=UTC),
             'timezone_now': datetime(2013, 1, 1, 1, 1, tzinfo=UTC),
             'coupon_available': True,
-            'title': 'Test coupon 0'
         },
         {
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2013, 7, 10, 6, 2, tzinfo=UTC),
             'timezone_now': datetime(2014, 1, 1, 1, 1, tzinfo=UTC),
             'coupon_available': False,
-            'title': 'Test coupon 1'
         },
         {
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2013, 7, 10, 6, 2, tzinfo=UTC),
             'timezone_now': datetime(2011, 1, 1, 1, 1, tzinfo=UTC),
             'coupon_available': False,
-            'title': 'Test coupon 2'
         },
         {
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'timezone_now': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'coupon_available': False,
-            'title': 'Test coupon 3'
         },
         {
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2012, 11, 15, 1, 40, tzinfo=UTC),
             'timezone_now': datetime(2012, 11, 15, 1, 35, tzinfo=UTC),
             'coupon_available': True,
-            'title': 'Test coupon 4'
-        },
+            },
     )
     @ddt.unpack
-    def test_is_coupon_available(self, start_datetime, end_datetime, timezone_now, coupon_available, title):
+    def test_is_coupon_available(self, start_datetime, end_datetime, timezone_now, coupon_available):
         """
         Verify `is_coupon_available` return correct value.
         """
-        coupon = self.create_coupon(start_datetime=start_datetime, end_datetime=end_datetime, title=title)
+        coupon = self.create_coupon(start_datetime=start_datetime, end_datetime=end_datetime)
         with patch.object(timezone, 'now', return_value=timezone_now):
             self.assertEqual(is_coupon_available(coupon), coupon_available)
+        
