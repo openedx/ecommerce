@@ -25,8 +25,6 @@ from ecommerce.tests.testcases import TestCase
 @ddt.ddt
 class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
 
-    serialized_rollback = True
-
     def setUp(self):
         """
         Setup variables for test cases.
