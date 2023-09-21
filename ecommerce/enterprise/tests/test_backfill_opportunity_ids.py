@@ -105,7 +105,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
         """
         Create database records to test against.
         """
-        self.create_coupon(enterprise_customer=enterprise_customer, sales_force_id=opportunity_id)
+        self.create_coupon(enterprise_customer=enterprise_customer, sales_force_id=opportunity_id, title='Test backfill_opportunity_ids')
 
         factories.EnterpriseOfferFactory(
             condition=factories.EnterpriseCustomerConditionFactory(

@@ -54,7 +54,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
         for i in range(2):
             code = '{}EntUserPercentBenefit'.format(i)
-            name = 'My voucher{}'.format(i)
+            name = 'Test_1 voucher{}'.format(i)
             voucher = VoucherFactory(code=code, name=name)
             offer_name = "Coupon [{}]-{}-{}".format(
                 voucher.pk,
@@ -70,7 +70,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
         for i in range(2):
             code = '{}EntUserAbsoluteBenefit'.format(i)
-            name = 'My voucher{}'.format(i)
+            name = 'Test_2 voucher {}'.format(i)
             voucher = VoucherFactory(code=code, name=name)
             offer_name = "Coupon [{}]-{}-{}".format(
                 voucher.pk,
@@ -95,7 +95,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
         for i in range(3):
             code = '{}NoEntUserPercentBenefit'.format(i)
-            name = 'My voucher{}'.format(i)
+            name = 'Test_3 voucher{}'.format(i)
             voucher = VoucherFactory(code=code, name=name)
             offer_name = "Coupon [{}]-{}-{}".format(
                 voucher.pk,
