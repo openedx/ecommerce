@@ -168,7 +168,8 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
 
     def test_creating_multi_offer_coupon(self):
         """Test the creation of a multi-offer coupon."""
-        ordinary_coupon = self.create_coupon(quantity=2)
+        
+        ordinary_coupon = self.create_coupon(quantity=2, title='Test offer coupon')
         ordinary_coupon_vouchers = ordinary_coupon.attr.coupon_vouchers.vouchers.all()
         self.assertEqual(
             ordinary_coupon_vouchers[0].offers.first(),
