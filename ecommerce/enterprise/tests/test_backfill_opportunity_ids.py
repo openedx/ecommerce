@@ -109,7 +109,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
             enterprise_customer=enterprise_customer,
             sales_force_id=opportunity_id,
             title='Test backfill_opportunity_ids'
-            )
+        )
 
         factories.EnterpriseOfferFactory(
             condition=factories.EnterpriseCustomerConditionFactory(
