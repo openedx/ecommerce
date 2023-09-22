@@ -35,13 +35,12 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
 
         # create enterprise coupons, enterprise offers and manual orders without opportunity id
         for enterprise_customer, __ in self.enterprise_without_opportunity_ids.items():
-            self.init_data(enterprise_customer, title='Test_1 enterprise coupons')
+            self.init_data(enterprise_customer)
 
         # create an enterprise coupon, enterprise offer and manual order offer with opportunity id
         self.init_data(
             self.enterprise_with_opportunity_id[0],
             self.enterprise_with_opportunity_id[1],
-            title='Test_2 enterprise coupons'
         )
 
         # multi contracts data setup for coupons and offers
@@ -56,10 +55,7 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
         for record in self.multi_contract_vouchers:
             if record[3] not in created:
                 created.append(record[3])
-                coupon = self.create_coupon(
-                    enterprise_customer=record[0],
-                    title='Test Multi contract'
-                )
+                coupon = self.create_coupon(enterprise_customer=record[0])
                 coupon.id = record[3]
                 coupon.save()
 
@@ -105,14 +101,13 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
         for record in self.multi_contract_enterprises_with_opportunity_ids_only:
             self.init_data(record[0])
 
-    def init_data(self, enterprise_customer, opportunity_id=None, title="Test coupon"):
+    def init_data(self, enterprise_customer, opportunity_id=None):
         """
         Create database records to test against.
         """
         self.create_coupon(
             enterprise_customer=enterprise_customer,
-            sales_force_id=opportunity_id,
-            title=title
+            sales_force_id=opportunity_id
         )
 
         factories.EnterpriseOfferFactory(

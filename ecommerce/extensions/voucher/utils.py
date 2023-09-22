@@ -538,7 +538,6 @@ def create_new_voucher(code, end_datetime, name, start_datetime, voucher_type):
         end_datetime = dateutil.parser.parse(end_datetime)
 
     name = name + voucher_code
-
     voucher = Voucher.objects.create(
         name=name[:128],
         code=voucher_code,
@@ -588,7 +587,7 @@ def create_vouchers_and_attach_offers(
             start_datetime=start_datetime,
             voucher_type=voucher_type,
             code=code,
-            name=name + str(i)
+            name=name
         )
         voucher_offers.append(
             VoucherOffer(voucher=voucher, conditionaloffer=offers[i] if len(offers) > 1 else offers[0])
