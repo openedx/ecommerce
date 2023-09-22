@@ -539,7 +539,7 @@ def create_new_voucher(code, end_datetime, name, start_datetime, voucher_type):
 
     voucher = Voucher.objects.last()
     if voucher:
-        name = name + str(voucher.id)
+        name = name + str(voucher.code)
 
     voucher = Voucher.objects.create(
         name=name[:128],
