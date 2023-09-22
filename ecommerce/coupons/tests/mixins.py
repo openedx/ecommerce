@@ -483,7 +483,7 @@ class CouponMixin(SiteMixin):
 
     def create_coupon(self, benefit_type=Benefit.PERCENTAGE, benefit_value=100, catalog=None, catalog_query=None,
                       client=None, code='', course_seat_types=None, email_domains=None, enterprise_customer=None,
-                      enterprise_customer_catalog=None, max_uses=None, note=None, partner=None, price=100, quantity=5,
+                      enterprise_customer_catalog=None, max_uses=None, note=None, partner=None, price=100, quantity=1,
                       title='Test coupon', voucher_type=Voucher.SINGLE_USE, course_catalog=None, program_uuid=None,
                       start_datetime=None, end_datetime=None, sales_force_id=None,
                       salesforce_opportunity_line_item=None):
