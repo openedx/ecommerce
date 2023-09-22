@@ -56,7 +56,10 @@ class BackfillOpportunityIdsCommandTests(CouponMixin, TestCase):
         for record in self.multi_contract_vouchers:
             if record[3] not in created:
                 created.append(record[3])
-                coupon = self.create_coupon(enterprise_customer=record[0])
+                coupon = self.create_coupon(
+                    enterprise_customer=record[0],
+                    title='Test Multi contract'
+                )
                 coupon.id = record[3]
                 coupon.save()
 
