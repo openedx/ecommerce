@@ -20,10 +20,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2023-09-24 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Filipa Macieira <filipa.macieira@fccn.pt>, 2021\n"
-"Language-Team: Portuguese (Portugal) (http://www.transifex.com/open-edx/edx-platform/language/pt_PT/)\n"
+"Language-Team: Portuguese (Portugal) (http://app.transifex.com/open-edx/edx-platform/language/pt_PT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -322,11 +322,11 @@ msgstr "Código de Inscrição"
 msgid "Discount Code"
 msgstr "Código do desconto"
 
-#: ecommerce/static/js/views/coupon_form_view.js:781
+#: ecommerce/static/js/views/coupon_form_view.js:787
 msgid "Save Changes"
 msgstr "Guardar Alterações"
 
-#: ecommerce/static/js/views/coupon_form_view.js:796
+#: ecommerce/static/js/views/coupon_form_view.js:802
 msgid "Create Coupon"
 msgstr "Criar cupão"
 
@@ -468,7 +468,7 @@ msgstr "Tipo de lugar"
 msgid "Can be used multiple times by one customer"
 msgstr "Pode ser usado várias vezes por um cliente"
 
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:280
 msgid "Create and Add More"
 msgstr "Criar e Adicionar Mais"
 
