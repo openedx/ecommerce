@@ -126,8 +126,8 @@ def embargo_check(user, site, products, ip=None):
     if courses:
         params = {
             'user': user.username,
-            # ip variable is None when testing it locally, giving it dummy string "test_local_ip" just to bypass 
-            # the API otherwise API return "Missing Parameters" response.
+            # ip variable is None when testing it locally, giving it dummy string "test_local_ip" 
+            # just to bypass the API, otherwise API returns "Missing Parameters" response.
             'ip_address': ip or "test_local_ip",
             'course_ids': courses
         }
