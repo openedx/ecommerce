@@ -31,6 +31,9 @@ define([
 
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/courses/',
+            url: function() {
+                return Backbone.Model.prototype.url.call(this) + '/';
+            },
 
             defaults: {
                 id: null,
