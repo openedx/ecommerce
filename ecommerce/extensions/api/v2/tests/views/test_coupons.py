@@ -608,7 +608,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         new_coupon = Product.objects.get(id=self.coupon.id)
         vouchers = new_coupon.attr.coupon_vouchers.vouchers.all()
         for voucher in vouchers:
-            self.assertEqual(voucher.name, 'New voucher name')
+            new_voucher_name =  "%s - %d" % (data['name'], voucher.id + 1)
+            self.assertEqual(voucher.name, new_voucher_name)
 
     def test_update_datetimes(self):
         """Test that updating a coupons date updates all of it's voucher dates."""
