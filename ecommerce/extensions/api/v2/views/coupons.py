@@ -378,6 +378,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             if 'name' in data:
                 for voucher in vouchers:
                     voucher.name = "%s - %d" % (data['name'], voucher.id + 1)
+                    voucher.save()
+
                 data.pop('name')
 
             vouchers.update(**data)
