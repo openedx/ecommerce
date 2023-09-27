@@ -255,7 +255,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         })
         trimmed = (
             'This Is A Really Really Really Really Really Really Long '
-            'Voucher Name That Needs To Be Trimmed To Fit Into The '
+            'Voucher Name That Needs To Be Trimmed To Fit Into The N'
         )
         vouchers = create_vouchers(**self.data)
         voucher = vouchers[0]
