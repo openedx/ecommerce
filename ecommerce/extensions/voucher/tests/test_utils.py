@@ -533,6 +533,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         })
         vouchers = create_vouchers(**self.data)
         self.coupon_vouchers.first().vouchers.add(*vouchers)
+        print(self.coupon_vouchers.vouchers.first().code)
 
         __, rows = generate_coupon_report(self.coupon_vouchers)
 
