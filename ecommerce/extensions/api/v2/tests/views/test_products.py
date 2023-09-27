@@ -200,8 +200,10 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         self.assertEqual(response.status_code, 200)
 
         response_data = response.json()
+        print(response_data)
         voucher = response_data['attribute_values'][0]['value'][0]
-        self.assertEqual(voucher['name'], 'Test coupon' + voucher.code)
+        print(voucher)
+        self.assertEqual(voucher['name'], 'Test coupon' + voucher['code'])
         self.assertEqual(voucher['usage'], Voucher.SINGLE_USE)
         self.assertEqual(voucher['benefit']['type'], Benefit.PERCENTAGE)
         self.assertEqual(voucher['benefit']['value'], 100.0)
