@@ -255,11 +255,11 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         })
         trimmed = (
             'This Is A Really Really Really Really Really Really Long '
-            'Voucher Name That Needs To Be Trimmed To Fit Into The Name Column Of Th'
+            'Voucher Name That Needs To Be Trimmed To Fit Into The '
         )
         vouchers = create_vouchers(**self.data)
         voucher = vouchers[0]
-        self.assertEqual(voucher.name, trimmed)
+        self.assertEqual(voucher.name, trimmed + voucher.code)
 
     @ddt.data(
         {'end_datetime': ''},
