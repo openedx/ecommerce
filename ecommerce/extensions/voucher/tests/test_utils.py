@@ -540,6 +540,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         # are only shown in row[0]
         # The data that is unique among vouchers like Code, Url, Status, etc.
         # starts from row[1]
+        print(rows[0])
         self.assertEqual(rows[0]['Coupon Name'], self.coupon.title + rows[0]['Code'])
         self.assertEqual(rows[2]['Status'], _('Inactive'))
 
