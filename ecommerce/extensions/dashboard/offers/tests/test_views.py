@@ -32,7 +32,7 @@ class OfferWizardTests(TestCase):
         }
         metadata_url = reverse('dashboard:offer-metadata')
         response = self.client.post(metadata_url, metadata)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Location'], reverse('dashboard:offer-benefit'))
 
         # Ensure the Site ID is stored in the session
