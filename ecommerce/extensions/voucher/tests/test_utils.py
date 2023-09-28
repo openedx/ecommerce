@@ -534,19 +534,14 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         vouchers = create_vouchers(**self.data)
         self.coupon_vouchers.first().vouchers.add(*vouchers)
 
-        for vouch in vouchers:
-            print(vouch)
-
-        print(self.coupon_vouchers)
-
         __, rows = generate_coupon_report(self.coupon_vouchers)
 
         # The data that is the same for all vouchers like Coupon Name, Coupon Type, etc.
         # are only shown in row[0]
         # The data that is unique among vouchers like Code, Url, Status, etc.
         # starts from row[1]
-        print(rows[1])
-        self.assertEqual(rows[0]['Coupon Name'], self.coupon.title + rows[0]['Code'])
+
+        self.assertEqual(rows[0]['Coupon Name'], self.coupon.title + rows[1]['Code'])
         self.assertEqual(rows[2]['Status'], _('Inactive'))
 
     def test_generate_coupon_report_for_query_coupons(self):
