@@ -253,7 +253,7 @@ extras==1.0.0
     # via
     #   cybersource-rest-client-python
     #   python-subunit
-factory-boy==3.1.0
+factory-boy==3.2.1
     # via django-oscar
 faker==18.10.1
     # via factory-boy
