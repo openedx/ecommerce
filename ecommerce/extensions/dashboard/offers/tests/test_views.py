@@ -32,7 +32,13 @@ class OfferWizardTests(TestCase):
         }
         metadata_url = reverse('dashboard:offer-metadata')
         response = self.client.post(metadata_url, metadata)
-        print(response)
+
+        print(response.template_name)
+        print(response.context_data)
+        print(response.status_code)
+        for header, value in response.items():
+            print(f"{header}: {value}")
+
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], reverse('dashboard:offer-benefit'))
 
