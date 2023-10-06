@@ -149,7 +149,7 @@ def prepare_basket(request, products, voucher=None):
     _set_basket_bundle_status(bundle, basket)
 
     if request.site.siteconfiguration.enable_embargo_check:
-        if not embargo_check(request.user, request.site, products):
+        if not embargo_check(request.user, request.site, products, headers=request.headers):
             messages.error(
                 request,
                 _('Due to export controls, we cannot allow you to access this course at this time.')

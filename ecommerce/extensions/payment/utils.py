@@ -100,7 +100,8 @@ def clean_field_value(value):
     """
     return re.sub(r'[\^:"\']', '', value)
 
-def embargo_check(user, site, products, ip=None):
+
+def embargo_check(user, site, products, ip=None, headers={}):
     """ Checks if the user has access to purchase products by calling the LMS embargo API.
 
     Args:
@@ -126,16 +127,18 @@ def embargo_check(user, site, products, ip=None):
     if courses:
         params = {
             'user': user.username,
-            # ip variable is None when testing it locally, giving it dummy string "test_local_ip" 
-            # just to bypass the API, otherwise API returns "Missing Parameters" response.
-            'ip_address': ip or "test_local_ip",
+            'ip_address': ip,
             'course_ids': courses
         }
 
         try:
             api_client = site.siteconfiguration.oauth_api_client
             api_url = urljoin(f"{site.siteconfiguration.embargo_api_url}/", "course_access/")
-            response = api_client.get(api_url, params=params).json()
+            response = api_client.get(
+                api_url,
+                params=params,
+                headers={**headers, 'accept': 'application/json'}
+            ).json()
             return response.get('access', True)
         except:  # pylint: disable=bare-except
             # We are going to allow purchase if the API is un-reachable.
