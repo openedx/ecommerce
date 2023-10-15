@@ -14,10 +14,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2023-10-15 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: NELC Open edX Translation <openedx@elc.edu.sa>, 2020\n"
-"Language-Team: Arabic (Saudi Arabia) (http://www.transifex.com/open-edx/edx-platform/language/ar_SA/)\n"
+"Language-Team: Arabic (Saudi Arabia) (http://app.transifex.com/open-edx/edx-platform/language/ar_SA/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -316,11 +316,11 @@ msgstr "رمز التسجيل"
 msgid "Discount Code"
 msgstr "رمز التخفيض"
 
-#: ecommerce/static/js/views/coupon_form_view.js:781
+#: ecommerce/static/js/views/coupon_form_view.js:787
 msgid "Save Changes"
 msgstr "حفّظ التغييرات"
 
-#: ecommerce/static/js/views/coupon_form_view.js:796
+#: ecommerce/static/js/views/coupon_form_view.js:802
 msgid "Create Coupon"
 msgstr "إنشاء قسيمة"
 
@@ -462,7 +462,7 @@ msgstr "نوع المقعد"
 msgid "Can be used multiple times by one customer"
 msgstr "يمكن استخدامه عدة مرات لعميل واحد"
 
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:280
 msgid "Create and Add More"
 msgstr "إنشاء وإضافة المزيد"
 
