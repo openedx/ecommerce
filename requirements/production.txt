@@ -356,7 +356,7 @@ naked==0.1.32
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.in
-newrelic==4.20.1.121
+newrelic==9.1.0
     # via
     #   -r requirements/base.in
     #   -r requirements/production.in
