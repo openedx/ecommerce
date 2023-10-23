@@ -4,7 +4,7 @@
 
 django-ses
 gunicorn==19.7.1
-newrelic<5
+newrelic
 python-memcached==1.59
 PyYAML
 nodeenv==1.1.1
