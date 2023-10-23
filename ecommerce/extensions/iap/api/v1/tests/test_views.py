@@ -31,6 +31,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_ALREADY_PURCHASED,
     ERROR_BASKET_ID_NOT_PROVIDED,
     ERROR_BASKET_NOT_FOUND,
+    ERROR_DURING_IOS_REFUND_EXECUTION,
     ERROR_DURING_ORDER_CREATION,
     ERROR_DURING_PAYMENT_HANDLING,
     ERROR_DURING_POST_ORDER_OP,
@@ -923,7 +924,7 @@ class IOSRefundTests(BaseRefundTests):
     processor_name = IOSIAP.NAME
 
     def assert_error_response(self, response):
-        """ Assert the response has HTTP status 200 and no data. """
+        """ Assert the response has HTTP status 500 and no data. """
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def check_record_not_found_log(self, logger, msg_t):
@@ -992,7 +993,7 @@ class IOSRefundTests(BaseRefundTests):
 
     def test_non_refund_notification(self):
         """
-        View should create a refund if an order/line are found eligible for refund.
+        View should ignore non refund notifications
         """
 
         with mock.patch.object(asn2, 'parse') as mock_ios_response_parse,\
@@ -1014,4 +1015,26 @@ class IOSRefundTests(BaseRefundTests):
                     'INFO',
                     IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE
                 )
+            )
+    def test_unknown_error_in_parsing_or_refund(self):
+        """ If there is any other error in parsing or executing refund, View should log it and return 500."""
+
+        with mock.patch.object(asn2, 'parse') as mock_ios_response_parse, \
+                LogCapture(self.logger_name) as logger:
+
+            mock_ios_response_parse.side_effect = Exception("Test Exception")
+
+            response = self.client.post(self.path)
+            self.assert_error_response(response)
+            logger.check(
+                (
+                    self.logger_name,
+                    'ERROR',
+                    ERROR_DURING_IOS_REFUND_EXECUTION
+                ),
+                (
+                    self.logger_name,
+                    'ERROR',
+                    "Test Exception"
+                ),
             )
