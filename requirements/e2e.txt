@@ -64,7 +64,7 @@ importlib-metadata==6.7.0
     # via pytest-randomly
 iniconfig==2.0.0
     # via pytest
-newrelic==8.8.0
+newrelic==9.1.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils

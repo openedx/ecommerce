@@ -137,6 +137,7 @@ class JwtMixin:
         # create a mock user, and not the actual user, because we want to confirm that
         #   the user is created during JWT authentication
         user = Mock()
+        user.id = 1
         user.username = username
         user.email = email
         user.is_staff = is_staff
