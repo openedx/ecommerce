@@ -39,6 +39,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_ALREADY_PURCHASED,
     ERROR_BASKET_ID_NOT_PROVIDED,
     ERROR_BASKET_NOT_FOUND,
+    ERROR_DURING_IOS_REFUND_EXECUTION,
     ERROR_DURING_ORDER_CREATION,
     ERROR_DURING_PAYMENT_HANDLING,
     ERROR_DURING_POST_ORDER_OP,
@@ -359,8 +360,9 @@ class IOSRefundView(BaseRefund):
                 logger.info(IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE)
                 return Response(status=status.HTTP_200_OK)
 
-        except Exception:  # pylint: disable=broad-except
-            pass
+        except Exception as e:  # pylint: disable=broad-except
+            logger.error(ERROR_DURING_IOS_REFUND_EXECUTION)
+            logger.error(e)
 
         status_code = status.HTTP_200_OK if is_refunded else status.HTTP_500_INTERNAL_SERVER_ERROR
         return Response(status=status_code)
