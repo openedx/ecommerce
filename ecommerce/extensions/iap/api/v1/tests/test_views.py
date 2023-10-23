@@ -1016,8 +1016,11 @@ class IOSRefundTests(BaseRefundTests):
                     IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE
                 )
             )
+
     def test_unknown_error_in_parsing_or_refund(self):
-        """ If there is any other error in parsing or executing refund, View should log it and return 500."""
+        """
+        If there is any other error in parsing or executing refund, View should log it and return 500.
+        """
 
         with mock.patch.object(asn2, 'parse') as mock_ios_response_parse, \
                 LogCapture(self.logger_name) as logger:
