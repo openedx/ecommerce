@@ -255,11 +255,11 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         })
         trimmed = (
             'This Is A Really Really Really Really Really Really Long '
-            'Voucher Name That Needs To Be Trimmed To Fit Into The Name Column Of Th'
+            'Voucher Name That Needs To Be Trimmed To Fit Into The N'
         )
         vouchers = create_vouchers(**self.data)
         voucher = vouchers[0]
-        self.assertEqual(voucher.name, trimmed)
+        self.assertEqual(voucher.name, trimmed + voucher.code)
 
     @ddt.data(
         {'end_datetime': ''},
@@ -540,7 +540,8 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         # are only shown in row[0]
         # The data that is unique among vouchers like Code, Url, Status, etc.
         # starts from row[1]
-        self.assertEqual(rows[0]['Coupon Name'], self.coupon.title)
+
+        self.assertEqual(rows[0]['Coupon Name'], self.coupon.title + rows[1]['Code'])
         self.assertEqual(rows[2]['Status'], _('Inactive'))
 
     def test_generate_coupon_report_for_query_coupons(self):

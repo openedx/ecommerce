@@ -26,15 +26,13 @@
 {% endblock extrascripts %}
 
 {% block breadcrumbs %}
-<ul class="breadcrumb">
-    <li>
-        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
-    </li>
-    <li>
-        <a href="{% url 'dashboard:refunds-list' %}">{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</a>
-    </li>
-    <li class="active">#{{ refund.id }}</li>
-</ul>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'dashboard:refunds-list' %}">{% trans "Refunds" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">#{{ refund.id }}</li>
+    </ol>
+</nav>
 {% endblock breadcrumbs %}
 
 {% block headertext %}

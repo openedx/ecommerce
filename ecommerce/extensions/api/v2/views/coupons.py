@@ -373,7 +373,15 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
     def update_voucher_data(self, request_data, vouchers):
         data = self.create_update_data_dict(data=request_data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
+
         if data:
+            if 'name' in data:
+                for voucher in vouchers:
+                    voucher.name = "%s - %d" % (data['name'], voucher.id + 1)
+                    voucher.save()
+
+                data.pop('name')
+
             vouchers.update(**data)
 
     def create_update_data_dict(self, data, fields):

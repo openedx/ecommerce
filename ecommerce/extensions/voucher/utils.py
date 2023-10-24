@@ -537,8 +537,9 @@ def create_new_voucher(code, end_datetime, name, start_datetime, voucher_type):
     if not isinstance(end_datetime, datetime.datetime):
         end_datetime = dateutil.parser.parse(end_datetime)
 
+    name = name[:128 - len(voucher_code)] + voucher_code
     voucher = Voucher.objects.create(
-        name=name[:128],
+        name=name,
         code=voucher_code,
         usage=voucher_type,
         start_datetime=start_datetime,
@@ -579,6 +580,7 @@ def create_vouchers_and_attach_offers(
     vouchers = []
     voucher_offers = []
     enterprise_voucher_offers = []
+
     for i in range(quantity):
         voucher = create_new_voucher(
             end_datetime=end_datetime,
