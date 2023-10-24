@@ -5,14 +5,14 @@ from factory.fuzzy import FuzzyInteger
 from oscar.core.loading import get_model
 
 
-class PaymentEventFactory(factory.django.DjangoModelFactory):
+class PaymentEventFactory(factory.DjangoModelFactory):
     id = FuzzyInteger(1000, 999999)
 
     class Meta:
         model = get_model('order', 'PaymentEvent')
 
 
-class SuperUserFactory(factory.django.DjangoModelFactory):
+class SuperUserFactory(factory.DjangoModelFactory):
     id = FuzzyInteger(1000, 999999)
     is_superuser = True
     lms_user_id = 56765
