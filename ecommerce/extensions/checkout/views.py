@@ -223,7 +223,7 @@ class ReceiptResponseView(ThankYouView):
                                          )
         return "".join(products_for_tracking)
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         kwargs = {
             'number': self.request.GET['order_number'],
             'site': self.request.site,
