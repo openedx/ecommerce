@@ -153,7 +153,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
         self.basket = create_basket(owner=UserFactory(), site=self.site)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        factories.create_stockrecord(enrollment_code, num_in_stock=2, price_excl_tax='10.00')
+        factories.create_stockrecord(enrollment_code, num_in_stock=2, price='10.00')
         self.basket.add_product(enrollment_code, quantity=1)
 
         # Create a payment record the view can use to retrieve a basket

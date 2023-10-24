@@ -54,7 +54,7 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
         """
         Verify is_voucher_applied return correct value.
         """
-        product = ProductFactory(stockrecords__price_excl_tax=100)
+        product = ProductFactory(stockrecords__price=100)
         voucher, product = prepare_voucher(
             _range=RangeFactory(products=[product]),
             benefit_value=10
@@ -92,31 +92,31 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2013, 7, 10, 6, 2, tzinfo=UTC),
             'timezone_now': datetime(2013, 1, 1, 1, 1, tzinfo=UTC),
-            'coupon_available': True
+            'coupon_available': True,
         },
         {
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2013, 7, 10, 6, 2, tzinfo=UTC),
             'timezone_now': datetime(2014, 1, 1, 1, 1, tzinfo=UTC),
-            'coupon_available': False
+            'coupon_available': False,
         },
         {
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2013, 7, 10, 6, 2, tzinfo=UTC),
             'timezone_now': datetime(2011, 1, 1, 1, 1, tzinfo=UTC),
-            'coupon_available': False
+            'coupon_available': False,
         },
         {
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'timezone_now': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
-            'coupon_available': False
+            'coupon_available': False,
         },
         {
             'start_datetime': datetime(2012, 11, 15, 1, 30, tzinfo=UTC),
             'end_datetime': datetime(2012, 11, 15, 1, 40, tzinfo=UTC),
             'timezone_now': datetime(2012, 11, 15, 1, 35, tzinfo=UTC),
-            'coupon_available': True
+            'coupon_available': True,
         },
     )
     @ddt.unpack
