@@ -17,6 +17,7 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 class OfferWizardTests(TestCase):
     def test_site(self):
         """ Verify the site is stored in the session. """
+
         user = self.create_user(is_staff=True)
         self.client.login(username=user.username, password=self.password)
         site_configuration = SiteConfigurationFactory()
@@ -28,10 +29,12 @@ class OfferWizardTests(TestCase):
         metadata = {
             'name': 'Test Offer',
             'description': 'Blah!',
+            'offer_type': 'Site',
             'site': site.id,
         }
         metadata_url = reverse('dashboard:offer-metadata')
         response = self.client.post(metadata_url, metadata)
+
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], reverse('dashboard:offer-benefit'))
 
