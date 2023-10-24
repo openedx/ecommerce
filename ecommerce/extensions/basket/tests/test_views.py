@@ -1593,7 +1593,7 @@ class VoucherAddViewTests(VoucherAddMixin, TestCase):
 
         voucher, product = prepare_voucher(benefit_value=voucher_discount)
         stockrecord = product.stockrecords.first()
-        stockrecord.price_excl_tax = product_price
+        stockrecord.price = product_price
         stockrecord.save()
 
         _range = factories.RangeFactory(includes_all_products=True)

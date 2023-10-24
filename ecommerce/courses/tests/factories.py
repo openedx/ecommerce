@@ -6,7 +6,7 @@ from factory.fuzzy import FuzzyText
 from ecommerce.courses.models import Course
 
 
-class CourseFactory(factory.DjangoModelFactory):
+class CourseFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Course
 
