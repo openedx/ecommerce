@@ -13,9 +13,5 @@ MYSQL:
     - ShippingEvent.lines
     - PaymentEvent.lines
     - ProductAlert.key
-    - HistoricalOption.order
-    - Option.order
 SNOWFLAKE:
-    - HistoricalOption.order
-    - Option.order
 STITCH:
