@@ -28,7 +28,7 @@ drf-yasg
 edx-auth-backends
 edx-django-release-util
 edx-django-utils
-edx-drf-extensions
+edx-drf-extensions>=8.13.0  # 8.13 fixes forgiven JWTs for ecommerce
 edx-django-sites-extensions
 edx-ecommerce-worker
 edx-opaque-keys
