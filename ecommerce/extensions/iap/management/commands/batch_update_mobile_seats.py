@@ -9,13 +9,13 @@ from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from django.db.models import Q
 from django.utils.timezone import now, timedelta
+from oscar.core.loading import get_class
 
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_detail, get_course_run_detail
 from ecommerce.extensions.catalogue.models import Product
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.extensions.partner.models import StockRecord
-from oscar.core.loading import get_class
 
 ANDROID_SKU_PREFIX = 'android'
 IOS_SKU_PREFIX = 'ios'
@@ -44,6 +44,7 @@ class Command(BaseCommand):
             help='Sleep time in seconds between update of batches')
 
     def handle(self, *args, **options):
+        print(__name__)
         batch_size = options['batch_size']
         sleep_time = options['sleep_time']
         default_site = Site.objects.filter(id=settings.SITE_ID).first()
@@ -59,8 +60,9 @@ class Command(BaseCommand):
         )
 
         # Fetch courses for these products
-        expired_courses = Course.objects.filter(products__in=expired_products)
-        self._send_email_about_expired_courses(expired_courses=expired_courses)
+        expired_courses = Course.objects.filter(products__in=expired_products).distinct()
+        if expired_courses:
+            self._send_email_about_expired_courses(expired_courses=expired_courses)
         for expired_course in expired_courses:
             # Get parent course key from discovery for the current course run
             course_run_detail_response = get_course_run_detail(default_site, expired_course.id)
