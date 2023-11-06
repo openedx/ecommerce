@@ -182,3 +182,32 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
             )
             assert mock_send_email.call_count == 1
             mock_send_email.assert_called_with(mock_mobile_team_mail, mock_email_body)
+
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
+    @patch.object(Course, 'publish_to_lms')
+    def test_send_mail_to_mobile_team_with_no_email(self, mock_publish_to_lms, mock_course_run, mock_course_detail):
+        logger_name = 'ecommerce.extensions.iap.management.commands.batch_update_mobile_seats'
+        email_sender = 'ecommerce.extensions.communication.utils.Dispatcher.dispatch_direct_messages'
+        iap_configs = IAPProcessorConfiguration.get_solo()
+        iap_configs.mobile_team_email = ""
+        iap_configs.save()
+        course = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
+
+        mock_publish_to_lms.return_value = None
+        mock_course_run.return_value = {'course': course.id}
+        mock_course_detail.return_value = {'course_run_keys': []}
+
+        with LogCapture(logger_name) as logger, \
+                patch(email_sender) as mock_send_email:
+            call_command(self.command)
+            msg = "Couldn't mail mobile team for expired courses with SKUS. " \
+                  "No email was specified for mobile team in configurations"
+            logger.check_present(
+                (
+                    logger_name,
+                    'INFO',
+                    msg
+                )
+            )
+            assert mock_send_email.call_count == 0
