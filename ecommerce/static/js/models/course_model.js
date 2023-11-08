@@ -31,6 +31,8 @@ define([
 
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/courses/',
+            // course detail page url was not matching because of missing trailing slash,
+            // with thi function, trailing slash will be added to match the url
             url: function() {
                 return Backbone.Model.prototype.url.call(this) + '/';
             },
