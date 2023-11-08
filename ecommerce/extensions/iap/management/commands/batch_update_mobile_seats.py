@@ -12,6 +12,7 @@ from django.utils.timezone import now, timedelta
 from oscar.core.loading import get_class
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.courses.constants import CertificateType
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_detail, get_course_run_detail
 from ecommerce.extensions.catalogue.models import Product
@@ -52,7 +53,7 @@ class Command(BaseCommand):
         # Fetch products which expired in the last month and had mobile skus.
         expired_products = Product.objects.filter(
             attribute_values__attribute__name="certificate_type",
-            attribute_values__value_text="verified",
+            attribute_values__value_text=CertificateType.VERIFIED,
             parent__product_class__name=SEAT_PRODUCT_CLASS_NAME,
             stockrecords__partner_sku__icontains="mobile",
             expires__lt=now(),
@@ -95,9 +96,10 @@ class Command(BaseCommand):
         """
         products_to_create_mobile_skus_for = Product.objects.filter(
             ~Q(children__stockrecords__partner_sku__icontains="mobile"),
+            structure=Product.PARENT,
             children__stockrecords__isnull=False,
             children__attribute_values__attribute__name="certificate_type",
-            children__attribute_values__value_text="verified",
+            children__attribute_values__value_text=CertificateType.VERIFIED,
             product_class__name=SEAT_PRODUCT_CLASS_NAME,
             children__expires__gt=now(),
             course__in=courses,
@@ -113,7 +115,7 @@ class Command(BaseCommand):
             ~Q(stockrecords__partner_sku__icontains="mobile"),
             parent=product,
             attribute_values__attribute__name="certificate_type",
-            attribute_values__value_text="verified",
+            attribute_values__value_text=CertificateType.VERIFIED,
             parent__product_class__name=SEAT_PRODUCT_CLASS_NAME,
         ).first()
         if existing_web_seat:
@@ -125,19 +127,13 @@ class Command(BaseCommand):
         Create a mobile seat, attributes and stock records matching the given existing_web_seat
         in the same Parent Product.
         """
-        try:
-            new_mobile_seat = Product.objects.get(
-                title="{} {}".format(sku_prefix.capitalize(), existing_web_seat.title.lower()),
-                course=existing_web_seat.course,
-                parent=existing_web_seat.parent
-            )
-        except Product.DoesNotExist:
-            new_mobile_seat = Product()
-            new_mobile_seat.title = "{} {}".format(sku_prefix.capitalize(), existing_web_seat.title.lower())
-            new_mobile_seat.course = existing_web_seat.course
-            new_mobile_seat.parent = existing_web_seat.parent
-        new_mobile_seat.structure = existing_web_seat.structure
-        new_mobile_seat.product_class = existing_web_seat.product_class
+        new_mobile_seat, _ = Product.objects.get_or_create(
+            title="{} {}".format(sku_prefix.capitalize(), existing_web_seat.title.lower()),
+            course=existing_web_seat.course,
+            parent=existing_web_seat.parent,
+            product_class=existing_web_seat.product_class,
+            structure=existing_web_seat.structure
+        )
         new_mobile_seat.expires = existing_web_seat.expires
         new_mobile_seat.is_public = existing_web_seat.is_public
         new_mobile_seat.save()
@@ -150,14 +146,13 @@ class Command(BaseCommand):
 
         # Create stock records
         existing_stock_record = existing_web_seat.stockrecords.first()
-        try:
-            mobile_stock_record = StockRecord.objects.get(
-                product=new_mobile_seat, partner=existing_stock_record.partner)
-        except StockRecord.DoesNotExist:
+        mobile_stock_record, created = StockRecord.objects.get_or_create(
+            product=new_mobile_seat,
+            partner=existing_stock_record.partner
+        )
+        if created:
             partner_sku = 'mobile.{}.{}'.format(sku_prefix.lower(), existing_stock_record.partner_sku.lower())
-            mobile_stock_record = StockRecord(
-                product=new_mobile_seat, partner=existing_stock_record.partner, partner_sku=partner_sku)
-
+            mobile_stock_record.partner_sku = partner_sku
         mobile_stock_record.price_currency = existing_stock_record.price_currency
         mobile_stock_record.price_excl_tax = existing_stock_record.price_excl_tax
         mobile_stock_record.price_retail = existing_stock_record.price_retail
