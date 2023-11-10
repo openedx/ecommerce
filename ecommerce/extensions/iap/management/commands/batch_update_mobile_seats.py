@@ -67,13 +67,23 @@ class Command(BaseCommand):
         for expired_course in expired_courses:
             # Get parent course key from discovery for the current course run
             course_run_detail_response = get_course_run_detail(default_site, expired_course.id)
-            parent_course_key = course_run_detail_response.get('course')
+            try:
+                parent_course_key = course_run_detail_response.get('course')
+            except AttributeError:
+                message = "Error while fetching parent course for {} from discovery".format(expired_course.id)
+                logger.ERROR(message)
+                continue
 
             # Get all course run keys for parent course from discovery. Then filter those
             # courses/course runs on Ecommerce using Course.verification_deadline and
             # Product.expires to determine products to create course runs for.
             parent_course = get_course_detail(default_site, parent_course_key)
-            all_course_run_keys = parent_course.get('course_run_keys')
+            try:
+                all_course_run_keys = parent_course.get('course_run_keys')
+            except AttributeError:
+                message = "Error while fetching course runs for {} from discovery".format(parent_course_key)
+                logger.ERROR(message)
+                continue
 
             all_course_runs = Course.objects.filter(id__in=all_course_run_keys)
             parent_products = self._get_parent_products_to_create_mobile_skus_for(all_course_runs)

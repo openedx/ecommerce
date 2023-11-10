@@ -138,6 +138,65 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
     @patch.object(Course, 'publish_to_lms')
     @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
+    def test_no_response_from_discovery_for_course_run_api(
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail):
+        """Test that the command handles exceptions if no response returned from Discovery for course run API."""
+        course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
+        course_run_without_mobile_seat = self._create_course_and_seats()
+        course_run_return_value = None
+        course_detail_return_value = {'course_run_keys': [course_run_without_mobile_seat.id]}
+
+        logger_name = 'ecommerce.extensions.iap.management.commands.batch_update_mobile_seats'
+        mock_email.return_value = None
+        mock_publish_to_lms.return_value = None
+        mock_course_run.return_value = course_run_return_value
+        mock_course_detail.return_value = course_detail_return_value
+
+        with self.assertRaises(AttributeError), \
+                LogCapture(logger_name) as logger:
+            call_command(self.command)
+            msg = "Error while fetching parent course for {} from discovery".format(course_with_mobile_seat.id)
+            logger.check_present(logger_name, 'ERROR', msg)
+
+        actual_mobile_seats = Product.objects.filter(
+            course=course_run_without_mobile_seat,
+            stockrecords__partner_sku__icontains='mobile'
+        )
+        self.assertFalse(actual_mobile_seats.exists())
+
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
+    @patch.object(Course, 'publish_to_lms')
+    @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
+    def test_no_response_from_discovery_for_course_detail_api(
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail):
+        """Test that the command handles exceptions if no response returned from Discovery for course detail API."""
+        course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
+        course_run_without_mobile_seat = self._create_course_and_seats()
+        course_run_return_value = {'course': course_with_mobile_seat.id}
+
+        logger_name = 'ecommerce.extensions.iap.management.commands.batch_update_mobile_seats'
+        mock_email.return_value = None
+        mock_publish_to_lms.return_value = None
+        mock_course_run.return_value = course_run_return_value
+        mock_course_detail.return_value = None
+
+        with self.assertRaises(AttributeError), \
+                LogCapture(logger_name) as logger:
+            call_command(self.command)
+            msg = "Error while fetching course runs for {} from discovery".format(course_with_mobile_seat.id)
+            logger.check_present(logger_name, 'ERROR', msg)
+
+        actual_mobile_seats = Product.objects.filter(
+            course=course_run_without_mobile_seat,
+            stockrecords__partner_sku__icontains='mobile'
+        )
+        self.assertFalse(actual_mobile_seats.exists())
+
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
+    @patch.object(Course, 'publish_to_lms')
+    @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
     def test_command_arguments_are_processed(
             self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail):
         course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
