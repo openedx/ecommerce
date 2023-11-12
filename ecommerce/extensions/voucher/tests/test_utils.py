@@ -76,7 +76,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.catalog = Catalog.objects.create(partner=self.partner)
 
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
-        self.seat_price = self.stock_record.price_excl_tax
+        self.seat_price = self.stock_record.price
         self.catalog.stock_records.add(self.stock_record)
 
         self.coupon = self.create_coupon(
@@ -255,11 +255,11 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         })
         trimmed = (
             'This Is A Really Really Really Really Really Really Long '
-            'Voucher Name That Needs To Be Trimmed To Fit Into The Name Column Of Th'
+            'Voucher Name That Needs To Be Trimmed To Fit Into The N'
         )
         vouchers = create_vouchers(**self.data)
         voucher = vouchers[0]
-        self.assertEqual(voucher.name, trimmed)
+        self.assertEqual(voucher.name, trimmed + voucher.code)
 
     @ddt.data(
         {'end_datetime': ''},
@@ -374,7 +374,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         if offer.condition.range.catalog:
             discount_data = get_voucher_discount_info(
                 offer.benefit,
-                offer.condition.range.catalog.stock_records.first().price_excl_tax
+                offer.condition.range.catalog.stock_records.first().price
             )
             coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
             discount_percentage = _('{percentage} %').format(percentage=discount_data['discount_percentage'])
@@ -540,7 +540,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         # are only shown in row[0]
         # The data that is unique among vouchers like Code, Url, Status, etc.
         # starts from row[1]
-        self.assertEqual(rows[0]['Coupon Name'], self.coupon.title)
+        self.assertEqual(rows[0]['Coupon Name'], self.coupon.title + rows[1]['Code'])
         self.assertEqual(rows[2]['Status'], _('Inactive'))
 
     def test_generate_coupon_report_for_query_coupons(self):

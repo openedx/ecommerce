@@ -53,7 +53,7 @@ class EdxOrderPlacementMixinTests(
 
     def test_order_note_created(self):
         basket = create_basket(empty=True)
-        basket.add_product(ProductFactory(stockrecords__price_excl_tax=0))
+        basket.add_product(ProductFactory(stockrecords__price=0))
 
         expected_note = json.dumps({
             'address': self.mock_address,
@@ -74,7 +74,7 @@ class EdxOrderPlacementMixinTests(
 
     def test_non_free_basket_order(self):
         basket = create_basket(empty=True)
-        basket.add_product(ProductFactory(stockrecords__price_excl_tax=10))
+        basket.add_product(ProductFactory(stockrecords__price=10))
         with self.assertRaises(BasketNotFreeError):
             ExecutiveEducation2UOrderPlacementMixin().place_free_order(
                 basket,

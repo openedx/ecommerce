@@ -128,7 +128,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         note = ''
 
     coupon_stockrecord = StockRecord.objects.get(product=coupon)
-    invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
+    invoiced_amount = currency(coupon_stockrecord.price)
     offer = voucher.best_offer
     offer_range = offer.condition.range
     program_uuid = offer.condition.program_uuid
@@ -151,8 +151,8 @@ def _get_info_for_coupon_report(coupon, voucher):
         course_seat_types = offer_range.course_seat_types
 
     if course_id:
-        price = currency(seat_stockrecord.price_excl_tax)
-        discount_data = get_voucher_discount_info(benefit, seat_stockrecord.price_excl_tax)
+        price = currency(seat_stockrecord.price)
+        discount_data = get_voucher_discount_info(benefit, seat_stockrecord.price)
         coupon_type, discount_percentage, discount_amount = _get_discount_info(discount_data)
     else:
         benefit_type = get_benefit_type(benefit)
@@ -537,8 +537,9 @@ def create_new_voucher(code, end_datetime, name, start_datetime, voucher_type):
     if not isinstance(end_datetime, datetime.datetime):
         end_datetime = dateutil.parser.parse(end_datetime)
 
+    name = name[:128 - len(voucher_code)] + voucher_code
     voucher = Voucher.objects.create(
-        name=name[:128],
+        name=name,
         code=voucher_code,
         usage=voucher_type,
         start_datetime=start_datetime,
