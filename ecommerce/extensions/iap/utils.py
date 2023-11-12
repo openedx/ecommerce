@@ -54,6 +54,11 @@ def create_mobile_seat(sku_prefix, existing_web_seat):
     new_mobile_seat.attr.certificate_type = existing_web_seat.attr.certificate_type
     new_mobile_seat.attr.course_key = existing_web_seat.attr.course_key
     new_mobile_seat.attr.id_verification_required = existing_web_seat.attr.id_verification_required
+    if 'ios' in sku_prefix:
+        # We need this attribute defined for ios products
+        # Actual values will be assigned when we create product on appstore
+        new_mobile_seat.attr.app_store_id = ''
+
     new_mobile_seat.attr.save()
 
     # Create stock records
@@ -66,9 +71,7 @@ def create_mobile_seat(sku_prefix, existing_web_seat):
         partner_sku = 'mobile.{}.{}'.format(sku_prefix.lower(), existing_stock_record.partner_sku.lower())
         mobile_stock_record.partner_sku = partner_sku
     mobile_stock_record.price_currency = existing_stock_record.price_currency
-    mobile_stock_record.price_excl_tax = existing_stock_record.price_excl_tax
-    mobile_stock_record.price_retail = existing_stock_record.price_retail
-    mobile_stock_record.cost_price = existing_stock_record.cost_price
+    mobile_stock_record.price = existing_stock_record.price
     mobile_stock_record.save()
 
     return mobile_stock_record

@@ -1,4 +1,5 @@
 import json
+from ast import literal_eval
 
 import stripe
 from ddt import ddt, file_data
@@ -8,8 +9,13 @@ from mock import mock
 from oscar.core.loading import get_class, get_model
 from rest_framework import status
 
-from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import (
+    COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    SEAT_PRODUCT_CLASS_NAME
+)
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
@@ -177,6 +183,10 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
             assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
+            courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
+            assert len(courses_metadata_list) == basket.lines.count()
+            assert courses_metadata_list[0]['course_id'] == basket.lines.first().product.course.id
+            assert courses_metadata_list[0]['course_name'] == basket.lines.first().product.course.name
 
         with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
             mock_retrieve.return_value = retrieve_addr_resp
@@ -285,6 +295,80 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 }
             })
             self.assertEqual(response.status_code, 200)
+
+    def test_capture_context_bulk_basket(self):
+        """
+        Verify Payment Intent metadata contains course information for bulk baskets with multiple courses.
+        """
+        # Create basket with multiple enrollment code products
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        basket = self.create_basket(product_class=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        basket.add_product(enrollment_code, quantity=1)
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+            }
+            self.client.get(self.capture_context_url)
+            mock_create.assert_called_once()
+            courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
+            assert len(courses_metadata_list) == basket.lines.count()
+            for index, line in enumerate(basket.lines.all()):
+                assert courses_metadata_list[index]['course_id'] == line.product.course.id
+                assert courses_metadata_list[index]['course_name'] == line.product.course.name
+
+    def test_capture_context_program_basket(self):
+        """
+        Verify Payment Intent metadata contains product title information for entitlements.
+        """
+        # Create basket with multiple entitlements
+        entitlement_basket = create_basket(
+            owner=self.user, site=self.site, product_class=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
+        )
+        entitlement = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'test-course-uuid', 'Course Entitlement')
+        entitlement_basket.add_product(entitlement)
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+            }
+            self.client.get(self.capture_context_url)
+            mock_create.assert_called_once()
+            courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
+            assert len(courses_metadata_list) == entitlement_basket.lines.count()
+            # The product in the basket does not have a course associated to it, so no course.id and course.name
+            for index, line in enumerate(entitlement_basket.lines.all()):
+                assert courses_metadata_list[index]['course_id'] is None
+                assert courses_metadata_list[index]['course_name'] == line.product.title
+
+    def test_capture_context_large_characters_basket(self):
+        """
+        Verify we don't send Stripe metadata value that is longer than 500 characters.
+        """
+        # Create basket with courses that will result in courses list > 500 characters
+        basket = self.create_basket()
+        very_long_course_name = 'a' * 200
+        course_1 = CourseFactory(id='edX/DemoX/Demo_Course_1', name=very_long_course_name, partner=self.partner)
+        product = course_1.create_or_update_seat('verified', False, 50)
+        basket.add_product(product)
+        course_2 = CourseFactory(id='edX/DemoX/Demo_Course_2', name=very_long_course_name, partner=self.partner)
+        product = course_2.create_or_update_seat('verified', False, 100)
+        basket.add_product(product)
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+            }
+            self.client.get(self.capture_context_url)
+            mock_create.assert_called_once()
+            # The metadata must be less than 500 characters
+            assert len(mock_create.call_args.kwargs['metadata']['courses']) < 500
 
     def test_payment_error_no_basket(self):
         """

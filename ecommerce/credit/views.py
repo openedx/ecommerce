@@ -154,12 +154,12 @@ class Checkout(TemplateView):
             if code:
                 discount = format_benefit_value(voucher.benefit)
                 if discount_type == 'Percentage':
-                    new_price = stockrecord.price_excl_tax - (stockrecord.price_excl_tax * (discount_value / 100))
+                    new_price = stockrecord.price - (stockrecord.price * (discount_value / 100))
                 else:
-                    new_price = stockrecord.price_excl_tax - discount_value
+                    new_price = stockrecord.price - discount_value
                 new_price = '{0:.2f}'.format(new_price)
             providers_dict[seat.attr.credit_provider].update({
-                'price': stockrecord.price_excl_tax,
+                'price': stockrecord.price,
                 'sku': stockrecord.partner_sku,
                 'credit_hours': seat.attr.credit_hours,
                 'discount': discount,

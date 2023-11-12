@@ -9,18 +9,15 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <ul class="breadcrumb">
-        <li>
-            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
-        </li>
-        <li>
-            <a href="{% url 'dashboard:order-list' %}">{% trans "Orders" as tmsg %}{{ tmsg | force_escape }}</a>
-        </li>
-        <li>
-            <a href="{% url 'dashboard:order-detail' number=line.order.number %}">#{{ line.order.number }}</a>
-        </li>
-        <li class="active">{% filter force_escape %}{% blocktrans with id=line.id %}Line #{{ id }}{% endblocktrans %}{% endfilter %}</li>
-    </ul>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">{% trans "Orders" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'dashboard:order-detail' number=line.order.number %}">#{{ line.order.number }}</a></li>
+
+        <li class="breadcrumb-item active" aria-current="page">{% filter force_escape %}{% blocktrans with id=line.id %}Line #{{ id }}{% endblocktrans %}{% endfilter %}</li>
+    </ol>
+</nav>
 {% endblock %}
 
 {% block headertext %}

@@ -35,7 +35,7 @@ edx-django-sites-extensions
 # but it is a tradeoff we are willing to live with, given the infrequency
 # with which ecommerce-worker is actually updated and deployed.
 # See https://github.com/openedx/ecommerce/blob/master/docs/decisions/0008-master-branch-split.rst
-git+https://github.com/openedx/ecommerce-worker.git@2u/3.3.4#egg=edx-ecommerce-worker
+git+https://github.com/openedx/ecommerce-worker.git@2u/3.3.5#egg=edx-ecommerce-worker
 edx-opaque-keys
 edx-rbac
 edx-rest-api-client
@@ -46,10 +46,11 @@ inapppy==2.5.2
 jsonfield
 jsonfield2
 libsass==0.9.2
-markdown==2.6.9
+markdown==3.4.3
 mysqlclient<1.5
 newrelic
 ndg-httpsclient
+openedx-atlas
 path.py==7.2
 paypalrestsdk
 premailer==2.9.2
