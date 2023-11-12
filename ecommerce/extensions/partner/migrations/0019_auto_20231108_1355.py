@@ -16,10 +16,6 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='historicalstockrecord',
-            name='price_excl_tax',
-        ),
-        migrations.RemoveField(
-            model_name='historicalstockrecord',
             name='price_retail',
         ),
         migrations.RemoveField(
@@ -28,20 +24,26 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='stockrecord',
-            name='price_excl_tax',
-        ),
-        migrations.RemoveField(
-            model_name='stockrecord',
             name='price_retail',
         ),
-        migrations.AddField(
+        migrations.AlterField(
             model_name='historicalstockrecord',
-            name='price',
+            name='price_excl_tax',
             field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Price'),
         ),
-        migrations.AddField(
+        migrations.RenameField(
+            model_name='historicalstockrecord',
+            old_name='price_excl_tax',
+            new_name='price',
+        ),
+        migrations.AlterField(
             model_name='stockrecord',
-            name='price',
+            name='price_excl_tax',
             field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Price'),
+        ),
+        migrations.RenameField(
+            model_name='stockrecord',
+            old_name='price_excl_tax',
+            new_name='price',
         ),
     ]
