@@ -1,0 +1,2 @@
+ANDROID_SKU_PREFIX = 'android'
+IOS_SKU_PREFIX = 'ios'
