@@ -34,6 +34,15 @@ class OrderLineVouchers(models.Model):
 
 
 class Voucher(AbstractVoucher):
+    name = models.CharField(
+        _("Name"),
+        max_length=128,
+        help_text=_(
+            "This will be shown in the checkout"
+            " and basket once the voucher is"
+            " entered"
+        ),
+    )
     SINGLE_USE, MULTI_USE, ONCE_PER_CUSTOMER, MULTI_USE_PER_CUSTOMER = (
         'Single use', 'Multi-use', 'Once per customer', 'Multi-use-per-Customer')
     USAGE_CHOICES = (
