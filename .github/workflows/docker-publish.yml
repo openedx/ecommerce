@@ -1,0 +1,50 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - master
+      - open-release/**
+jobs:
+  push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Use the release name as the image tag if we're building an open release tag.
+      # Examples: if we're building 'open-release/olive.master', tag the image as 'olive.master'.
+      # Otherwise, we must be building from a push to master, so use 'latest'.
+      - name: Get tag name
+        id: get-tag-name
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const branchName = context.ref.split('/').slice(-1)[0];
+            const tagName = branchName === 'master' ? 'latest' : branchName;
+            console.log('Will use tag: ' + tagName);
+            return tagName;
+          result-encoding: string
+
+      - name: Build and push Dev Docker image
+        uses: docker/build-push-action@v1
+        with:
+          push: true
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          target: dev
+          repository: edxops/ecommerce-dev
+          tags: ${{ steps.get-tag-name.outputs.result }},${{ github.sha }}
+
+      # The current priority is to get the devstack off of Ansible based Images. Once that is done, we can come back to this part to get
+      # suitable images for smaller prod environments.
+      # - name: Build and push prod Docker image
+      #   uses: docker/build-push-action@v1
+      #   with:
+      #     push: true
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      #     target: prod
+      #     repository: edxops/ecommerce-prod
+      #     tags: ${{ steps.get-tag-name.outputs.result }},${{ github.sha }}
