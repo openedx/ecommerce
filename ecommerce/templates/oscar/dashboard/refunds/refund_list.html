@@ -25,17 +25,17 @@
 {% endblock extrascripts %}
 
 {% block breadcrumbs %}
-<ul class="breadcrumb">
-    <li>
-        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
-    </li>
-    <li class="active">{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</li>
-</ul>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Refunds" %}</li>
+    </ol>
+</nav>
 {% endblock breadcrumbs %}
 
 {% block header %}
 <div class="page-header">
-    <h1>{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</h1>
+    <h1>{% trans "Refunds" %}</h1>
 </div>
 {% endblock header %}
 
@@ -45,6 +45,7 @@
 {% if refunds %}
     {% include "oscar/dashboard/partials/refund_action_modal.html" %}
     {% block refund_list %}
+
         <table class="table table-striped table-bordered table-hover">
             <caption>
                 <h3 class="pull-left"><i class="icon-repeat icon-large icon-flip-horizontal"></i></h3>
