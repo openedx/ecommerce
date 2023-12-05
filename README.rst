@@ -3,6 +3,8 @@
 This repository is deprecated and in maintainence-only operation while we work on a replacement, please see `this announcement <https://discuss.openedx.org/t/deprecation-removal-ecommerce-service-depr-22/6839>`__ for more information.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+Very cool!
+
 Although we have stopped integrating new contributions, we always appreciate security disclosures and patches sent to security@openedx.org
 
 edX E-Commerce Service  |CI|_ |Codecov|_
