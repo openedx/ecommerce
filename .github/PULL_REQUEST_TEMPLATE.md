@@ -1,3 +1,7 @@
+# ⛔️ MAIN BRANCH WARNING! 2U EMPLOYEES must make branches against the 2u/main BRANCH
+
+- [ ] I have checked the branch to which I would like to merge.
+
 # ⛔️ DEPRECATION WARNING
 
 **This repository is deprecated and in maintainence-only operation while we work on a replacement, please see [this announcement](https://discuss.openedx.org/t/deprecation-removal-ecommerce-service-depr-22/6839) for more information.**
