@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 import ddt
 import mock
 import responses
+from django.db.models import Q
 from django.utils import timezone
 from oscar.core.loading import get_model
 from requests import Timeout
@@ -16,6 +17,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.catalogue.models import Product
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -40,6 +42,39 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         self.course.create_or_update_seat('verified', True, 50)
         self.publisher = LMSPublisher()
         self.error_message = 'Failed to publish commerce data for {course_id} to LMS.'.format(course_id=self.course.id)
+
+    def _create_mobile_seat_for_course(self, course, sku_prefix):
+        """ Create a mobile seat for a course given the sku_prefix """
+        web_seat = Product.objects.filter(
+            ~Q(stockrecords__partner_sku__icontains="mobile"),
+            parent__isnull=False,
+            course=course,
+            attributes__name="id_verification_required",
+            parent__product_class__name="Seat"
+        ).first()
+        web_stock_record = web_seat.stockrecords.first()
+        mobile_seat = Product.objects.create(
+            course=course,
+            parent=web_seat.parent,
+            structure=web_seat.structure,
+            expires=web_seat.expires,
+            is_public=web_seat.is_public,
+            title="{} {}".format(sku_prefix.capitalize(), web_seat.title.lower())
+        )
+
+        mobile_seat.attr.certificate_type = web_seat.attr.certificate_type
+        mobile_seat.attr.course_key = web_seat.attr.course_key
+        mobile_seat.attr.id_verification_required = web_seat.attr.id_verification_required
+        mobile_seat.attr.save()
+
+        StockRecord.objects.create(
+            partner=web_stock_record.partner,
+            product=mobile_seat,
+            partner_sku="mobile.{}.{}".format(sku_prefix.lower(), web_stock_record.partner_sku.lower()),
+            price_currency=web_stock_record.price_currency,
+            price_excl_tax=web_stock_record.price_excl_tax,
+        )
+        return mobile_seat
 
     def tearDown(self):
         super().tearDown()
@@ -133,6 +168,39 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
             'sku': stock_record.partner_sku,
             'bulk_sku': None,
             'expires': None,
+            'android_sku': None,
+            'ios_sku': None,
+        }
+        self.assertDictEqual(actual, expected)
+
+        # Try with an expiration datetime
+        expires = datetime.datetime.utcnow()
+        seat.expires = expires
+        expected['expires'] = expires.isoformat()
+        actual = self.publisher.serialize_seat_for_commerce_api(seat)
+        self.assertDictEqual(actual, expected)
+
+    def test_serialize_seat_for_commerce_api_with_mobile_skus(self):
+        """ Verify that mobile SKUS are added to the JSON serializable key as expected. """
+        # Grab the verified seat
+        self._create_mobile_seat_for_course(self.course, 'android')
+        self._create_mobile_seat_for_course(self.course, 'ios')
+        seat = self.course.seat_products.filter(
+            ~Q(stockrecords__partner_sku__contains="mobile"),
+            attribute_values__value_text='verified',
+        ).first()
+        stock_record = seat.stockrecords.first()
+
+        actual = self.publisher.serialize_seat_for_commerce_api(seat)
+        expected = {
+            'name': 'verified',
+            'currency': 'USD',
+            'price': int(stock_record.price_excl_tax),
+            'sku': stock_record.partner_sku,
+            'bulk_sku': None,
+            'expires': None,
+            'android_sku': 'mobile.android.{}'.format(stock_record.partner_sku.lower()),
+            'ios_sku': 'mobile.ios.{}'.format(stock_record.partner_sku.lower()),
         }
         self.assertDictEqual(actual, expected)
 
@@ -165,6 +233,8 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
             'sku': stock_record.partner_sku,
             'bulk_sku': None,
             'expires': None,
+            'android_sku': None,
+            'ios_sku': None,
         }
         self.assertDictEqual(actual, expected)
 
@@ -181,6 +251,8 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
             'sku': stock_record.partner_sku,
             'bulk_sku': ec_stock_record.partner_sku,
             'expires': None,
+            'android_sku': None,
+            'ios_sku': None,
         }
         self.assertDictEqual(actual, expected)
 
