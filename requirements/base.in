@@ -34,7 +34,7 @@ edx-django-sites-extensions
 # This OEP advises against this type of use of pinning: https://docs.openedx.org/projects/openedx-proposals/en/latest/best-practices/oep-0018-bp-python-dependencies.html#rationale
 # but it is a tradeoff we are willing to live with, given the infrequency
 # with which ecommerce-worker is actually updated and deployed.
--e git+https://github.com/openedx/ecommerce-worker.git@2u/3.3.4#egg=edx-ecommerce-worker
+git+https://github.com/openedx/ecommerce-worker.git@2u/3.3.4#egg=edx-ecommerce-worker
 edx-opaque-keys
 edx-rbac
 edx-rest-api-client
