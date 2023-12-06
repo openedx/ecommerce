@@ -327,7 +327,7 @@ edx-django-utils==5.5.0
     #   edx-drf-extensions
     #   edx-rest-api-client
     #   getsmarter-api-clients
-edx-drf-extensions==9.0.0
+edx-drf-extensions==9.0.1
     # via
     #   -r requirements/test.txt
     #   edx-rbac
