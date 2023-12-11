@@ -7,7 +7,7 @@ from uuid import UUID
 import crum
 from django.contrib import messages
 from django.db.models import Sum
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import HTTPError, Timeout

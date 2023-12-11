@@ -183,7 +183,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             self.PATH,
             data=json.dumps(request_data),
             content_type=JSON_CONTENT_TYPE,
-            HTTP_AUTHORIZATION=self.generate_jwt_token_header(self.user)
+            headers={"authorization": self.generate_jwt_token_header(self.user)}
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
@@ -305,13 +305,13 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
 
         self.mock_user_info_response(username=self.user.username)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=auth_header)
+        response = self.client.get(self.path, headers={"authorization": auth_header})
         self.assertEqual(response.status_code, 200)
 
     def test_only_works_for_staff_users(self):
         """ Test view only return results when accessed by staff. """
         basket = BasketFactory(site=self.site)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
 
         self.assertEqual(response.status_code, 200)
         content = response.json()
@@ -331,7 +331,7 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         basket.add_product(product)
         PaymentProcessorResponse.objects.create(basket=basket, transaction_id='PAY-123', processor_name='paypal',
                                                 response=json.dumps({'state': 'approved'}))
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
 
         self.assertEqual(response.status_code, 200)
         content = response.json()
@@ -348,11 +348,11 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         basket.add_product(product)
 
         with mock.patch('ecommerce.extensions.api.serializers.VoucherSerializer', side_effect=ValueError):
-            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+            response = self.client.get(self.path, headers={"authorization": self.token})
             self.assertIsNone(response.json()['results'][0]['vouchers'])
 
         with mock.patch('ecommerce.extensions.api.serializers.VoucherSerializer', side_effect=AttributeError):
-            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+            response = self.client.get(self.path, headers={"authorization": self.token})
             self.assertIsNone(response.json()['results'][0]['vouchers'])
 
 
@@ -368,7 +368,7 @@ class OrderByBasketRetrieveViewTests(OrderDetailViewTestMixin, TestCase):
         url = self.url
         self.order.basket.delete()
 
-        response = self.client.get(url, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(url, headers={"authorization": self.token})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.serialize_order(self.order))
 

@@ -1,7 +1,7 @@
 
 
 from django.conf import settings
-from django.conf.urls import url
+from django.urls import path
 from django.views.generic import RedirectView
 from oscar import config
 
@@ -15,7 +15,7 @@ class EdxShop(config.Shop):
 
     def get_urls(self):
         urls = [
-            url(r'^$', RedirectView.as_view(url=settings.OSCAR_HOMEPAGE), name='home'),
+            path('', RedirectView.as_view(url=settings.OSCAR_HOMEPAGE), name='home'),
         ] + super().get_urls()
         # excluding urls of catalogue and search
         exclude_app_urls(urls, 'catalogue')

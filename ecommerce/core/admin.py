@@ -3,7 +3,7 @@
 import waffle
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from edx_rbac.admin import UserRoleAssignmentAdmin
 
 from ecommerce.core.constants import USER_LIST_VIEW_SWITCH

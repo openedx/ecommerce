@@ -1,7 +1,7 @@
 
 
-from django.conf.urls import include, url
+from django.urls import include, path
 
 urlpatterns = [
-    url(r'^v2/', include(('ecommerce.extensions.api.v2.urls', 'v2'))),
+    path('v2/', include(('ecommerce.extensions.api.v2.urls', 'v2'))),
 ]

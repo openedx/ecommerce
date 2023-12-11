@@ -38,7 +38,7 @@ class PaymentProcessorListViewTests(TestCase):
 
     def assert_processor_list_matches(self, expected):
         """ DRY helper. """
-        response = self.client.get(reverse('api:v2:payment:list_processors'), HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(reverse('api:v2:payment:list_processors'), headers={"authorization": self.token})
         self.assertEqual(response.status_code, 200)
         self.assertSetEqual(set(response.json()), set(expected))
 

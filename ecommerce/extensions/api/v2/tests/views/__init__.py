@@ -37,7 +37,7 @@ class OrderDetailViewTestMixin(ThrottlingMixin):
 
     def test_get_order(self):
         """Test successful order retrieval."""
-        response = self.client.get(self.url, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.url, headers={"authorization": self.token})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.serialize_order(self.order))
 
@@ -45,7 +45,7 @@ class OrderDetailViewTestMixin(ThrottlingMixin):
         """Test scenarios where an order should return a 404 due to the wrong user."""
         other_user = self.create_user()
         other_token = self.generate_jwt_token_header(other_user)
-        response = self.client.get(self.url, HTTP_AUTHORIZATION=other_token)
+        response = self.client.get(self.url, headers={"authorization": other_token})
         self.assertEqual(response.status_code, 404)
 
 

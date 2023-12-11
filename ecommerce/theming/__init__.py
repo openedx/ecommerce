@@ -39,4 +39,3 @@ Models:
             site (ForeignKey): Foreign Key field pointing to django Site model
             theme_dir_name (CharField): Contains directory name for any site's theme (e.g. 'red-theme')
 """
-default_app_config = "ecommerce.theming.apps.ThemeAppConfig"

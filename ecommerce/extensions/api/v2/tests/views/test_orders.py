@@ -70,13 +70,13 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
 
         self.mock_user_info_response(username=self.user.username)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=auth_header)
+        response = self.client.get(self.path, headers={"authorization": auth_header})
         self.assert_empty_result_response(response)
 
     def test_no_orders(self):
         """ If the user has no orders, the view should return an empty list. """
         self.assertFalse(self.user.orders.exists())
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
         self.assert_empty_result_response(response)
 
     def test_with_orders(self):
@@ -87,7 +87,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         order = create_order(site=self.site, user=self.user)
         site = SiteConfigurationFactory().site
         create_order(site=site, user=self.user)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content.decode('utf-8'))
 
@@ -97,7 +97,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
         # Test ordering
         order_2 = create_order(site=self.site, user=self.user)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content.decode('utf-8'))
 
@@ -110,7 +110,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         """ Verify that orders contain the Order History flag value """
         with override_flag(ENABLE_HOIST_ORDER_HISTORY, active=enable_hoist_order_history_flag):
             create_order(site=self.site, user=self.user)
-            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+            response = self.client.get(self.path, headers={"authorization": self.token})
             self.assertEqual(response.status_code, 200)
             content = json.loads(response.content.decode('utf-8'))
 
@@ -174,7 +174,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         Applicator().apply(basket, user=basket.owner, request=self.request)
         order = factories.create_order(basket=basket, user=self.user)
 
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
         self.assertEqual(response.status_code, 200)
 
         content = json.loads(response.content.decode('utf-8'))
@@ -244,11 +244,11 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         """ The view should only return orders for the authenticated users. """
         other_user = self.create_user()
         create_order(site=self.site, user=other_user)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
         self.assert_empty_result_response(response)
 
         order = create_order(site=self.site, user=self.user)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
         content = json.loads(response.content.decode('utf-8'))
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], str(order.number))
@@ -263,7 +263,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         admin_user = self.create_user(is_staff=is_staff, is_superuser=is_superuser)
         order = create_order(site=self.site, user=self.user)
 
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
+        response = self.client.get(self.path, headers={"authorization": self.generate_jwt_token_header(admin_user)})
         content = json.loads(response.content.decode('utf-8'))
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], str(order.number))
@@ -273,7 +273,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         admin_user = self.create_user(is_staff=True, is_superuser=True)
         order = create_order(site=self.site, user=admin_user)
 
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
+        response = self.client.get(self.path, headers={"authorization": self.generate_jwt_token_header(admin_user)})
         content = json.loads(response.content.decode('utf-8'))
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], str(order.number))
@@ -319,7 +319,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         """
         order = create_order(site=self.site, user=self.user)
         second_order = create_order(site=self.site, user=self.user)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content.decode('utf-8'))
 
@@ -345,7 +345,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.request.site = site_configuration.site
         self.client = self.client_class(SERVER_NAME=domain)
 
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(self.path, headers={"authorization": self.token})
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content.decode('utf-8'))
 

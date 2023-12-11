@@ -1,7 +1,7 @@
 """Oscar-specific settings"""
 
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.defaults import *
 
 from ecommerce.extensions.fulfillment.status import LINE, ORDER

@@ -11,7 +11,7 @@ import waffle
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from ecommerce_worker.email.v1.api import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
 

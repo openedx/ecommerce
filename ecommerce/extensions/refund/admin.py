@@ -3,7 +3,7 @@
 import waffle
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_model
 from rules.contrib.admin import ObjectPermissionsModelAdmin, ObjectPermissionsTabularInline
 

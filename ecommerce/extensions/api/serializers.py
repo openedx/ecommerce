@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count, Q, Sum, prefetch_related_objects
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers

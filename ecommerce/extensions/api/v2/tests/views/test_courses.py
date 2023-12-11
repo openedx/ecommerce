@@ -81,7 +81,7 @@ class CourseViewSetTests(JwtMixin, ProductSerializerMixin, DiscoveryTestMixin, T
 
         response = self.client.get(
             self.list_path,
-            HTTP_AUTHORIZATION=auth_header
+            headers={"authorization": auth_header}
         )
         self.assertEqual(response.status_code, 200)
 

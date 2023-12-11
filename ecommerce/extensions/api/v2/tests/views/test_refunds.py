@@ -106,7 +106,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, TestCase):
         data = self._get_data(self.user.username, self.course_id)
         auth_header = self.generate_jwt_token_header(self.user)
 
-        response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE, headers={"authorization": auth_header})
         self.assert_ok_response(response)
 
     @responses.activate
@@ -118,7 +118,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, TestCase):
         auth_header = 'Bearer ' + self.DEFAULT_TOKEN
         self.mock_user_info_response(username=self.user.username)
 
-        response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE, headers={"authorization": auth_header})
         self.assert_ok_response(response)
 
     def test_session_authentication(self):
