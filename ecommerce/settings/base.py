@@ -325,7 +325,7 @@ DJANGO_APPS = [
 
 # Apps specific to this project go here.
 LOCAL_APPS = [
-    'ecommerce.core',
+    'ecommerce.core.config.CoreAppConfig',
     'ecommerce.coupons',
     'ecommerce.courses',
     'ecommerce.invoice',
