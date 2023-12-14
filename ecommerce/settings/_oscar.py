@@ -53,7 +53,7 @@ OSCAR_APPS = [
     'ecommerce.extensions.dashboard',
     'ecommerce.extensions.dashboard.catalogue',
     'ecommerce.extensions.dashboard.offers',
-    'ecommerce.extensions.dashboard.refunds',
+    'ecommerce.extensions.dashboard.refunds.apps.RefundsDashboardConfig',  # Providing full path to make the signals work
     'ecommerce.extensions.dashboard.orders',
     'ecommerce.extensions.dashboard.users',
 
