@@ -156,17 +156,17 @@ $(COMMON_CONSTRAINTS_TXT):
 upgrade: export CUSTOM_COMPILE_COMMAND=make upgrade
 upgrade: $(COMMON_CONSTRAINTS_TXT)
 	pip install -q -r requirements/pip_tools.txt
-	pip-compile --rebuild --upgrade --allow-unsafe -o requirements/pip.txt requirements/pip.in
-	pip-compile --rebuild --upgrade -o requirements/pip_tools.txt requirements/pip_tools.in
+	pip-compile --rebuild  --allow-unsafe -o requirements/pip.txt requirements/pip.in
+	pip-compile --rebuild  -o requirements/pip_tools.txt requirements/pip_tools.in
 	pip install -qr requirements/pip.txt
 	pip install -qr requirements/pip_tools.txt
-	pip-compile --upgrade -o requirements/tox.txt requirements/tox.in
-	pip-compile --upgrade -o requirements/base.txt requirements/base.in
-	pip-compile --upgrade -o requirements/docs.txt requirements/docs.in
-	pip-compile --upgrade -o requirements/e2e.txt requirements/e2e.in
-	pip-compile --upgrade -o requirements/test.txt requirements/test.in
-	pip-compile --upgrade -o requirements/dev.txt requirements/dev.in
-	pip-compile --upgrade -o requirements/production.txt requirements/production.in
+	pip-compile  -o requirements/tox.txt requirements/tox.in
+	pip-compile  -o requirements/base.txt requirements/base.in
+	pip-compile  -o requirements/docs.txt requirements/docs.in
+	pip-compile  -o requirements/e2e.txt requirements/e2e.in
+	pip-compile  -o requirements/test.txt requirements/test.in
+	pip-compile  -o requirements/dev.txt requirements/dev.in
+	pip-compile  -o requirements/production.txt requirements/production.in
 	# Let tox control the Django version for tests
 	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
 	mv requirements/test.tmp requirements/test.txt
