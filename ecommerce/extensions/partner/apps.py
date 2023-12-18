@@ -1,7 +1,7 @@
 
 
-from oscar.apps.partner import apps
+from oscar.apps.partner.apps import PartnerConfig as CorePartnerConfig
 
 
-class PartnerConfig(apps.PartnerConfig):
+class PartnerConfig(CorePartnerConfig):
     name = 'ecommerce.extensions.partner'
