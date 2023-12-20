@@ -14,19 +14,19 @@ OSCAR_HOMEPAGE = reverse_lazy('dashboard:index')
 
 # APP CONFIGURATION
 OSCAR_APPS = [
-    'oscar',
-    'oscar.apps.address',
-    'oscar.apps.shipping',
-    'oscar.apps.catalogue.reviews',
-    'oscar.apps.search',
-    'oscar.apps.wishlists',
+    "oscar.config.Shop",
+    "oscar.apps.address.apps.AddressConfig",
+    'oscar.apps.shipping.apps.ShippingConfig',
+    'oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig',
+    "oscar.apps.search.apps.SearchConfig",
+    "oscar.apps.wishlists.apps.WishlistsConfig",
 
     'ecommerce.extensions',
     'ecommerce.extensions.iap',
     'ecommerce.extensions.api',
     'ecommerce.extensions.communication.apps.CommunicationConfig',
     'ecommerce.extensions.fulfillment',
-    'ecommerce.extensions.refund',
+    'ecommerce.extensions.refund.apps.RefundConfig',
     'ecommerce.extensions.analytics',
     'ecommerce.extensions.basket',
     'ecommerce.extensions.catalogue',
@@ -41,14 +41,14 @@ OSCAR_APPS = [
     # Dashboard applications depend on models declared in the core applications (basket, catalogue, etc).
     # To prevent issues with Oscar’s dynamic model loading, overrides of dashboard applications should
     # follow overrides of core applications
-    'oscar.apps.dashboard.reports',
-    'oscar.apps.dashboard.partners',
-    'oscar.apps.dashboard.pages',
-    'oscar.apps.dashboard.ranges',
-    'oscar.apps.dashboard.reviews',
-    'oscar.apps.dashboard.vouchers',
-    'oscar.apps.dashboard.communications',
-    'oscar.apps.dashboard.shipping',
+    "oscar.apps.dashboard.reports.apps.ReportsDashboardConfig",
+    "oscar.apps.dashboard.partners.apps.PartnersDashboardConfig",
+    "oscar.apps.dashboard.pages.apps.PagesDashboardConfig",
+    "oscar.apps.dashboard.ranges.apps.RangesDashboardConfig",
+    'oscar.apps.dashboard.reviews.apps.ReviewsDashboardConfig',
+    "oscar.apps.dashboard.vouchers.apps.VouchersDashboardConfig",
+    "oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig",
+    'oscar.apps.dashboard.shipping.apps.ShippingDashboardConfig',
 
     'ecommerce.extensions.dashboard',
     'ecommerce.extensions.dashboard.catalogue',
