@@ -21,22 +21,22 @@ OSCAR_APPS = [
     "oscar.apps.search.apps.SearchConfig",
     "oscar.apps.wishlists.apps.WishlistsConfig",
 
-    'ecommerce.extensions',
-    'ecommerce.extensions.iap',
-    'ecommerce.extensions.api',
+    'ecommerce.extensions.config.EdxShop',
+    'ecommerce.extensions.iap.apps.IapConfig',
+    'ecommerce.extensions.api', # isn't an oscar app
     'ecommerce.extensions.communication.apps.CommunicationConfig',
-    'ecommerce.extensions.fulfillment',
+    'ecommerce.extensions.fulfillment', # isn't an oscar app
     'ecommerce.extensions.refund.apps.RefundConfig',
-    'ecommerce.extensions.analytics',
-    'ecommerce.extensions.basket',
-    'ecommerce.extensions.catalogue',
-    'ecommerce.extensions.checkout',
-    'ecommerce.extensions.customer',
-    'ecommerce.extensions.offer',
-    'ecommerce.extensions.order',
-    'ecommerce.extensions.partner',
-    'ecommerce.extensions.payment',
-    'ecommerce.extensions.voucher',
+    'ecommerce.extensions.analytics.apps.AnalyticsConfig',
+    'ecommerce.extensions.basket.apps.BasketConfig',
+    'ecommerce.extensions.catalogue.apps.CatalogueConfig',
+    'ecommerce.extensions.checkout.apps.CheckoutConfig',
+    'ecommerce.extensions.customer.apps.CustomerConfig',
+    'ecommerce.extensions.offer.apps.OfferConfig',
+    'ecommerce.extensions.order.apps.OrderConfig',
+    'ecommerce.extensions.partner.apps.PartnerConfig',
+    'ecommerce.extensions.payment.apps.PaymentConfig',
+    'ecommerce.extensions.voucher.apps.VoucherConfig',
 
     # Dashboard applications depend on models declared in the core applications (basket, catalogue, etc).
     # To prevent issues with Oscar’s dynamic model loading, overrides of dashboard applications should
@@ -50,12 +50,12 @@ OSCAR_APPS = [
     "oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig",
     'oscar.apps.dashboard.shipping.apps.ShippingDashboardConfig',
 
-    'ecommerce.extensions.dashboard',
-    'ecommerce.extensions.dashboard.catalogue',
-    'ecommerce.extensions.dashboard.offers',
+    'ecommerce.extensions.dashboard.apps.DashboardConfig',
+    'ecommerce.extensions.dashboard.catalogue.apps.CatalogueDashboardConfig',
+    'ecommerce.extensions.dashboard.offers.apps.OffersDashboardConfig',
     'ecommerce.extensions.dashboard.refunds.apps.RefundsDashboardConfig',  # Providing full path to make the signals work
-    'ecommerce.extensions.dashboard.orders',
-    'ecommerce.extensions.dashboard.users',
+    'ecommerce.extensions.dashboard.orders.apps.OrdersDashboardConfig',
+    'ecommerce.extensions.dashboard.users.apps.UsersDashboardConfig',
 
     # 3rd-party apps that oscar depends on
     'haystack',
