@@ -3,7 +3,6 @@
 -r e2e.txt                  # required for quality
 -r tox.txt
 
-bok_choy
 coverage
 ddt
 diff-cover
@@ -21,5 +20,4 @@ pytest-cov
 pytest-django
 python-memcached==1.59      # required by collectstatic in devstack
 responses
-selenium
 testfixtures                # Provides a LogCapture utility used by several tests

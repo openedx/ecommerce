@@ -6,7 +6,5 @@ edx-rest-api-client
 pyjwkest
 pytest
 pytest-randomly
-pytest-selenium
 pytest-timeout
 python-dotenv
-selenium
