@@ -98,6 +98,7 @@ class Product(AbstractProduct):
         ]
 
     def save(self, *args, **kwargs):
+        super(Product, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
         try:
             if not isinstance(self.attr.note, str) and self.attr.note is not None:
                 log_message_and_raise_validation_error(
@@ -115,8 +116,6 @@ class Product(AbstractProduct):
             )
         except AttributeError:
             pass
-
-        super(Product, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
 
 
 @receiver(post_init, sender=Product)
