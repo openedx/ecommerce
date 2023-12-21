@@ -13,6 +13,7 @@ ERROR_ORDER_NOT_FOUND_FOR_REFUND = "Could not find any order to refund for [%s] 
 ERROR_REFUND_NOT_COMPLETED = "Could not complete refund for user [%s] in course [%s] by processor [%s]"
 ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND = "Could not find any transaction to refund for [%s] by processor [%s]"
 ERROR_DURING_POST_ORDER_OP = "An error occurred during post order operations."
+FOUND_MULTIPLE_PRODUCTS_ERROR = "Found unexpected number of products for course [%s]"
 GOOGLE_PUBLISHER_API_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
 IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE = "Ignoring notification from apple since we are only expecting" \
                                             " refund notifications"
@@ -41,3 +42,5 @@ PRODUCT_IS_NOT_AVAILABLE = "Product [%s] is not available to buy."
 RECEIVED_NOTIFICATION_FROM_APPLE = "Received notification from apple with notification type [%s]"
 SEGMENT_MOBILE_BASKET_ADD = "Mobile Basket Add Items View Called"
 SEGMENT_MOBILE_PURCHASE_VIEW = "Mobile Course Purchase View Called"
+SKUS_CREATION_ERROR = "There was an error while creating mobile skus for course [%s]"
+SKUS_CREATION_FAILURE = "Couldn't create mobile skus for course [%s]"
