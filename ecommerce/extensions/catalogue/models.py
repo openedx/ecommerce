@@ -98,24 +98,26 @@ class Product(AbstractProduct):
         ]
 
     def save(self, *args, **kwargs):
-        super(Product, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
-        try:
-            if not isinstance(self.attr.note, str) and self.attr.note is not None:
-                log_message_and_raise_validation_error(
-                    'Failed to create Product. Product note value must be of type string'
-                )
-        except AttributeError:
-            pass
+        if self.id:
+            try:
+                if not isinstance(self.attr.note, str) and self.attr.note is not None:
+                    log_message_and_raise_validation_error(
+                        'Failed to create Product. Product note value must be of type string'
+                    )
+            except AttributeError:
+                pass
 
-        try:
-            if self.attr.notify_email is not None:
-                validate_email(self.attr.notify_email)
-        except ValidationError:
-            log_message_and_raise_validation_error(
-                'Notification email must be a valid email address.'
-            )
-        except AttributeError:
-            pass
+            try:
+                if self.attr.notify_email is not None:
+                    validate_email(self.attr.notify_email)
+            except ValidationError:
+                log_message_and_raise_validation_error(
+                    'Notification email must be a valid email address.'
+                )
+            except AttributeError:
+                pass
+
+        super(Product, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
 
 
 @receiver(post_init, sender=Product)

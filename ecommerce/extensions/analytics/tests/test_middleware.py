@@ -19,7 +19,7 @@ class TrackingMiddlewareTests(TestCase):
 
     def setUp(self):
         super(TrackingMiddlewareTests, self).setUp()
-        self.middleware = middleware.TrackingMiddleware()
+        self.middleware = middleware.TrackingMiddleware(get_response=lambda request: None)
         self.request_factory = RequestFactory()
         self.user = self.create_user()
 
