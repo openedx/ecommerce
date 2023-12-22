@@ -36,6 +36,7 @@ LOGGER_EXECUTE_SUCCESSFUL = "Payment execution successful for user [%s], basket 
 LOGGER_PAYMENT_FAILED_FOR_BASKET = "Attempts to handle payment for basket [%s] failed with error [%s]."
 LOGGER_REFUND_SUCCESSFUL = "Refund successful. OrderId: [%s] Processor: [%s] "
 LOGGER_STARTING_PAYMENT_FLOW = "Starting payment flow for user [%s] for products [%s]."
+MISSING_PRODUCT_ERROR = "Couldn't find parent product for course [%s]"
 NO_PRODUCT_AVAILABLE = "No product is available to buy."
 PRODUCTS_DO_NOT_EXIST = "Products with SKU(s) [{skus}] do not exist."
 PRODUCT_IS_NOT_AVAILABLE = "Product [%s] is not available to buy."

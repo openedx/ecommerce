@@ -15,6 +15,5 @@ urlpatterns = [
     url(r'^execute/$', MobileCoursePurchaseExecutionView.as_view(), name='iap-execute'),
     url(r'^android/refund/$', AndroidRefundView.as_view(), name='android-refund'),
     url(r'^ios/refund/$', IOSRefundView.as_view(), name='ios-refund'),
-    url(r'^ios/refund/$', IOSRefundView.as_view(), name='ios-refund'),
     url(r'^create-mobile-skus/$', MobileSkusCreationView.as_view(), name='create-mobile-skus'),
 ]

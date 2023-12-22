@@ -68,6 +68,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     LOGGER_PAYMENT_FAILED_FOR_BASKET,
     LOGGER_REFUND_SUCCESSFUL,
     LOGGER_STARTING_PAYMENT_FLOW,
+    MISSING_PRODUCT_ERROR,
     NO_PRODUCT_AVAILABLE,
     PRODUCT_IS_NOT_AVAILABLE,
     PRODUCTS_DO_NOT_EXIST,
@@ -390,7 +391,7 @@ class MobileSkusCreationView(APIView):
             try:
                 course_run = CourseKey.from_string(course_run_key)
             except InvalidKeyError:
-                # An `InvalidKeyError` is thrown because this course key not a course run key
+                # An `InvalidKeyError` is thrown because this course key is not a course run key
                 missing_course_runs.append(course_run_key)
                 continue
 
@@ -404,8 +405,13 @@ class MobileSkusCreationView(APIView):
                 course=course_run,
             )
 
-            if not parent_product or len(parent_product) > 1:
-                # Either we couldn't find parent product or we are handling a use case we are not familiar with.
+            if not parent_product.exists():
+                failed_course_runs.append(course_run_key)
+                logger.error(MISSING_PRODUCT_ERROR, course_run_key)
+                continue
+
+            if parent_product.count() > 1:
+                # We are handling a use case we are not familiar with.
                 #  We should return the course id to add mobile skus manually for this course run.
                 failed_course_runs.append(course_run_key)
                 logger.error(FOUND_MULTIPLE_PRODUCTS_ERROR, course_run_key)
@@ -419,11 +425,11 @@ class MobileSkusCreationView(APIView):
                 continue
 
             if not mobile_products:
-                logger.error(SKUS_CREATION_ERROR, course_run_key)
-                failed_course_runs.append(SKUS_CREATION_FAILURE, course_run_key)
+                failed_course_runs.append(course_run_key)
+                logger.error(SKUS_CREATION_FAILURE, course_run_key)
                 continue
 
-            created_skus[course_run_key] = [mobile_products[0].partner_sku, mobile_products[0].partner_sku]
+            created_skus[course_run_key] = [mobile_products[0].partner_sku, mobile_products[1].partner_sku]
             course = Course.objects.get(id=course_run)
             course.publish_to_lms()
 
