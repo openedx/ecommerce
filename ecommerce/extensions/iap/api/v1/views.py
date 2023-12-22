@@ -5,24 +5,28 @@ import time
 import app_store_notifications_v2_validator as asn2
 import httplib2
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
+from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 from edx_django_utils import monitoring as monitoring_utils
 from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
+from opaque_keys import InvalidKeyError
+from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from oscar.core.loading import get_class, get_model
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.courses.constants import CertificateType
+from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.api.v2.views.checkout import CheckoutView
 from ecommerce.extensions.basket.exceptions import BadRequestException
@@ -46,6 +50,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
     ERROR_ORDER_NOT_FOUND_FOR_REFUND,
     ERROR_REFUND_NOT_COMPLETED,
     ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND,
+    FOUND_MULTIPLE_PRODUCTS_ERROR,
     GOOGLE_PUBLISHER_API_SCOPE,
     IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE,
     LOGGER_BASKET_ALREADY_PURCHASED,
@@ -63,12 +68,15 @@ from ecommerce.extensions.iap.api.v1.constants import (
     LOGGER_PAYMENT_FAILED_FOR_BASKET,
     LOGGER_REFUND_SUCCESSFUL,
     LOGGER_STARTING_PAYMENT_FLOW,
+    MISSING_PRODUCT_ERROR,
     NO_PRODUCT_AVAILABLE,
     PRODUCT_IS_NOT_AVAILABLE,
     PRODUCTS_DO_NOT_EXIST,
     RECEIVED_NOTIFICATION_FROM_APPLE,
     SEGMENT_MOBILE_BASKET_ADD,
-    SEGMENT_MOBILE_PURCHASE_VIEW
+    SEGMENT_MOBILE_PURCHASE_VIEW,
+    SKUS_CREATION_ERROR,
+    SKUS_CREATION_FAILURE
 )
 from ecommerce.extensions.iap.api.v1.exceptions import RefundCompletionException
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
@@ -76,6 +84,7 @@ from ecommerce.extensions.iap.api.v1.utils import products_in_basket_already_pur
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
+from ecommerce.extensions.iap.utils import create_child_products_for_mobile
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
@@ -366,3 +375,67 @@ class IOSRefundView(BaseRefund):
 
         status_code = status.HTTP_200_OK if is_refunded else status.HTTP_500_INTERNAL_SERVER_ERROR
         return Response(status=status_code)
+
+
+class MobileSkusCreationView(APIView):
+
+    permission_classes = (IsAuthenticated, IsAdminUser,)
+
+    def post(self, request):
+        missing_course_runs = []
+        failed_course_runs = []
+        created_skus = {}
+
+        course_run_keys = request.data.get('courses', [])
+        for course_run_key in course_run_keys:
+            try:
+                course_run = CourseKey.from_string(course_run_key)
+            except InvalidKeyError:
+                # An `InvalidKeyError` is thrown because this course key is not a course run key
+                missing_course_runs.append(course_run_key)
+                continue
+
+            parent_product = Product.objects.filter(
+                structure=Product.PARENT,
+                children__stockrecords__isnull=False,
+                children__attribute_values__attribute__name="certificate_type",
+                children__attribute_values__value_text=CertificateType.VERIFIED,
+                product_class__name=SEAT_PRODUCT_CLASS_NAME,
+                children__expires__gt=now(),
+                course=course_run,
+            )
+
+            if not parent_product.exists():
+                failed_course_runs.append(course_run_key)
+                logger.error(MISSING_PRODUCT_ERROR, course_run_key)
+                continue
+
+            if parent_product.count() > 1:
+                # We are handling a use case we are not familiar with.
+                #  We should return the course id to add mobile skus manually for this course run.
+                failed_course_runs.append(course_run_key)
+                logger.error(FOUND_MULTIPLE_PRODUCTS_ERROR, course_run_key)
+                continue
+
+            try:
+                mobile_products = create_child_products_for_mobile(parent_product[0])
+            except Exception:   # pylint: disable=broad-except
+                failed_course_runs.append(course_run_key)
+                logger.error(SKUS_CREATION_ERROR, course_run_key)
+                continue
+
+            if not mobile_products:
+                failed_course_runs.append(course_run_key)
+                logger.error(SKUS_CREATION_FAILURE, course_run_key)
+                continue
+
+            created_skus[course_run_key] = [mobile_products[0].partner_sku, mobile_products[1].partner_sku]
+            course = Course.objects.get(id=course_run)
+            course.publish_to_lms()
+
+        result = {
+            'new_mobile_skus': created_skus,
+            'failed_course_ids': failed_course_runs,
+            'missing_course_runs': missing_course_runs
+        }
+        return JsonResponse(result, status=status.HTTP_200_OK)
