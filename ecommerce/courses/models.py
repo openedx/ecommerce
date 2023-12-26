@@ -155,6 +155,7 @@ class Course(models.Model):
             remove_stale_modes=True,
             create_enrollment_code=False,
             sku=None,
+            variant_id=None,
     ):
         """
         Creates and updates course seat products.
@@ -218,6 +219,7 @@ class Course(models.Model):
         seat.attr.certificate_type = certificate_type
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
+        seat.attr.variant_id = variant_id
         if certificate_type in ENROLLMENT_CODE_SEAT_TYPES and create_enrollment_code:
             self._create_or_update_enrollment_code(
                 certificate_type, id_verification_required, self.partner, price, expires
