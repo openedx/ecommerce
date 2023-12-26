@@ -284,8 +284,8 @@ class Course(models.Model):
             return None
 
     def _create_or_update_enrollment_code(
-            self, seat_type, id_verification_required, partner, price, expires, variant_id=None
-        ):
+        self, seat_type, id_verification_required, partner, price, expires, variant_id=None
+    ):
         """
         Creates an enrollment code product and corresponding stock record for the specified seat.
         Includes course ID and seat type as product attributes.
