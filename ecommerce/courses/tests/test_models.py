@@ -224,6 +224,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
             credit_provider=credit_provider,
             credit_hours=credit_hours,
             sku=credit_seat.stockrecords.first().partner_sku,
+            variant_id=variant_id
         )
         self.assert_course_seat_valid(
             credit_seat,

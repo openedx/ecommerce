@@ -219,9 +219,10 @@ class Course(models.Model):
         seat.attr.certificate_type = certificate_type
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
+        seat.attr.variant_id = variant_id
         if certificate_type in ENROLLMENT_CODE_SEAT_TYPES and create_enrollment_code:
             self._create_or_update_enrollment_code(
-                certificate_type, id_verification_required, self.partner, price, expires, variant_id
+                certificate_type, id_verification_required, self.partner, price, expires
             )
 
         if credit_provider:
@@ -283,9 +284,7 @@ class Course(models.Model):
         except Product.DoesNotExist:
             return None
 
-    def _create_or_update_enrollment_code(
-        self, seat_type, id_verification_required, partner, price, expires, variant_id=None
-    ):
+    def _create_or_update_enrollment_code(self, seat_type, id_verification_required, partner, price, expires):
         """
         Creates an enrollment code product and corresponding stock record for the specified seat.
         Includes course ID and seat type as product attributes.
@@ -316,8 +315,6 @@ class Course(models.Model):
         enrollment_code.attr.course_key = self.id
         enrollment_code.attr.seat_type = seat_type
         enrollment_code.attr.id_verification_required = id_verification_required
-        if variant_id:
-            enrollment_code.attr.variant_id = variant_id
         enrollment_code.save()
 
         try:
