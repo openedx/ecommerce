@@ -771,6 +771,7 @@ class SeatProductHelper:
         stockrecords = product.get('stockrecords', [])
         if stockrecords:
             sku = stockrecords[0].get('partner_sku')
+        variant_id = attrs.get('variant_id')
 
         seat = course.create_or_update_seat(
             certificate_type,
@@ -781,6 +782,7 @@ class SeatProductHelper:
             credit_hours=credit_hours,
             create_enrollment_code=create_enrollment_code,
             sku=sku,
+            variant_id=variant_id
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.

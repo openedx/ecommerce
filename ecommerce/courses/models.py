@@ -155,6 +155,7 @@ class Course(models.Model):
             remove_stale_modes=True,
             create_enrollment_code=False,
             sku=None,
+            variant_id=None,
     ):
         """
         Creates and updates course seat products.
@@ -220,7 +221,7 @@ class Course(models.Model):
         seat.attr.id_verification_required = id_verification_required
         if certificate_type in ENROLLMENT_CODE_SEAT_TYPES and create_enrollment_code:
             self._create_or_update_enrollment_code(
-                certificate_type, id_verification_required, self.partner, price, expires
+                certificate_type, id_verification_required, self.partner, price, expires, variant_id
             )
 
         if credit_provider:
@@ -282,7 +283,7 @@ class Course(models.Model):
         except Product.DoesNotExist:
             return None
 
-    def _create_or_update_enrollment_code(self, seat_type, id_verification_required, partner, price, expires):
+    def _create_or_update_enrollment_code(self, seat_type, id_verification_required, partner, price, expires, variant_id=None):
         """
         Creates an enrollment code product and corresponding stock record for the specified seat.
         Includes course ID and seat type as product attributes.
@@ -313,6 +314,8 @@ class Course(models.Model):
         enrollment_code.attr.course_key = self.id
         enrollment_code.attr.seat_type = seat_type
         enrollment_code.attr.id_verification_required = id_verification_required
+        if variant_id:
+            enrollment_code.attr.variant_id = variant_id
         enrollment_code.save()
 
         try:
