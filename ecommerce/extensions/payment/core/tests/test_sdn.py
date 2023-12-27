@@ -479,7 +479,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         If there is no hit, allow purchase.
         """
         request = RequestFactory().post('/payment/cybersource/submit/')
-        middleware = SessionMiddleware()
+        middleware = SessionMiddleware(get_response=lambda request: None)
         middleware.process_request(request)
         request.session.save()
         site_configuration = self.site.siteconfiguration

@@ -246,7 +246,7 @@ django-oscar==3.2.2
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.txt
-django-phonenumber-field==5.0.0
+django-phonenumber-field==5.1.0
     # via
     #   -r requirements/base.txt
     #   django-oscar
