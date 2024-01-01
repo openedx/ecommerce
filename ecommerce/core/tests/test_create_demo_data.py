@@ -59,7 +59,13 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
             partner=self.partner
         )
 
-        seat_attrs = {'certificate_type': '', 'expires': None, 'price': 0.00, 'id_verification_required': False}
+        seat_attrs = {
+            'certificate_type': '',
+            'expires': None,
+            'price': 0.00,
+            'id_verification_required': False,
+            'variant_id': '00000000-0000-0000-0000-000000000000'
+        }
         course.create_or_update_seat(**seat_attrs)
 
         with mock.patch.object(Course, 'publish_to_lms', return_value=None) as mock_publish:
