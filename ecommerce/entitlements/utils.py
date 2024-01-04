@@ -94,7 +94,7 @@ def create_or_update_course_entitlement(
             'product': course_entitlement,
             'partner': partner,
             'partner_sku': generate_sku(course_entitlement, partner),
-            'price_excl_tax': price,
+            'price': price,
             'price_currency': settings.OSCAR_DEFAULT_CURRENCY,
         }
     )

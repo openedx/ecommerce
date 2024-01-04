@@ -106,7 +106,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(getattr(seat.attr, 'certificate_type', ''), certificate_type)
         self.assertEqual(seat.attr.course_key, course.id)
         self.assertEqual(seat.attr.id_verification_required, id_verification_required)
-        self.assertEqual(seat.stockrecords.first().price_excl_tax, price)
+        self.assertEqual(seat.stockrecords.first().price, price)
 
         if credit_provider:
             self.assertEqual(seat.attr.credit_provider, credit_provider)
@@ -157,7 +157,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertIsNone(enrollment_code.expires)
 
         stock_record = StockRecord.objects.get(product=enrollment_code)
-        self.assertEqual(stock_record.price_excl_tax, price)
+        self.assertEqual(stock_record.price, price)
         self.assertEqual(stock_record.price_currency, settings.OSCAR_DEFAULT_CURRENCY)
         self.assertEqual(stock_record.partner, self.partner)
 

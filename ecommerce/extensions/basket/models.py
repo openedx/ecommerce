@@ -63,7 +63,7 @@ class Basket(AbstractBasket):
         for line in self.all_lines():
             # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
             # usage. Given that orders for free items are ignored, there is no need for these events.
-            if line.stockrecord.price_excl_tax > 0:
+            if line.stockrecord.price > 0:
                 properties = translate_basket_line_for_segment(line)
                 track_segment_event(self.site, self.owner, 'Product Removed', properties)
                 product_removed_event_fired = True
@@ -104,7 +104,7 @@ class Basket(AbstractBasket):
 
         # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
         # usage. Given that orders for free items are ignored, there is no need for these events.
-        if line.stockrecord.price_excl_tax > 0:
+        if line.stockrecord.price > 0:
             properties = translate_basket_line_for_segment(line)
             properties['cart_id'] = self.id
             track_segment_event(self.site, self.owner, 'Product Added', properties)

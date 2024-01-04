@@ -215,7 +215,7 @@ class Command(BaseCommand):
         if len(seats) == 1:
             seat = seats[0]
             seat_type = getattr(seat.attr, 'certificate_type', '').lower()
-            price = seat.stockrecords.all()[0].price_excl_tax
+            price = seat.stockrecords.all()[0].price
             id_verification_required = getattr(seat.attr, 'id_verification_required', False)
 
             return seat_type, price, id_verification_required
