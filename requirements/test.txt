@@ -318,7 +318,7 @@ edx-django-utils==5.5.0
     #   edx-drf-extensions
     #   edx-rest-api-client
     #   getsmarter-api-clients
-edx-drf-extensions==9.0.1
+edx-drf-extensions==9.1.0
     # via
     #   -r requirements/base.txt
     #   edx-rbac
@@ -918,6 +918,7 @@ slumber==0.7.1
     #   edx-rest-api-client
 social-auth-app-django==5.2.0
     # via
+    #   -c requirements/constraints.txt
     #   -r requirements/base.txt
     #   edx-auth-backends
 social-auth-core==4.4.2
