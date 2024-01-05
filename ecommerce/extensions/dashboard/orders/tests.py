@@ -3,7 +3,6 @@
 import os
 from unittest import SkipTest, skipIf
 
-import pytest
 from django.contrib.messages import constants as MSG
 from django.test import override_settings
 from django.urls import reverse
@@ -45,7 +44,6 @@ class OrderViewTestsMixin:
             self.assertListEqual(list(response.context['orders']), orders)
 
 
-@pytest.mark.acceptance
 class OrderViewBrowserTestBase(LiveServerTestCase):
     @classmethod
     def setUpClass(cls):

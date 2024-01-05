@@ -4,7 +4,6 @@ import os
 from unittest import SkipTest, skip
 
 import ddt
-import pytest
 from django.urls import reverse
 from oscar.core.loading import get_model
 from selenium.common.exceptions import NoSuchElementException
@@ -25,7 +24,6 @@ ALL_REFUND_STATUSES = (
 
 
 @ddt.ddt
-@pytest.mark.acceptance
 class RefundAcceptanceTestMixin(RefundTestMixin):
     @classmethod
     def setUpClass(cls):
