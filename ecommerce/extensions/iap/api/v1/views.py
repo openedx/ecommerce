@@ -80,7 +80,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
 )
 from ecommerce.extensions.iap.api.v1.exceptions import RefundCompletionException
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
-from ecommerce.extensions.iap.api.v1.utils import products_in_basket_already_purchased
+from ecommerce.extensions.iap.api.v1.utils import create_ios_skus, products_in_basket_already_purchased
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
@@ -385,6 +385,7 @@ class MobileSkusCreationView(APIView):
         missing_course_runs = []
         failed_course_runs = []
         created_skus = {}
+        failed_ios_skus = []
 
         course_run_keys = request.data.get('courses', [])
         for course_run_key in course_run_keys:
@@ -429,13 +430,27 @@ class MobileSkusCreationView(APIView):
                 logger.error(SKUS_CREATION_FAILURE, course_run_key)
                 continue
 
-            created_skus[course_run_key] = [mobile_products[0].partner_sku, mobile_products[1].partner_sku]
             course = Course.objects.get(id=course_run)
             course.publish_to_lms()
+            created_skus[course_run_key] = [mobile_products[0].partner_sku, mobile_products[1].partner_sku]
+
+            # create ios product on appstore
+            partner_short_code = request.site.siteconfiguration.partner.short_code
+            configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][IOSIAP.NAME.lower()]
+            ios_product = list((filter(lambda sku: 'ios' in sku.partner_sku, mobile_products)))[0]
+            course_data = {
+                'price': ios_product.price_excl_tax,
+                'name': course.name,
+                'key': course_run_key
+            }
+            error_msg = create_ios_skus(course_data, ios_product.partner_sku, configuration)
+            if error_msg:
+                failed_ios_skus.append(error_msg)
 
         result = {
             'new_mobile_skus': created_skus,
             'failed_course_ids': failed_course_runs,
-            'missing_course_runs': missing_course_runs
+            'missing_course_runs': missing_course_runs,
+            'failed_ios_skus': failed_ios_skus
         }
         return JsonResponse(result, status=status.HTTP_200_OK)
