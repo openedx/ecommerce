@@ -5,10 +5,10 @@ from unittest import SkipTest, skip
 
 import ddt
 import pytest
-from bok_choy.browser import browser
 from django.urls import reverse
 from oscar.core.loading import get_model
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.refund.status import REFUND
@@ -32,7 +32,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         if os.environ.get('DISABLE_ACCEPTANCE_TESTS') == 'True':
             raise SkipTest
 
-        cls.selenium = browser()
+        cls.selenium = WebDriver()
         cls.selenium.set_page_load_timeout(30)
         super(RefundAcceptanceTestMixin, cls).setUpClass()
 

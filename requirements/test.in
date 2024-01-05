@@ -3,7 +3,6 @@
 -r e2e.txt                  # required for quality
 -r tox.txt
 
-bok_choy
 coverage
 ddt
 diff-cover

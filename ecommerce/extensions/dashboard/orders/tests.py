@@ -4,12 +4,12 @@ import os
 from unittest import SkipTest, skipIf
 
 import pytest
-from bok_choy.browser import browser
 from django.contrib.messages import constants as MSG
 from django.test import override_settings
 from django.urls import reverse
 from oscar.core.loading import get_model
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.dashboard.orders.views import queryset_orders_for_user
@@ -52,7 +52,7 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
         if os.environ.get('DISABLE_ACCEPTANCE_TESTS') == 'True':
             raise SkipTest
 
-        cls.selenium = browser()
+        cls.selenium = WebDriver()
         super(OrderViewBrowserTestBase, cls).setUpClass()
 
     @classmethod
