@@ -1,13 +1,7 @@
-# #-#-#-#-#  django.po (ecommerce)  #-#-#-#-#
-# edX translation file
-# Copyright (C) 2018 edX
+# edX translation file.
+# Copyright (C) 2024 EdX
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
 # Translators:
 # ashed <craysy@gmail.com>, 2022
 # Iaroslav V <yivasilev@fa.ru>, 2018
@@ -20,413 +14,412 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
+"POT-Creation-Date: 2023-06-13 08:00+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: ashed <craysy@gmail.com>, 2022\n"
-"Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
+"Language-Team: Russian (http://app.transifex.com/open-edx/edx-platform/language/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: ecommerce/static/js/models/coupon_model.js:33
-#: ecommerce/static/js/models/enterprise_coupon_model.js:15
+#: static/js/models/coupon_model.js:33
+#: static/js/models/enterprise_coupon_model.js:15
 msgid "This field is required."
 msgstr "Это обязательное поле."
 
-#: ecommerce/static/js/models/coupon_model.js:34
-#: ecommerce/static/js/models/enterprise_coupon_model.js:16
+#: static/js/models/coupon_model.js:34
+#: static/js/models/enterprise_coupon_model.js:16
 msgid "This value must be a number."
 msgstr "Это значение должно быть числом."
 
-#: ecommerce/static/js/models/coupon_model.js:35
-#: ecommerce/static/js/models/enterprise_coupon_model.js:17
+#: static/js/models/coupon_model.js:35
+#: static/js/models/enterprise_coupon_model.js:17
 msgid "This value must be a date."
 msgstr "Это значение должно быть датой"
 
-#: ecommerce/static/js/models/coupon_model.js:36
+#: static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
 msgstr "Должно быть выбрано не менее одного типа сиденья."
 
-#: ecommerce/static/js/models/coupon_model.js:72
+#: static/js/models/coupon_model.js:72
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
 msgstr "Это поле должно быть пустым или содержать 1-16 буквенно-цифровых символов."
 
-#: ecommerce/static/js/models/coupon_model.js:81
+#: static/js/models/coupon_model.js:81
 #, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr "Домен электронной почты {%s} неправильный"
 
-#: ecommerce/static/js/models/coupon_model.js:98
+#: static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
 msgstr "Должна быть после даты начала"
 
-#: ecommerce/static/js/models/coupon_model.js:128
+#: static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "Максимальное использование многоразовых купонов не должно превышать 2."
 
-#: ecommerce/static/js/models/coupon_model.js:152
+#: static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
 msgstr "Должна быть раньше даты окончания"
 
-#: ecommerce/static/js/models/coupon_model.js:174
+#: static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
 msgstr "Укажите действительный ID курса"
 
-#: ecommerce/static/js/models/coupon_model.js:188
+#: static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
 msgstr "Требуется действительная программа UUID."
 
-#: ecommerce/static/js/models/course_model.js:54
+#: static/js/models/course_model.js:54
 msgid "You must select a course type."
 msgstr "Вы должны выбрать тип курса"
 
-#: ecommerce/static/js/models/course_model.js:60
+#: static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
 msgstr "Выберите, должно ли быть создано место."
 
-#: ecommerce/static/js/models/course_model.js:77
+#: static/js/models/course_model.js:77
 msgid "The verification deadline must occur AFTER the upgrade deadline."
 msgstr "Время верификации должно быть ПОЗЖЕ срока обновления. "
 
-#: ecommerce/static/js/models/course_model.js:86
+#: static/js/models/course_model.js:86
 msgid "Product validation failed."
 msgstr "Ошибка проверки продукта."
 
-#: ecommerce/static/js/models/course_model.js:94
-#: ecommerce/static/js/views/dynamic_catalog_view.js:70
+#: static/js/models/course_model.js:94
+#: static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
 msgstr "Идентификатор курса"
 
-#: ecommerce/static/js/models/course_model.js:95
+#: static/js/models/course_model.js:95
 msgid "Course Name"
 msgstr "Название курса"
 
-#: ecommerce/static/js/models/course_model.js:96
-#: ecommerce/static/js/views/course_list_view.js:77
+#: static/js/models/course_model.js:96 static/js/views/course_list_view.js:77
 msgid "Course Type"
 msgstr "Вид курса"
 
-#: ecommerce/static/js/models/course_model.js:97
+#: static/js/models/course_model.js:97
 msgid "Verification Deadline"
 msgstr "Срок подтверждения данных"
 
-#: ecommerce/static/js/models/course_model.js:98
+#: static/js/models/course_model.js:98
 msgid "Include Honor Seat"
 msgstr "Включить место Кодекса чести"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:28
+#: static/js/models/course_seats/course_seat.js:28
 msgid "All course seats must have a price."
 msgstr "Все места курса должны иметь цену."
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:45
+#: static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
 msgstr "Подтвержденные места должны иметь крайний срок обновления."
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:53
+#: static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr "Время обновления должно быть РАНЬШЕ времени верификации. "
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:84
+#: static/js/models/course_seats/course_seat.js:84
 msgid "Verified"
 msgstr "Подтверждено"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:86
-#: ecommerce/static/js/views/course_form_view.js:77
+#: static/js/models/course_seats/course_seat.js:86
+#: static/js/views/course_form_view.js:77
 msgid "Credit"
 msgstr "Баллы"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:89
+#: static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
 msgstr "Профессиональный"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:91
+#: static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
 msgstr "Сертификат Кодекса чести"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:93
+#: static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
 msgstr "Бесплатный курс"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:101
+#: static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
 msgstr "Подтверждённый сертификат"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:105
+#: static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
 msgstr "Сертификат повышения квалификации"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:108
+#: static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
 msgstr "Сертификат Кодекса чести"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:111
+#: static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
 msgstr "Нет сертификата"
 
-#: ecommerce/static/js/models/course_seats/credit_seat.js:26
+#: static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
 msgstr "У курса должен быть указан провайдер зачётных единиц."
 
-#: ecommerce/static/js/models/course_seats/credit_seat.js:30
+#: static/js/models/course_seats/credit_seat.js:30
 msgid "Please select a valid credit provider."
 msgstr "Пожалуйста, выберите верного кредитного провайдера "
 
-#: ecommerce/static/js/models/course_seats/credit_seat.js:39
+#: static/js/models/course_seats/credit_seat.js:39
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Должно быть определено количество зачётных единиц."
 
-#: ecommerce/static/js/models/enterprise_coupon_model.js:18
+#: static/js/models/enterprise_coupon_model.js:18
 msgid "This value must be a valid email."
 msgstr "Это значение должно быть действительным для электронной почты."
 
-#: ecommerce/static/js/pages/basket_page.js:27
+#: static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
 msgstr "Возникла проблема во время оформления заказа.  Пожалуйста, свяжитесь со службой поддержки."
 
-#: ecommerce/static/js/pages/basket_page.js:101
+#: static/js/pages/basket_page.js:101
 msgid "This field is required"
 msgstr "Это поле обязательно "
 
-#: ecommerce/static/js/pages/basket_page.js:145
+#: static/js/pages/basket_page.js:145
 msgid "Invalid card number"
 msgstr "Неправильный номер карты"
 
-#: ecommerce/static/js/pages/basket_page.js:147
+#: static/js/pages/basket_page.js:147
 msgid "Unsupported card type"
 msgstr "Не поддерживаемый тип карты "
 
-#: ecommerce/static/js/pages/basket_page.js:149
+#: static/js/pages/basket_page.js:149
 msgid "Invalid security number"
 msgstr "Неверный номер безопасности"
 
-#: ecommerce/static/js/pages/basket_page.js:154
+#: static/js/pages/basket_page.js:154
 msgid "Invalid month"
 msgstr "Недействительный месяц"
 
-#: ecommerce/static/js/pages/basket_page.js:156
+#: static/js/pages/basket_page.js:156
 msgid "Invalid year"
 msgstr "Недействительный год"
 
-#: ecommerce/static/js/pages/basket_page.js:158
+#: static/js/pages/basket_page.js:158
 msgid "Card expired"
 msgstr "Срок действия карты истек"
 
-#: ecommerce/static/js/pages/basket_page.js:474
+#: static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:475
+#: static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
 msgstr "Регион/область (обязательно) "
 
-#: ecommerce/static/js/pages/coupon_create_page.js:12
-#: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
+#: static/js/pages/coupon_create_page.js:12
+#: static/js/pages/enterprise_coupon_create_page.js:12
 msgid "Create New Coupon"
 msgstr "Создать новый купон"
 
-#: ecommerce/static/js/pages/coupon_detail_page.js:13
-#: ecommerce/static/js/pages/enterprise_coupon_detail_page.js:13
+#: static/js/pages/coupon_detail_page.js:13
+#: static/js/pages/enterprise_coupon_detail_page.js:13
 msgid "View Coupon"
 msgstr "Просмотреть купон"
 
-#: ecommerce/static/js/pages/coupon_edit_page.js:13
-#: ecommerce/static/js/pages/enterprise_coupon_edit_page.js:13
+#: static/js/pages/coupon_edit_page.js:13
+#: static/js/pages/enterprise_coupon_edit_page.js:13
 msgid "Edit Coupon"
 msgstr "Редактировать купон"
 
-#: ecommerce/static/js/pages/coupon_list_page.js:10
+#: static/js/pages/coupon_list_page.js:10
 msgid "Coupon Codes"
 msgstr "Коды купонов"
 
-#: ecommerce/static/js/pages/course_create_page.js:12
+#: static/js/pages/course_create_page.js:12
 msgid "Create New Course"
 msgstr "Создайте новый курс"
 
-#: ecommerce/static/js/pages/course_detail_page.js:13
+#: static/js/pages/course_detail_page.js:13
 msgid "View Course"
 msgstr "Просмотр курса"
 
-#: ecommerce/static/js/pages/course_edit_page.js:13
+#: static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
 msgstr "Редактировать курс"
 
-#: ecommerce/static/js/pages/course_list_page.js:10
+#: static/js/pages/course_list_page.js:10
 msgid "Courses"
 msgstr "Курсы"
 
-#: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
+#: static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
 msgstr "Коды купонов предприятия"
 
-#: ecommerce/static/js/pages/offer_page.js:14
+#: static/js/pages/offer_page.js:14
 msgid "Redeem"
 msgstr "Использовать"
 
-#: ecommerce/static/js/pages/receipt_page.js:21
+#: static/js/pages/receipt_page.js:21
 msgid ""
 "Caution! Using the back button on this page may cause you to be charged "
 "again."
 msgstr "Осторожно! Использование кнопки \"Назад\" на этой странице может привести к повторной зарядке. "
 
 #. Translators: Do not translate "Apple Pay".
-#: ecommerce/static/js/payment_processors/cybersource.js:225
+#: static/js/payment_processors/cybersource.js:225
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
 msgstr "Apple Pay в настоящее время недоступен.  Пожалуйста, попробуйте другой способ оплаты."
 
-#: ecommerce/static/js/payment_processors/cybersource.js:255
+#: static/js/payment_processors/cybersource.js:255
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
 msgstr "При обработке платежа произошла ошибка.  Вам НЕ предъявлено обвинение.  Пожалуйста, повторите попытку или выберите другой способ оплаты."
 
-#: ecommerce/static/js/payment_processors/stripe.js:71
+#: static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
 "been charged. Please check your payment details, and try again."
 msgstr "При попытке обработать платеж произошла ошибка.  Вам не предъявлено обвинение.  Пожалуйста, проверьте платежные реквизиты и повторите попытку."
 
-#: ecommerce/static/js/payment_processors/stripe.js:110
+#: static/js/payment_processors/stripe.js:110
 msgid "An error occurred while processing your payment. Please try again."
 msgstr "При обработке платежа произошла ошибка.  Пожалуйста, попробуйте еще раз"
 
-#: ecommerce/static/js/utils/utils.js:184
+#: static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
 msgstr "Запятая трейлинга запрещена."
 
-#: ecommerce/static/js/views/coupon_detail_view.js:108
-#: ecommerce/static/js/views/coupon_form_view.js:62
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
+#: static/js/views/coupon_detail_view.js:108
+#: static/js/views/coupon_form_view.js:62
+#: static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
 msgstr "Может быть использован один раз одним клиентом"
 
-#: ecommerce/static/js/views/coupon_detail_view.js:110
-#: ecommerce/static/js/views/coupon_form_view.js:70
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
+#: static/js/views/coupon_detail_view.js:110
+#: static/js/views/coupon_form_view.js:70
+#: static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
 msgstr "Может быть использован много раз многими клиентами"
 
-#: ecommerce/static/js/views/coupon_detail_view.js:112
-#: ecommerce/static/js/views/coupon_form_view.js:66
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
+#: static/js/views/coupon_detail_view.js:112
+#: static/js/views/coupon_form_view.js:66
+#: static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
 msgstr "Может быть использован один раз многими клиентами"
 
-#: ecommerce/static/js/views/coupon_form_view.js:51
+#: static/js/views/coupon_form_view.js:51
 msgid "Enrollment Code"
 msgstr "Регистрационный код"
 
-#: ecommerce/static/js/views/coupon_form_view.js:55
+#: static/js/views/coupon_form_view.js:55
 msgid "Discount Code"
 msgstr "Скидочный код"
 
-#: ecommerce/static/js/views/coupon_form_view.js:781
+#: static/js/views/coupon_form_view.js:787
 msgid "Save Changes"
 msgstr "Сохранить изменения"
 
-#: ecommerce/static/js/views/coupon_form_view.js:796
+#: static/js/views/coupon_form_view.js:802
 msgid "Create Coupon"
 msgstr "Создать купон"
 
-#: ecommerce/static/js/views/coupon_list_view.js:35
-#: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
+#: static/js/views/coupon_list_view.js:35
+#: static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
 msgstr "Имя"
 
-#: ecommerce/static/js/views/coupon_list_view.js:42
-#: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
+#: static/js/views/coupon_list_view.js:42
+#: static/js/views/enterprise_coupon_list_view.js:31
 msgid "Created"
 msgstr "Создано"
 
-#: ecommerce/static/js/views/coupon_list_view.js:49
+#: static/js/views/coupon_list_view.js:49
 msgid "Custom Code"
 msgstr "Пользовательский код"
 
-#: ecommerce/static/js/views/coupon_list_view.js:55
-#: ecommerce/static/js/views/enterprise_coupon_list_view.js:44
+#: static/js/views/coupon_list_view.js:55
+#: static/js/views/enterprise_coupon_list_view.js:44
 msgid "Client"
 msgstr "Клиент"
 
-#: ecommerce/static/js/views/coupon_list_view.js:61
+#: static/js/views/coupon_list_view.js:61
 msgid "Category"
 msgstr "Категория"
 
-#: ecommerce/static/js/views/coupon_list_view.js:67
-#: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
+#: static/js/views/coupon_list_view.js:67
+#: static/js/views/enterprise_coupon_list_view.js:62
 msgid "Coupon Report"
 msgstr "Отчет по купонам"
 
-#: ecommerce/static/js/views/coupon_list_view.js:80
-#: ecommerce/static/js/views/course_list_view.js:25
+#: static/js/views/coupon_list_view.js:80
+#: static/js/views/course_list_view.js:25
 msgid "Search..."
 msgstr "Поиск..."
 
-#: ecommerce/static/js/views/coupon_list_view.js:107
-#: ecommerce/static/js/views/course_list_view.js:52
+#: static/js/views/coupon_list_view.js:107
+#: static/js/views/course_list_view.js:52
 msgid "Next"
 msgstr "Вперёд"
 
-#: ecommerce/static/js/views/coupon_list_view.js:108
-#: ecommerce/static/js/views/course_list_view.js:53
+#: static/js/views/coupon_list_view.js:108
+#: static/js/views/course_list_view.js:53
 msgid "Previous"
 msgstr "Назад"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
-#: ecommerce/static/js/views/coupon_list_view.js:112
+#: static/js/views/coupon_list_view.js:112
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
 msgstr "Отображено _START_ to _END_ of _TOTAL_ купонов"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:115
+#: static/js/views/coupon_list_view.js:115
 msgid "(filtered from _MAX_ total coupons)"
 msgstr "(отобрано из _MAX_ купонов)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:118
+#: static/js/views/coupon_list_view.js:118
 msgid "Display _MENU_ coupons"
 msgstr "Отобразить _MENU_ купоны"
 
-#: ecommerce/static/js/views/course_form_view.js:55
+#: static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
 msgstr "Бесплатно (без сертификата)"
 
-#: ecommerce/static/js/views/course_form_view.js:56
+#: static/js/views/course_form_view.js:56
 msgid "Free audit track. No certificate."
 msgstr "Бесплатный курс. Без сертификата."
 
-#: ecommerce/static/js/views/course_form_view.js:60
+#: static/js/views/course_form_view.js:60
 msgid "Verified and Audit"
 msgstr ""
 
-#: ecommerce/static/js/views/course_form_view.js:61
-#: ecommerce/static/js/views/course_form_view.js:67
+#: static/js/views/course_form_view.js:61
+#: static/js/views/course_form_view.js:67
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate."
 msgstr ""
 
-#: ecommerce/static/js/views/course_form_view.js:62
+#: static/js/views/course_form_view.js:62
 msgid "Also includes the free audit track."
 msgstr ""
 
-#: ecommerce/static/js/views/course_form_view.js:66
+#: static/js/views/course_form_view.js:66
 msgid "Verified Only"
 msgstr ""
 
-#: ecommerce/static/js/views/course_form_view.js:71
+#: static/js/views/course_form_view.js:71
 msgid "Professional Education"
 msgstr "Профессиональное образование"
 
-#: ecommerce/static/js/views/course_form_view.js:72
+#: static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
 msgstr "Платный курс с предварительным удостоверением личности и Сертификатом повышения квалификации"
 
-#: ecommerce/static/js/views/course_form_view.js:78
+#: static/js/views/course_form_view.js:78
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
@@ -434,119 +427,118 @@ msgstr "Платный курс с предварительным удостов
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
-#: ecommerce/static/js/views/course_list_view.js:57
+#: static/js/views/course_list_view.js:57
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
 msgstr "Отображено _START_ - _END_ из _TOTAL_ курсов"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/course_list_view.js:60
+#: static/js/views/course_list_view.js:60
 msgid "(filtered from _MAX_ total courses)"
 msgstr "(отобрано из _MAX_ курсов)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/course_list_view.js:63
+#: static/js/views/course_list_view.js:63
 msgid "Display _MENU_ courses"
 msgstr "Отобразить _MENU_ курсы"
 
-#: ecommerce/static/js/views/course_list_view.js:69
+#: static/js/views/course_list_view.js:69
 msgid "Course"
 msgstr "Курс"
 
-#: ecommerce/static/js/views/course_list_view.js:86
+#: static/js/views/course_list_view.js:86
 msgid "Last Edited"
 msgstr "Последняя модификация"
 
-#: ecommerce/static/js/views/dynamic_catalog_view.js:74
+#: static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
 msgstr "Заголовок места"
 
-#: ecommerce/static/js/views/dynamic_catalog_view.js:78
+#: static/js/views/dynamic_catalog_view.js:78
 msgid "Seat type"
 msgstr "Тип места"
 
-#: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
+#: static/js/views/enterprise_coupon_detail_view.js:28
+#: static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
 msgstr "Может использоваться несколько раз одним клиентом"
 
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
+#: static/js/views/enterprise_coupon_form_view.js:280
 msgid "Create and Add More"
 msgstr ""
 
-#: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
+#: static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
 msgstr "Статус"
 
-#: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
+#: static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
 msgstr "Корпоративный клиент "
 
-#: ecommerce/static/js/views/enterprise_coupon_list_view.js:56
+#: static/js/views/enterprise_coupon_list_view.js:56
 msgid "Enterprise Customer Catalog"
 msgstr "Каталог корпоративных клиентов"
 
-#: ecommerce/static/js/views/form_view.js:71
+#: static/js/views/form_view.js:71
 msgid "A course with the specified ID already exists."
 msgstr "Курс с указанным ID уже существует."
 
-#: ecommerce/static/js/views/form_view.js:81
-#: ecommerce/static/js/views/form_view.js:174
+#: static/js/views/form_view.js:81 static/js/views/form_view.js:174
 msgid "Error!"
 msgstr "Ошибка!"
 
-#: ecommerce/static/js/views/form_view.js:127
+#: static/js/views/form_view.js:127
 msgid "Saving..."
 msgstr "Сохранение..."
 
-#: ecommerce/static/js/views/form_view.js:136
+#: static/js/views/form_view.js:136
 msgid "Please complete all required fields."
 msgstr "Пожалуйста, заполните все необходимые поля."
 
-#: ecommerce/static/js/views/form_view.js:161
+#: static/js/views/form_view.js:161
 msgid "An error occurred while saving the data."
 msgstr "При сохранении данных возникла ошибка."
 
-#: ecommerce/static/js/views/offer_view.js:198
+#: static/js/views/offer_view.js:198
 msgid "Ellipsis"
 msgstr "Эллипсис"
 
-#: ecommerce/static/js/views/offer_view.js:205
+#: static/js/views/offer_view.js:205
 msgid "Load the records for page "
 msgstr "Загрузить записи для страницы"
 
-#: ecommerce/static/js/views/offer_view.js:212
+#: static/js/views/offer_view.js:212
 msgid "Load the records for the next page"
 msgstr "Загрузить записи для следующей страницы"
 
-#: ecommerce/static/js/views/offer_view.js:220
+#: static/js/views/offer_view.js:220
 msgid "Load the records for the previous page"
 msgstr "Загрузить записи для предыдущей страницы"
 
-#: ecommerce/static/js/views/provider_selection_view.js:33
+#: static/js/views/provider_selection_view.js:33
 msgid "Select"
 msgstr "Выберите"
 
-#: ecommerce/static/js/views/provider_selection_view.js:34
+#: static/js/views/provider_selection_view.js:34
 msgid "Selected"
 msgstr "Выбрано"
 
-#: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:21
+#: static/vendor-extensions/oscar/js/order_actions.js:21
 msgid "Order %(order_number)s has been fulfilled."
 msgstr "Заказ %(order_number)s сделан."
 
-#: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:27
+#: static/vendor-extensions/oscar/js/order_actions.js:27
 msgid "Failed to fulfill order %(order_number)s: %(error)s"
 msgstr "Не получилось сделать заказ %(order_number)s: %(error)s"
 
-#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:24
+#: static/vendor-extensions/oscar/js/refund_list.js:24
 msgid "Refund #%(refund_id)s has been processed."
 msgstr "Процесс возврата денег #%(refund_id)s выполнен."
 
-#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
+#: static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
 msgstr "Ошибка"
 
-#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
+#: static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""
 "Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
 "contact the E-Commerce Development Team."
