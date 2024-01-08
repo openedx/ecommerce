@@ -50,6 +50,7 @@ markdown==3.4.3
 mysqlclient<1.5
 newrelic
 ndg-httpsclient
+openedx-atlas
 path.py==7.2
 paypalrestsdk
 premailer==2.9.2
