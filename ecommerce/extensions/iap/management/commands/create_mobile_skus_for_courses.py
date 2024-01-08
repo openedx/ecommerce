@@ -3,8 +3,8 @@ This command calls the edx-platform API to create mobile skus for given course k
 """
 import json
 import logging
-import requests
 
+import requests
 from django.core.management import BaseCommand, CommandError
 
 logger = logging.getLogger(__name__)
