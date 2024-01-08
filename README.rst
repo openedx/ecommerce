@@ -30,9 +30,11 @@ The code in this repository is licensed under version 3 of the AGPL unless other
 How To Contribute
 -----------------
 
-Anyone merging to this repository is expected to `release and monitor their changes <https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories>`__; if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
+Notice: Internal 2U contributions should be made against the ``2u/main`` branch.  Open source contributions should continue to be made against the ``master`` branch.
 
-Please also read `How To Contribute <https://github.com/openedx/.github/blob/master/CONTRIBUTING.md>`__.
+Anyone merging to the ``2u/main`` branch of this repository is expected to `release and monitor their changes <https://2u-internal.atlassian.net/wiki/spaces/RS/pages/7963261/How+to+contribute+to+our+repositories>`__ (2U-private link); if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
+
+Please also read `How To Contribute <https://github.com/openedx/.github/blob/master/CONTRIBUTING.md>`__. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
 
 Reporting Security Issues
 -------------------------
