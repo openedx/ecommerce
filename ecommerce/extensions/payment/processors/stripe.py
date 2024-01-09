@@ -185,6 +185,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             raise
 
         # proceed only if payment went through
+        # pylint: disable=E1136
         assert confirm_api_response['status'] == "succeeded"
         self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
 
@@ -197,6 +198,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         total = basket.total_incl_tax
         currency = basket.currency
+        # pylint: disable=E1136
         card_object = confirm_api_response['charges']['data'][0]['payment_method_details']['card']
         card_number = card_object['last4']
         card_type = STRIPE_CARD_TYPE_MAP.get(card_object['brand'])
