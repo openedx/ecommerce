@@ -811,7 +811,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         all_uploaded_un_uploaded_files = request.data.pop('template_files', [])
         self._validate_email_fields(subject, greeting, closing)
         files_with_url = [
-            {'file_name': file['name'], 'url':file['url']}
+            {'file_name': file['name'], 'url': file['url']}
             for file in all_uploaded_un_uploaded_files
             if 'url' in file
         ]
@@ -916,7 +916,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         self._validate_assignments_data(request.data.get('assignments'))
 
         files_with_url = [
-            {'file_name': file['name'], 'url':file['url']}
+            {'file_name': file['name'], 'url': file['url']}
             for file in all_uploaded_un_uploaded_files
             if 'url' in file
         ]
@@ -1006,7 +1006,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 )
 
         files_with_url = [
-            {'file_name': file['name'], 'url':file['url']}
+            {'file_name': file['name'], 'url': file['url']}
             for file in all_uploaded_un_uploaded_files
             if 'url' in file
         ]

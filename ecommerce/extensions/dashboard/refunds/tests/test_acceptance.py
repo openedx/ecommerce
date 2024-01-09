@@ -5,12 +5,12 @@ from unittest import SkipTest, skip
 
 import ddt
 import pytest
-from bok_choy.browser import browser
 from django.urls import reverse
 from oscar.core.loading import get_model
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 
+from ecommerce.extensions.dashboard.refunds.tests.browser import browser
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.factories import UserFactory

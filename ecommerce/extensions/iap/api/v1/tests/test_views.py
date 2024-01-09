@@ -996,7 +996,7 @@ class IOSRefundTests(BaseRefundTests):
         View should ignore non refund notifications
         """
 
-        with mock.patch.object(asn2, 'parse') as mock_ios_response_parse,\
+        with mock.patch.object(asn2, 'parse') as mock_ios_response_parse, \
                 LogCapture(self.logger_name) as logger:
 
             non_refund_payload = self.mock_processor_response.copy()

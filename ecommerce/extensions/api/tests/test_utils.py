@@ -28,7 +28,7 @@ class UtilTests(TestCase):
         email_sender = 'ecommerce.extensions.communication.utils.Dispatcher.dispatch_direct_messages'
         msg_t = "Couldn't mail mobile team for change in {}. No email was specified for mobile team in configurations"
         msg = msg_t.format(self.course.name)
-        with LogCapture(logger_name) as utils_logger,\
+        with LogCapture(logger_name) as utils_logger, \
                 mock.patch(email_sender) as mock_send_email:
 
             send_mail_to_mobile_team_for_change_in_course(self.course, self.course.seat_products.all())
@@ -47,7 +47,7 @@ class UtilTests(TestCase):
         iap_configs = IAPProcessorConfiguration.get_solo()
         iap_configs.mobile_team_email = self.mock_mobile_team_mail
         iap_configs.save()
-        with LogCapture(logger_name) as utils_logger,\
+        with LogCapture(logger_name) as utils_logger, \
                 mock.patch(email_sender) as mock_send_email:
 
             send_mail_to_mobile_team_for_change_in_course(self.course, self.course.seat_products.all())
