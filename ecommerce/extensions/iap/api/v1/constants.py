@@ -15,6 +15,12 @@ ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND = "Could not find any transaction to refu
 ERROR_DURING_POST_ORDER_OP = "An error occurred during post order operations."
 FOUND_MULTIPLE_PRODUCTS_ERROR = "Found unexpected number of products for course [%s]"
 GOOGLE_PUBLISHER_API_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
+IOS_PRODUCT_REVIEW_NOTE = 'This in-app purchase will unlock all the content of the course {course_name}\n\n'
+'For testing the end-to-end payment flow, please follow the following steps:\n1. '
+'Go to the Discover tab\n2. Search for "{course_name}"\n3. Enroll in the course'
+' "{course_name}"\n4. Hit \"Upgrade to access more features\", it will open a '
+'detail unlock features page\n5. Hit "Upgrade now for ${course_price}" from the'
+' detail page',
 IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE = "Ignoring notification from apple since we are only expecting" \
                                             " refund notifications"
 LOGGER_BASKET_ALREADY_PURCHASED = "Basket creation failed for user [%s] with SKUS [%s]. Products already purchased"

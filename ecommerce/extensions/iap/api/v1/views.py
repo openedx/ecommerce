@@ -80,7 +80,7 @@ from ecommerce.extensions.iap.api.v1.constants import (
 )
 from ecommerce.extensions.iap.api.v1.exceptions import RefundCompletionException
 from ecommerce.extensions.iap.api.v1.serializers import MobileOrderSerializer
-from ecommerce.extensions.iap.api.v1.utils import create_ios_skus, products_in_basket_already_purchased
+from ecommerce.extensions.iap.api.v1.utils import create_ios_product, products_in_basket_already_purchased
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
@@ -385,7 +385,7 @@ class MobileSkusCreationView(APIView):
         missing_course_runs = []
         failed_course_runs = []
         created_skus = {}
-        failed_ios_skus = []
+        failed_ios_products = []
 
         course_run_keys = request.data.get('courses', [])
         for course_run_key in course_run_keys:
@@ -443,14 +443,14 @@ class MobileSkusCreationView(APIView):
                 'name': course.name,
                 'key': course_run_key
             }
-            error_msg = create_ios_skus(course_data, ios_product.partner_sku, configuration)
+            error_msg = create_ios_product(course_data, ios_product.partner_sku, configuration)
             if error_msg:
-                failed_ios_skus.append(error_msg)
+                failed_ios_products.append(error_msg)
 
         result = {
             'new_mobile_skus': created_skus,
             'failed_course_ids': failed_course_runs,
             'missing_course_runs': missing_course_runs,
-            'failed_ios_skus': failed_ios_skus
+            'failed_ios_products': failed_ios_products
         }
         return JsonResponse(result, status=status.HTTP_200_OK)
