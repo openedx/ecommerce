@@ -21,6 +21,7 @@ INPUT_FILE_NAME = 'course_keys_for_mobile_skus.txt'
 OUTPUT_FILE_NAME = 'mobile_skus_response.txt'
 NEW_MOBILE_SKUS_KEY = 'new_mobile_skus'
 FAILED_COURSE_IDS_KEY = 'failed_course_ids'
+FAILED_IOS_PRODUCTS = 'failed_ios_products'
 MISSING_COURSE_RUNS_KEY = 'missing_course_runs'
 LOCAL_ENVIRONMENT = 'local'
 STAGE_ENVIRONMENT = 'stage'
@@ -79,12 +80,14 @@ class Command(BaseCommand):
             NEW_MOBILE_SKUS_KEY: {},
             FAILED_COURSE_IDS_KEY: [],
             MISSING_COURSE_RUNS_KEY: [],
+            FAILED_IOS_PRODUCTS: []
         }
         error_messages = []
         try:
             with open(INPUT_FILE_NAME, 'r+', encoding="utf-8") as input_file:
                 course_keys = input_file.readlines()
                 for course_key in course_keys:
+                    course_key = course_key.strip()
                     payload = json.dumps({"courses": [course_key]})
                     response = requests.post(create_skus_url, data=payload, headers=headers)
                     if response.status_code == 401:
@@ -162,6 +165,8 @@ class Command(BaseCommand):
             complete_response[FAILED_COURSE_IDS_KEY] += new_response.get(FAILED_COURSE_IDS_KEY)
         if new_response.get(MISSING_COURSE_RUNS_KEY):
             complete_response[MISSING_COURSE_RUNS_KEY] += new_response.get(MISSING_COURSE_RUNS_KEY)
+        if new_response.get(FAILED_IOS_PRODUCTS):
+            complete_response[FAILED_IOS_PRODUCTS] += new_response.get(FAILED_IOS_PRODUCTS)
 
     def _write_response_to_file(self, response):
         with open(OUTPUT_FILE_NAME, 'w+', encoding="utf-8") as output_file:
