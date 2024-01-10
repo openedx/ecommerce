@@ -2,6 +2,7 @@ import logging
 import time
 
 import jwt
+import requests
 from django.contrib.staticfiles.storage import staticfiles_storage
 from oscar.core.loading import get_model
 from requests import Session
@@ -39,31 +40,36 @@ def create_ios_product(course, ios_sku, configuration):
         localize_inapp_purchase(in_app_purchase_id, headers)
         apply_price_of_inapp_purchase(course['price'], in_app_purchase_id, headers)
         upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers)
-        submit_in_app_purchase_for_review(in_app_purchase_id, headers)
+        return submit_in_app_purchase_for_review(in_app_purchase_id, headers)
     except AppStoreRequestException as store_exception:
         sku_error_msg = "{}  for course {} with sku {}".format(str(store_exception), course['key'], ios_sku)
         logger.error(sku_error_msg)
         return sku_error_msg
 
 
-def request_connect_store(url, headers, data={}, method="post"):
+def request_connect_store(url, headers, data=None, method="post"):
     """ Request the given endpoint with multiple tries and backoff time """
     http = Session()
     retries = Retry(
         total=3,
-        backoff_factor=0.1,
-        status_forcelist=[502, 503, 504, 408, 429],
-        allowed_methods={'POST', "GET", "PUT", "PATCH"},
+        backoff_factor=3,
+        status_forcelist=[502, 503, 504, 408, 429, 409],
+        method_whitelist={'POST', "GET", "PUT", "PATCH"},
     )
     http.mount('https://', HTTPAdapter(max_retries=retries))
-    if method == "post":
-        return http.post(url, json=data, headers=headers)
-    elif method == "get":
-        return http.get(url, headers=headers)
-    elif method == "patch":
-        return http.patch(url, json=data, headers=headers)
-    elif method == "put":
-        return http.put(url, data=data, headers=headers)
+    try:
+        if method == "post":
+            response = http.post(url, json=data, headers=headers)
+        if method == "patch":
+            response = http.patch(url, json=data, headers=headers)
+        if method == "put":
+            response = http.put(url, data=data, headers=headers)
+        if method == "get":
+            response = http.get(url, headers=headers)
+    except requests.RequestException as request_exc:
+        raise AppStoreRequestException(request_exc) from request_exc
+
+    return response
 
 
 def get_auth_headers(configuration):
@@ -273,11 +279,6 @@ def upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers):
 
     if not response.status_code == 200:
         raise AppStoreRequestException("Couldn't finalize screenshot")
-
-    # If we submit right after screenshot upload we'll get error because of delay in screenshot uploading
-    response = request_connect_store(url, headers, method='get')
-    if not response.status_code == 200:
-        logger.info("Couldn't confirm screenshot upload but going ahead with submission")
 
 
 def submit_in_app_purchase_for_review(in_app_purchase_id, headers):
