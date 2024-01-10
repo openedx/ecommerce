@@ -49,22 +49,27 @@ def create_ios_product(course, ios_sku, configuration):
 
 def request_connect_store(url, headers, data=None, method="post"):
     """ Request the given endpoint with multiple tries and backoff time """
-    http = Session()
+    # Adding backoff and retries because of following two reasons
+    # 1. In case there is a connection error or server is busy.
+    # 2. Product data needs sometime before it gets updated on server for the final submit call,
+    # If we submit product right after image uploading it will return 409 error
+    # We will try 3 times with backoff time of 1.5, 3, 12 seconds
     retries = Retry(
         total=3,
         backoff_factor=3,
         status_forcelist=[502, 503, 504, 408, 429, 409],
         method_whitelist={'POST', "GET", "PUT", "PATCH"},
     )
+    http = Session()
     http.mount('https://', HTTPAdapter(max_retries=retries))
     try:
         if method == "post":
             response = http.post(url, json=data, headers=headers)
-        if method == "patch":
+        elif method == "patch":
             response = http.patch(url, json=data, headers=headers)
-        if method == "put":
+        elif method == "put":
             response = http.put(url, data=data, headers=headers)
-        if method == "get":
+        elif method == "get":
             response = http.get(url, headers=headers)
     except requests.RequestException as request_exc:
         raise AppStoreRequestException(request_exc) from request_exc
@@ -152,7 +157,7 @@ def localize_inapp_purchase(in_app_purchase_id, headers):
         }
     }
     response = request_connect_store(url=url, data=data, headers=headers)
-    if not response.status_code == 201:
+    if response.status_code != 201:
         raise AppStoreRequestException("Couldn't localize purchase")
 
 
@@ -249,7 +254,7 @@ def upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers):
     }
 
     response = request_connect_store(url, headers, data=data)
-    if not response.status_code == 201:
+    if response.status_code != 201:
         raise AppStoreRequestException("Couldn't get screenshot url")
 
     response = response.json()
@@ -260,7 +265,7 @@ def upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers):
         img_headers['Content-Type'] = 'image/png'
         response = request_connect_store(url, headers=img_headers, data=image.read(), method='put')
 
-        if not response.status_code == 200:
+        if response.status_code != 200:
             raise AppStoreRequestException("Couldn't upload screenshot")
 
     url = APP_STORE_BASE_URL + "/v1/inAppPurchaseAppStoreReviewScreenshots/{}".format(screenshot_id)
@@ -277,7 +282,7 @@ def upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers):
 
     response = request_connect_store(url, headers, data=data, method='patch')
 
-    if not response.status_code == 200:
+    if response.status_code != 200:
         raise AppStoreRequestException("Couldn't finalize screenshot")
 
 
@@ -298,7 +303,7 @@ def submit_in_app_purchase_for_review(in_app_purchase_id, headers):
         }
     }
     response = request_connect_store(url=url, data=data, headers=headers)
-    if not response.status_code == 201:
+    if response.status_code != 201:
         raise AppStoreRequestException("Couldn't submit purchase")
 
 
