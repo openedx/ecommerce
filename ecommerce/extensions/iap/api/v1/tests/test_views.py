@@ -1074,14 +1074,17 @@ class TestMobileSkusCreationView(TestCase):
             self.assertEqual(response.status_code, 200)
             result = json.loads(response.content)
             expected_result = {
-                "new_mobile_skus": {},
-                "failed_course_ids": [],
-                "missing_course_runs": []
+                'new_mobile_skus': {},
+                'failed_course_ids': [],
+                'missing_course_runs': [],
+                'failed_ios_products': []
             }
             self.assertEqual(result, expected_result)
 
-    def test_missing_and_new_skus_in_course(self):
+    @mock.patch('ecommerce.extensions.iap.api.v1.views.create_ios_product')
+    def test_missing_and_new_skus_in_course(self, create_ios_product_patch):
         """ Verify the view differentiate between a correct and non-existent course id """
+        create_ios_product_patch.return_value = None
         with LogCapture(self.logger_name) as logger:
             post_data = {"courses": ["course:wrong-id", self.course.id]}
             response = self.client.post(self.path, data=post_data, content_type="application/json")
@@ -1092,15 +1095,16 @@ class TestMobileSkusCreationView(TestCase):
             stock_record = StockRecord.objects.get(product=self.product)
 
             expected_result = {
-                "new_mobile_skus": {
+                'new_mobile_skus': {
                     self.course.id:
                         [
-                            "mobile.android.{}".format(stock_record.partner_sku.lower()),
-                            "mobile.ios.{}".format(stock_record.partner_sku.lower()),
+                            'mobile.android.{}'.format(stock_record.partner_sku.lower()),
+                            'mobile.ios.{}'.format(stock_record.partner_sku.lower()),
                         ]
                 },
-                "failed_course_ids": [],
-                "missing_course_runs": ['course:wrong-id']
+                'failed_course_ids': [],
+                'missing_course_runs': ['course:wrong-id'],
+                'failed_ios_products': []
             }
 
             self.assertEqual(result, expected_result)
