@@ -7,6 +7,7 @@ import logging
 import crum
 import waffle
 from django.db import transaction
+from django.http import JsonResponse
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
@@ -17,6 +18,7 @@ from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.basket.utils import ORGANIZATION_ATTRIBUTE_TYPE
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.invoice.models import Invoice
@@ -121,6 +123,30 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
             properties.update({'total': handled_processor_response.total, 'success': True, })
         finally:
             track_segment_event(basket.site, basket.owner, 'Payment Processor Response', properties)
+
+    def handle_stripe_payment(self, response, basket):  # pylint: disable=arguments-differ
+        """
+        Handle Stripe payment processing and record payment sources and events.
+
+        This method is responsible for handling payment and only recording if there is an exception.
+        Recording the
+        payment sources (using the add_payment_source method) and payment
+        events (using add_payment_event) are done via webhooks handle_payment_intent_succeeded.
+        """
+        request = crum.get_current_request()
+        properties = {
+            'basket_id': basket.id,
+            'processor_name': self.payment_processor.NAME,
+            'stripe_enabled': waffle.flag_is_active(request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
+        }
+        # If payment didn't go through, the handle_processor_response function will raise an error. We want to
+        # send the event regardless of if the payment didn't go through.
+        try:
+            self.payment_processor.handle_processor_response(response, basket=basket)
+        except Exception as ex:
+            properties.update({'success': False, 'payment_error': type(ex).__name__, })
+            track_segment_event(basket.site, basket.owner, 'Payment Processor Response', properties)
+            raise
 
     def emit_checkout_step_events(self, basket, handled_processor_response, payment_processor):
         """ Emit events necessary to track the user in the checkout funnel. """
@@ -314,6 +340,18 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
             Invoice.objects.create(
                 order=order, business_client=client, type=Invoice.BULK_PURCHASE, state=Invoice.PAID
             )
+
+    def receipt_page_response(self, basket, request):
+        """Tell the frontend to redirect to the receipt page."""
+        receipt_page_url = get_receipt_page_url(
+            request,
+            order_number=basket.order_number,
+            site_configuration=basket.site.siteconfiguration,
+            disable_back_button=True
+        )
+        return JsonResponse({
+            'receipt_page_url': receipt_page_url,
+        }, status=201)
 
     def log_order_placement_exception(self, order_number, basket_id):
         payment_processor = self.payment_processor.NAME.title() if self.payment_processor else None

@@ -142,7 +142,7 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
                 'Applicator applied, basket id: [%s]. Processed by [%s].',
                 basket.id, self.payment_processor.NAME)
 
-            basket_add_organization_attribute(basket, self.request.GET)
+            basket_add_organization_attribute(basket, self.request.POST)
         except MultipleObjectsReturned:
             logger.warning(u"Duplicate payment_intent_id [%s] received from Stripe.", payment_intent_id)
             return None
@@ -228,36 +228,17 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         try:
             with transaction.atomic():
                 try:
-                    self.handle_payment(stripe_response, basket)
+                    self.handle_stripe_payment(stripe_response, basket)
                 except CardError as err:
                     return self.stripe_error_response(err)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return self.error_page_response()
 
-        try:
-            billing_address = self.create_billing_address(
-                user=self.request.user,
-                billing_address=billing_address_obj
-            )
-        except Exception as err:  # pylint: disable=broad-except
-            logger.exception('Error creating billing address for basket [%d]: %s', basket.id, err)
-            billing_address = None
-
-        try:
-            order = self.create_order(request, basket, billing_address)
-            self.handle_post_order(order)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(
-                'Error processing order for transaction [%s], with order [%s] and basket [%d]. Processed by [%s].',
-                payment_intent_id,
-                basket.order_number,
-                basket.id,
-                self.payment_processor.NAME,
-            )
-            return self.error_page_response()
-
-        return self.receipt_page_response(basket)
+        # TODO: need a response, temp to Payment MFE but need a loading URL done in REV-3445
+        return JsonResponse({
+            'payment_mfe_loading_url': self.request.site.siteconfiguration.payment_microfrontend_url,
+        }, status=201)
 
     def error_page_response(self):
         """Tell the frontend to redirect to a generic error page."""
@@ -274,18 +255,6 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         return JsonResponse({
             'sdn_check_failure': {'hit_count': hit_count}
         }, status=400)
-
-    def receipt_page_response(self, basket):
-        """Tell the frontend to redirect to the receipt page."""
-        receipt_page_url = get_receipt_page_url(
-            self.request,
-            order_number=basket.order_number,
-            site_configuration=basket.site.siteconfiguration,
-            disable_back_button=True
-        )
-        return JsonResponse({
-            'receipt_page_url': receipt_page_url,
-        }, status=201)
 
     def stripe_error_response(self, error):
         """Tell the frontend that a Stripe error has occurred."""
