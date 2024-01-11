@@ -97,7 +97,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(parent.attr.course_key, course.id)
 
     def assert_course_seat_valid(self, seat, course, certificate_type, id_verification_required, price,
-                                 credit_provider=None, credit_hours=None):
+                                 credit_provider=None, credit_hours=None, variant_id=None):
         """ Ensure the given seat has the correct attribute values. """
         self.assertEqual(seat.structure, Product.CHILD)
         # pylint: disable=protected-access
@@ -107,6 +107,9 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(seat.attr.course_key, course.id)
         self.assertEqual(seat.attr.id_verification_required, id_verification_required)
         self.assertEqual(seat.stockrecords.first().price_excl_tax, price)
+
+        if variant_id:
+            self.assertEqual(seat.attr.variant_id, variant_id)
 
         if credit_provider:
             self.assertEqual(seat.attr.credit_provider, credit_provider)
@@ -132,7 +135,8 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         # Test seat update
         price = 10
         course.create_or_update_seat(
-            certificate_type, id_verification_required, price, sku=seat.stockrecords.first().partner_sku
+            certificate_type, id_verification_required, price, sku=seat.stockrecords.first().partner_sku,
+            variant_id='00000000-0000-0000-0000-000000000000'
         )
 
         # Again, only two seats with one being the parent seat product.
@@ -202,12 +206,14 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         certificate_type = 'credit'
         id_verification_required = True
         price = 10
+        variant_id = '00000000-0000-0000-0000-000000000000'
         credit_seat = course.create_or_update_seat(
             certificate_type,
             id_verification_required,
             price,
             credit_provider=credit_provider,
-            credit_hours=credit_hours
+            credit_hours=credit_hours,
+            variant_id=variant_id
         )
         credit_hours = 4
         price = 100
@@ -218,6 +224,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
             credit_provider=credit_provider,
             credit_hours=credit_hours,
             sku=credit_seat.stockrecords.first().partner_sku,
+            variant_id=variant_id
         )
         self.assert_course_seat_valid(
             credit_seat,
@@ -226,7 +233,8 @@ class CourseTests(DiscoveryTestMixin, TestCase):
             id_verification_required,
             price,
             credit_provider=credit_provider,
-            credit_hours=credit_hours
+            credit_hours=credit_hours,
+            variant_id=variant_id
         )
 
     def test_collision_avoidance(self):
