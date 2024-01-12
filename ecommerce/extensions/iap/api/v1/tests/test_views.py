@@ -1041,3 +1041,70 @@ class IOSRefundTests(BaseRefundTests):
                     "Test Exception"
                 ),
             )
+
+
+class TestMobileSkusCreationView(TestCase):
+    """ Tests for MobileSkusCreationView API view. """
+    path = reverse('iap:create-mobile-skus')
+
+    def setUp(self):
+        super(TestMobileSkusCreationView, self).setUp()
+        self.user = self.create_user(is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
+
+        self.course = CourseFactory(partner=self.partner)
+        future_expiry = pytz.utc.localize(datetime.datetime.max)
+        self.product = self.course.create_or_update_seat('verified', False, 50, expires=future_expiry)
+
+        self.logger_name = 'ecommerce.extensions.iap.api.v1.views'
+
+    def test_failure_for_not_admin_user(self):
+        """ Verify the endpoint requires admin authentication. """
+        self.client.logout()
+        not_admin_user = self.create_user()
+        self.client.login(username=not_admin_user.username, password=not_admin_user.password)
+        response = self.client.post(self.path, data={})
+        self.assertEqual(response.status_code, 401)
+
+    def test_empty_list(self):
+        """ Verify the endpoint returns HTTP 200 if we send empty list."""
+        with LogCapture(self.logger_name) as logger:
+            response = self.client.post(self.path, data={'courses': []})
+            logger.check()
+            self.assertEqual(response.status_code, 200)
+            result = json.loads(response.content)
+            expected_result = {
+                'new_mobile_skus': {},
+                'failed_course_ids': [],
+                'missing_course_runs': [],
+                'failed_ios_products': []
+            }
+            self.assertEqual(result, expected_result)
+
+    @mock.patch('ecommerce.extensions.iap.api.v1.views.create_ios_product')
+    def test_missing_and_new_skus_in_course(self, create_ios_product_patch):
+        """ Verify the view differentiate between a correct and non-existent course id """
+        create_ios_product_patch.return_value = None
+        with LogCapture(self.logger_name) as logger:
+            post_data = {"courses": ["course:wrong-id", self.course.id]}
+            response = self.client.post(self.path, data=post_data, content_type="application/json")
+
+            logger.check()
+            self.assertEqual(response.status_code, 200)
+            result = json.loads(response.content)
+            stock_record = StockRecord.objects.get(product=self.product)
+
+            expected_result = {
+                'new_mobile_skus': {
+                    self.course.id:
+                        [
+                            'mobile.android.{}'.format(stock_record.partner_sku.lower()),
+                            'mobile.ios.{}'.format(stock_record.partner_sku.lower()),
+                        ]
+                },
+                'failed_course_ids': [],
+                'missing_course_runs': ['course:wrong-id'],
+                'failed_ios_products': []
+            }
+
+            self.assertEqual(result, expected_result)

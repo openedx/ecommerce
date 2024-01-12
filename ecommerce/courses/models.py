@@ -155,6 +155,7 @@ class Course(models.Model):
             remove_stale_modes=True,
             create_enrollment_code=False,
             sku=None,
+            variant_id=None,
     ):
         """
         Creates and updates course seat products.
@@ -174,7 +175,8 @@ class Course(models.Model):
             create_enrollment_code(bool): Whether an enrollment code is created in addition to the seat.
             sku(str): The partner_sku for the product stored as part of the Stock Record. This is used
                 to perform a GET on the seat as a unique identifier both Ecommerce and Discovery know about.
-
+            variant_id(uuid):  The variant_id for the product stored as part of the Stock Record.
+                It is used specifically in case of Executive Education courses to create enrollment on getsmarter.
         Returns:
             Product:  The seat that has been created or updated.
         """
@@ -218,6 +220,8 @@ class Course(models.Model):
         seat.attr.certificate_type = certificate_type
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
+        if variant_id:
+            seat.attr.variant_id = variant_id
         if certificate_type in ENROLLMENT_CODE_SEAT_TYPES and create_enrollment_code:
             self._create_or_update_enrollment_code(
                 certificate_type, id_verification_required, self.partner, price, expires

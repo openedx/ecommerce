@@ -72,7 +72,11 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
             product=mobile_seat,
             partner_sku="mobile.{}.{}".format(sku_prefix.lower(), web_stock_record.partner_sku.lower()),
             price_currency=web_stock_record.price_currency,
+<<<<<<< HEAD
             price=web_stock_record.price,
+=======
+            price_excl_tax=web_stock_record.price_excl_tax,
+>>>>>>> 77569a72d59bebede624fccf345aab0c32e02f29
         )
         return mobile_seat
 
