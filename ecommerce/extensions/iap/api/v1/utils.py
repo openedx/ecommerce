@@ -27,8 +27,6 @@ def products_in_basket_already_purchased(user, basket, site):
                 UserAlreadyPlacedOrder.user_already_placed_order(user=user, product=product, site=site):
             return True
     return False
-<<<<<<< HEAD
-=======
 
 
 def create_ios_product(course, ios_sku, configuration):
@@ -311,4 +309,3 @@ def submit_in_app_purchase_for_review(in_app_purchase_id, headers):
 
 class AppStoreRequestException(Exception):
     pass
->>>>>>> 77569a72d59bebede624fccf345aab0c32e02f29
