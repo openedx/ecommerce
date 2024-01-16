@@ -330,18 +330,18 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockRecord
-        fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price_excl_tax',)
+        fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price',)
 
 
 class PartialStockRecordSerializerForUpdate(StockRecordSerializer):
     """ Stock record objects serializer for PUT requests.
 
-    Allowed fields to update are 'price_currency' and 'price_excl_tax'.
+    Allowed fields to update are 'price_currency' and 'price'.
     """
 
     class Meta:
         model = StockRecord
-        fields = ('price_currency', 'price_excl_tax',)
+        fields = ('price_currency', 'price',)
 
 
 class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSerializer):

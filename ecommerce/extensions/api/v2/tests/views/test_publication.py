@@ -231,7 +231,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(entitlement.parent.product_class.name, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
         self.assertEqual(entitlement.attr.certificate_type, certificate_type)
         self.assertEqual(entitlement.attr.UUID, self.course_uuid)
-        self.assertEqual(entitlement.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
+        self.assertEqual(entitlement.stockrecords.get(partner=self.partner).price, expected['price'])
 
     def assert_seat_saved(self, course, expected, test_mobile_seats=False):
         certificate_type = ''
@@ -255,7 +255,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         # Verify product price and expiration time.
         expires = EXPIRES if expected['expires'] else None
         self.assertEqual(seat.expires, expires)
-        self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
+        self.assertEqual(seat.stockrecords.get(partner=self.partner).price, expected['price'])
 
         if test_mobile_seats and verified_product:
             android_seat = course.seat_products.get(title='Android ' + seat_title)

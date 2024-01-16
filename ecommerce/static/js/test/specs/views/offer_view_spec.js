@@ -27,7 +27,7 @@ define([
                         partner: 1,
                         partner_sku: '8CF08E5',
                         price_currency: 'USD',
-                        price_excl_tax: '100.00'
+                        price: '100.00'
                     },
                     image_url: 'img/src/url',
                     seat_type: 'Not verified',
@@ -49,7 +49,7 @@ define([
                         partner: 1,
                         partner_sku: '8CF08E5',
                         price_currency: 'USD',
-                        price_excl_tax: '100.00'
+                        price: '100.00'
                     },
                     image_url: 'img/src/url2',
                     seat_type: 'verified',

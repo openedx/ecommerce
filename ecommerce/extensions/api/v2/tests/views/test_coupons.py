@@ -168,7 +168,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
 
     def test_creating_multi_offer_coupon(self):
         """Test the creation of a multi-offer coupon."""
-        ordinary_coupon = self.create_coupon(quantity=2)
+        ordinary_coupon = self.create_coupon(quantity=2, title='Test offer coupon')
         ordinary_coupon_vouchers = ordinary_coupon.attr.coupon_vouchers.vouchers.all()
         self.assertEqual(
             ordinary_coupon_vouchers[0].offers.first(),
@@ -607,7 +607,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         new_coupon = Product.objects.get(id=self.coupon.id)
         vouchers = new_coupon.attr.coupon_vouchers.vouchers.all()
         for voucher in vouchers:
-            self.assertEqual(voucher.name, 'New voucher name')
+            new_voucher_name = "%s - %d" % (data['name'], voucher.id + 1)
+            self.assertEqual(voucher.name, new_voucher_name)
 
     def test_update_datetimes(self):
         """Test that updating a coupons date updates all of it's voucher dates."""
@@ -682,7 +683,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         new_coupon = Product.objects.get(id=self.coupon.id)
         stock_records = StockRecord.objects.filter(product=new_coupon).all()
         for stock_record in stock_records:
-            self.assertEqual(stock_record.price_excl_tax, 77)
+            self.assertEqual(stock_record.price, 77)
 
     def test_update_note(self):
         path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})

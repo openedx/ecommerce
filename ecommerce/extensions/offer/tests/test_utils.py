@@ -50,7 +50,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         self.course = CourseFactory(partner=self.partner)
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
-        self.seat_price = self.stock_record.price_excl_tax
+        self.seat_price = self.stock_record.price
         self._range = RangeFactory(products=[self.verified_seat, ])
 
         self.percentage_benefit = BenefitFactory(type=Benefit.PERCENTAGE, range=self._range, value=35.00)
