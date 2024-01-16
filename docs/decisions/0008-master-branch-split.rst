@@ -9,7 +9,7 @@ Accepted
 Context
 -------
 
-Both 2U and the Open edX community use ecommerce's master branch for releases. Occasionally, changes
+Both 2U and the Open edX community used ecommerce's master branch for releases. Occasionally, changes
 specific to 2U's business case are merged into code, which also influences the structure
 of the code that the community runs, even if the changes are not relevant or beneficial
 to the community at large.

@@ -16,9 +16,8 @@ from ecommerce.courses.constants import CertificateType
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_detail, get_course_run_detail
 from ecommerce.extensions.catalogue.models import Product
-from ecommerce.extensions.iap.constants import ANDROID_SKU_PREFIX, IOS_SKU_PREFIX
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration
-from ecommerce.extensions.partner.models import StockRecord
+from ecommerce.extensions.iap.utils import create_child_products_for_mobile
 
 Dispatcher = get_class('communication.utils', 'Dispatcher')
 logger = logging.getLogger(__name__)
@@ -88,7 +87,7 @@ class Command(BaseCommand):
             all_course_runs = Course.objects.filter(id__in=all_course_run_keys)
             parent_products = self._get_parent_products_to_create_mobile_skus_for(all_course_runs)
             for parent_product in parent_products:
-                self._create_child_products_for_mobile(parent_product)
+                create_child_products_for_mobile(parent_product)
 
             expired_course.publish_to_lms()
             batch_counter += 1
@@ -115,57 +114,6 @@ class Command(BaseCommand):
             course__in=courses,
         )
         return products_to_create_mobile_skus_for
-
-    def _create_child_products_for_mobile(self, product):
-        """
-        Create child products/seats for IOS and Android.
-        Child product is also called a variant in the UI
-        """
-        existing_web_seat = Product.objects.filter(
-            ~Q(stockrecords__partner_sku__icontains="mobile"),
-            parent=product,
-            attribute_values__attribute__name="certificate_type",
-            attribute_values__value_text=CertificateType.VERIFIED,
-            parent__product_class__name=SEAT_PRODUCT_CLASS_NAME,
-        ).first()
-        if existing_web_seat:
-            self._create_mobile_seat(ANDROID_SKU_PREFIX, existing_web_seat)
-            self._create_mobile_seat(IOS_SKU_PREFIX, existing_web_seat)
-
-    def _create_mobile_seat(self, sku_prefix, existing_web_seat):
-        """
-        Create a mobile seat, attributes and stock records matching the given existing_web_seat
-        in the same Parent Product.
-        """
-        new_mobile_seat, _ = Product.objects.get_or_create(
-            title="{} {}".format(sku_prefix.capitalize(), existing_web_seat.title.lower()),
-            course=existing_web_seat.course,
-            parent=existing_web_seat.parent,
-            product_class=existing_web_seat.product_class,
-            structure=existing_web_seat.structure
-        )
-        new_mobile_seat.expires = existing_web_seat.expires
-        new_mobile_seat.is_public = existing_web_seat.is_public
-        new_mobile_seat.save()
-
-        # Set seat attributes
-        new_mobile_seat.attr.certificate_type = existing_web_seat.attr.certificate_type
-        new_mobile_seat.attr.course_key = existing_web_seat.attr.course_key
-        new_mobile_seat.attr.id_verification_required = existing_web_seat.attr.id_verification_required
-        new_mobile_seat.attr.save()
-
-        # Create stock records
-        existing_stock_record = existing_web_seat.stockrecords.first()
-        mobile_stock_record, created = StockRecord.objects.get_or_create(
-            product=new_mobile_seat,
-            partner=existing_stock_record.partner
-        )
-        if created:
-            partner_sku = 'mobile.{}.{}'.format(sku_prefix.lower(), existing_stock_record.partner_sku.lower())
-            mobile_stock_record.partner_sku = partner_sku
-        mobile_stock_record.price_currency = existing_stock_record.price_currency
-        mobile_stock_record.price = existing_stock_record.price
-        mobile_stock_record.save()
 
     def _send_email_about_expired_courses(self, expired_courses):
         """

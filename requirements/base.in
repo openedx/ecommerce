@@ -30,7 +30,12 @@ edx-django-release-util
 edx-django-utils
 edx-drf-extensions>=8.13.0  # 8.13 fixes forgiven JWTs for ecommerce
 edx-django-sites-extensions
-edx-ecommerce-worker
+# edx-ecommerce-worker is pinned to releases from the 2u/main branch of its repo.
+# This OEP advises against this type of use of pinning: https://docs.openedx.org/projects/openedx-proposals/en/latest/best-practices/oep-0018-bp-python-dependencies.html#rationale
+# but it is a tradeoff we are willing to live with, given the infrequency
+# with which ecommerce-worker is actually updated and deployed.
+# See https://github.com/openedx/ecommerce/blob/master/docs/decisions/0008-master-branch-split.rst
+git+https://github.com/openedx/ecommerce-worker.git@2u/3.3.4#egg=edx-ecommerce-worker
 edx-opaque-keys
 edx-rbac
 edx-rest-api-client
