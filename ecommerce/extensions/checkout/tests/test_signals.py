@@ -1,7 +1,5 @@
 
 
-import json
-
 import mock
 import responses
 from django.core import mail
@@ -224,7 +222,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             )
 
     def _generate_event_properties(
-            self, order, voucher=None, bundle_id=None, fullBundle=False, recommendations=None):
+            self, order, voucher=None, bundle_id=None, fullBundle=False):
         coupon = voucher.code if voucher else None
         products = []
         for line in order.lines.all():
@@ -237,12 +235,6 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 'category': line.product.get_product_class().name,
                 'title': line.product.title,
             }
-
-            if line.product.course:
-                course_key = CourseKey.from_string(line.product.course.id)
-                course_key = f'{course_key.org}+{course_key.course}'
-                if recommendations and course_key in recommendations['course_keys']:
-                    order_line['dashboard_recommendations_group'] = recommendations['is_control']
             products.append(order_line)
 
         properties = {
@@ -254,6 +246,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             'discount': float(order.total_discount_incl_tax),
             'products': products,
             'stripe_enabled': False,
+            'processor_name': None
         }
         if order.user:
             properties['email'] = order.user.email
@@ -301,27 +294,6 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             mock_track.reset_mock()
             order = create_order()
             track_completed_order(None, order)
-            properties = self._generate_event_properties(order)
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties, traits=properties)
-
-    def test_track_completed_order_with_recommendation(self):
-        """ An event should be sent to Segment with personalized recommendation property set. """
-
-        with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
-            order = self.prepare_order('verified')
-            recommendation_data = self._get_recommendations_data(order)
-
-            # Event emitted with matching recommended courses.
-            self.request.COOKIES['edx-user-personalized-recommendation'] = json.dumps(recommendation_data)
-            track_completed_order(None, order, request=self.request)
-            properties = self._generate_event_properties(order, recommendations=recommendation_data)
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties, traits=properties)
-
-            # Event emitted without matching recommended courses.
-            mock_track.reset_mock()
-            recommendation_data['course_keys'] = ['course-v1:test-org+test+test']
-            self.request.COOKIES['edx-user-personalized-recommendation'] = json.dumps(recommendation_data)
-            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties, traits=properties)
 

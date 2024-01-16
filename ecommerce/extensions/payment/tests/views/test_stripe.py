@@ -269,11 +269,22 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         basket.flush()
 
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': '',
+                'client_secret': '',
+            }
+
             self.assertTrue(basket.is_empty)
             response = self.client.get(self.capture_context_url)
+
             mock_create.assert_not_called()
-            self.assertDictEqual(response.json(), {})
-            self.assertEqual(response.status_code, 400)
+            self.assertDictEqual(response.json(), {
+                'capture_context': {
+                    'key_id': mock_create.return_value['client_secret'],
+                    'order_id': basket.order_number,
+                }
+            })
+            self.assertEqual(response.status_code, 200)
 
     def test_payment_error_no_basket(self):
         """

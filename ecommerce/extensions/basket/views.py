@@ -47,7 +47,7 @@ from ecommerce.extensions.analytics.utils import (
     translate_basket_line_for_segment
 )
 from ecommerce.extensions.basket import message_utils
-from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
+from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
 from ecommerce.extensions.basket.utils import (
     add_invalid_code_message_to_url,
@@ -59,6 +59,7 @@ from ecommerce.extensions.basket.utils import (
     get_payment_microfrontend_or_basket_url,
     get_payment_microfrontend_url_if_configured,
     prepare_basket,
+    set_email_preference_on_basket,
     validate_voucher
 )
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
@@ -437,7 +438,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             except AlreadyPlacedOrderException:
                 return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
 
-            self._set_email_preference_on_basket(request, basket)
+            set_email_preference_on_basket(request, basket)
 
             # Used basket object from request to allow enterprise offers
             # being applied on basket via BasketMiddleware
@@ -482,17 +483,6 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
         if not available_products:
             raise BadRequestException(_('No product is available to buy.'))
         return available_products
-
-    def _set_email_preference_on_basket(self, request, basket):
-        """
-        Associate the user's email opt in preferences with the basket in
-        order to opt them in later as part of fulfillment
-        """
-        BasketAttribute.objects.update_or_create(
-            basket=basket,
-            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
-            defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
-        )
 
     def _redirect_response_to_basket_or_payment(self, request, invalid_code=None):
         redirect_url = get_payment_microfrontend_or_basket_url(request)

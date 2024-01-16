@@ -6,7 +6,8 @@ on:
   push:
     branches:
       - master
-
+      - 2u/release
+      
 jobs:
   check_migrations:
     name: check migrations mysql8

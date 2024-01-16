@@ -310,7 +310,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         # ensure that analytics.track was called, but the exception was caught
         self.assertTrue(mock_track.called)
         # ensure we logged a warning.
-        self.assertTrue(mock_log_exc.called_with("Failed to emit tracking event upon order placement."))
+        mock_log_exc.assert_called_with("Failed to emit tracking event upon order completion.")
 
     def test_handle_successful_async_order(self, __):
         """

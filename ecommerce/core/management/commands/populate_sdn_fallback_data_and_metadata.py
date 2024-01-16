@@ -33,7 +33,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # download the csv locally, to check size and pass along to import
         threshold = options['threshold']
-        url = 'http://api.trade.gov/static/consolidated_screening_list/consolidated.csv'
+        url = 'https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv'
         timeout = settings.SDN_CHECK_REQUEST_TIMEOUT
 
         with requests.Session() as s:

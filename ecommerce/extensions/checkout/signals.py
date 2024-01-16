@@ -6,7 +6,7 @@ import waffle
 from django.dispatch import receiver
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.courses.utils import is_course_recommended_on_user_dashboard, mode_for_product
+from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import silence_exceptions, track_segment_event
 from ecommerce.extensions.basket.constants import ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
@@ -52,16 +52,11 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             'title': line.product.title,
         }
 
-        # VAN-987: Adding segment event property 'is_personalized_recommendation'
-        # for the course recommendations.
-        is_recommended_course, control_group = is_course_recommended_on_user_dashboard(
-            line.product.course, kwargs.get('request', None)
-        )
-        if is_recommended_course:
-            order_line['dashboard_recommendations_group'] = control_group
-
         products.append(order_line)
     request = kwargs.get('request', None)
+    processor_response = order.basket.paymentprocessorresponse_set.first()
+    processor_name = processor_response.processor_name if processor_response else None
+
     properties = {
         'orderId': order.number,
         'total': float(order.total_excl_tax),
@@ -70,6 +65,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         'revenue': float(order.total_excl_tax),
         'currency': order.currency,
         'discount': float(order.total_discount_incl_tax),
+        'processor_name': processor_name,
         'products': products,
         'stripe_enabled': waffle.flag_is_active(request, ENABLE_STRIPE_PAYMENT_PROCESSOR),
     }

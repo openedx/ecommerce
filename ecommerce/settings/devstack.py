@@ -32,6 +32,9 @@ BACKEND_SERVICE_EDX_OAUTH2_SECRET = "ecommerce-backend-service-secret"
 BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://edx.devstack.lms:18000/oauth2"
 
 JWT_AUTH.update({
+    # Temporarily set JWT_DECODE_HANDLER until new devstack images are built
+    #   with this updated connfiguration: https://github.com/openedx/configuration/pull/6921.
+    'JWT_DECODE_HANDLER': 'edx_rest_framework_extensions.auth.jwt.decoder.jwt_decode_handler',
     'JWT_ISSUER': 'http://localhost:18000/oauth2',
     'JWT_ISSUERS': [{
         'AUDIENCE': 'lms-key',
@@ -48,12 +51,12 @@ JWT_AUTH.update({
 })
 
 CORS_ORIGIN_WHITELIST = (
-    'http://localhost:1991',
+    'http://localhost:1991', # Enterprise Admin Portal MFE
     'http://localhost:1996',
     'http://localhost:1997', # Account MFE
     'http://localhost:1998',
     'http://localhost:2000', # Learning MFE
-    'http://localhost:8734',
+    'http://localhost:8734', # Enterprise Learner Portal MFE
 )
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
@@ -107,6 +110,17 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'receipt_url': PAYMENT_PROCESSOR_RECEIPT_PATH,
         },
+        'android-iap': {
+            'google_bundle_id': 'org.edx.mobile',
+            'google_service_account_key_file': '<put-value-here>'
+        },
+        'ios-iap': {
+            "apple_id": "<put-value-here>",
+            'ios_bundle_id': 'org.edx.mobile',
+            'issuer_id': '<put-value-here>',
+            'key_id': '<put-value-here>',
+            'private_key': "<put-value-here>"
+        }
     },
 }
 # END PAYMENT PROCESSING

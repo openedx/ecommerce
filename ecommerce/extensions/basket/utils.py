@@ -19,6 +19,7 @@ from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.basket.constants import (
+    EMAIL_OPT_IN_ATTRIBUTE,
     ENABLE_STRIPE_PAYMENT_PROCESSOR,
     PAYMENT_INTENT_ID_ATTRIBUTE,
     PURCHASER_BEHALF_ATTRIBUTE,
@@ -620,3 +621,15 @@ def get_billing_address_from_payment_intent_data(payment_intent):
         country=Country.objects.get(iso_3166_1_a2__iexact=customer_address['country'])
     )
     return address
+
+
+def set_email_preference_on_basket(request, basket):
+    """
+    Associate the user's email opt in preferences with the basket in
+    order to opt them in later as part of fulfillment
+    """
+    BasketAttribute.objects.update_or_create(
+        basket=basket,
+        attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+        defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
+    )

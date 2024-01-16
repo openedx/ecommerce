@@ -1,9 +1,9 @@
-⛔️ DEPRECATION WARNING 
+⛔️ DEPRECATION WARNING
 ======================
 This repository is deprecated and in maintainence-only operation while we work on a replacement, please see `this announcement <https://discuss.openedx.org/t/deprecation-removal-ecommerce-service-depr-22/6839>`__ for more information.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Although we have stopped integrating new contributions, we always appreciate security disclosures and patches sent to `security@edx.org <mailto:security@edx.org>`__
+Although we have stopped integrating new contributions, we always appreciate security disclosures and patches sent to security@openedx.org
 
 edX E-Commerce Service  |CI|_ |Codecov|_
 ============================================
@@ -30,14 +30,16 @@ The code in this repository is licensed under version 3 of the AGPL unless other
 How To Contribute
 -----------------
 
-Anyone merging to this repository is expected to `release and monitor their changes <https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories>`__; if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
+Notice: Internal 2U contributions should be made against the ``2u/main`` branch.  Open source contributions should continue to be made against the ``master`` branch.
 
-Please also read `How To Contribute <https://github.com/openedx/edx-platform/blob/master/CONTRIBUTING.rst>`__. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
+Anyone merging to the ``2u/main`` branch of this repository is expected to `release and monitor their changes <https://2u-internal.atlassian.net/wiki/spaces/RS/pages/7963261/How+to+contribute+to+our+repositories>`__ (2U-private link); if you are not able to do this DO NOT MERGE, please coordinate with someone who can to ensure that the changes are released.
+
+Please also read `How To Contribute <https://github.com/openedx/.github/blob/master/CONTRIBUTING.md>`__. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
 
 Reporting Security Issues
 -------------------------
 
-Please do not report security issues in public. Please email security@edx.org.
+Please do not report security issues in public. Please email security@openedx.org.
 
 Get Help
 --------

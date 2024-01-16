@@ -33,7 +33,8 @@ define([
                 contract_discount_type: 'Percentage',
                 contract_discount_value: null,
                 prepaid_invoice_amount: null,
-                sales_force_id: null
+                sales_force_id: null,
+                salesforce_opportunity_line_item: null
             },
 
             couponValidation: {
@@ -56,8 +57,12 @@ define([
                     pattern: 'number'
                 },
                 sales_force_id: {
-                    required: true,
+                    required: false,
                     pattern: 'sales_force_id'
+                },
+                salesforce_opportunity_line_item: {
+                    required: true,
+                    pattern: 'salesforce_opportunity_line_item'
                 }
             },
 

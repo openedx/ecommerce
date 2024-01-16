@@ -14,6 +14,8 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.executive_education_2u.constants import ExecutiveEducation2UCheckoutFailureReason
 from ecommerce.extensions.executive_education_2u.utils import get_previous_order_for_user
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.refund.status import REFUND
+from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.extensions.test import factories
 from ecommerce.tests.mixins import JwtMixin
 from ecommerce.tests.testcases import TestCase
@@ -87,7 +89,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
         product.attr.save()
         return product
 
-    def _create_enterprise_offer(self, max_discount=None, max_user_discount=None):
+    def _create_enterprise_offer(self, max_discount=None, max_user_discount=None, **kwargs):
         condition = factories.EnterpriseCustomerConditionFactory(
             enterprise_customer_uuid=self.enterprise_customer_uuid
         )
@@ -98,7 +100,8 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             condition=condition,
             offer_type=ConditionalOffer.SITE,
             max_discount=max_discount,
-            max_user_discount=max_user_discount
+            max_user_discount=max_user_discount,
+            **kwargs,
         )
         return offer
 
@@ -128,6 +131,57 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
             site_configuration=order.site.siteconfiguration,
             disable_back_button=False
         )
+        self.assertEqual(response.headers['Location'], expected_redirect_url)
+
+    def test_begin_checkout_has_previous_order_refund_error_redirect_to_receipt_page(self):
+        product = self._create_product(is_exec_ed_2u_product=True)
+        sku = product.stockrecords.first().partner_sku
+        order = OrderFactory(user=self.user)
+        OrderLineFactory(order=order, product=product, partner_sku=sku)
+        RefundFactory(order=order, user=self.user, status=REFUND.PAYMENT_REFUND_ERROR)
+
+        response = self.client.get(self.checkout_path, {'sku': sku})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        expected_redirect_url = get_receipt_page_url(
+            response.request,
+            order_number=order.number,
+            site_configuration=order.site.siteconfiguration,
+            disable_back_button=False
+        )
+        self.assertEqual(response.headers['Location'], expected_redirect_url)
+
+    @mock.patch('ecommerce.enterprise.conditions.catalog_contains_course_runs')
+    @mock.patch('ecommerce.enterprise.conditions.get_course_info_from_catalog')
+    @mock.patch('ecommerce.extensions.executive_education_2u.views.get_learner_portal_url')
+    def test_begin_checkout_has_previous_refunded_order_redirect_to_lp(
+        self,
+        mock_get_learner_portal_url,
+        mock_get_course_info_from_catalog,
+        mock_catalog_contains_course_runs
+    ):
+        mock_get_learner_portal_url.return_value = self.learner_portal_url
+        product = self._create_product(is_exec_ed_2u_product=True)
+        sku = product.stockrecords.first().partner_sku
+        self._create_enterprise_offer()
+
+        order = OrderFactory(user=self.user)
+        OrderLineFactory(order=order, product=product, partner_sku=sku)
+        RefundFactory(order=order, user=self.user, status=REFUND.COMPLETE)
+
+        mock_get_course_info_from_catalog.return_value = {
+            'key': product.attr.UUID
+        }
+        mock_catalog_contains_course_runs.return_value = True
+
+        response = self.client.get(self.checkout_path, {'sku': sku})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        expected_query_params = {
+            'course_uuid': product.attr.UUID,
+            'sku': sku
+        }
+        expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
         self.assertEqual(response.headers['Location'], expected_redirect_url)
 
     @mock.patch('ecommerce.enterprise.conditions.catalog_contains_course_runs')
@@ -253,6 +307,41 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
         expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
         self.assertEqual(response.headers['Location'], expected_redirect_url)
 
+    @mock.patch('ecommerce.extensions.executive_education_2u.views.fetch_enterprise_catalogs_for_content_items')
+    @mock.patch('ecommerce.extensions.executive_education_2u.views.get_course_info_from_catalog')
+    @mock.patch('ecommerce.extensions.executive_education_2u.views.get_learner_portal_url')
+    def test_begin_checkout_no_offer_with_remaining_applications(
+        self,
+        mock_get_learner_portal_url,
+        mock_get_course_info_from_catalog,
+        mock_fetch_enterprise_catalogs_for_content_items
+    ):
+        mock_get_learner_portal_url.return_value = self.learner_portal_url
+        offer = self._create_enterprise_offer(max_user_applications=1)
+        mock_fetch_enterprise_catalogs_for_content_items.return_value = [
+            offer.condition.enterprise_customer_catalog_uuid
+        ]
+        product = self._create_product(is_exec_ed_2u_product=True)
+        sku = product.stockrecords.first().partner_sku
+        mock_get_course_info_from_catalog.return_value = {
+            'key': product.attr.UUID
+        }
+
+        # Create order discounts
+        order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
+        OrderDiscountFactory(order=order, offer_id=offer.id, frequency=1)
+
+        response = self.client.get(self.checkout_path, {'sku': sku})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        expected_query_params = {
+            'course_uuid': product.attr.UUID,
+            'sku': sku,
+            'failure_reason': ExecutiveEducation2UCheckoutFailureReason.NO_OFFER_WITH_REMAINING_APPLICATIONS
+        }
+        expected_redirect_url = f'{self.learner_portal_url}/executive-education-2u?{urlencode(expected_query_params)}'
+        self.assertEqual(response.headers['Location'], expected_redirect_url)
+
     @mock.patch('ecommerce.extensions.executive_education_2u.views.get_course_info_from_catalog')
     @mock.patch('ecommerce.extensions.executive_education_2u.views.get_learner_portal_url')
     def test_begin_checkout_system_error(
@@ -295,6 +384,7 @@ class ExecutiveEducation2UAPIViewSetTests(TestCase, JwtMixin):
                 'mobile_phone': '1234567890'
             },
             'terms_accepted_at': '2022-08-05T15:28:46.493Z',
+            'data_share_consent': True,
         }
 
     def _create_basket(self, product, has_offer=False):

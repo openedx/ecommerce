@@ -214,6 +214,12 @@ define([
                     onSet: function(val) {
                         return val === '' ? null : val;
                     }
+                },
+                'input[name=salesforce_opportunity_line_item]': {
+                    observe: 'salesforce_opportunity_line_item',
+                    onSet: function(val) {
+                        return val === '' ? null : val;
+                    }
                 }
             },
 

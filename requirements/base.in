@@ -1,9 +1,11 @@
 -c constraints.txt
 
 analytics-python
+app-store-notifications-v2-validator==0.0.7
 bleach
 boto3>=1.17.80
 coreapi
+crispy-bootstrap3
 cybersource-rest-client-python
 django>=3.2,<4.0
 django-compressor
@@ -26,14 +28,23 @@ drf-yasg
 edx-auth-backends
 edx-django-release-util
 edx-django-utils
-edx-drf-extensions
+edx-drf-extensions>=8.13.0  # 8.13 fixes forgiven JWTs for ecommerce
 edx-django-sites-extensions
-edx-ecommerce-worker
+# edx-ecommerce-worker is pinned to releases from the 2u/main branch of its repo.
+# This OEP advises against this type of use of pinning: https://docs.openedx.org/projects/openedx-proposals/en/latest/best-practices/oep-0018-bp-python-dependencies.html#rationale
+# but it is a tradeoff we are willing to live with, given the infrequency
+# with which ecommerce-worker is actually updated and deployed.
+# See https://github.com/openedx/ecommerce/blob/master/docs/decisions/0008-master-branch-split.rst
+git+https://github.com/openedx/ecommerce-worker.git@2u/3.3.4#egg=edx-ecommerce-worker
 edx-opaque-keys
 edx-rbac
 edx-rest-api-client
 getsmarter-api-clients
+google-api-python-client==2.31.0
+httplib2==0.20.2
+inapppy==2.5.2
 jsonfield
+jsonfield2
 libsass==0.9.2
 markdown==2.6.9
 mysqlclient<1.5

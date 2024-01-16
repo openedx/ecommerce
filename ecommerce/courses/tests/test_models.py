@@ -42,8 +42,10 @@ class CourseTests(DiscoveryTestMixin, TestCase):
 
         # Create the seat products
         seats = [course.create_or_update_seat('honor', False, 0),
-                 course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)]
-        self.assertEqual(course.products.count(), 4)
+                 course.create_or_update_seat('verified', True, 50, create_enrollment_code=True),
+                 course.create_or_update_seat('verified', True, 60),
+                 course.create_or_update_seat('verified', True, 70)]
+        self.assertEqual(course.products.count(), 6)
 
         # The property should return only the child seats.
         self.assertEqual(set(course.seat_products), set(seats))
@@ -95,7 +97,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(parent.attr.course_key, course.id)
 
     def assert_course_seat_valid(self, seat, course, certificate_type, id_verification_required, price,
-                                 credit_provider=None, credit_hours=None):
+                                 credit_provider=None, credit_hours=None, variant_id=None):
         """ Ensure the given seat has the correct attribute values. """
         self.assertEqual(seat.structure, Product.CHILD)
         # pylint: disable=protected-access
@@ -105,6 +107,9 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(seat.attr.course_key, course.id)
         self.assertEqual(seat.attr.id_verification_required, id_verification_required)
         self.assertEqual(seat.stockrecords.first().price_excl_tax, price)
+
+        if variant_id:
+            self.assertEqual(seat.attr.variant_id, variant_id)
 
         if credit_provider:
             self.assertEqual(seat.attr.credit_provider, credit_provider)
@@ -130,7 +135,8 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         # Test seat update
         price = 10
         course.create_or_update_seat(
-            certificate_type, id_verification_required, price, sku=seat.stockrecords.first().partner_sku
+            certificate_type, id_verification_required, price, sku=seat.stockrecords.first().partner_sku,
+            variant_id='00000000-0000-0000-0000-000000000000'
         )
 
         # Again, only two seats with one being the parent seat product.
@@ -200,12 +206,14 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         certificate_type = 'credit'
         id_verification_required = True
         price = 10
+        variant_id = '00000000-0000-0000-0000-000000000000'
         credit_seat = course.create_or_update_seat(
             certificate_type,
             id_verification_required,
             price,
             credit_provider=credit_provider,
-            credit_hours=credit_hours
+            credit_hours=credit_hours,
+            variant_id=variant_id
         )
         credit_hours = 4
         price = 100
@@ -216,6 +224,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
             credit_provider=credit_provider,
             credit_hours=credit_hours,
             sku=credit_seat.stockrecords.first().partner_sku,
+            variant_id=variant_id
         )
         self.assert_course_seat_valid(
             credit_seat,
@@ -224,7 +233,8 @@ class CourseTests(DiscoveryTestMixin, TestCase):
             id_verification_required,
             price,
             credit_provider=credit_provider,
-            credit_hours=credit_hours
+            credit_hours=credit_hours,
+            variant_id=variant_id
         )
 
     def test_collision_avoidance(self):
@@ -371,3 +381,18 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         ec_expires = now() - timedelta(days=365)
         self.assertEqual(course.get_enrollment_code().expires, ec_expires)
         self.assertIsNone(course.enrollment_code_product)
+
+    def test_toggle_enrollment_code_with_multiple_seats(self):
+        """Verify enrollment code expiration date is set when course has multiple seats"""
+        seat_one_expires = now() + timedelta(days=365)
+        seat_two_expires = now() + timedelta(days=366)
+        seat_three_expires = now() + timedelta(days=367)
+        course, _, enrollment_code = self.create_course_seat_and_enrollment_code(expires=seat_one_expires)
+        course.create_or_update_seat("honor", False, 0)
+        course.create_or_update_seat("verified", True, 10, expires=seat_two_expires)
+        course.create_or_update_seat("verified", True, 10, expires=seat_three_expires)
+        course.toggle_enrollment_code_status(True)
+        ec_expires = seat_three_expires
+
+        self.assertEqual(course.get_enrollment_code().expires, ec_expires)
+        self.assertEqual(course.enrollment_code_product, enrollment_code)

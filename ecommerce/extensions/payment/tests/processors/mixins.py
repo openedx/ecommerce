@@ -27,6 +27,7 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, DiscoveryTestMixin, Payment
     processor_name = None
 
     CERTIFICATE_TYPE = 'test-certificate-type'
+    CLIENT_SIDE_PAYMENT_ENABLED_PROCESSORS = ['android-iap', 'ios-iap']
 
     def setUp(self):
         super(PaymentProcessorTestCaseMixin, self).setUp()
@@ -56,7 +57,10 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, DiscoveryTestMixin, Payment
 
     def test_client_side_payment_url(self):
         """ Verify the property returns the client-side payment URL. """
-        self.assertIsNone(self.processor.client_side_payment_url)
+        if self.processor.NAME in self.CLIENT_SIDE_PAYMENT_ENABLED_PROCESSORS:
+            self.assertIsNotNone(self.processor.client_side_payment_url)
+        else:
+            self.assertIsNone(self.processor.client_side_payment_url)
 
     def test_get_transaction_parameters(self):
         """ Verify the processor returns the appropriate parameters required to complete a transaction. """
