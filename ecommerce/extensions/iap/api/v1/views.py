@@ -5,7 +5,6 @@ import time
 import app_store_notifications_v2_validator as asn2
 import httplib2
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.utils.html import escape

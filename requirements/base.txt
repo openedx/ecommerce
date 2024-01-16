@@ -362,8 +362,6 @@ oauthlib==3.2.2
     #   getsmarter-api-clients
     #   requests-oauthlib
     #   social-auth-core
-openedx-atlas==0.5.0
-    # via -r requirements/base.in
 packaging==23.1
     # via drf-yasg
 paramiko==3.2.0
