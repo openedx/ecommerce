@@ -78,7 +78,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
 
         actual_codes = [datum['code'] for datum in response.data['results']]
         expected_codes = [voucher.code for voucher in vouchers]
-        self.assertEqual(actual_codes, expected_codes)
+        self.assertEqual(actual_codes, expected_codes[::-1])
 
     def test_list_with_code_filter(self):
         """ Verify the endpoint list all vouchers, filtered by the specified code. """

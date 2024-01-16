@@ -164,9 +164,7 @@ class Command(BaseCommand):
             partner_sku = 'mobile.{}.{}'.format(sku_prefix.lower(), existing_stock_record.partner_sku.lower())
             mobile_stock_record.partner_sku = partner_sku
         mobile_stock_record.price_currency = existing_stock_record.price_currency
-        mobile_stock_record.price_excl_tax = existing_stock_record.price_excl_tax
-        mobile_stock_record.price_retail = existing_stock_record.price_retail
-        mobile_stock_record.cost_price = existing_stock_record.cost_price
+        mobile_stock_record.price = existing_stock_record.price
         mobile_stock_record.save()
 
     def _send_email_about_expired_courses(self, expired_courses):

@@ -192,7 +192,7 @@ class Command(BaseCommand):
                         data = (
                             getattr(seat.attr, 'certificate_type', ''),
                             seat.attr.id_verification_required,
-                            '{0} {1}'.format(stock_record.price_currency, stock_record.price_excl_tax),
+                            '{0} {1}'.format(stock_record.price_currency, stock_record.price),
                             stock_record.partner_sku,
                             seat.slug,
                             seat.expires
