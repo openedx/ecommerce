@@ -826,7 +826,12 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'google_service_account_key_file': 'SET-ME-PLEASE'
         },
         'ios-iap': {
+            "apple_id": "<put-value-here>",
             'ios_bundle_id': 'org.edx.mobile',
+            'issuer_id': '<put-value-here>',
+            'key_id': '<put-value-here>',
+            'private_key': "<put-value-here>"
+
         },
         'stripe': {
             'api_version': '2022-08-01; server_side_confirmation_beta=v1',
@@ -891,3 +896,5 @@ CAMPAIGN_IDS_BY_EMAIL_TYPE = {
     OfferUsageEmailTypes.LOW_BALANCE: BRAZE_OFFER_LOW_BALANCE_CAMPAIGN,
     OfferUsageEmailTypes.OUT_OF_BALANCE: BRAZE_OFFER_NO_BALANCE_CAMPAIGN
 }
+
+SERVICE_USERS = []

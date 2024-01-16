@@ -11,3 +11,5 @@ coverage:
         target: 98
 
 comment: false
+ignore:
+  - "**/migrations"

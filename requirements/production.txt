@@ -231,11 +231,11 @@ edx-django-utils==5.5.0
     #   edx-drf-extensions
     #   edx-rest-api-client
     #   getsmarter-api-clients
-edx-drf-extensions==9.0.0
+edx-drf-extensions==9.1.2
     # via
     #   -r requirements/base.in
     #   edx-rbac
-edx-ecommerce-worker==3.3.4
+edx-ecommerce-worker @ git+https://github.com/openedx/ecommerce-worker.git@2u/3.3.4
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -372,8 +372,6 @@ oauthlib==3.2.2
     #   getsmarter-api-clients
     #   requests-oauthlib
     #   social-auth-core
-openedx-atlas==0.5.0
-    # via -r requirements/base.in
 packaging==23.1
     # via drf-yasg
 paramiko==3.2.0

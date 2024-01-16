@@ -13,7 +13,14 @@ ERROR_ORDER_NOT_FOUND_FOR_REFUND = "Could not find any order to refund for [%s] 
 ERROR_REFUND_NOT_COMPLETED = "Could not complete refund for user [%s] in course [%s] by processor [%s]"
 ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND = "Could not find any transaction to refund for [%s] by processor [%s]"
 ERROR_DURING_POST_ORDER_OP = "An error occurred during post order operations."
+FOUND_MULTIPLE_PRODUCTS_ERROR = "Found unexpected number of products for course [%s]"
 GOOGLE_PUBLISHER_API_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
+IOS_PRODUCT_REVIEW_NOTE = ('This in-app purchase will unlock all the content of the course {course_name}\n\n'
+                           'For testing the end-to-end payment flow, please follow the following steps:\n1. '
+                           'Go to the Discover tab\n2. Search for "{course_name}"\n3. Enroll in the course'
+                           ' "{course_name}"\n4. Hit \"Upgrade to access more features\", it will open a '
+                           'detail unlock features page\n5. Hit "Upgrade now for ${course_price}" from the'
+                           ' detail page')
 IGNORE_NON_REFUND_NOTIFICATION_FROM_APPLE = "Ignoring notification from apple since we are only expecting" \
                                             " refund notifications"
 LOGGER_BASKET_ALREADY_PURCHASED = "Basket creation failed for user [%s] with SKUS [%s]. Products already purchased"
@@ -35,9 +42,12 @@ LOGGER_EXECUTE_SUCCESSFUL = "Payment execution successful for user [%s], basket 
 LOGGER_PAYMENT_FAILED_FOR_BASKET = "Attempts to handle payment for basket [%s] failed with error [%s]."
 LOGGER_REFUND_SUCCESSFUL = "Refund successful. OrderId: [%s] Processor: [%s] "
 LOGGER_STARTING_PAYMENT_FLOW = "Starting payment flow for user [%s] for products [%s]."
+MISSING_PRODUCT_ERROR = "Couldn't find parent product for course [%s]"
 NO_PRODUCT_AVAILABLE = "No product is available to buy."
 PRODUCTS_DO_NOT_EXIST = "Products with SKU(s) [{skus}] do not exist."
 PRODUCT_IS_NOT_AVAILABLE = "Product [%s] is not available to buy."
 RECEIVED_NOTIFICATION_FROM_APPLE = "Received notification from apple with notification type [%s]"
 SEGMENT_MOBILE_BASKET_ADD = "Mobile Basket Add Items View Called"
 SEGMENT_MOBILE_PURCHASE_VIEW = "Mobile Course Purchase View Called"
+SKUS_CREATION_ERROR = "There was an error while creating mobile skus for course [%s]"
+SKUS_CREATION_FAILURE = "Couldn't create mobile skus for course [%s]"
