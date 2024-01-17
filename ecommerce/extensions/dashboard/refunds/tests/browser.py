@@ -72,120 +72,6 @@ class BrowserConfigError(Exception):
     """
 
 
-def save_source(driver, name):
-    """
-    Save the rendered HTML of the browser.
-
-    The location of the source can be configured
-    by the environment variable `SAVED_SOURCE_DIR`.  If not set,
-    this defaults to the current working directory.
-
-    Args:
-        driver (selenium.webdriver): The Selenium-controlled browser.
-        name (str): A name to use in the output file name.
-            Note that ".html" is appended automatically
-
-    Returns:
-        None
-    """
-    source = driver.page_source
-    saved_source_dir = os.environ.get('SAVED_SOURCE_DIR')
-    if not saved_source_dir:
-        LOGGER.warning('The SAVED_SOURCE_DIR environment variable was not set; not saving page source')
-        return
-    file_name = os.path.join(saved_source_dir,
-                             f'{name}.html')
-
-    try:
-        if not os.path.exists(saved_source_dir):
-            os.makedirs(saved_source_dir)
-        with open(file_name, 'wb') as output_file:
-            output_file.write(source.encode('utf-8'))
-    except Exception:  # pylint: disable=broad-except
-        msg = f"Could not save the browser page source to {file_name}."
-        LOGGER.warning(msg)
-
-
-def save_screenshot(driver, name):
-    """
-    Save a screenshot of the browser.
-
-    The location of the screenshot can be configured
-    by the environment variable `SCREENSHOT_DIR`.  If not set,
-    this defaults to the current working directory.
-
-    Args:
-        driver (selenium.webdriver): The Selenium-controlled browser.
-        name (str): A name for the screenshot, which will be used in the output file name.
-
-    Returns:
-        None
-    """
-    if hasattr(driver, 'save_screenshot'):
-        screenshot_dir = os.environ.get('SCREENSHOT_DIR')
-        if not screenshot_dir:
-            LOGGER.warning('The SCREENSHOT_DIR environment variable was not set; not saving a screenshot')
-            return
-        if not os.path.exists(screenshot_dir):
-            os.makedirs(screenshot_dir)
-        image_name = os.path.join(screenshot_dir, name + '.png')
-        driver.save_screenshot(image_name)
-
-    else:
-        msg = f"Browser does not support screenshots. Could not save screenshot '{name}'"
-        LOGGER.warning(msg)
-
-
-def save_driver_logs(driver, prefix):
-    """
-    Save the selenium driver logs.
-
-    The location of the driver log files can be configured
-    by the environment variable `SELENIUM_DRIVER_LOG_DIR`.  If not set,
-    this defaults to the current working directory.
-
-    Args:
-        driver (selenium.webdriver): The Selenium-controlled browser.
-        prefix (str): A prefix which will be used in the output file names for the logs.
-
-    Returns:
-        None
-    """
-    browser_name = os.environ.get('SELENIUM_BROWSER', 'firefox')
-    log_dir = os.environ.get('SELENIUM_DRIVER_LOG_DIR')
-    if not log_dir:
-        LOGGER.warning('The SELENIUM_DRIVER_LOG_DIR environment variable was not set; not saving logs')
-        return
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    if browser_name == 'firefox':
-        # Firefox doesn't yet provide logs to Selenium, but does log to a separate file
-        # https://github.com/mozilla/geckodriver/issues/284
-        # https://firefox-source-docs.mozilla.org/testing/geckodriver/geckodriver/TraceLogs.html
-        log_path = os.path.join(os.getcwd(), 'geckodriver.log')
-        if os.path.exists(log_path):
-            dest_path = os.path.join(log_dir, f'{prefix}_geckodriver.log')
-            copyfile(log_path, dest_path)
-        return
-
-    log_types = driver.log_types
-    for log_type in log_types:
-        try:
-            log = driver.get_log(log_type)
-            file_name = os.path.join(
-                log_dir, f'{prefix}_{log_type}.log'
-            )
-            with open(file_name, 'w', encoding="utf8") as output_file:
-                for line in log:
-                    output_file.write("{}{}".format(dumps(line), '\n'))
-        except:  # pylint: disable=bare-except
-            msg = (
-                f"Could not save browser log of type '{log_type}'. It may be that the browser does not support it."
-            )
-
-            LOGGER.warning(msg, exc_info=True)
-
-
 def browser(tags=None, proxy=None, other_caps=None):
     """
     Interpret environment variables to configure Selenium.
@@ -291,16 +177,6 @@ def browser(tags=None, proxy=None, other_caps=None):
         browser_check_func, "Browser is instantiated successfully.", try_limit=3, timeout=95).fulfill()
 
     return browser_instance
-
-
-def add_profile_customizer(func):
-    """Add a new function that modifies the preferences of the firefox profile object it receives as an argument"""
-    FIREFOX_PROFILE_CUSTOMIZERS.append(func)
-
-
-def clear_profile_customizers():
-    """Remove any previously-configured functions for customizing the firefox profile"""
-    FIREFOX_PROFILE_CUSTOMIZERS[:] = []
 
 
 def _firefox_profile():
