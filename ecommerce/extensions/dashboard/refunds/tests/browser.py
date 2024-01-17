@@ -6,8 +6,6 @@ For use with SauceLabs (via SauceConnect) or local browsers.
 import errno
 import logging
 import os
-from json import dumps
-from shutil import copyfile
 
 try:
     from needle.driver import NeedleChrome as Chrome
