@@ -84,15 +84,34 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         """Convert to stripe amount, which is in cents."""
         return str((basket.total_incl_tax * 100).to_integral_value())
 
+    def _get_basket_courses(self, basket):
+        """
+        Gets all courses in a basket and returns the course ID and name into a list that is returned as a string,
+        since Stripe only accepts strings in metadata. At this point, it's expected that the basket is not empty.
+        """
+        courses = []
+        for line in basket.lines.all():
+            course = {
+                'course_id': line.product.course_id,
+                'course_name': line.product.course.name
+            }
+            courses.append(course)
+        return str(courses)
+
     def _build_payment_intent_parameters(self, basket):
         order_number = basket.order_number
         amount = self._get_basket_amount(basket)
         currency = basket.currency
+        courses = self._get_basket_courses(basket)
+
         return {
             'amount': amount,
             'currency': currency,
             'description': order_number,
-            'metadata': {'order_number': order_number},
+            'metadata': {
+                'order_number': order_number,
+                'courses': courses,
+            },
         }
 
     def generate_basket_pi_idempotency_key(self, basket):
