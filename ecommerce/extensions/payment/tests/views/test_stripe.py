@@ -169,6 +169,11 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
         idempotency_key = f'basket_pi_create_v1_{basket.order_number}'
+        product = basket.lines.first().product
+        course = {
+            'course_id': product.course_id,
+            'course_name': product.course.name
+        }
 
         # need to call capture-context endpoint before we call do GET to the stripe checkout view
         # so that the PaymentProcessorResponse is already created
@@ -177,6 +182,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
             assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
+            assert mock_create.call_args.kwargs['metadata']['courses'] == str([(course)])
 
         with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
             mock_retrieve.return_value = retrieve_addr_resp
