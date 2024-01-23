@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('basket', '0015_add_paymentintentid'),
+        ('basket', '0016_make_lineattribute_value_json_compatible'),
     ]
 
     operations = [
