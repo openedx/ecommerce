@@ -194,6 +194,7 @@ def _local_browser_class(browser_name):
 
         firefox_options = FirefoxOptions()
         firefox_options.log.level = 'trace'
+        firefox_options.headless = False
         browser_args = []
         browser_kwargs = {
             'options': firefox_options,
@@ -217,8 +218,7 @@ def _local_browser_class(browser_name):
 
     elif browser_name == 'chrome':
         chrome_options = ChromeOptions()
-        if headless:
-            chrome_options.headless = True
+        chrome_options.headless = False
 
         # Emulate webcam and microphone for testing purposes
         chrome_options.add_argument('--use-fake-device-for-media-stream')
