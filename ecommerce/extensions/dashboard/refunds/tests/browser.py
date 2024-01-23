@@ -181,7 +181,6 @@ def _local_browser_class(browser_name):
 
     # Get class of local browser based on name
     browser_class = BROWSERS.get(browser_name)
-    headless = os.environ.get('BOKCHOY_HEADLESS', 'false').lower() == 'true'
     if browser_class is None:
         raise BrowserConfigError(
             f"Invalid browser name {browser_name}.  Options are: {', '.join(list(BROWSERS.keys()))}"
@@ -195,8 +194,7 @@ def _local_browser_class(browser_name):
 
         firefox_options = FirefoxOptions()
         firefox_options.log.level = 'trace'
-        if headless:
-            firefox_options.headless = True
+        firefox_options.headless = True
         browser_args = []
         browser_kwargs = {
             'options': firefox_options,
@@ -220,8 +218,7 @@ def _local_browser_class(browser_name):
 
     elif browser_name == 'chrome':
         chrome_options = ChromeOptions()
-        if headless:
-            chrome_options.headless = True
+        chrome_options.headless = True
 
         # Emulate webcam and microphone for testing purposes
         chrome_options.add_argument('--use-fake-device-for-media-stream')
