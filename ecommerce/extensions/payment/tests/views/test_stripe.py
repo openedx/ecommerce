@@ -1,4 +1,5 @@
 import json
+from ast import literal_eval
 
 import stripe
 from ddt import ddt, file_data
@@ -8,7 +9,11 @@ from mock import mock
 from oscar.core.loading import get_class, get_model
 from rest_framework import status
 
-from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import (
+    COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    SEAT_PRODUCT_CLASS_NAME
+)
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
@@ -141,6 +146,13 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         basket.add_product(seat, 1)
         return basket
 
+    def get_basket_count(self, basket):
+        expected_basket_count = 0
+        for line in basket.lines.all():
+            if line.product:
+                expected_basket_count = expected_basket_count + 1
+        return expected_basket_count
+
     def test_login_required(self):
         self.client.logout()
         response = self.client.post(self.path)
@@ -177,6 +189,10 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
             assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
+            courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
+            assert len(courses_metadata_list) == self.get_basket_count(basket)
+            assert courses_metadata_list[0]['course_id'] == basket.lines.first().product.course.id
+            assert courses_metadata_list[0]['course_name'] == basket.lines.first().product.course.name
 
         with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
             mock_retrieve.return_value = retrieve_addr_resp
@@ -285,6 +301,43 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 }
             })
             self.assertEqual(response.status_code, 200)
+
+    def test_capture_context_bulk_basket(self):
+        """
+        Verify Payment Intent metadata contains course information for bulk baskets with multiple courses.
+        """
+        basket = self.create_basket(product_class=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+            }
+            self.client.get(self.capture_context_url)
+            mock_create.assert_called_once()
+            courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
+            assert len(courses_metadata_list) == self.get_basket_count(basket)
+
+    def test_capture_context_program_basket(self):
+        """
+        Verify Payment Intent metadata contains product title information for entitlements.
+        """
+        entitlement_basket = create_basket(
+            owner=self.user, site=self.site, product_class=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
+        )
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+            }
+            self.client.get(self.capture_context_url)
+            mock_create.assert_called_once()
+            courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
+            assert len(courses_metadata_list) == self.get_basket_count(entitlement_basket)
+            # The product in the basket does not have a course associated to it, so no course.id and course.name
+            assert courses_metadata_list[0]['course_id'] is None
+            assert courses_metadata_list[0]['course_name'] == entitlement_basket.lines.first().product.title
 
     def test_payment_error_no_basket(self):
         """
