@@ -439,7 +439,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         if discount_percentage is not None:
             if not isinstance(discount_percentage, float) or (discount_percentage < 0.0 or discount_percentage > 100.0):
                 raise ValidationError('Discount percentage should be a float from 0 to 100.')
-        return lms_user_id, learner_username, learner_email, course_run_key, mode, discount_percentage,\
+        return lms_user_id, learner_username, learner_email, course_run_key, mode, discount_percentage, \
             sales_force_id, salesforce_opportunity_line_item
 
     def _get_learner_user(self, lms_user_id, learner_username, learner_email):

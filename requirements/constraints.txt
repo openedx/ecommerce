@@ -37,8 +37,6 @@ celery<5.0.0
 # Pinning for now to reduce entropy
 social-auth-app-django==5.2.0
 
-# bok-choy 2.0.1 still requires selenium<4
-# (bok-choy is now deprecated; updates unlikely)
 # - pytest-selenium v3 has inconsistent pytest dependency requirements
 #   (see pytest-selenium/issues/294)
 # - pytest-variables v3 uses pytest.stash instead of _variables. This
