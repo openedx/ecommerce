@@ -93,15 +93,23 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         courses = []
         for line in basket.lines.all():
             try:
-                course_id = line.product.course.id if line.product.course else None
-                course_name = line.product.course.name if line.product.course else line.product.title
+                course_id = line.product.course.id
             except Exception:  # pylint: disable=broad-except
                 logger.exception(
-                    'Failed to retrieve course data from basket [%s] for payment intent metadata for order [%s]',
+                    'Failed to retrieve course_id data from basket [%s] for payment intent metadata for order [%s]',
                     basket.id,
                     basket.order_number
                 )
-                continue
+                course_id = None
+            try:
+                course_name = line.product.course.name if line.product.course else line.product.title
+            except Exception:  # pylint: disable=broad-except
+                logger.exception(
+                    'Failed to retrieve course_name data from basket [%s] for payment intent metadata for order [%s]',
+                    basket.id,
+                    basket.order_number
+                )
+                course_name = None
             course = {
                 'course_id': course_id,
                 'course_name': course_name,
