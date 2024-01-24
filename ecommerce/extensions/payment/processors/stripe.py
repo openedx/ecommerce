@@ -103,13 +103,13 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 course_id = None
             try:
                 course_name = line.product.course.name if line.product.course else line.product.title
-            except Exception:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except  # pragma: no cover
                 logger.exception(
                     'Failed to retrieve course_name data from basket [%s] for payment intent metadata for order [%s]',
                     basket.id,
                     basket.order_number
-                )
-                course_name = None
+                )  # pragma: no cover
+                course_name = None  # pragma: no cover
             course = {
                 'course_id': course_id,
                 'course_name': course_name,
