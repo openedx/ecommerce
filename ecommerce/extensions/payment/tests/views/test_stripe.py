@@ -15,6 +15,7 @@ from ecommerce.core.constants import (
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
@@ -146,13 +147,6 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         basket.add_product(seat, 1)
         return basket
 
-    def get_basket_count(self, basket):
-        expected_basket_count = 0
-        for line in basket.lines.all():
-            if line.product:
-                expected_basket_count = expected_basket_count + 1
-        return expected_basket_count
-
     def test_login_required(self):
         self.client.logout()
         response = self.client.post(self.path)
@@ -190,7 +184,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             mock_create.assert_called_once()
             assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
             courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
-            assert len(courses_metadata_list) == self.get_basket_count(basket)
+            assert len(courses_metadata_list) == basket.lines.count()
             assert courses_metadata_list[0]['course_id'] == basket.lines.first().product.course.id
             assert courses_metadata_list[0]['course_name'] == basket.lines.first().product.course.name
 
@@ -306,7 +300,12 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         """
         Verify Payment Intent metadata contains course information for bulk baskets with multiple courses.
         """
+        # Create basket with multiple enrollment code products
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         basket = self.create_basket(product_class=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        basket.add_product(enrollment_code, quantity=1)
 
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
             mock_create.return_value = {
@@ -316,15 +315,22 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
             courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
-            assert len(courses_metadata_list) == self.get_basket_count(basket)
+            assert len(courses_metadata_list) == basket.lines.count()
+            for index, line in enumerate(basket.lines.all()):
+                assert courses_metadata_list[index]['course_id'] == line.product.course.id
+                assert courses_metadata_list[index]['course_name'] == line.product.course.name
 
     def test_capture_context_program_basket(self):
         """
         Verify Payment Intent metadata contains product title information for entitlements.
         """
+        # Create basket with multiple entitlements
         entitlement_basket = create_basket(
             owner=self.user, site=self.site, product_class=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
         )
+        entitlement = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'test-course-uuid', 'Course Entitlement')
+        entitlement_basket.add_product(entitlement)
 
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
             mock_create.return_value = {
@@ -334,10 +340,11 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
             courses_metadata_list = literal_eval(mock_create.call_args.kwargs['metadata']['courses'])
-            assert len(courses_metadata_list) == self.get_basket_count(entitlement_basket)
+            assert len(courses_metadata_list) == entitlement_basket.lines.count()
             # The product in the basket does not have a course associated to it, so no course.id and course.name
-            assert courses_metadata_list[0]['course_id'] is None
-            assert courses_metadata_list[0]['course_name'] == entitlement_basket.lines.first().product.title
+            for index, line in enumerate(entitlement_basket.lines.all()):
+                assert courses_metadata_list[index]['course_id'] is None
+                assert courses_metadata_list[index]['course_name'] == line.product.title
 
     def test_payment_error_no_basket(self):
         """
