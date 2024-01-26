@@ -346,6 +346,30 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 assert courses_metadata_list[index]['course_id'] is None
                 assert courses_metadata_list[index]['course_name'] == line.product.title
 
+    def test_capture_context_large_characters_basket(self):
+        """
+        Verify we don't send Stripe metadata value that is longer than 500 characters.
+        """
+        # Create basket with courses that will result in courses list > 500 characters
+        basket = self.create_basket()
+        very_long_course_name = 'a' * 200
+        course_1 = CourseFactory(id='edX/DemoX/Demo_Course_1', name=very_long_course_name, partner=self.partner)
+        product = course_1.create_or_update_seat('verified', False, 50)
+        basket.add_product(product)
+        course_2 = CourseFactory(id='edX/DemoX/Demo_Course_2', name=very_long_course_name, partner=self.partner)
+        product = course_2.create_or_update_seat('verified', False, 100)
+        basket.add_product(product)
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = {
+                'id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+            }
+            self.client.get(self.capture_context_url)
+            mock_create.assert_called_once()
+            # The metadata must be less than 500 characters
+            assert len(mock_create.call_args.kwargs['metadata']['courses']) < 500
+
     def test_payment_error_no_basket(self):
         """
         Verify view redirects to error page if no basket exists for payment_intent_id.

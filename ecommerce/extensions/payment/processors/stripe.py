@@ -115,7 +115,10 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 'course_name': course_name,
             }
             courses.append(course)
-        return str(courses) if courses else None
+
+        # Stripe metadata field value must be a string under 500 characters.
+        courses_string = str(courses)
+        return courses_string[:499] if courses else None
 
     def _build_payment_intent_parameters(self, basket):
         order_number = basket.order_number
