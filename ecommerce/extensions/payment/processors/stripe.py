@@ -124,11 +124,16 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         order_number = basket.order_number
         amount = self._get_basket_amount(basket)
         currency = basket.currency
+        courses = self._get_basket_courses(basket)
+
         return {
             'amount': amount,
             'currency': currency,
             'description': order_number,
-            'metadata': {'order_number': order_number},
+            'metadata': {
+                'order_number': order_number,
+                'courses': courses,
+            },
         }
 
     def generate_basket_pi_idempotency_key(self, basket):
@@ -161,7 +166,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                     # don't create a new intent for the same basket
                     idempotency_key=self.generate_basket_pi_idempotency_key(basket),
                 )
-
                 # id is the payment_intent_id from Stripe
                 transaction_id = stripe_response['id']
 
