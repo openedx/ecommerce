@@ -350,11 +350,14 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         """
         Verify we don't send Stripe metadata value that is longer than 500 characters.
         """
-        # Create basket with a course that will result in courses list > 500 characters
-        very_long_course_name = 'a' * 500
-        course = CourseFactory(id='edX/DemoX/Demo_Course', name=very_long_course_name, partner=self.partner)
-        product = course.create_or_update_seat('verified', False, 50)
+        # Create basket with courses that will result in courses list > 500 characters
         basket = self.create_basket()
+        very_long_course_name = 'a' * 250
+        course_1 = CourseFactory(id='edX/DemoX/Demo_Course_1', name=very_long_course_name, partner=self.partner)
+        product = course_1.create_or_update_seat('verified', False, 50)
+        basket.add_product(product)
+        course_2 = CourseFactory(id='edX/DemoX/Demo_Course_2', name=very_long_course_name, partner=self.partner)
+        product = course_2.create_or_update_seat('verified', False, 100)
         basket.add_product(product)
 
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
