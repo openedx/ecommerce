@@ -352,7 +352,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         """
         # Create basket with courses that will result in courses list > 500 characters
         basket = self.create_basket()
-        very_long_course_name = 'a' * 250
+        very_long_course_name = 'a' * 200
         course_1 = CourseFactory(id='edX/DemoX/Demo_Course_1', name=very_long_course_name, partner=self.partner)
         product = course_1.create_or_update_seat('verified', False, 50)
         basket.add_product(product)
