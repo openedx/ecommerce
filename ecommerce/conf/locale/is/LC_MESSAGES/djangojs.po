@@ -14,10 +14,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-05-08 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Davíð Elvar Másson <davidelvar@gmail.com>, 2016\n"
-"Language-Team: Icelandic (http://www.transifex.com/open-edx/edx-platform/language/is/)\n"
+"Language-Team: Icelandic (http://app.transifex.com/open-edx/edx-platform/language/is/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -91,11 +91,11 @@ msgstr ""
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "Námskeið númer"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Nafn námskeiðs"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:77
@@ -104,7 +104,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Lokadagur staðfestingar"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
@@ -124,7 +124,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 msgid "Verified"
-msgstr ""
+msgstr "Staðfest"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:77
@@ -133,19 +133,19 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Faglegt"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr "Viðurkenning"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Endurskoðun"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Staðfest skírteini"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
@@ -232,7 +232,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/coupon_list_page.js:10
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Afsláttarkóðar"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
@@ -240,7 +240,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Skoða námskeið"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
@@ -248,7 +248,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_list_page.js:10
 msgid "Courses"
-msgstr ""
+msgstr "Námskeið"
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
@@ -310,7 +310,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_form_view.js:51
 msgid "Enrollment Code"
-msgstr ""
+msgstr "Skráningarkóði"
 
 #: ecommerce/static/js/views/coupon_form_view.js:55
 msgid "Discount Code"
@@ -327,7 +327,7 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:35
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
-msgstr ""
+msgstr "Nafn"
 
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
@@ -345,7 +345,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:61
 msgid "Category"
-msgstr ""
+msgstr "Flokkur"
 
 #: ecommerce/static/js/views/coupon_list_view.js:67
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
@@ -360,12 +360,12 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:107
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Next"
-msgstr ""
+msgstr "Áfram"
 
 #: ecommerce/static/js/views/coupon_list_view.js:108
 #: ecommerce/static/js/views/course_list_view.js:53
 msgid "Previous"
-msgstr ""
+msgstr "Fyrri"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -411,7 +411,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Professional Education"
-msgstr ""
+msgstr "Fagmenntun"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
@@ -443,7 +443,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_list_view.js:69
 msgid "Course"
-msgstr ""
+msgstr "Námskeið"
 
 #: ecommerce/static/js/views/course_list_view.js:86
 msgid "Last Edited"
@@ -468,7 +468,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "Staða"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
@@ -537,7 +537,7 @@ msgstr ""
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Villa"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""

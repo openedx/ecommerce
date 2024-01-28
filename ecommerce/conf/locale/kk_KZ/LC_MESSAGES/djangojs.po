@@ -15,10 +15,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-05-08 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Sara Kopbulsynova <sara_95701@mail.ru>, 2016\n"
-"Language-Team: Kazakh (Kazakhstan) (http://www.transifex.com/open-edx/edx-platform/language/kk_KZ/)\n"
+"Language-Team: Kazakh (Kazakhstan) (http://app.transifex.com/open-edx/edx-platform/language/kk_KZ/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -55,7 +55,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
-msgstr ""
+msgstr "Басталу күнінен кейін орын керек"
 
 #: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
@@ -63,11 +63,11 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
-msgstr ""
+msgstr "Аяқталу күніне дейін орын керек"
 
 #: ecommerce/static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
-msgstr ""
+msgstr "Жарамды Курс ID талап етіледі."
 
 #: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
@@ -75,7 +75,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
-msgstr ""
+msgstr "Сізге курс түрін таңдау керек."
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
@@ -87,25 +87,25 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:86
 msgid "Product validation failed."
-msgstr ""
+msgstr "Өнім тексеру сәтсіз аяқталды."
 
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "Курстың сәйкестендіргіші"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Курстың аты"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:77
 msgid "Course Type"
-msgstr ""
+msgstr "Курстың түрі"
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Қайта анықтаудың соңғы мерзімі"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
@@ -113,7 +113,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:28
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "Барлық оқу орындары бағасы болуы тиіс."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
@@ -125,44 +125,44 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 msgid "Verified"
-msgstr ""
+msgstr "тексерілген"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:77
 msgid "Credit"
-msgstr ""
+msgstr "кредит"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "кәсіпқой"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr " Ар-намыс"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Аудит"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Расталған куәлік"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Кәсіби куәлік"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
-msgstr ""
+msgstr "Құрмет куәлігі"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "Куәлік жоқ"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "Барлық несие орындарының несиелік мекемесі болуы тиіс."
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:30
 msgid "Please select a valid credit provider."
@@ -186,11 +186,11 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid card number"
-msgstr ""
+msgstr "Карта нөмірі дұрыс емес"
 
 #: ecommerce/static/js/pages/basket_page.js:147
 msgid "Unsupported card type"
-msgstr ""
+msgstr "Қолдау көрсетілмейтін карта түрі"
 
 #: ecommerce/static/js/pages/basket_page.js:149
 msgid "Invalid security number"
@@ -206,7 +206,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:158
 msgid "Card expired"
-msgstr ""
+msgstr "Картаның қолданылу мерзімі аяқталды"
 
 #: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
@@ -214,42 +214,42 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
-msgstr ""
+msgstr "Мемлекет / провинция (міндетті)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 #: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
 msgid "Create New Coupon"
-msgstr ""
+msgstr "Жаңа купонды құру"
 
 #: ecommerce/static/js/pages/coupon_detail_page.js:13
 #: ecommerce/static/js/pages/enterprise_coupon_detail_page.js:13
 msgid "View Coupon"
-msgstr ""
+msgstr "Купонды қарау"
 
 #: ecommerce/static/js/pages/coupon_edit_page.js:13
 #: ecommerce/static/js/pages/enterprise_coupon_edit_page.js:13
 msgid "Edit Coupon"
-msgstr ""
+msgstr "Купонды өңдеу"
 
 #: ecommerce/static/js/pages/coupon_list_page.js:10
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Купондық кодтар"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
-msgstr ""
+msgstr "Жаңа курс құру"
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Курсты қарау"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
-msgstr ""
+msgstr "Курсын өзгерту"
 
 #: ecommerce/static/js/pages/course_list_page.js:10
 msgid "Courses"
-msgstr ""
+msgstr "Курстар"
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
@@ -269,7 +269,7 @@ msgstr ""
 #: ecommerce/static/js/payment_processors/cybersource.js:225
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "Қазіргі уақытта Apple Pay қол жетімді емес. Басқа төлем әдісін қолданып көріңіз."
 
 #: ecommerce/static/js/payment_processors/cybersource.js:255
 msgid ""
@@ -295,40 +295,40 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_form_view.js:62
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
-msgstr ""
+msgstr "Бір клиентті бір рет қалдану "
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
-msgstr ""
+msgstr "Ол бірнеше клиенттерді бірнеше рет пайдалануға болады"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
-msgstr ""
+msgstr "Бірнеше клиенттерді бір рет пайдалануға болады"
 
 #: ecommerce/static/js/views/coupon_form_view.js:51
 msgid "Enrollment Code"
-msgstr ""
+msgstr "Қабылдау коды"
 
 #: ecommerce/static/js/views/coupon_form_view.js:55
 msgid "Discount Code"
-msgstr ""
+msgstr "Жеңілдік коды"
 
 #: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
-msgstr ""
+msgstr "Өзгерістерді сақтау "
 
 #: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
-msgstr ""
+msgstr "Купонды құру"
 
 #: ecommerce/static/js/views/coupon_list_view.js:35
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
-msgstr ""
+msgstr "Аты"
 
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
@@ -346,27 +346,27 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:61
 msgid "Category"
-msgstr ""
+msgstr "Категория"
 
 #: ecommerce/static/js/views/coupon_list_view.js:67
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
 msgid "Coupon Report"
-msgstr ""
+msgstr "Купондық есеп "
 
 #: ecommerce/static/js/views/coupon_list_view.js:80
 #: ecommerce/static/js/views/course_list_view.js:25
 msgid "Search..."
-msgstr ""
+msgstr "Іздеу ..."
 
 #: ecommerce/static/js/views/coupon_list_view.js:107
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Next"
-msgstr ""
+msgstr "Кейінгі"
 
 #: ecommerce/static/js/views/coupon_list_view.js:108
 #: ecommerce/static/js/views/course_list_view.js:53
 msgid "Previous"
-msgstr ""
+msgstr "Алдыңғы "
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -386,7 +386,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
-msgstr ""
+msgstr "Тегін(аудит)"
 
 #: ecommerce/static/js/views/course_form_view.js:56
 msgid "Free audit track. No certificate."
@@ -408,11 +408,11 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid "Verified Only"
-msgstr ""
+msgstr "Тек Тексерілді"
 
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Professional Education"
-msgstr ""
+msgstr "Кәсіптік Білім Беру"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
@@ -444,7 +444,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_list_view.js:69
 msgid "Course"
-msgstr ""
+msgstr "Курс "
 
 #: ecommerce/static/js/views/course_list_view.js:86
 msgid "Last Edited"
@@ -469,7 +469,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "Мәртебе:"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
@@ -486,11 +486,11 @@ msgstr ""
 #: ecommerce/static/js/views/form_view.js:81
 #: ecommerce/static/js/views/form_view.js:174
 msgid "Error!"
-msgstr ""
+msgstr "Қате!"
 
 #: ecommerce/static/js/views/form_view.js:127
 msgid "Saving..."
-msgstr ""
+msgstr "Сақтау ..."
 
 #: ecommerce/static/js/views/form_view.js:136
 msgid "Please complete all required fields."
@@ -518,7 +518,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/provider_selection_view.js:33
 msgid "Select"
-msgstr ""
+msgstr "таңдау"
 
 #: ecommerce/static/js/views/provider_selection_view.js:34
 msgid "Selected"
@@ -538,7 +538,7 @@ msgstr ""
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Қателік"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""

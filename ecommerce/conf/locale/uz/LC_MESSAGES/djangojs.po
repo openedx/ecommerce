@@ -13,10 +13,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-05-08 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Transifex Bot <>\n"
-"Language-Team: Uzbek (http://www.transifex.com/open-edx/edx-platform/language/uz/)\n"
+"Language-Team: Uzbek (http://app.transifex.com/open-edx/edx-platform/language/uz/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -90,11 +90,11 @@ msgstr ""
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "Kurs identifikatori."
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Kurs nomi."
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:77
@@ -103,7 +103,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Tekshirishning oxirgi muddati"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
@@ -123,7 +123,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 msgid "Verified"
-msgstr ""
+msgstr "Tasdiqlangan"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:77
@@ -132,7 +132,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Professional"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
@@ -144,11 +144,11 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Tasdiqlangan sertifikat"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Professional darajadagi sertifikat"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
@@ -180,15 +180,15 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
-msgstr ""
+msgstr "Ushbu maydonni to'ldirish kerak"
 
 #: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid card number"
-msgstr ""
+msgstr "Karta raqami noto'g'ri"
 
 #: ecommerce/static/js/pages/basket_page.js:147
 msgid "Unsupported card type"
-msgstr ""
+msgstr "Nomaqbul karta turi"
 
 #: ecommerce/static/js/pages/basket_page.js:149
 msgid "Invalid security number"
@@ -204,7 +204,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:158
 msgid "Card expired"
-msgstr ""
+msgstr "Karta muddati tugagan"
 
 #: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
@@ -212,7 +212,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
-msgstr ""
+msgstr "Mintaqa/hudud"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 #: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
@@ -239,7 +239,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Kursni ko'rish"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
@@ -247,7 +247,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_list_page.js:10
 msgid "Courses"
-msgstr ""
+msgstr "Kurslar."
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
@@ -267,7 +267,7 @@ msgstr ""
 #: ecommerce/static/js/payment_processors/cybersource.js:225
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "Apple Pay hozirda mavjud emas. Iltimos, boshqa toʻlov usuli bilan urinib koʻring."
 
 #: ecommerce/static/js/payment_processors/cybersource.js:255
 msgid ""
@@ -326,7 +326,7 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:35
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
-msgstr ""
+msgstr "Nomi"
 
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
@@ -359,12 +359,12 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:107
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Next"
-msgstr ""
+msgstr "Keyingisi"
 
 #: ecommerce/static/js/views/coupon_list_view.js:108
 #: ecommerce/static/js/views/course_list_view.js:53
 msgid "Previous"
-msgstr ""
+msgstr "Oldingi"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -406,7 +406,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid "Verified Only"
-msgstr ""
+msgstr "Faqat tasdiqlanganlar"
 
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Professional Education"
@@ -442,7 +442,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_list_view.js:69
 msgid "Course"
-msgstr ""
+msgstr "Kurs"
 
 #: ecommerce/static/js/views/course_list_view.js:86
 msgid "Last Edited"
@@ -467,7 +467,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "Holat."
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
@@ -536,7 +536,7 @@ msgstr ""
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Xato"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""

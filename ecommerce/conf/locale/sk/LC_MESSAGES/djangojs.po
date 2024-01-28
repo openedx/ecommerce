@@ -15,10 +15,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-05-08 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Marcel Miklosik <marcel.miklosik@gmail.com>, 2015\n"
-"Language-Team: Slovak (http://www.transifex.com/open-edx/edx-platform/language/sk/)\n"
+"Language-Team: Slovak (http://app.transifex.com/open-edx/edx-platform/language/sk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -75,7 +75,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
-msgstr ""
+msgstr "Musíte si vybrať typ kurzu."
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
@@ -83,29 +83,29 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:77
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "Termín overenia musí nastať po termíne aktualizácie."
 
 #: ecommerce/static/js/models/course_model.js:86
 msgid "Product validation failed."
-msgstr ""
+msgstr "Overenie produktu zlyhalo."
 
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "ID kurzu"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Názov kurzu"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:77
 msgid "Course Type"
-msgstr ""
+msgstr "Typ kurzu"
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Termín overenia"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
@@ -113,7 +113,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:28
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "Každé miesto kurzu musí mať svoju cenu."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
@@ -121,48 +121,48 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
-msgstr ""
+msgstr "Termín aktualizácie musí nastať pred termínom overenia."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 msgid "Verified"
-msgstr ""
+msgstr "Overených"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:77
 msgid "Credit"
-msgstr ""
+msgstr "Pohľadávka"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Profesionálnych"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr "Čestný"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Audit"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Overený certifikát"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Profesijný certifikát"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
-msgstr ""
+msgstr "Čestný certifikát"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "Žiaden certifikát"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "Všetky miesta s kreditom musia mať poskytovateľa kreditu."
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:30
 msgid "Please select a valid credit provider."
@@ -170,7 +170,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:39
 msgid "All credit seats must designate a number of credit hours."
-msgstr ""
+msgstr "Všetky miesta s kreditom musia mať určený počet kreditových hodín."
 
 #: ecommerce/static/js/models/enterprise_coupon_model.js:18
 msgid "This value must be a valid email."
@@ -241,15 +241,15 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Pozrieť kurz"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
-msgstr ""
+msgstr "Editovať kurz"
 
 #: ecommerce/static/js/pages/course_list_page.js:10
 msgid "Courses"
-msgstr ""
+msgstr "Kurzy"
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
@@ -319,7 +319,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
-msgstr ""
+msgstr "Uložiť zmeny"
 
 #: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
@@ -328,7 +328,7 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:35
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
-msgstr ""
+msgstr "Názov"
 
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
@@ -356,17 +356,17 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:80
 #: ecommerce/static/js/views/course_list_view.js:25
 msgid "Search..."
-msgstr ""
+msgstr "Hľadať..."
 
 #: ecommerce/static/js/views/coupon_list_view.js:107
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Next"
-msgstr ""
+msgstr "Ďalej"
 
 #: ecommerce/static/js/views/coupon_list_view.js:108
 #: ecommerce/static/js/views/course_list_view.js:53
 msgid "Previous"
-msgstr ""
+msgstr "Predchádzajúci "
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -412,43 +412,43 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Professional Education"
-msgstr ""
+msgstr "Profesijné vzdelávanie"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "Platený kurz s certifikátom s prvotným overením a certifikátom odborného vydelania."
 
 #: ecommerce/static/js/views/course_form_view.js:78
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "Platený kurz s certifikátom s prvotným overením a overeným certifikátom s možnoťou zakúpiť si kredit."
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: ecommerce/static/js/views/course_list_view.js:57
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "Zobrazujem _START_ to _END_ of _TOTAL_ kurzy"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:60
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(filtered from _MAX_ total courses)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:63
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "Zobraziť _MENU_ courses"
 
 #: ecommerce/static/js/views/course_list_view.js:69
 msgid "Course"
-msgstr ""
+msgstr "Kurz"
 
 #: ecommerce/static/js/views/course_list_view.js:86
 msgid "Last Edited"
-msgstr ""
+msgstr "Naposledy upravené"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
@@ -469,7 +469,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "Stav"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
@@ -486,11 +486,11 @@ msgstr ""
 #: ecommerce/static/js/views/form_view.js:81
 #: ecommerce/static/js/views/form_view.js:174
 msgid "Error!"
-msgstr ""
+msgstr "Chyba!"
 
 #: ecommerce/static/js/views/form_view.js:127
 msgid "Saving..."
-msgstr ""
+msgstr "Ukladá sa..."
 
 #: ecommerce/static/js/views/form_view.js:136
 msgid "Please complete all required fields."
@@ -498,7 +498,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/form_view.js:161
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "Pri ukladaní dát došlo k chybe."
 
 #: ecommerce/static/js/views/offer_view.js:198
 msgid "Ellipsis"
@@ -538,7 +538,7 @@ msgstr ""
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Chyba"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""

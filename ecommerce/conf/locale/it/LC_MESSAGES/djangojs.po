@@ -14,10 +14,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-05-08 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: ASEV Empoli <e.constantinova@asev.it>, 2020\n"
-"Language-Team: Italian (http://www.transifex.com/open-edx/edx-platform/language/it/)\n"
+"Language-Team: Italian (http://app.transifex.com/open-edx/edx-platform/language/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -91,11 +91,11 @@ msgstr ""
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "ID del corso"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Nome Corso"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:77
@@ -104,7 +104,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Verification Deadline"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
@@ -124,7 +124,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 msgid "Verified"
-msgstr ""
+msgstr "Verificato"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:77
@@ -133,19 +133,19 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Professionale"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr "Honor"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Audit"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Certificato Verificato"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
@@ -240,7 +240,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Vedi il Corso"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
@@ -248,7 +248,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_list_page.js:10
 msgid "Courses"
-msgstr ""
+msgstr "Corsi"
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
@@ -318,7 +318,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
-msgstr ""
+msgstr "Salva  Modifiche"
 
 #: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
@@ -327,7 +327,7 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:35
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
@@ -345,7 +345,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:61
 msgid "Category"
-msgstr ""
+msgstr "Categoria"
 
 #: ecommerce/static/js/views/coupon_list_view.js:67
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
@@ -355,17 +355,17 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:80
 #: ecommerce/static/js/views/course_list_view.js:25
 msgid "Search..."
-msgstr ""
+msgstr "Cerca..."
 
 #: ecommerce/static/js/views/coupon_list_view.js:107
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Next"
-msgstr ""
+msgstr "Successivo"
 
 #: ecommerce/static/js/views/coupon_list_view.js:108
 #: ecommerce/static/js/views/course_list_view.js:53
 msgid "Previous"
-msgstr ""
+msgstr "Precedente"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -411,7 +411,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Professional Education"
-msgstr ""
+msgstr "Formazione professionale"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
@@ -443,7 +443,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_list_view.js:69
 msgid "Course"
-msgstr ""
+msgstr "Corso"
 
 #: ecommerce/static/js/views/course_list_view.js:86
 msgid "Last Edited"
@@ -468,7 +468,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "Stato"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
@@ -537,7 +537,7 @@ msgstr ""
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Errore"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""

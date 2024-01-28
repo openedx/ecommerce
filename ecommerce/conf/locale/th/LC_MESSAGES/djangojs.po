@@ -16,10 +16,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-05-08 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Pornchai TummarATTAnanonT <yantaku@gmail.com>, 2015-2016\n"
-"Language-Team: Thai (http://www.transifex.com/open-edx/edx-platform/language/th/)\n"
+"Language-Team: Thai (http://app.transifex.com/open-edx/edx-platform/language/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -56,7 +56,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
-msgstr ""
+msgstr "ต้องกำหนดหลังวันเริ่มต้น"
 
 #: ecommerce/static/js/models/coupon_model.js:128
 msgid "Max uses for multi-use coupons must be higher than 2."
@@ -64,11 +64,11 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:152
 msgid "Must occur before end date"
-msgstr ""
+msgstr "ต้องกำหนดก่อนวัดสิ้นสุด"
 
 #: ecommerce/static/js/models/coupon_model.js:174
 msgid "A valid course ID is required"
-msgstr ""
+msgstr "ระบุรหัสหลักสูตรที่ถูกต้อง"
 
 #: ecommerce/static/js/models/coupon_model.js:188
 msgid "A valid Program UUID is required."
@@ -80,7 +80,7 @@ msgstr "คุณต้องเลือกประเภทหลักสู
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
-msgstr ""
+msgstr "คุณต้องเลือกถ้าที่นั่ง honor ถูกสร้าง"
 
 #: ecommerce/static/js/models/course_model.js:77
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -110,7 +110,7 @@ msgstr "วันสิ้นสุดการตรวจสอบ"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
-msgstr ""
+msgstr "รวมที่นั่ง Honor"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:28
 msgid "All course seats must have a price."
@@ -220,25 +220,25 @@ msgstr ""
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 #: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
 msgid "Create New Coupon"
-msgstr ""
+msgstr "สร้างคูปองใหม่"
 
 #: ecommerce/static/js/pages/coupon_detail_page.js:13
 #: ecommerce/static/js/pages/enterprise_coupon_detail_page.js:13
 msgid "View Coupon"
-msgstr ""
+msgstr "ดูคูปอง"
 
 #: ecommerce/static/js/pages/coupon_edit_page.js:13
 #: ecommerce/static/js/pages/enterprise_coupon_edit_page.js:13
 msgid "Edit Coupon"
-msgstr ""
+msgstr "แก้ไขคูปอง"
 
 #: ecommerce/static/js/pages/coupon_list_page.js:10
 msgid "Coupon Codes"
-msgstr ""
+msgstr "รหัสคูปอง"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
-msgstr ""
+msgstr "สร้างหลักสูตรใหม่"
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
@@ -250,7 +250,7 @@ msgstr "แก้ไขหลักสูตร"
 
 #: ecommerce/static/js/pages/course_list_page.js:10
 msgid "Courses"
-msgstr ""
+msgstr "หลักสูตร"
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
@@ -296,40 +296,40 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_form_view.js:62
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
-msgstr ""
+msgstr "สามารถใช้ได้ครั้งเดียวโดยลูกค้าท่านเดียว"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
-msgstr ""
+msgstr "สามารถใช้ได้หลายครั้งโดยลูกค้าหลายท่าน"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
-msgstr ""
+msgstr "สามารถใช้ได้ครั้งเดียวโดยลูกค้าหลายท่าน"
 
 #: ecommerce/static/js/views/coupon_form_view.js:51
 msgid "Enrollment Code"
-msgstr ""
+msgstr "รหัสการลงทะเบียน"
 
 #: ecommerce/static/js/views/coupon_form_view.js:55
 msgid "Discount Code"
-msgstr ""
+msgstr "รหัสลดราคา"
 
 #: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
-msgstr ""
+msgstr "บันทึกการเปลี่ยนแปลง"
 
 #: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
-msgstr ""
+msgstr "สร้างคูปอง"
 
 #: ecommerce/static/js/views/coupon_list_view.js:35
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
-msgstr ""
+msgstr "ชื่อ"
 
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
@@ -347,12 +347,12 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:61
 msgid "Category"
-msgstr ""
+msgstr "Category"
 
 #: ecommerce/static/js/views/coupon_list_view.js:67
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
 msgid "Coupon Report"
-msgstr ""
+msgstr "รายงานคูปอง"
 
 #: ecommerce/static/js/views/coupon_list_view.js:80
 #: ecommerce/static/js/views/course_list_view.js:25
@@ -373,25 +373,25 @@ msgstr "ก่อนหน้า"
 #. them.
 #: ecommerce/static/js/views/coupon_list_view.js:112
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
-msgstr ""
+msgstr "กำลังแสดง _เริ่มต้น_ ถึง _สิ้นสุด_ ของ _ทั้งหมด_ คูปอง"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/coupon_list_view.js:115
 msgid "(filtered from _MAX_ total coupons)"
-msgstr ""
+msgstr "(คัดกรองจาก _มากที่สุด_ คูปองทั้งหมด)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/coupon_list_view.js:118
 msgid "Display _MENU_ coupons"
-msgstr ""
+msgstr "แสดง _เมนู_ คูปอง"
 
 #: ecommerce/static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
-msgstr ""
+msgstr "ฟรี (ผู้ใหญ่)"
 
 #: ecommerce/static/js/views/course_form_view.js:56
 msgid "Free audit track. No certificate."
-msgstr ""
+msgstr "ตรวจสอบฟรี  ไม่มีการรับรอง"
 
 #: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified and Audit"
@@ -419,13 +419,13 @@ msgstr "การศึกษาวิชาชีพ"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "ชุดวิชาประกาศนียบัตรที่ชำระเงินแล้วพร้อมการตรวจสอบและรับรองการศึกษาวิชาชีพ"
 
 #: ecommerce/static/js/views/course_form_view.js:78
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "ชุดวิชาประกาศนียบัตรที่ชำระเงินแล้วพร้อมการตรวจสอบและรับรอง และการชำระเครดิต"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -470,7 +470,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "สถานะ"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
@@ -519,30 +519,30 @@ msgstr ""
 
 #: ecommerce/static/js/views/provider_selection_view.js:33
 msgid "Select"
-msgstr ""
+msgstr "เลือก"
 
 #: ecommerce/static/js/views/provider_selection_view.js:34
 msgid "Selected"
-msgstr ""
+msgstr "ถูกเลือก"
 
 #: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:21
 msgid "Order %(order_number)s has been fulfilled."
-msgstr ""
+msgstr "เรียงลำดับ %(order_number)s บรรลุผลแล้ว"
 
 #: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:27
 msgid "Failed to fulfill order %(order_number)s: %(error)s"
-msgstr ""
+msgstr "เกิดข้อผิดพลาดในการเรียงลำดับ %(order_number)s: %(error)s"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:24
 msgid "Refund #%(refund_id)s has been processed."
-msgstr ""
+msgstr "คืนเงิน #%(refund_id)s ได้ถูกดำเนินการ"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "ผิดพลาด"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""
 "Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
 "contact the E-Commerce Development Team."
-msgstr ""
+msgstr "กระบวนการคืนเงินผิดพลาด #%(refund_id)s: %(error)s. กรุณาทดลองอีกครั้ง, หรือติดต่อทีมพัฒนา E-Commerce"

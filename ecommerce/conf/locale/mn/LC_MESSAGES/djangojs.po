@@ -14,10 +14,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 20:12+0000\n"
+"POT-Creation-Date: 2022-05-08 20:12+0000\n"
 "PO-Revision-Date: 2015-06-18 02:02+0000\n"
 "Last-Translator: Myagmarjav Enkhbileg <miigaa.lucky@gmail.com>, 2018\n"
-"Language-Team: Mongolian (http://www.transifex.com/open-edx/edx-platform/language/mn/)\n"
+"Language-Team: Mongolian (http://app.transifex.com/open-edx/edx-platform/language/mn/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -27,7 +27,7 @@ msgstr ""
 #: ecommerce/static/js/models/coupon_model.js:33
 #: ecommerce/static/js/models/enterprise_coupon_model.js:15
 msgid "This field is required."
-msgstr ""
+msgstr "Энэ талбарыг оруулах шаардлагатай."
 
 #: ecommerce/static/js/models/coupon_model.js:34
 #: ecommerce/static/js/models/enterprise_coupon_model.js:16
@@ -91,11 +91,11 @@ msgstr ""
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "Хичээлийн АйДи"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Хичээлийн нэр"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:77
@@ -104,7 +104,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Баталгаажуулалтын эцсийн хугацаа"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
@@ -124,24 +124,24 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 msgid "Verified"
-msgstr ""
+msgstr "Баталгаажсан "
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:77
 msgid "Credit"
-msgstr ""
+msgstr "Кредит"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Мэргэжлийн"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr "Honor"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Аудит "
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
@@ -149,7 +149,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Мэргэжлийн гэрчилгээ"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
@@ -232,19 +232,19 @@ msgstr ""
 
 #: ecommerce/static/js/pages/coupon_list_page.js:10
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Купон код"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
-msgstr ""
+msgstr "Шинэ хичээл үүсгэх"
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Хичээл Үзэх "
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
-msgstr ""
+msgstr "Хичээлийг засах"
 
 #: ecommerce/static/js/pages/course_list_page.js:10
 msgid "Courses"
@@ -310,7 +310,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_form_view.js:51
 msgid "Enrollment Code"
-msgstr ""
+msgstr "Элсэлтийн Код "
 
 #: ecommerce/static/js/views/coupon_form_view.js:55
 msgid "Discount Code"
@@ -318,7 +318,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
-msgstr ""
+msgstr "Өөрчлөлтийг хадгалах"
 
 #: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
@@ -327,7 +327,7 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:35
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
 msgid "Name"
-msgstr ""
+msgstr "Нэр"
 
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
@@ -345,7 +345,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:61
 msgid "Category"
-msgstr ""
+msgstr "Ангилал"
 
 #: ecommerce/static/js/views/coupon_list_view.js:67
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
@@ -360,12 +360,12 @@ msgstr "Хайх..."
 #: ecommerce/static/js/views/coupon_list_view.js:107
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Next"
-msgstr ""
+msgstr "Дараагийнх"
 
 #: ecommerce/static/js/views/coupon_list_view.js:108
 #: ecommerce/static/js/views/course_list_view.js:53
 msgid "Previous"
-msgstr ""
+msgstr "Өмнөх"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -443,7 +443,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_list_view.js:69
 msgid "Course"
-msgstr ""
+msgstr "Хичээл"
 
 #: ecommerce/static/js/views/course_list_view.js:86
 msgid "Last Edited"
@@ -468,7 +468,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "Төлөв"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
@@ -489,7 +489,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/form_view.js:127
 msgid "Saving..."
-msgstr ""
+msgstr "Хадгалж байна..."
 
 #: ecommerce/static/js/views/form_view.js:136
 msgid "Please complete all required fields."
@@ -537,7 +537,7 @@ msgstr ""
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Алдаа"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""
