@@ -28,6 +28,7 @@ ANDROID_SKU_KEY = 'android_sku'
 COURSE_KEY = 'course_key'
 IOS_SKU_KEY = 'ios_sku'
 
+
 class CourseRunFetchException(Exception):
     pass
 
@@ -185,8 +186,8 @@ class Command(BaseCommand):
         recipient = IAPProcessorConfiguration.get_solo().mobile_team_email
         if not recipient:
             message = "Couldn't mail mobile team for expired courses with SKUS. " \
-                  "No email was specified for mobile team in configurations.\n " \
-                  "Email contents: {}".format(email_body)
+                "No email was specified for mobile team in configurations.\n " \
+                "Email contents: {}".format(email_body)
             logger.info(message)
             return
 
