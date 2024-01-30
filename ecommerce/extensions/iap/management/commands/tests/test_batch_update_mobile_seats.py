@@ -82,12 +82,13 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         )
         return mobile_seat
 
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
     @patch.object(Course, 'publish_to_lms')
     @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
     def test_mobile_seat_for_new_course_run_created(
-            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail):
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product):
         """Test that the command creates mobile seats for new course run."""
         course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
         course_run_without_mobile_seat = self._create_course_and_seats()
@@ -98,6 +99,7 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_publish_to_lms.return_value = None
         mock_course_run.return_value = course_run_return_value
         mock_course_detail.return_value = course_detail_return_value
+        mock_create_ios_product.return_value = None
 
         call_command(self.command)
         actual_mobile_seats = Product.objects.filter(
@@ -108,12 +110,13 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         self.assertTrue(actual_mobile_seats.exists())
         self.assertEqual(actual_mobile_seats.count(), expected_mobile_seats_count)
 
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
     @patch.object(Course, 'publish_to_lms')
     @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
     def test_extra_seats_not_created(
-            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail):
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product):
         """Test the case where mobile seats are already created for course run."""
         course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
         course_run_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True)
@@ -124,6 +127,7 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_publish_to_lms.return_value = None
         mock_course_run.return_value = course_run_return_value
         mock_course_detail.return_value = course_detail_return_value
+        mock_create_ios_product.return_value = "Error creating ios product"
 
         call_command(self.command)
         actual_mobile_seats = Product.objects.filter(
@@ -134,12 +138,13 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         self.assertTrue(actual_mobile_seats.exists())
         self.assertEqual(actual_mobile_seats.count(), expected_mobile_seats_count)
 
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
     @patch.object(Course, 'publish_to_lms')
     @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
     def test_no_response_from_discovery_for_course_run_api(
-            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail):
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product):
         """Test that the command handles exceptions if no response returned from Discovery for course run API."""
         course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
         course_run_without_mobile_seat = self._create_course_and_seats()
@@ -151,6 +156,7 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_publish_to_lms.return_value = None
         mock_course_run.return_value = course_run_return_value
         mock_course_detail.return_value = course_detail_return_value
+        mock_create_ios_product.return_value = None
 
         with self.assertRaises(AttributeError), \
                 LogCapture(logger_name) as logger:
@@ -164,12 +170,13 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         )
         self.assertFalse(actual_mobile_seats.exists())
 
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
     @patch.object(Course, 'publish_to_lms')
     @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
     def test_no_response_from_discovery_for_course_detail_api(
-            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail):
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product):
         """Test that the command handles exceptions if no response returned from Discovery for course detail API."""
         course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
         course_run_without_mobile_seat = self._create_course_and_seats()
@@ -180,6 +187,7 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_publish_to_lms.return_value = None
         mock_course_run.return_value = course_run_return_value
         mock_course_detail.return_value = None
+        mock_create_ios_product.return_value = None
 
         with self.assertRaises(AttributeError), \
                 LogCapture(logger_name) as logger:
@@ -193,25 +201,30 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         )
         self.assertFalse(actual_mobile_seats.exists())
 
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
     @patch.object(Course, 'publish_to_lms')
     @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
     def test_command_arguments_are_processed(
-            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail):
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product):
         course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
         mock_email.return_value = None
         mock_publish_to_lms.return_value = None
         mock_course_run.return_value = {'course': course_with_mobile_seat.id}
         mock_course_detail.return_value = {'course_run_keys': []}
+        mock_create_ios_product.return_value = None
 
         call_command(self.command, batch_size=1, sleep_time=1)
         assert mock_email.call_count == 1
 
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._get_email_contents')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
     @patch.object(Course, 'publish_to_lms')
-    def test_send_mail_to_mobile_team(self, mock_publish_to_lms, mock_course_run, mock_course_detail):
+    def test_send_mail_to_mobile_team(self, mock_publish_to_lms, mock_course_run, mock_course_detail,
+                                      mock_get_email_contents, mock_create_ios_product):
         logger_name = 'ecommerce.extensions.iap.management.commands.batch_update_mobile_seats'
         email_sender = 'ecommerce.extensions.communication.utils.Dispatcher.dispatch_direct_messages'
         mock_mobile_team_mail = 'abc@example.com'
@@ -223,9 +236,12 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_publish_to_lms.return_value = None
         mock_course_run.return_value = {'course': course.id}
         mock_course_detail.return_value = {'course_run_keys': []}
+        mock_get_email_contents.return_value = "mock_email_contents"
+        mock_create_ios_product.return_value = None
+
         mock_email_body = {
             'subject': 'Expired Courses with mobile SKUS alert',
-            'body': '{}'.format(course.id),
+            'body': 'mock_email_contents',
             'html': None,
         }
 
@@ -242,10 +258,13 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
             assert mock_send_email.call_count == 1
             mock_send_email.assert_called_with(mock_mobile_team_mail, mock_email_body)
 
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._get_email_contents')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
     @patch.object(Course, 'publish_to_lms')
-    def test_send_mail_to_mobile_team_with_no_email(self, mock_publish_to_lms, mock_course_run, mock_course_detail):
+    def test_send_mail_to_mobile_team_with_no_email(self, mock_publish_to_lms, mock_course_run, mock_course_detail,
+                                                    mock_get_email_contents, mock_create_ios_product):
         logger_name = 'ecommerce.extensions.iap.management.commands.batch_update_mobile_seats'
         email_sender = 'ecommerce.extensions.communication.utils.Dispatcher.dispatch_direct_messages'
         iap_configs = IAPProcessorConfiguration.get_solo()
@@ -256,12 +275,15 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_publish_to_lms.return_value = None
         mock_course_run.return_value = {'course': course.id}
         mock_course_detail.return_value = {'course_run_keys': []}
+        mock_get_email_contents.return_value = "mock_email_contents"
+        mock_create_ios_product.return_value = None
 
         with LogCapture(logger_name) as logger, \
                 patch(email_sender) as mock_send_email:
             call_command(self.command)
             msg = "Couldn't mail mobile team for expired courses with SKUS. " \
-                  "No email was specified for mobile team in configurations"
+                  "No email was specified for mobile team in configurations.\n " \
+                  "Email contents: mock_email_contents"
             logger.check_present(
                 (
                     logger_name,
