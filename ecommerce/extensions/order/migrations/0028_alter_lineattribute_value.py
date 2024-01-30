@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('order', '0026_auto_20231108_1355'),
+        ('order', '0027_make_lineattribute_value_json_compatible'),
     ]
 
     operations = [
