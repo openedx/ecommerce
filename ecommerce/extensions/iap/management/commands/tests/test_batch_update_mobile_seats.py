@@ -27,23 +27,24 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         super().setUp()
         self.command = 'batch_update_mobile_seats'
 
-    def _create_course_and_seats(self, create_mobile_seats=False, expired_in_past=False):
+    def _create_course_and_seats(self, create_mobile_seats=False, expired_in_past=False, create_web_seat=True):
         """
         Create the specified number of courses with audit and verified seats. Create mobile seats
         if specified.
         """
         course = CourseFactory(partner=self.partner)
         course.create_or_update_seat('audit', False, 0)
-        verified_seat = course.create_or_update_seat('verified', True, Decimal(10.0))
-        verified_seat.title = (
-            f'Seat in {course.name} with verified certificate (and ID verification)'
-        )
-        expires = now() - timedelta(days=10) if expired_in_past else now() + timedelta(days=10)
-        verified_seat.expires = expires
-        verified_seat.save()
-        if create_mobile_seats:
-            self._create_mobile_seat_for_course(course, ANDROID_SKU_PREFIX)
-            self._create_mobile_seat_for_course(course, IOS_SKU_PREFIX)
+        if create_web_seat:
+            verified_seat = course.create_or_update_seat('verified', True, Decimal(10.0))
+            verified_seat.title = (
+                f'Seat in {course.name} with verified certificate (and ID verification)'
+            )
+            expires = now() - timedelta(days=10) if expired_in_past else now() + timedelta(days=10)
+            verified_seat.expires = expires
+            verified_seat.save()
+            if create_mobile_seats:
+                self._create_mobile_seat_for_course(course, ANDROID_SKU_PREFIX)
+                self._create_mobile_seat_for_course(course, IOS_SKU_PREFIX)
 
         return course
 
@@ -138,6 +139,37 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         self.assertTrue(actual_mobile_seats.exists())
         self.assertEqual(actual_mobile_seats.count(), expected_mobile_seats_count)
 
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.create_child_products_for_mobile')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
+    @patch.object(Course, 'publish_to_lms')
+    @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
+    def test_no_mobile_products_returned(
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product,
+            mock_create_child_products):
+        """Test the case where mobile seats are already created for course run."""
+        course_with_mobile_seat = self._create_course_and_seats(create_web_seat=False)
+        course_run_with_mobile_seat = self._create_course_and_seats(create_web_seat=False)
+        course_run_return_value = {'course': course_with_mobile_seat.id}
+        course_detail_return_value = {'course_run_keys': [course_run_with_mobile_seat.id]}
+
+        mock_email.return_value = None
+        mock_publish_to_lms.return_value = None
+        mock_course_run.return_value = course_run_return_value
+        mock_course_detail.return_value = course_detail_return_value
+        mock_create_ios_product.return_value = None
+        mock_create_child_products.return_value = None
+
+        call_command(self.command)
+        actual_mobile_seats = Product.objects.filter(
+            course=course_run_with_mobile_seat,
+            stockrecords__partner_sku__icontains='mobile'
+        )
+        expected_mobile_seats_count = 0
+        self.assertFalse(actual_mobile_seats.exists())
+        self.assertEqual(actual_mobile_seats.count(), expected_mobile_seats_count)
+
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
@@ -200,6 +232,34 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
             stockrecords__partner_sku__icontains='mobile'
         )
         self.assertFalse(actual_mobile_seats.exists())
+
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.create_ios_product')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
+    @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_run_detail')
+    @patch.object(Course, 'publish_to_lms')
+    @patch.object(mobile_seats_command, '_send_email_about_expired_courses')
+    def test_error_in_creating_ios_products(
+            self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product):
+        """Test the case where mobile seats are already created for course run."""
+        course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
+        course_run_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True)
+        course_run_return_value = {'course': course_with_mobile_seat.id}
+        course_detail_return_value = {'course_run_keys': [course_run_with_mobile_seat.id]}
+
+        mock_email.return_value = None
+        mock_publish_to_lms.return_value = None
+        mock_course_run.return_value = course_run_return_value
+        mock_course_detail.return_value = course_detail_return_value
+        mock_create_ios_product.return_value = "Error creating ios product"
+
+        call_command(self.command)
+        actual_mobile_seats = Product.objects.filter(
+            course=course_run_with_mobile_seat,
+            stockrecords__partner_sku__icontains='mobile'
+        )
+        expected_mobile_seats_count = 2
+        self.assertTrue(actual_mobile_seats.exists())
+        self.assertEqual(actual_mobile_seats.count(), expected_mobile_seats_count)
 
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.Command._create_ios_product')
     @patch('ecommerce.extensions.iap.management.commands.batch_update_mobile_seats.get_course_detail')
@@ -292,3 +352,36 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
                 )
             )
             assert mock_send_email.call_count == 0
+
+    def test_no_expired_courses(self):
+        logger_name = 'ecommerce.extensions.iap.management.commands.batch_update_mobile_seats'
+        email_sender = 'ecommerce.extensions.communication.utils.Dispatcher.dispatch_direct_messages'
+        mock_mobile_team_mail = 'abc@example.com'
+        iap_configs = IAPProcessorConfiguration.get_solo()
+        iap_configs.mobile_team_email = mock_mobile_team_mail
+        iap_configs.save()
+        self._create_course_and_seats(create_mobile_seats=True, expired_in_past=False)
+
+        expected_body = "\nExpired Courses:\n"
+        expected_body += "\n\nNew course runs processed:\n"
+        expected_body += "\n\nFailed course runs:\n"
+        expected_body += "\n\nSeats created:\n"
+        expected_body += "\n\nFailed iOS products:\n"
+
+        mock_email_body = {
+            'subject': 'Expired Courses with mobile SKUS alert',
+            'body': expected_body,
+            'html': None,
+        }
+
+        with LogCapture(logger_name) as logger, \
+                patch(email_sender) as mock_send_email:
+            call_command(self.command)
+            logger.check_present(
+                (
+                    logger_name,
+                    'INFO',
+                    'Sent Expired Courses alert email to mobile team.'
+                )
+            )
+            mock_send_email.assert_called_with(mock_mobile_team_mail, mock_email_body)

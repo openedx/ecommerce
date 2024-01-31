@@ -81,9 +81,9 @@ class Command(BaseCommand):
 
         for expired_course in expired_courses:
             try:
-                all_course_run_keys = self._get_course_run_keys_for_parent_course(expired_course, default_site)
+                all_course_run_keys = self._get_related_course_run_keys(expired_course, default_site)
             except CourseRunFetchException:
-                # Logging of exception is already done inside _get_course_run_keys_for_parent_course
+                # Logging of exception is already done inside _get_related_course_run_keys
                 continue  # pragma: no cover
 
             all_course_runs = Course.objects.filter(id__in=all_course_run_keys)
@@ -93,21 +93,21 @@ class Command(BaseCommand):
 
                 try:
                     mobile_products = create_child_products_for_mobile(parent_product)
+                    if not mobile_products:
+                        raise Exception
                 except Exception:  # pylint: disable=broad-except
                     failed_course_runs.append(course_run.id)
                     continue
 
-                if not mobile_products:
-                    failed_course_runs.append(course_run.id)
-                else:
-                    android_sku = list(filter(lambda sku: 'android' in sku.partner_sku, mobile_products))[0].partner_sku
-                    ios_sku = list(filter(lambda sku: 'ios' in sku.partner_sku, mobile_products))[0].partner_sku
-                    new_seats_created.append("{},{},{}".format(ios_sku, android_sku, course_run.id))
+                android_sku = list(filter(lambda sku: 'android' in sku.partner_sku, mobile_products))[0].partner_sku
+                ios_product = list(filter(lambda sku: 'ios' in sku.partner_sku, mobile_products))[0]
+                ios_sku = ios_product.partner_sku
+                new_seats_created.append("{},{},{}".format(ios_sku, android_sku, course_run.id))
 
-                    error_message = self._create_ios_product(mobile_products, course_run, default_site)
-                    if error_message:
-                        failed_ios_products.append(error_message)
-                    course_run.publish_to_lms()
+                error_message = self._create_ios_product(course_run, ios_product, default_site)
+                if error_message:
+                    failed_ios_products.append(error_message)
+                course_run.publish_to_lms()
 
             batch_counter += 1
             if batch_counter >= batch_size:
@@ -116,12 +116,12 @@ class Command(BaseCommand):
         self._send_email_about_expired_courses(expired_courses_keys, all_course_runs_processed,
                                                failed_course_runs, new_seats_created, failed_ios_products)
 
-    def _get_course_run_keys_for_parent_course(self, course, default_site):
+    def _get_related_course_run_keys(self, course, default_site):
         """
         Get parent course key from discovery for the current course run.
         Get all course run keys for parent course from discovery. Then filter those
         courses/course runs on Ecommerce using Course.verification_deadline and
-        Product.expires to determine products to create course runs for.
+        Product.expires to determine mobile products to create course runs for.
         """
 
         course_run_detail_response = get_course_run_detail(default_site, course.id)
@@ -162,11 +162,10 @@ class Command(BaseCommand):
         ).first()
         return product_to_create_mobile_skus_for
 
-    def _create_ios_product(self, mobile_products, course, site):
+    def _create_ios_product(self, course, ios_product, site):
         # create ios product on appstore
         partner_short_code = site.siteconfiguration.partner.short_code
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][IOSIAP.NAME.lower()]
-        ios_product = list((filter(lambda sku: 'ios' in sku.partner_sku, mobile_products)))[0]
         course_data = {
             'price': ios_product.price_excl_tax,
             'name': course.name,
