@@ -128,7 +128,7 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_publish_to_lms.return_value = None
         mock_course_run.return_value = course_run_return_value
         mock_course_detail.return_value = course_detail_return_value
-        mock_create_ios_product.return_value = "Error creating ios product"
+        mock_create_ios_product.return_value = None
 
         call_command(self.command)
         actual_mobile_seats = Product.objects.filter(
@@ -149,8 +149,8 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
             self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product,
             mock_create_child_products):
         """Test the case where mobile seats are already created for course run."""
-        course_with_mobile_seat = self._create_course_and_seats(create_web_seat=False)
-        course_run_with_mobile_seat = self._create_course_and_seats(create_web_seat=False)
+        course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
+        course_run_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=False)
         course_run_return_value = {'course': course_with_mobile_seat.id}
         course_detail_return_value = {'course_run_keys': [course_run_with_mobile_seat.id]}
 
@@ -242,7 +242,7 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
             self, mock_email, mock_publish_to_lms, mock_course_run, mock_course_detail, mock_create_ios_product):
         """Test the case where mobile seats are already created for course run."""
         course_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True, expired_in_past=True)
-        course_run_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=True)
+        course_run_with_mobile_seat = self._create_course_and_seats(create_mobile_seats=False)
         course_run_return_value = {'course': course_with_mobile_seat.id}
         course_detail_return_value = {'course_run_keys': [course_run_with_mobile_seat.id]}
 
