@@ -129,7 +129,7 @@ class Command(BaseCommand):
             parent_course_key = course_run_detail_response.get('course')
         except AttributeError as err:
             message = "Error while fetching parent course for {} from discovery".format(course.id)
-            logger.ERROR(message)
+            logger.error(message)
             raise CourseRunFetchException from err
 
         parent_course = get_course_detail(default_site, parent_course_key)
@@ -137,7 +137,7 @@ class Command(BaseCommand):
             all_course_run_keys = parent_course.get('course_run_keys')
         except AttributeError as err:
             message = "Error while fetching course runs for {} from discovery".format(parent_course_key)
-            logger.ERROR(message)
+            logger.error(message)
             raise CourseRunFetchException from err
 
         return all_course_run_keys

@@ -190,11 +190,10 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_course_detail.return_value = course_detail_return_value
         mock_create_ios_product.return_value = None
 
-        with self.assertRaises(AttributeError), \
-                LogCapture(logger_name) as logger:
+        with LogCapture(logger_name) as logger:
             call_command(self.command)
             msg = "Error while fetching parent course for {} from discovery".format(course_with_mobile_seat.id)
-            logger.check_present(logger_name, 'ERROR', msg)
+            logger.check_present((logger_name, 'ERROR', msg))
 
         actual_mobile_seats = Product.objects.filter(
             course=course_run_without_mobile_seat,
@@ -221,11 +220,10 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
         mock_course_detail.return_value = None
         mock_create_ios_product.return_value = None
 
-        with self.assertRaises(AttributeError), \
-                LogCapture(logger_name) as logger:
+        with LogCapture(logger_name) as logger:
             call_command(self.command)
             msg = "Error while fetching course runs for {} from discovery".format(course_with_mobile_seat.id)
-            logger.check_present(logger_name, 'ERROR', msg)
+            logger.check_present((logger_name, 'ERROR', msg))
 
         actual_mobile_seats = Product.objects.filter(
             course=course_run_without_mobile_seat,
