@@ -229,7 +229,7 @@ class BatchUpdateMobileSeatsTests(DiscoveryTestMixin, TransactionTestCase):
             'html': None,
         }
 
-        with LogCapture(logger_name) as logger,\
+        with LogCapture(logger_name) as logger, \
                 patch(email_sender) as mock_send_email:
             call_command(self.command)
             logger.check_present(

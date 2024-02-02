@@ -4,7 +4,6 @@ import os
 from unittest import SkipTest, skipIf
 
 import pytest
-from bok_choy.browser import browser
 from django.contrib.messages import constants as MSG
 from django.test import override_settings
 from django.urls import reverse
@@ -13,6 +12,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.dashboard.orders.views import queryset_orders_for_user
+from ecommerce.extensions.dashboard.refunds.tests.browser import browser
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
