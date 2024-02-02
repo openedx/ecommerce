@@ -14,6 +14,10 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 HandledProcessorResponse = namedtuple('HandledProcessorResponse',
                                       ['transaction_id', 'total', 'currency', 'card_number', 'card_type'])
 
+InProgressProcessorResponse = namedtuple('InProgressProcessorResponse',
+                                         ['basket_id', 'order_number', 'transaction_id', 'confirmation_client_secret',
+                                          'status', 'payment_method', 'total'])
+
 logger = logging.getLogger(__name__)
 
 
