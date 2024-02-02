@@ -4,6 +4,7 @@
 import logging
 
 import stripe
+from django.conf import settings
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 
@@ -19,7 +20,8 @@ from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors import (
     ApplePayMixin,
     BaseClientSidePaymentProcessor,
-    HandledProcessorResponse
+    HandledProcessorResponse,
+    InProgressProcessorResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -103,6 +105,30 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             },
         }
 
+    def create_new_payment_intent_for_basket(self, basket, payment_intent_id):
+        """
+        Create a new Stripe payment intent to associate with the current basket.
+        This is used as a reset of the payment to allow payment retries when the intent gets into unexpected states.
+        """
+        # Cancel existing Payment Intent
+        stripe.PaymentIntent.cancel(payment_intent_id)
+
+        # Create a new Payment Intent and add to Basket
+        new_payment_intent = stripe.PaymentIntent.create(
+            **self._build_payment_intent_parameters(basket),
+            # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
+            secret_key_confirmation='required',
+            # don't create a new intent for the same basket
+            idempotency_key=self.generate_basket_pi_idempotency_key(basket),
+            # Enable dynamic payment methods, w/o payment method configuration ID due to Custom Actions Beta:
+            # 'allow_redirects' is default to 'always',
+            # 'enabled' is not default to True with CAB, only for Deferred Intents.
+            automatic_payment_methods={'enabled': True},
+        )
+        new_payment_intent_id = new_payment_intent['id']
+        basket_add_payment_intent_id_attribute(basket, new_payment_intent_id)
+        return new_payment_intent
+
     def generate_basket_pi_idempotency_key(self, basket):
         """
         Generate an idempotency key for creating a PaymentIntent for a Basket.
@@ -132,6 +158,10 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                     secret_key_confirmation='required',
                     # don't create a new intent for the same basket
                     idempotency_key=self.generate_basket_pi_idempotency_key(basket),
+                    # Enable dynamic payment methods, w/o payment method configuration ID due to Custom Actions Beta
+                    # 'allow_redirects' is default to 'always'
+                    # 'enabled' is not default to True with CAB, only for Deferred Intents
+                    automatic_payment_methods={'enabled': True},
                 )
 
                 # id is the payment_intent_id from Stripe
@@ -179,6 +209,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # pretty sure we should simply return/error if basket is None, as not
         # sure what it would mean if there
         payment_intent_id = response['payment_intent_id']
+        dynamic_payment_methods_enabled = response['dynamic_payment_methods_enabled']
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
 
         # rewrite order amount so it's updated for coupon & quantity and unchanged by the user
@@ -186,17 +217,46 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             payment_intent_id,
             **self._build_payment_intent_parameters(basket),
         )
+
+        # Need a return_url for dynamic payment methods that require action outside of the payment MFE
+        return_url = settings.PAYMENT_MICROFRONTEND_URL
+
         try:
             confirm_api_response = stripe.PaymentIntent.confirm(
                 payment_intent_id,
                 # stop on complicated payments MFE can't handle yet
                 error_on_requires_action=True,
                 expand=['payment_method'],
+                return_url=return_url,
             )
         except stripe.error.CardError as err:
             self.record_processor_response(err.json_body, transaction_id=payment_intent_id, basket=basket)
             logger.exception('Card Error for basket [%d]: %s}', basket.id, err)
             raise
+
+        # If the payment has another status other than 'succeeded', we want to return to the MFE something it can handle
+        if dynamic_payment_methods_enabled:
+            if confirm_api_response['status'] == 'requires_action':
+                # The Payment Intent in this status will result in 'payment_intent_unexpected_state', since it cannot
+                # be confirmed again unless in 'requires_confirmation' or 'requires_payment_intent' status.
+                # Need to create a new one so the MFE can let the learner retry payment
+                new_payment_intent = self.create_new_payment_intent_for_basket(confirm_api_response['id'], basket)
+                logger.info(
+                    'Dynamic Payment Method received requires additional action for edX order %s, '
+                    'created a new Payment Intent %s with status %s.',
+                    confirm_api_response['metadata']['order_number'],
+                    new_payment_intent['id'],
+                    new_payment_intent['status'],
+                )
+                return InProgressProcessorResponse(
+                    basket_id=basket.id,
+                    order_number=basket.order_number,
+                    status=new_payment_intent['status'],
+                    confirmation_client_secret=new_payment_intent['client_secret'],
+                    transaction_id=new_payment_intent['id'],
+                    payment_method=new_payment_intent['payment_method'],
+                    total=new_payment_intent['amount'],
+                )
 
         # proceed only if payment went through
         assert confirm_api_response['status'] == "succeeded"

@@ -228,13 +228,16 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         try:
             with transaction.atomic():
                 try:
-                    self.handle_payment(stripe_response, basket)
+                    in_progress_payment = self.handle_payment(stripe_response, basket)
                 except CardError as err:
                     return self.stripe_error_response(err)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return self.error_page_response()
 
+        # We'll only have a return value if the payment is a dynamic payment methods in progress
+        if in_progress_payment:
+            return self.dynamic_payment_methods_response(in_progress_payment)
         try:
             billing_address = self.create_billing_address(
                 user=self.request.user,
@@ -293,3 +296,15 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
             'error_code': error.code,
             'user_message': error.user_message,
         }, status=400)
+
+    def dynamic_payment_methods_response(self, in_progress_payment):
+        """Tell the frontend the Payment Intent status and it will decide what to do."""
+        if 'status' in in_progress_payment._fields:
+            response_data = {
+                'status': in_progress_payment.status,
+                'confirmation_client_secret': in_progress_payment.confirmation_client_secret,
+                'payment_method': in_progress_payment.payment_method,
+                'total': in_progress_payment.total,
+                'transaction_id': in_progress_payment.transaction_id,
+            }
+        return JsonResponse(response_data, status=201)

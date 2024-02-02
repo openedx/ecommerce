@@ -93,7 +93,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
             self._payment_events = []
         self._payment_events.append(event)
 
-    def handle_payment(self, response, basket):  # pylint: disable=arguments-differ
+    def handle_payment(self, response, basket):  # pylint: disable=arguments-differ, inconsistent-return-statements
         """
         Handle any payment processing and record payment sources and events.
 
@@ -111,14 +111,27 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         # If payment didn't go through, the handle_processor_response function will raise an error. We want to
         # send the event regardless of if the payment didn't go through.
         try:
-            handled_processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
+            processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
         except Exception as ex:
             properties.update({'success': False, 'payment_error': type(ex).__name__, })
             raise
         else:
+            # If the processor_response has a status, it's a InProgressProcessorResponse,
+            # which means the payment is part of dynamic payment methods
+            if 'status' in processor_response._fields:
+                logger.info(
+                    'Dynamic Payment Method in progress for edX order %s and basket %s, '
+                    'returning Payment Intent %s with status %s to the payment MFE.',
+                    processor_response.order_number,
+                    processor_response.basket_id,
+                    processor_response.transaction_id,
+                    processor_response.status,
+                )
+                # TODO: do we track this event if in progress?
+                return processor_response
             # We only record successful payments in the database.
-            self.record_payment(basket, handled_processor_response)
-            properties.update({'total': handled_processor_response.total, 'success': True, })
+            self.record_payment(basket, processor_response)
+            properties.update({'total': processor_response.total, 'success': True, })
         finally:
             track_segment_event(basket.site, basket.owner, 'Payment Processor Response', properties)
 
