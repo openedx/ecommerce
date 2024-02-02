@@ -31,7 +31,7 @@ class Command(BaseCommand):
     help = 'Compile and collect assets'
 
     # NOTE (CCB): This allows us to compile static assets in Docker containers without database access.
-    requires_system_checks = False
+    requires_system_checks = []
 
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)

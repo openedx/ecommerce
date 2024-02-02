@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Count, Q
 from django.utils.timezone import now, timedelta
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from simple_history.models import HistoricalRecords
 

@@ -8,7 +8,7 @@ import responses
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import override_settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from factory.fuzzy import FuzzyText
 from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import (

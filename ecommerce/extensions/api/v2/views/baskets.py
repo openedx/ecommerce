@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.utils.decorators import method_decorator
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE, TieredCache
 from edx_rest_framework_extensions.permissions import IsSuperuser
 from oscar.core.loading import get_class, get_model

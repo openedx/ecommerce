@@ -5,7 +5,7 @@ import logging
 from urllib.parse import urljoin
 
 from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError
 

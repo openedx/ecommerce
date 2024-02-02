@@ -15,7 +15,7 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import escape
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.signals import voucher_removal

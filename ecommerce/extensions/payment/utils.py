@@ -3,7 +3,7 @@ import re
 from urllib.parse import urljoin
 
 from django.contrib.auth import get_user_model
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME

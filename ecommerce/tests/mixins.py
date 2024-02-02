@@ -198,7 +198,9 @@ class BasketCreationMixin(UserMixin, JwtMixin):
                 self.PATH,
                 data=json.dumps(request_data),
                 content_type=CONTENT_TYPE,
-                HTTP_AUTHORIZATION='JWT {}'.format(token) if token else self.generate_jwt_token_header(self.user)
+                headers={
+                    "authorization": 'JWT {}'.format(token) if token else self.generate_jwt_token_header(self.user)
+                }
             )
         else:
             response = self.client.post(

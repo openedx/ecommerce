@@ -8,6 +8,7 @@ from django.contrib import admin
 from .models import SiteTheme
 
 
+@admin.register(SiteTheme)
 class SiteThemeAdmin(admin.ModelAdmin):
     """
     Admin interface for the SiteTheme object.
@@ -20,6 +21,3 @@ class SiteThemeAdmin(admin.ModelAdmin):
         Meta class for SiteTheme admin model
         """
         model = SiteTheme
-
-
-admin.site.register(SiteTheme, SiteThemeAdmin)

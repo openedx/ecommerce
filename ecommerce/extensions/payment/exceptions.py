@@ -1,7 +1,7 @@
 """Exceptions and error messages used by payment processors."""
 
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.apps.payment.exceptions import GatewayError, PaymentError
 
 PROCESSOR_NOT_FOUND_DEVELOPER_MESSAGE = "Lookup for a payment processor with name [{name}] failed"

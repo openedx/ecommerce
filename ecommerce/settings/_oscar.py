@@ -1,7 +1,7 @@
 """Oscar-specific settings"""
 
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.defaults import *
 
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
@@ -53,7 +53,7 @@ OSCAR_APPS = [
     'ecommerce.extensions.dashboard',
     'ecommerce.extensions.dashboard.catalogue',
     'ecommerce.extensions.dashboard.offers',
-    'ecommerce.extensions.dashboard.refunds',
+    'ecommerce.extensions.dashboard.refunds.apps.RefundsDashboardConfig',  # Providing full path to make the signals work
     'ecommerce.extensions.dashboard.orders',
     'ecommerce.extensions.dashboard.users',
 

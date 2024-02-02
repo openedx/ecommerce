@@ -40,5 +40,5 @@ class TrackingMiddleware(MiddlewareMixin):
             # If the user does not already have an LMS user id, add it
             called_from = u'middleware with request path: {request}, referrer: {referrer}'.format(
                 request=request.get_full_path(),
-                referrer=request.META.get('HTTP_REFERER'))
+                referrer=request.headers.get('referer'))
             user.add_lms_user_id('ecommerce_missing_lms_user_id_middleware', called_from)

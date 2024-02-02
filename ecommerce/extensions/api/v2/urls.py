@@ -1,6 +1,6 @@
 
 
-from django.conf.urls import include, url
+from django.urls import include, path, re_path
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_extensions.routers import ExtendedSimpleRouter as SimpleRouter
 
@@ -34,49 +34,52 @@ USERNAME_REGEX_PARTIAL = r'[\w .@_+-]+'
 USERNAME_PATTERN = r'(?P<username>{regex})'.format(regex=USERNAME_REGEX_PARTIAL)
 
 BASKET_URLS = [
-    url(r'^$', basket_views.BasketCreateView.as_view(), name='create'),
-    url(
+    path('', basket_views.BasketCreateView.as_view(), name='create'),
+    re_path(
         r'^{basket_id}/$'.format(basket_id=BASKET_ID_PATTERN),
         basket_views.BasketDestroyView.as_view(),
         name='destroy'
     ),
-    url(
+    re_path(
         r'^{basket_id}/order/$'.format(basket_id=BASKET_ID_PATTERN),
         basket_views.OrderByBasketRetrieveView.as_view(),
         name='retrieve_order'
     ),
-    url(r'^calculate/$', basket_views.BasketCalculateView.as_view(), name='calculate'),
+    path('calculate/', basket_views.BasketCalculateView.as_view(), name='calculate'),
 ]
 
 PAYMENT_URLS = [
-    url(r'^processors/$', payment_views.PaymentProcessorListView.as_view(), name='list_processors'),
+    path('processors/', payment_views.PaymentProcessorListView.as_view(), name='list_processors'),
 ]
 
 WEBHOOKS_URLS = [
-    url(r'^stripe/$', webhooks_views.StripeWebhooksView.as_view(), name='webhook_events'),
+    path('stripe/', webhooks_views.StripeWebhooksView.as_view(), name='webhook_events'),
 ]
 
 REFUND_URLS = [
-    url(r'^$', refund_views.RefundCreateView.as_view(), name='create'),
-    url(r'^(?P<pk>[\d]+)/process/$', refund_views.RefundProcessView.as_view(), name='process'),
+    path('', refund_views.RefundCreateView.as_view(), name='create'),
+    re_path(r'^(?P<pk>[\d]+)/process/$', refund_views.RefundProcessView.as_view(), name='process'),
 ]
 
 RETIREMENT_URLS = [
-    url(r'^tracking_id/{}/$'.format(USERNAME_PATTERN), retirement_views.EcommerceIdView.as_view(), name='tracking_id')
+    re_path(
+        r'^tracking_id/{}/$'.format(USERNAME_PATTERN),
+        retirement_views.EcommerceIdView.as_view(), name='tracking_id'
+    )
 ]
 
 COUPON_URLS = [
-    url(r'^coupon_reports/(?P<coupon_id>[\d]+)/$', CouponReportCSVView.as_view(), name='coupon_reports'),
-    url(r'^categories/$', coupon_views.CouponCategoriesListView.as_view(), name='coupons_categories'),
+    re_path(r'^coupon_reports/(?P<coupon_id>[\d]+)/$', CouponReportCSVView.as_view(), name='coupon_reports'),
+    path('categories/', coupon_views.CouponCategoriesListView.as_view(), name='coupons_categories'),
 ]
 
 CHECKOUT_URLS = [
-    url(r'^$', checkout_views.CheckoutView.as_view(), name='process')
+    path('', checkout_views.CheckoutView.as_view(), name='process')
 ]
 
 ATOMIC_PUBLICATION_URLS = [
-    url(r'^$', publication_views.AtomicPublicationView.as_view(), name='create'),
-    url(
+    path('', publication_views.AtomicPublicationView.as_view(), name='create'),
+    re_path(
         r'^{course_id}$'.format(course_id=COURSE_ID_PATTERN),
         publication_views.AtomicPublicationView.as_view(),
         name='update'
@@ -84,44 +87,44 @@ ATOMIC_PUBLICATION_URLS = [
 ]
 
 PROVIDER_URLS = [
-    url(r'^$', provider_views.ProviderViewSet.as_view(), name='list_providers')
+    path('', provider_views.ProviderViewSet.as_view(), name='list_providers')
 ]
 
 ENTERPRISE_URLS = [
-    url(r'^customers$', enterprise_views.EnterpriseCustomerViewSet.as_view(), name='enterprise_customers'),
-    url(
-        r'^customer_catalogs$',
+    path('customers', enterprise_views.EnterpriseCustomerViewSet.as_view(), name='enterprise_customers'),
+    path(
+        'customer_catalogs',
         enterprise_views.EnterpriseCustomerCatalogsViewSet.as_view({'get': 'get'}),
         name='enterprise_customer_catalogs'
     ),
-    url(
-        r'^customer_catalogs/(?P<enterprise_catalog_uuid>[^/]+)$',
+    path(
+        'customer_catalogs/<str:enterprise_catalog_uuid>',
         enterprise_views.EnterpriseCustomerCatalogsViewSet.as_view({'get': 'retrieve'}),
         name='enterprise_customer_catalog_details'
     ),
 ]
 
 ASSIGNMENT_EMAIL_URLS = [
-    url(r'^status/$', assignment_email.AssignmentEmailStatus.as_view(), name='update_status'),
+    path('status/', assignment_email.AssignmentEmailStatus.as_view(), name='update_status'),
 ]
 
 USER_MANAGEMENT_URLS = [
-    url(r'^replace_usernames/$', user_management_views.UsernameReplacementView.as_view(), name='username_replacement'),
+    path('replace_usernames/', user_management_views.UsernameReplacementView.as_view(), name='username_replacement'),
 ]
 
 urlpatterns = [
-    url(r'^baskets/', include((BASKET_URLS, 'baskets'))),
-    url(r'^checkout/', include((CHECKOUT_URLS, 'checkout'))),
-    url(r'^coupons/', include((COUPON_URLS, 'coupons'))),
-    url(r'^enterprise/', include((ENTERPRISE_URLS, 'enterprise'))),
-    url(r'^payment/', include((PAYMENT_URLS, 'payment'))),
-    url(r'^providers/', include((PROVIDER_URLS, 'providers'))),
-    url(r'^publication/', include((ATOMIC_PUBLICATION_URLS, 'publication'))),
-    url(r'^refunds/', include((REFUND_URLS, 'refunds'))),
-    url(r'^retirement/', include((RETIREMENT_URLS, 'retirement'))),
-    url(r'^user_management/', include((USER_MANAGEMENT_URLS, 'user_management'))),
-    url(r'^assignment-email/', include((ASSIGNMENT_EMAIL_URLS, 'assignment-email'))),
-    url(r'^webhooks/', include((WEBHOOKS_URLS, 'webhooks'))),
+    path('baskets/', include((BASKET_URLS, 'baskets'))),
+    path('checkout/', include((CHECKOUT_URLS, 'checkout'))),
+    path('coupons/', include((COUPON_URLS, 'coupons'))),
+    path('enterprise/', include((ENTERPRISE_URLS, 'enterprise'))),
+    path('payment/', include((PAYMENT_URLS, 'payment'))),
+    path('providers/', include((PROVIDER_URLS, 'providers'))),
+    path('publication/', include((ATOMIC_PUBLICATION_URLS, 'publication'))),
+    path('refunds/', include((REFUND_URLS, 'refunds'))),
+    path('retirement/', include((RETIREMENT_URLS, 'retirement'))),
+    path('user_management/', include((USER_MANAGEMENT_URLS, 'user_management'))),
+    path('assignment-email/', include((ASSIGNMENT_EMAIL_URLS, 'assignment-email'))),
+    path('webhooks/', include((WEBHOOKS_URLS, 'webhooks'))),
 ]
 
 router = SimpleRouter()

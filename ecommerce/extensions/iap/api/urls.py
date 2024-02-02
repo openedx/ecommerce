@@ -1,5 +1,5 @@
-from django.conf.urls import include, url
+from django.urls import include, path
 
 urlpatterns = [
-    url(r'^v1/', include('ecommerce.extensions.iap.api.v1.urls')),
+    path('v1/', include('ecommerce.extensions.iap.api.v1.urls')),
 ]

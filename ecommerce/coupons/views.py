@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.generic import TemplateView, View
 from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from oscar.core.loading import get_class, get_model

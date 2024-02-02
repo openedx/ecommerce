@@ -1,9 +1,9 @@
 
 
-from django.conf.urls import include, url
+from django.urls import include, path
 
 urlpatterns = [
-    url(r'^payment/', include(('ecommerce.bff.payment.urls', 'payment'))),
-    url(r'subscriptions/', include(('ecommerce.bff.subscriptions.urls', 'subscriptions')))
+    path('payment/', include(('ecommerce.bff.payment.urls', 'payment'))),
+    path('subscriptions/', include(('ecommerce.bff.subscriptions.urls', 'subscriptions')))
 
 ]

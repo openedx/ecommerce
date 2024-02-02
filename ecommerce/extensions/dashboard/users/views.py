@@ -6,7 +6,7 @@ import requests
 import waffle
 from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from oscar.apps.dashboard.users.views import UserDetailView as CoreUserDetailView
 
 from ecommerce.core.url_utils import get_lms_enrollment_api_url

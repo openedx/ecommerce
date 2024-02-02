@@ -6,7 +6,7 @@ from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import silence_exceptions, track_segment_event
 
 # This signal should be emitted after a refund is completed - payment credited AND fulfillment revoked.
-post_refund = Signal(providing_args=['refund'])
+post_refund = Signal()
 
 
 @receiver(post_refund, dispatch_uid='tracking.post_refund_callback')
