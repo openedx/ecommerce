@@ -84,15 +84,56 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         """Convert to stripe amount, which is in cents."""
         return str((basket.total_incl_tax * 100).to_integral_value())
 
+    def _get_basket_courses(self, basket):
+        """
+        Gets all courses in a basket and returns the course ID and name into a list that is returned as a string,
+        since Stripe only accepts strings in metadata. If no course is associated to the basket,
+        it will add the product title. At this point, it's expected that the basket is not empty.
+        """
+        courses = []
+        for line in basket.lines.all():
+            try:
+                course_id = line.product.course.id
+            except Exception:  # pylint: disable=broad-except
+                logger.exception(
+                    'Failed to retrieve course_id data from basket [%s] for payment intent metadata for order [%s]',
+                    basket.id,
+                    basket.order_number
+                )
+                course_id = None
+            try:
+                course_name = line.product.course.name if line.product.course else line.product.title
+            except Exception:  # pylint: disable=broad-except  # pragma: no cover
+                logger.exception(
+                    'Failed to retrieve course_name data from basket [%s] for payment intent metadata for order [%s]',
+                    basket.id,
+                    basket.order_number
+                )  # pragma: no cover
+                course_name = None  # pragma: no cover
+            course = {
+                'course_id': course_id,
+                'course_name': course_name,
+            }
+            courses.append(course)
+
+        # Stripe metadata field value must be a string under 500 characters.
+        courses_string = str(courses)
+        return courses_string[:499] if courses else None
+
     def _build_payment_intent_parameters(self, basket):
         order_number = basket.order_number
         amount = self._get_basket_amount(basket)
         currency = basket.currency
+        courses = self._get_basket_courses(basket)
+
         return {
             'amount': amount,
             'currency': currency,
             'description': order_number,
-            'metadata': {'order_number': order_number},
+            'metadata': {
+                'order_number': order_number,
+                'courses': courses,
+            },
         }
 
     def generate_basket_pi_idempotency_key(self, basket):
@@ -126,7 +167,12 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                     # don't create a new intent for the same basket
                     idempotency_key=self.generate_basket_pi_idempotency_key(basket),
                 )
-                logger.info("*** STRIPE RESPONSE %s ***", stripe_response)
+                logger.info(
+                    "*** STRIPE RESPONSE %s *** for basket [%s] and order [%s]",
+                    stripe_response,
+                    basket.id,
+                    basket.order_number
+                )
                 # id is the payment_intent_id from Stripe
                 transaction_id = stripe_response['id']
 
