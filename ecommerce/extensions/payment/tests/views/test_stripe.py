@@ -61,7 +61,8 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             create_side_effect=None,
             retrieve_side_effect=None,
             confirm_side_effect=None,
-            modify_side_effect=None):
+            modify_side_effect=None,
+            in_progress_payment=None):
         """
         Helper function to mock all stripe calls with successful responses.
 
@@ -95,6 +96,8 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
                     if confirm_side_effect is not None:
                         mock_confirm.side_effect = confirm_side_effect
+                    elif in_progress_payment is not None:
+                        mock_confirm.side_effect = [fixture_data['confirm_resp_in_progress']]
                     else:
                         mock_confirm.side_effect = [fixture_data['confirm_resp']]
                     with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
@@ -102,11 +105,19 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                             mock_modify.side_effect = modify_side_effect
                         else:
                             mock_modify.side_effect = [fixture_data['modify_resp']]
-                        # make your call
-                        return self.client.post(
-                            url,
-                            data=data
-                        )
+                        # If Payment Intent gets into 'requires_action' status without confirmation from the BNPL,
+                        # we create a new Payment Intent for retry payment in the MFE
+                        with mock.patch('stripe.PaymentIntent.cancel') as mock_cancel:
+                            if in_progress_payment is not None:
+                                mock_cancel.side_effect = [fixture_data['cancel_resp']]
+                            with mock.patch('stripe.PaymentIntent.create') as mock_create:
+                                if in_progress_payment is not None:
+                                    mock_create.side_effect = [fixture_data['create_resp_in_progress']]
+                                # make your call
+                                return self.client.post(
+                                    url,
+                                    data=data
+                                )
 
     def assert_successful_order_response(self, response, order_number):
         assert response.status_code == 201
@@ -157,8 +168,11 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
     def test_payment_flow(
             self,
             confirm_resp,
+            confirm_resp_in_progress,  # pylint: disable=unused-argument
             create_resp,
+            create_resp_in_progress,  # pylint: disable=unused-argument
             modify_resp,
+            cancel_resp,  # pylint: disable=unused-argument
             refund_resp,  # pylint: disable=unused-argument
             retrieve_addr_resp):
         """
@@ -205,6 +219,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                             data={
                                 'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                                 'skus': basket.lines.first().stockrecord.partner_sku,
+                                'dynamic_payment_methods_enabled': False,
                             },
                         )
                 assert mock_retrieve.call_count == 1
@@ -380,6 +395,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             data={
                 'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                 'skus': '',
+                'dynamic_payment_methods_enabled': False,
             },
         )
         assert response.status_code == 302
@@ -397,6 +413,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': 'totally_the_wrong_sku',
+                    'dynamic_payment_methods_enabled': False,
                 },
             )
             assert response.json() == {'sku_error': True}
@@ -423,10 +440,37 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': basket.lines.first().stockrecord.partner_sku,
+                    'dynamic_payment_methods_enabled': False,
                 },
             )
             assert response.status_code == 400
             assert response.json() == {'sdn_check_failure': {'hit_count': 1}}
+
+    def test_payment_handle_payment_intent_in_progress(self):
+        """
+        Verify the POST endpoint handles a Payment Intent that is not succeeded yet,
+        with a 'requires_action' status without confirmation from the BNPL payment.
+        """
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+
+        response = self.payment_flow_with_mocked_stripe_calls(
+            self.stripe_checkout_url,
+            {
+                'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                'skus': basket.lines.first().stockrecord.partner_sku,
+                'dynamic_payment_methods_enabled': True,
+            },
+            in_progress_payment=True,
+        )
+
+        assert response.status_code == 201
+        # A new Payment Intent was created for retry payment
+        assert response.json() == {
+            'status': 'requires_payment_method',
+            'transaction_id': 'pi_3OqcQ5H4caH7G0X11y8NKNa4',
+            'confirmation_client_secret': 'pi_3OqcQ5H4caH7G0X11y8NKNa4_secret_kbBQP5DZGLccIESMInIq5GECO',
+            'payment_method': None,
+        }
 
     def test_handle_payment_fails_with_carderror(self):
         """
@@ -439,6 +483,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             {
                 'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                 'skus': basket.lines.first().stockrecord.partner_sku,
+                'dynamic_payment_methods_enabled': False,
             },
             confirm_side_effect=stripe.error.CardError('Oops!', {}, 'card_declined'),
         )
@@ -459,6 +504,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': basket.lines.first().stockrecord.partner_sku,
+                    'dynamic_payment_methods_enabled': False,
                 },
             )
             assert response.status_code == 400
