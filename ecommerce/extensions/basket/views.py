@@ -939,6 +939,7 @@ class VoucherAddLogicMixin:
             VoucherException in case of an error.
             RedirectException if a redirect is needed.
         """
+        # TEMP
         self._verify_basket_not_empty(code)
         self._verify_voucher_not_already_applied(code)
 
