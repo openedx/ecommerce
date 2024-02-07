@@ -23,6 +23,7 @@ from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
+from ecommerce.extensions.iap.utils import create_child_products_for_mobile
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -232,13 +233,16 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(entitlement.attr.UUID, self.course_uuid)
         self.assertEqual(entitlement.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
 
-    def assert_seat_saved(self, course, expected):
+    def assert_seat_saved(self, course, expected, test_mobile_seats=False):
         certificate_type = ''
+        verified_product = False
 
         for attr in expected['attribute_values']:
             name = attr['name']
             if name == 'certificate_type':
                 certificate_type = attr['value']
+                if attr['value'] == 'verified':
+                    verified_product = True
 
         seat_title = 'Seat in {course_name}'.format(course_name=course.name)
 
@@ -253,9 +257,18 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(seat.expires, expires)
         self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
 
+        if test_mobile_seats and verified_product:
+            android_seat = course.seat_products.get(title='Android ' + seat_title)
+            self.assertEqual(android_seat.expires, expires)
+            self.assertEqual(android_seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
+
+            ios_seat = course.seat_products.get(title='Ios ' + seat_title)
+            self.assertEqual(ios_seat.expires, expires)
+            self.assertEqual(ios_seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
+
         return seat
 
-    def assert_course_saved(self, course_id, expected, enrollment_code_count=0):
+    def assert_course_saved(self, course_id, expected, enrollment_code_count=0, test_mobile_seats=False):
         """Verify that the expected Course and associated products have been saved."""
         # Verify that Course was saved.
         self.assertTrue(Course.objects.filter(id=course_id).exists())
@@ -269,6 +282,8 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         # Validate seat product structure.
         products = expected['products']
         expected_child_products = len(products)
+        if test_mobile_seats:
+            expected_child_products += 2
         expected_parent_products = 2  # entitlement and seat
         self.assertEqual(
             len(Product.objects.all()),
@@ -281,7 +296,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             if product['product_class'] == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
                 self.assert_entitlement_saved(course, product)
             else:
-                self.assert_seat_saved(course, product)
+                self.assert_seat_saved(course, product, test_mobile_seats)
 
     def test_lms_publication_disabled(self):
         """ Verify the endpoint returns an error, and does not save the course, if publication is disabled. """
@@ -485,3 +500,29 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         enrollment_code = course.get_enrollment_code()
         self.assertIsNotNone(enrollment_code)
         self.assertEqual(enrollment_code.expires, EXPIRES)
+
+    @mock.patch('ecommerce.extensions.iap.api.v1.utils.jwt.encode', return_value='Test token')
+    @mock.patch('ecommerce.extensions.api.serializers.apply_price_of_inapp_purchase')
+    # @mock.patch('ecommerce.extensions.iap.v1.utils.apply_price_of_inapp_purchase')
+    def test_mobile_seats_update(self, _, __):
+        """Verify that a Course and associated mobile products can be updated and published."""
+        self.create_course_and_seats()
+        course = Course.objects.get(id=self.course_id)
+        android_seat, ios_seat = create_child_products_for_mobile(course.parent_seat_product)
+        updated_data = self.generate_update_payload()
+
+        # Since we are only concerned with expiry date and price
+        # therefore we are setting title manually here.
+        android_seat.product.title = 'Android Seat in A New Name with verified certificate'
+        ios_seat.product.title = 'Ios Seat in A New Name with verified certificate'
+        android_seat.product.save()
+        ios_seat.product.save()
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            # If publication succeeds, the view should return a 200 and data should be saved.
+            mock_publish.return_value = None
+
+            response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
+
+            self.assertEqual(response.status_code, 200)
+            self.assert_course_saved(self.course_id, expected=updated_data,
+                                     enrollment_code_count=1, test_mobile_seats=True)

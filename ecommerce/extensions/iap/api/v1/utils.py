@@ -29,22 +29,24 @@ def products_in_basket_already_purchased(user, basket, site):
     return False
 
 
-def create_ios_product(course, ios_sku, configuration):
+def create_ios_product(course, ios_product, configuration):
     """
     Create in app ios product on connect store.
     return error message in case of failure.
     """
     headers = get_auth_headers(configuration)
     try:
-        in_app_purchase_id = create_inapp_purchase(course, ios_sku, configuration['apple_id'], headers)
+        in_app_purchase_id = create_inapp_purchase(course, ios_product.partner_sku, configuration['apple_id'], headers)
+        ios_product.attr.app_store_id = in_app_purchase_id
+        ios_product.save()
         localize_inapp_purchase(in_app_purchase_id, headers)
         apply_price_of_inapp_purchase(course['price'], in_app_purchase_id, headers)
         upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers)
         return submit_in_app_purchase_for_review(in_app_purchase_id, headers)
     except AppStoreRequestException as store_exception:
-        sku_error_msg = "{}  for course {} with sku {}".format(str(store_exception), course['key'], ios_sku)
-        logger.error(sku_error_msg)
-        return sku_error_msg
+        error_msg = "[%s]  for course [%s] with sku [%s]"
+        logger.error(error_msg, str(store_exception), course['key'], ios_product.partner_sku)
+        return error_msg
 
 
 def request_connect_store(url, headers, data=None, method="post"):
