@@ -23,8 +23,8 @@ from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
-from ecommerce.extensions.iap.utils import create_child_products_for_mobile
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.extensions.iap.utils import create_child_products_for_mobile
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')

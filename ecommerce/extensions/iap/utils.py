@@ -55,7 +55,9 @@ def create_mobile_seat(sku_prefix, existing_web_seat):
     new_mobile_seat.attr.course_key = existing_web_seat.attr.course_key
     new_mobile_seat.attr.id_verification_required = existing_web_seat.attr.id_verification_required
     if 'ios' in sku_prefix:
-        new_mobile_seat.attr.app_store_id = "111"
+        # We need this attribute defined for ios products
+        # Actual values will be assigned when we create product on appstore
+        new_mobile_seat.attr.app_store_id = ''
 
     new_mobile_seat.attr.save()
 
