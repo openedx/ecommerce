@@ -42,6 +42,7 @@ def create_ios_product(course, ios_product, configuration):
         localize_inapp_purchase(in_app_purchase_id, headers)
         apply_price_of_inapp_purchase(course['price'], in_app_purchase_id, headers)
         upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers)
+        set_territories_of_in_app_purchase(in_app_purchase_id, headers)
         return submit_in_app_purchase_for_review(in_app_purchase_id, headers)
     except AppStoreRequestException as store_exception:
         error_msg = "[%s]  for course [%s] with sku [%s]"
@@ -117,7 +118,6 @@ def create_inapp_purchase(course, ios_sku, apple_id, headers):
                 "inAppPurchaseType": "NON_CONSUMABLE",
                 "reviewNote": IOS_PRODUCT_REVIEW_NOTE.format(course_name=course['name'],
                                                              course_price=course['price']),
-                "availableInAllTerritories": True
             },
             "relationships": {
                 "app": {
@@ -286,6 +286,42 @@ def upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers):
 
     if response.status_code != 200:
         raise AppStoreRequestException("Couldn't finalize screenshot")
+
+
+def set_territories_of_in_app_purchase(in_app_purchase_id, headers):
+    url = 'https://api.appstoreconnect.apple.com/v1/territories?limit=200'
+    response = request_connect_store(url, headers, method='get')
+    if response.status_code != 200:
+        raise AppStoreRequestException("Couldn't fetch territories")
+
+    territories = [{'type': territory['type'], 'id': territory['id']}
+                   for territory in response.json()['data']]
+
+    url = 'https://api.appstoreconnect.apple.com/v1/inAppPurchaseAvailabilities'
+    data = {
+        "data": {
+            "type": "inAppPurchaseAvailabilities",
+            "attributes": {
+                "availableInNewTerritories": True
+            },
+            "relationships": {
+                "availableTerritories": {
+                    "data": territories
+                },
+                "inAppPurchase": {
+                    "data": {
+                        "id": in_app_purchase_id,
+                        "type": "inAppPurchases"
+                    }
+                }
+            }
+        }
+    }
+
+    response = request_connect_store(url, headers, data=data)
+
+    if response.status_code != 201:
+        raise AppStoreRequestException("Couldn't modify territories of inapp purchase")
 
 
 def submit_in_app_purchase_for_review(in_app_purchase_id, headers):

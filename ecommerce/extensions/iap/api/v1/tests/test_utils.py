@@ -9,6 +9,7 @@ from ecommerce.extensions.iap.api.v1.utils import (
     get_auth_headers,
     localize_inapp_purchase,
     products_in_basket_already_purchased,
+    set_territories_of_in_app_purchase,
     submit_in_app_purchase_for_review,
     upload_screenshot_of_inapp_purchase
 )
@@ -192,7 +193,53 @@ class TestCreateIosProducts(TestCase):
             self.assertEqual(patch_call.call_args[0][0], img_patch_url)
             self.assertEqual(patch_call.call_args[1]['headers'], headers)
 
-    def submit_in_app_purchase_for_review(self, _):
+    def test_set_territories_of_in_app_purchase(self, _):
+        """
+        Test applying price on in app product call and its exception working properly.
+        """
+        headers = get_auth_headers(self.configuration)
+        with mock.patch('ecommerce.extensions.iap.api.v1.utils.requests.Session.post') as post_call, \
+                mock.patch('ecommerce.extensions.iap.api.v1.utils.requests.Session.get') as get_call:
+            with self.assertRaises(AppStoreRequestException, msg="Couldn't fetch territories"):
+                get_call.return_value.status_code = 500
+                set_territories_of_in_app_purchase('100', headers)
+
+            get_call.return_value.status_code = 200
+            get_call.return_value.json.return_value = {
+                "data": [
+                    {
+                        "type": "territories",
+                        "id": "AFG",
+                        "attributes": {
+                            "currency": "USD"
+                        },
+                        "links": {
+                            "self": "https://api.appstoreconnect.apple.com/v1/territories/AFG"
+                        }
+                    },
+                    {
+                        "type": "territories",
+                        "id": "AGO",
+                        "attributes": {
+                            "currency": "USD"
+                        },
+                        "links": {
+                            "self": "https://api.appstoreconnect.apple.com/v1/territories/AGO"
+                        }
+                    }
+                ]
+            }
+            with self.assertRaises(AppStoreRequestException, msg="Couldn't modify territories of inapp purchase"):
+                post_call.return_value.status_code = 500
+                set_territories_of_in_app_purchase('100', headers)
+
+            post_call.return_value.status_code = 201
+            set_territories_of_in_app_purchase('100', headers)
+            territory_url = 'https://api.appstoreconnect.apple.com/v1/inAppPurchaseAvailabilities'
+            self.assertEqual(post_call.call_args[0][0], territory_url)
+            self.assertEqual(post_call.call_args[1]['headers'], headers)
+
+    def test_submit_in_app_purchase_for_review(self, _):
         """
         Test submitting in app product call and its exception working properly.
         """
