@@ -167,7 +167,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                     # don't create a new intent for the same basket
                     idempotency_key=self.generate_basket_pi_idempotency_key(basket),
                 )
-                scrubbed_stripe_response = stripe_response
+                scrubbed_stripe_response = dict(stripe_response)
                 scrubbed_stripe_response['client_secret'] = 'REDACTED'
                 logger.info(
                     "*** STRIPE RESPONSE %s *** for basket [%s] and order [%s]",
