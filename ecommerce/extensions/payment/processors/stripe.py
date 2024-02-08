@@ -159,7 +159,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             }
         else:
             try:
-                logger.info("*** GETTING STRIPE RESPONSE ***")
                 stripe_response = stripe.PaymentIntent.create(
                     **self._build_payment_intent_parameters(basket),
                     # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
@@ -167,14 +166,16 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                     # don't create a new intent for the same basket
                     idempotency_key=self.generate_basket_pi_idempotency_key(basket),
                 )
+
+                # id is the payment_intent_id from Stripe
+                transaction_id = stripe_response['id']
+
                 logger.info(
-                    "*** STRIPE RESPONSE %s *** for basket [%s] and order [%s]",
-                    stripe_response,
+                    "Capture-context: succesfully created a Stripe Payment Intent [%s] for basket [%s] and order [%s]",
+                    transaction_id,
                     basket.id,
                     basket.order_number
                 )
-                # id is the payment_intent_id from Stripe
-                transaction_id = stripe_response['id']
 
                 basket_add_payment_intent_id_attribute(basket, transaction_id)
             # for when basket was already created, but with different amount
