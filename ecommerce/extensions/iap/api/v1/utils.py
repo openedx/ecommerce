@@ -289,7 +289,7 @@ def upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers):
 
 
 def set_territories_of_in_app_purchase(in_app_purchase_id, headers):
-    url = 'https://api.appstoreconnect.apple.com/v1/territories?limit=200'
+    url = APP_STORE_BASE_URL + '/v1/territories?limit=200'
     response = request_connect_store(url, headers, method='get')
     if response.status_code != 200:
         raise AppStoreRequestException("Couldn't fetch territories")
@@ -297,7 +297,7 @@ def set_territories_of_in_app_purchase(in_app_purchase_id, headers):
     territories = [{'type': territory['type'], 'id': territory['id']}
                    for territory in response.json()['data']]
 
-    url = 'https://api.appstoreconnect.apple.com/v1/inAppPurchaseAvailabilities'
+    url = APP_STORE_BASE_URL + '/v1/inAppPurchaseAvailabilities'
     data = {
         "data": {
             "type": "inAppPurchaseAvailabilities",

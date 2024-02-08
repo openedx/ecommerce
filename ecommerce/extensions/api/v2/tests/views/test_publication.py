@@ -503,7 +503,6 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
 
     @mock.patch('ecommerce.extensions.iap.api.v1.utils.jwt.encode', return_value='Test token')
     @mock.patch('ecommerce.extensions.api.serializers.apply_price_of_inapp_purchase')
-    # @mock.patch('ecommerce.extensions.iap.v1.utils.apply_price_of_inapp_purchase')
     def test_mobile_seats_update(self, _, __):
         """Verify that a Course and associated mobile products can be updated and published."""
         self.create_course_and_seats()

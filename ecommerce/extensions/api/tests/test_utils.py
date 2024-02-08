@@ -79,5 +79,5 @@ class UtilTests(TestCase):
                 )
             )
             assert mock_send_email.call_count == 1
-            failure_mail_body = self.mock_email_body + "\n Failed to update above mobile seats, please do it manually."
-            mock_send_email.assert_called_with(self.mock_mobile_team_mail, failure_mail_body)
+            self.mock_email_body['body'] += "\n Failed to update above mobile seats, please do it manually."
+            mock_send_email.assert_called_with(self.mock_mobile_team_mail, self.mock_email_body)
