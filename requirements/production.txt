@@ -169,7 +169,7 @@ django-libsass==0.9
     # via -r requirements/base.in
 django-model-utils==4.3.1
     # via edx-rbac
-django-oscar==3.2
+django-oscar==3.2.2
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in

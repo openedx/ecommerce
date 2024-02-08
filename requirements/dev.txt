@@ -252,7 +252,7 @@ django-model-utils==4.3.1
     # via
     #   -r requirements/test.txt
     #   edx-rbac
-django-oscar==3.2
+django-oscar==3.2.2
     # via -r requirements/test.txt
 django-phonenumber-field==5.0.0
     # via
