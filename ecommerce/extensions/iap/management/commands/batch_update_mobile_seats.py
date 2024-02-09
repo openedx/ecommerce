@@ -171,7 +171,7 @@ class Command(BaseCommand):
             'name': course.name,
             'key': course.id,
         }
-        error_message = create_ios_product(course_data, ios_product.partner_sku, configuration)
+        error_message = create_ios_product(course_data, ios_product, configuration)
         return error_message
 
     def _send_email_about_expired_courses(self, expired_courses_keys, all_course_runs_processed,
