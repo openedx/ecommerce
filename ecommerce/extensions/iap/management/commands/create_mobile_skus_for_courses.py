@@ -82,10 +82,10 @@ class Command(BaseCommand):
             MISSING_COURSE_RUNS_KEY: [],
             FAILED_IOS_PRODUCTS: []
         }
-        error_messages = []
         try:
             with open(INPUT_FILE_NAME, 'r+', encoding="utf-8") as input_file:
                 course_keys = input_file.readlines()
+                breakpoint()
                 for course_key in course_keys:
                     course_key = course_key.strip()
                     payload = json.dumps({"courses": [course_key]})
@@ -96,11 +96,12 @@ class Command(BaseCommand):
                         response = requests.post(create_skus_url, data=payload, headers=headers)
 
                     if response.status_code != 200:
-                        error_message = 'Failed for course key {}. {}'.format(course_key, response.text)
-                        error_messages.append(error_message)
+                        error_message = 'Failed for course key {}. {}'.format(course_key, response.status_code)
+                        complete_response['error_messages'].append(error_message)
                         continue
 
                     self._update_response_dictionary(response.json(), complete_response)
+                    logger.info(response)
         except FileNotFoundError as error:
             raise CommandError('Input file with name {} does not exists.'.format(INPUT_FILE_NAME)) from error
 
