@@ -443,7 +443,7 @@ class MobileSkusCreationView(APIView):
                 'name': course.name,
                 'key': course_run_key
             }
-            error_msg = create_ios_product(course_data, ios_product.partner_sku, configuration)
+            error_msg = create_ios_product(course_data, ios_product, configuration)
             if error_msg:
                 failed_ios_products.append(error_msg)
 
