@@ -29,22 +29,25 @@ def products_in_basket_already_purchased(user, basket, site):
     return False
 
 
-def create_ios_product(course, ios_sku, configuration):
+def create_ios_product(course, ios_product, configuration):
     """
     Create in app ios product on connect store.
     return error message in case of failure.
     """
     headers = get_auth_headers(configuration)
     try:
-        in_app_purchase_id = create_inapp_purchase(course, ios_sku, configuration['apple_id'], headers)
+        in_app_purchase_id = create_inapp_purchase(course, ios_product.partner_sku, configuration['apple_id'], headers)
+        ios_product.attr.app_store_id = in_app_purchase_id
+        ios_product.save()
         localize_inapp_purchase(in_app_purchase_id, headers)
         apply_price_of_inapp_purchase(course['price'], in_app_purchase_id, headers)
         upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers)
+        set_territories_of_in_app_purchase(in_app_purchase_id, headers)
         return submit_in_app_purchase_for_review(in_app_purchase_id, headers)
     except AppStoreRequestException as store_exception:
-        sku_error_msg = "{}  for course {} with sku {}".format(str(store_exception), course['key'], ios_sku)
-        logger.error(sku_error_msg)
-        return sku_error_msg
+        error_msg = "[%s]  for course [%s] with sku [%s]"
+        logger.error(error_msg, str(store_exception), course['key'], ios_product.partner_sku)
+        return error_msg
 
 
 def request_connect_store(url, headers, data=None, method="post"):
@@ -115,7 +118,6 @@ def create_inapp_purchase(course, ios_sku, apple_id, headers):
                 "inAppPurchaseType": "NON_CONSUMABLE",
                 "reviewNote": IOS_PRODUCT_REVIEW_NOTE.format(course_name=course['name'],
                                                              course_price=course['price']),
-                "availableInAllTerritories": True
             },
             "relationships": {
                 "app": {
@@ -284,6 +286,42 @@ def upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers):
 
     if response.status_code != 200:
         raise AppStoreRequestException("Couldn't finalize screenshot")
+
+
+def set_territories_of_in_app_purchase(in_app_purchase_id, headers):
+    url = APP_STORE_BASE_URL + '/v1/territories?limit=200'
+    response = request_connect_store(url, headers, method='get')
+    if response.status_code != 200:
+        raise AppStoreRequestException("Couldn't fetch territories")
+
+    territories = [{'type': territory['type'], 'id': territory['id']}
+                   for territory in response.json()['data']]
+
+    url = APP_STORE_BASE_URL + '/v1/inAppPurchaseAvailabilities'
+    data = {
+        "data": {
+            "type": "inAppPurchaseAvailabilities",
+            "attributes": {
+                "availableInNewTerritories": True
+            },
+            "relationships": {
+                "availableTerritories": {
+                    "data": territories
+                },
+                "inAppPurchase": {
+                    "data": {
+                        "id": in_app_purchase_id,
+                        "type": "inAppPurchases"
+                    }
+                }
+            }
+        }
+    }
+
+    response = request_connect_store(url, headers, data=data)
+
+    if response.status_code != 201:
+        raise AppStoreRequestException("Couldn't modify territories of inapp purchase")
 
 
 def submit_in_app_purchase_for_review(in_app_purchase_id, headers):
