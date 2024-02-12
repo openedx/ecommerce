@@ -31,6 +31,7 @@ from ecommerce.core.constants import (
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import is_coupon_available
+from ecommerce.courses.constants import CertificateType
 from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import sum_user_discounts_for_offer
@@ -56,6 +57,8 @@ from ecommerce.extensions.api.v2.constants import (
 )
 from ecommerce.extensions.catalogue.utils import attach_vouchers_to_coupon_product
 from ecommerce.extensions.checkout.views import ReceiptResponseView
+from ecommerce.extensions.iap.api.v1.utils import apply_price_of_inapp_purchase, get_auth_headers
+from ecommerce.extensions.iap.processors.ios_iap import IOSIAP
 from ecommerce.extensions.offer.constants import (
     ASSIGN,
     AUTOMATIC_EMAIL,
@@ -824,12 +827,45 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
         return products
 
-    def _get_seats_offered_on_mobile(self, course):
-        certificate_type_query = Q(attributes__name='certificate_type', attribute_values__value_text='verified')
+    def _update_mobile_seats(self, course):
+        certificate_type_query = Q(attributes__name='certificate_type',
+                                   attribute_values__value_text=CertificateType.VERIFIED)
         mobile_query = Q(stockrecords__partner_sku__contains='mobile')
-        mobile_seats = course.seat_products.filter(certificate_type_query & mobile_query)
+        seat_products = course.seat_products
+        mobile_seats = seat_products.filter(certificate_type_query & mobile_query)
+        web_seat = seat_products.filter(certificate_type_query & ~mobile_query).first()
+        failure_msg = False
+        try:
+            for mobile_seat in mobile_seats:
+                if mobile_seat.expires != web_seat.expires:
+                    mobile_seat.expires = web_seat.expires
+                    mobile_seat.save()
 
-        return mobile_seats
+                mobile_stock_record = mobile_seat.stockrecords.first()
+                web_stock_record = web_seat.stockrecords.first()
+                if mobile_stock_record.price_excl_tax != web_stock_record.price_excl_tax:
+                    mobile_stock_record.price_excl_tax = web_stock_record.price_excl_tax
+                    mobile_stock_record.save()
+
+                    if 'ios' in mobile_stock_record.partner_sku:
+                        self._update_app_store_product(mobile_seat, web_stock_record.price_excl_tax)
+
+        except Exception as e:  # pylint: disable=broad-except
+            logger.error(u'Failed to update mobile seats [%s]: [%s]', course.id, str(e))
+            failure_msg = True
+
+        if waffle.switch_is_active(MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE) and mobile_seats:
+            send_mail_to_mobile_team_for_change_in_course(course, mobile_seats, failure_msg)
+
+    def _update_app_store_product(self, mobile_seat, price):
+        partner_short_code = self.context['request'].site.siteconfiguration.partner.short_code
+        configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][IOSIAP.NAME.lower()]
+        headers = get_auth_headers(configuration)
+        try:
+            ios_product_id = mobile_seat.attr.app_store_id
+            apply_price_of_inapp_purchase(price, ios_product_id, headers)
+        except AttributeError:
+            logger.error("app_store_id not associated with [%s]", mobile_seat.course)
 
     def get_partner(self):
         """Validate partner"""
@@ -890,9 +926,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 published = (resp_message is None)
 
                 if published:
-                    mobile_seats = self._get_seats_offered_on_mobile(course)
-                    if waffle.switch_is_active(MAIL_MOBILE_TEAM_FOR_CHANGE_IN_COURSE) and mobile_seats:
-                        send_mail_to_mobile_team_for_change_in_course(course, mobile_seats)
+                    self._update_mobile_seats(course)
 
                     return created, None, None
                 raise Exception(resp_message)

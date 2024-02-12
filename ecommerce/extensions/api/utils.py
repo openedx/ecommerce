@@ -8,7 +8,7 @@ Dispatcher = get_class('communication.utils', 'Dispatcher')
 logger = logging.getLogger(__name__)
 
 
-def send_mail_to_mobile_team_for_change_in_course(course, seats):
+def send_mail_to_mobile_team_for_change_in_course(course, seats, failure_msg=False):
     recipient = IAPProcessorConfiguration.get_solo().mobile_team_email
     if not recipient:
         msg = "Couldn't mail mobile team for change in %s. No email was specified for mobile team in configurations"
@@ -31,6 +31,9 @@ def send_mail_to_mobile_team_for_change_in_course(course, seats):
         'subject': 'Course Change Alert for {}'.format(course.name),
         'body': "\n".join(formatted_seats)
     }
+
+    if failure_msg:
+        messages['body'] += "\n Failed to update above mobile seats, please do it manually."
 
     Dispatcher().dispatch_direct_messages(recipient, messages)
     logger.info("Sent change in %s email to mobile team.", course.name)

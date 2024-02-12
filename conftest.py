@@ -87,6 +87,14 @@ def django_db_setup(django_db_setup, django_db_blocker, django_db_use_migrations
             required=False
         )
 
+        ProductAttribute.objects.create(
+            product_class=seat,
+            name='App Store Id',
+            code='app_store_id',
+            type='text',
+            required=False
+        )
+
         ProductAttribute.objects.get_or_create(
             product_class=seat,
             name="certificate_type",
