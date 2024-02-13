@@ -17,7 +17,7 @@ def make_voucher_names_unique(apps, schema_editor):
         updates = []
 
         for obj in page.object_list:
-            obj.name = '%d - %s' % (obj.id, obj.name)
+            obj.name = '%d - %s' % (obj.id, obj.name[:128 - len(obj.id)])
             updates.append(obj)
 
         Voucher.objects.bulk_update(updates, ['name'])
