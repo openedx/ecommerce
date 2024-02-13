@@ -3,9 +3,8 @@ FROM ubuntu:focal as app
 ENV DEBIAN_FRONTEND noninteractive
 # System requirements.
 RUN apt update && \
-  apt-get install -qy \
+  apt-get install -qy \ 
   curl \
-  gettext \
   git \
   language-pack-en \
   build-essential \

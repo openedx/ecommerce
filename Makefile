@@ -126,13 +126,7 @@ compile_translations: requirements.tox
 fake_translations: extract_translations dummy_translations compile_translations
 
 pull_translations:
-ifeq ($(OPENEDX_ATLAS_PULL),)
 	cd ecommerce && tx pull -a -f -t --mode reviewed
-else
-	find ecommerce/conf/locale -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;
-	atlas pull $(OPENEDX_ATLAS_ARGS) translations/ecommerce/ecommerce/conf/locale:ecommerce/conf/locale
-	python manage.py compilemessages
-endif
 
 push_translations:
 	cd ecommerce && tx push -s
