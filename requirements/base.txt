@@ -166,7 +166,7 @@ django-libsass==0.9
     # via -r requirements/base.in
 django-model-utils==4.3.1
     # via edx-rbac
-django-oscar==2.2
+django-oscar==3.1
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
@@ -178,7 +178,7 @@ django-simple-history==3.0.0
     #   -r requirements/base.in
 django-solo==2.1.0
     # via -r requirements/base.in
-django-tables2==2.4.1
+django-tables2==2.3.4
     # via django-oscar
 django-threadlocals==0.10
     # via -r requirements/base.in
@@ -248,7 +248,7 @@ extras==1.0.0
     # via
     #   cybersource-rest-client-python
     #   python-subunit
-factory-boy==2.12.0
+factory-boy==3.1.0
     # via django-oscar
 faker==18.10.1
     # via factory-boy
@@ -331,7 +331,7 @@ lxml==4.9.2
     # via
     #   premailer
     #   zeep
-markdown==2.6.9
+markdown==3.4.3
     # via -r requirements/base.in
 markupsafe==2.1.3
     # via jinja2
@@ -362,6 +362,8 @@ oauthlib==3.2.2
     #   getsmarter-api-clients
     #   requests-oauthlib
     #   social-auth-core
+openedx-atlas==0.5.0
+    # via -r requirements/base.in
 packaging==23.1
     # via drf-yasg
 paramiko==3.2.0

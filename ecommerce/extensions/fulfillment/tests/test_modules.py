@@ -596,7 +596,7 @@ class DonationsFromCheckoutTestFulfillmentModuleTest(FulfillmentTestMixin, TestC
         )
         user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
-        factories.create_stockrecord(donation, num_in_stock=2, price_excl_tax=10)
+        factories.create_stockrecord(donation, num_in_stock=2, price=10)
         basket.add_product(donation, 1)
         self.order = create_order(number=1, basket=basket, user=user)
 

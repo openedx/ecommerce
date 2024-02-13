@@ -167,7 +167,7 @@ class Command(BaseCommand):
         partner_short_code = site.siteconfiguration.partner.short_code
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][IOSIAP.NAME.lower()]
         course_data = {
-            'price': ios_product.price_excl_tax,
+            'price': ios_product.price,
             'name': course.name,
             'key': course.id,
         }
