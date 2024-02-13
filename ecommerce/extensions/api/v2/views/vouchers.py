@@ -193,7 +193,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     credit_provider_price = None
                 else:
                     multiple_credit_providers = False
-                    credit_provider_price = StockRecord.objects.get(product=product).price
+                    credit_provider_price = StockRecord.objects.get(product=product).price_excl_tax
 
             try:
                 stock_record = stock_records.get(product__id=product.id)
