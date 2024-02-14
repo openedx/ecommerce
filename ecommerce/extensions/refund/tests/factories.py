@@ -17,7 +17,7 @@ ProductAttribute = get_model("catalogue", "ProductAttribute")
 ProductClass = get_model("catalogue", "ProductClass")
 
 
-class RefundFactory(factory.django.DjangoModelFactory):
+class RefundFactory(factory.DjangoModelFactory):
     status = getattr(settings, 'OSCAR_INITIAL_REFUND_STATUS', REFUND.OPEN)
     user = factory.SubFactory(UserFactory)
     total_credit_excl_tax = Decimal(1.00)
@@ -42,7 +42,7 @@ class RefundFactory(factory.django.DjangoModelFactory):
         model = get_model('refund', 'Refund')
 
 
-class RefundLineFactory(factory.django.DjangoModelFactory):
+class RefundLineFactory(factory.DjangoModelFactory):
     status = getattr(settings, 'OSCAR_INITIAL_REFUND_LINE_STATUS', REFUND_LINE.OPEN)
     refund = factory.SubFactory(RefundFactory)
     line_credit_excl_tax = Decimal(1.00)
