@@ -36,9 +36,7 @@ def create_ios_product(course, ios_product, configuration):
     """
     headers = get_auth_headers(configuration)
     try:
-        in_app_purchase_id = create_inapp_purchase(course, ios_product.partner_sku, configuration['apple_id'], headers)
-        ios_product.product.attr.app_store_id = in_app_purchase_id
-        ios_product.product.save()
+        in_app_purchase_id = get_or_create_inapp_purchase(ios_product, course, configuration, headers)
         localize_inapp_purchase(in_app_purchase_id, headers)
         apply_price_of_inapp_purchase(course['price'], in_app_purchase_id, headers)
         upload_screenshot_of_inapp_purchase(in_app_purchase_id, headers)
@@ -49,6 +47,22 @@ def create_ios_product(course, ios_product, configuration):
                                                              ios_product.partner_sku)
         logger.error(error_msg)
         return error_msg
+
+
+def get_or_create_inapp_purchase(ios_stock_record, course, configuration, headers):
+    """
+    Returns inapp_purchase_id from product attr
+    If not present there create a product on ios store and return its inapp_purchase_id
+    """
+
+    in_app_purchase_id = getattr(ios_stock_record.product.attr, 'app_store_id', '')
+    if not in_app_purchase_id:
+        in_app_purchase_id = create_inapp_purchase(course, ios_stock_record.partner_sku,
+                                                   configuration['apple_id'], headers)
+        ios_stock_record.product.attr.app_store_id = in_app_purchase_id
+        ios_stock_record.product.save()
+
+    return in_app_purchase_id
 
 
 def request_connect_store(url, headers, data=None, method="post"):
