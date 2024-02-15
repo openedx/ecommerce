@@ -868,7 +868,6 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
         apply_price_of_inapp_purchase(price, ios_product_id, headers)
 
-
     def get_partner(self):
         """Validate partner"""
         if not self.partner:

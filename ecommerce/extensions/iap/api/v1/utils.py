@@ -48,6 +48,7 @@ def create_ios_product(course, ios_product, configuration):
         logger.error(error_msg)
         return error_msg
 
+
 def get_or_create_inapp_purchase(ios_stock_record, course, configuration, headers):
     """
     Returns inapp_purchase_id from product attr
@@ -62,6 +63,7 @@ def get_or_create_inapp_purchase(ios_stock_record, course, configuration, header
         ios_stock_record.product.save()
 
     return in_app_purchase_id
+
 
 def request_connect_store(url, headers, data=None, method="post"):
     """ Request the given endpoint with multiple tries and backoff time """
