@@ -57,7 +57,9 @@ def create_mobile_seat(sku_prefix, existing_web_seat):
     if 'ios' in sku_prefix:
         # We need this attribute defined for ios products
         # Actual values will be assigned when we create product on appstore
-        new_mobile_seat.attr.app_store_id = ''
+        app_store_id = getattr(new_mobile_seat.attr, 'app_store_id', None)
+        if not app_store_id:
+            new_mobile_seat.attr.app_store_id = ''
 
     new_mobile_seat.attr.save()
 
