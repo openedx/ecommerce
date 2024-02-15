@@ -861,11 +861,12 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         partner_short_code = self.context['request'].site.siteconfiguration.partner.short_code
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][IOSIAP.NAME.lower()]
         headers = get_auth_headers(configuration)
-        try:
-            ios_product_id = mobile_seat.attr.app_store_id
-            apply_price_of_inapp_purchase(price, ios_product_id, headers)
-        except AttributeError:
+        ios_product_id = getattr(mobile_seat.attr, 'app_store_id', None)
+        if not ios_product_id:
             logger.error("app_store_id not associated with [%s]", mobile_seat.course)
+            return
+
+        apply_price_of_inapp_purchase(price, ios_product_id, headers)
 
     def get_partner(self):
         """Validate partner"""
