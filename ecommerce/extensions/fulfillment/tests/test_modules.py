@@ -672,10 +672,42 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
             settings.HUBSPOT_PORTAL_ID,
             settings.HUBSPOT_SALES_LEAD_FORM_GUID)
 
+    def create_mobile_seat_for_course(self, sku_prefix):
+        """ Create a mobile seat for a course given the sku_prefix """
+        web_seat = Product.objects.filter(
+            parent__isnull=False,
+            course=self.course,
+            attributes__name="id_verification_required",
+            parent__product_class__name="Seat"
+        ).first()
+        web_stock_record = web_seat.stockrecords.first()
+
+        mobile_seat = Product.objects.create(
+            course=self.course,
+            parent=web_seat.parent,
+            structure=web_seat.structure,
+            expires=web_seat.expires,
+            is_public=web_seat.is_public,
+            title="{} {}".format(sku_prefix.capitalize(), web_seat.title.lower())
+        )
+
+        mobile_seat.attr.certificate_type = web_seat.attr.certificate_type
+        mobile_seat.attr.course_key = web_seat.attr.course_key
+        mobile_seat.attr.id_verification_required = web_seat.attr.id_verification_required
+        mobile_seat.attr.save()
+
+        StockRecord.objects.create(
+            partner=web_stock_record.partner,
+            product=mobile_seat,
+            partner_sku="mobile.{}.{}".format(sku_prefix.lower(), web_stock_record.partner_sku.lower()),
+            price_currency=web_stock_record.price_currency,
+        )
+        return mobile_seat
+
     def setUp(self):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
-        course = CourseFactory(partner=self.partner)
-        course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
+        self.course = CourseFactory(partner=self.partner)
+        self.course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
@@ -703,6 +735,18 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         """Test fulfilling an Enrollment code product."""
         self.assertEqual(OrderLineVouchers.objects.count(), 0)
         lines = self.order.lines.all()
+        __, completed_lines = EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines)
+        self.assertEqual(completed_lines[0].status, LINE.COMPLETE)
+        self.assertEqual(OrderLineVouchers.objects.count(), 1)
+        self.assertEqual(OrderLineVouchers.objects.first().vouchers.count(), self.QUANTITY)
+        self.assertIsNotNone(OrderLineVouchers.objects.first().vouchers.first().benefit.range.catalog)
+
+    def test_fulfill_product_with_existing_mobile_seats(self):
+        """Test fulfilling an Enrollment code product with mobile seats for the same course."""
+        self.assertEqual(OrderLineVouchers.objects.count(), 0)
+        lines = self.order.lines.all()
+        self.create_mobile_seat_for_course('android')
+        self.create_mobile_seat_for_course('ios')
         __, completed_lines = EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines)
         self.assertEqual(completed_lines[0].status, LINE.COMPLETE)
         self.assertEqual(OrderLineVouchers.objects.count(), 1)
