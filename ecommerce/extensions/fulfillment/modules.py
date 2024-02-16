@@ -14,6 +14,7 @@ from urllib.parse import urlencode, urljoin
 import requests
 import waffle
 from django.conf import settings
+from django.db.models import Q
 from django.urls import reverse
 from getsmarter_api_clients.geag import GetSmarterEnterpriseApiClient
 from oscar.core.loading import get_model
@@ -553,6 +554,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 attributes__name='course_key',
                 attribute_values__value_text=line.product.attr.course_key
             ).get(
+                ~Q(stockrecords__partner_sku__icontains="mobile"),
                 attributes__name='certificate_type',
                 attribute_values__value_text=line.product.attr.seat_type
             )
