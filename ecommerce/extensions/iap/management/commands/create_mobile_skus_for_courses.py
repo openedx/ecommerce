@@ -80,12 +80,12 @@ class Command(BaseCommand):
             NEW_MOBILE_SKUS_KEY: {},
             FAILED_COURSE_IDS_KEY: [],
             MISSING_COURSE_RUNS_KEY: [],
-            FAILED_IOS_PRODUCTS: []
+            FAILED_IOS_PRODUCTS: [],
+            "error_messages": []
         }
         try:
             with open(INPUT_FILE_NAME, 'r+', encoding="utf-8") as input_file:
                 course_keys = input_file.readlines()
-                breakpoint()
                 for course_key in course_keys:
                     course_key = course_key.strip()
                     payload = json.dumps({"courses": [course_key]})
