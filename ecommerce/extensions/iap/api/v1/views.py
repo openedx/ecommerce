@@ -404,7 +404,7 @@ class MobileSkusCreationView(APIView):
                 product_class__name=SEAT_PRODUCT_CLASS_NAME,
                 children__expires__gt=now(),
                 course=course_run,
-            )
+            ).distinct()
 
             if not parent_product.exists():
                 failed_course_runs.append(course_run_key)
