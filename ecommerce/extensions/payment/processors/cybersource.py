@@ -222,7 +222,7 @@ class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
             (capture_context, decoded_capture_context)
             for (capture_context, decoded_capture_context)
             in (
-                (capture_context, jwt.decode(capture_context['key_id'], verify=False))
+                (capture_context, jwt.decode(capture_context['key_id'], options={"verify_signature": False}))
                 for capture_context
                 in session.get('capture_contexts', [])
             )
