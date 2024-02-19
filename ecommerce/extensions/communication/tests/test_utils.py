@@ -1,5 +1,4 @@
 import mock
-
 from django.conf import settings
 
 from ecommerce.extensions.communication.utils import Dispatcher
