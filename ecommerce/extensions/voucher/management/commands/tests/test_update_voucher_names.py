@@ -32,8 +32,7 @@ class ManagementCommandTests(TestCase):
         start_datetime = timezone.now()
         end_datetime = timezone.now() + timedelta(days=7)
 
-        mock_vouchers =
-        [
+        mock_vouchers = [
             Voucher(id=1, name='Name1', code='SASAFR',
                     start_datetime=start_datetime, end_datetime=start_datetime),
             Voucher(id=2, name='Name2', code='EWRRFEC',
