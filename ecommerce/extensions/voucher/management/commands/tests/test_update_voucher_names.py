@@ -14,7 +14,7 @@ class ManagementCommandTests(TestCase):
         self.data = {
             'name': 'Test voucher',
             'code': 'TESTCODE',
-            'start_datetime': timezone.now() ,
+            'start_datetime': timezone.now(),
             'end_datetime': timezone.now() + timedelta(days=7)
         }
         voucher = Voucher.objects.create(**self.data)
@@ -32,12 +32,13 @@ class ManagementCommandTests(TestCase):
         start_datetime = timezone.now()
         end_datetime = timezone.now() + timedelta(days=7)
 
-        mock_vouchers = [
+        mock_vouchers =
+        [
             Voucher(id=1, name='Name1', code='SASAFR',
-                    start_datetime=start_datetime, end_datetime=start_datetime ),
+                    start_datetime=start_datetime, end_datetime=start_datetime),
             Voucher(id=2, name='Name2', code='EWRRFEC',
                     start_datetime=start_datetime, end_datetime=end_datetime),
-        ]    
+        ]
         mock_all.return_value = mock_vouchers
 
         # Call the Celery task
@@ -62,6 +63,6 @@ class ManagementCommandTests(TestCase):
         call_command('update_voucher_names')
 
         updated_voucher = Voucher.objects.get(id=voucher.id)
- 
+
         self.assertEqual(mock_delay.call_count, 2)
         self.assertEqual(updated_voucher.name, f"{voucher.id} - {original_name}")
