@@ -45,6 +45,8 @@ class TestDispatcher(TestCase):
     @mock.patch('ecommerce.extensions.communication.utils.EmailMultiAlternatives')
     def test_send_email_messages_html(self, mock_email_multi_alternatives):
         dispatcher = Dispatcher()
+        mock_email_instance = mock_email_multi_alternatives.return_value
+
         messages = {
             'subject': 'Test Subject',
             'body': 'Test Body',
@@ -56,4 +58,8 @@ class TestDispatcher(TestCase):
             'Test Body',
             from_email=settings.OSCAR_FROM_EMAIL,
             to=['recipient@example.com']
+        )
+        mock_email_instance.attach_alternative.assert_called_once_with(
+            '<html><body>Test HTML Body</body></html>',
+            "text/html"
         )
