@@ -6,8 +6,8 @@ from django.conf import settings  # lint-amnesty, pylint: disable=unused-import
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, ignore_result=True) 
-def update_voucher_names(self, vouchers): # pylint: disable=unused-argument
+@shared_task(bind=True, ignore_result=True)
+def update_voucher_names(self, vouchers):  # pylint: disable=unused-argument
     for voucher in vouchers:
         if f"{voucher.id} -" not in voucher.name:
             updated_name = f"{voucher.id} - {voucher.name}"
