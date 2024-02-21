@@ -17,7 +17,7 @@ class ManagementCommandTests(TestCase):
             'start_datetime': timezone.now(),
             'end_datetime': timezone.now() + timedelta(days=7)
         }
-        voucher = Voucher.objects.create(**self.data)
+        self.voucher = Voucher.objects.create(**self.data)
 
     @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names.delay')
     def test_update_voucher_names_command(self, mock_delay):

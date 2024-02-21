@@ -1,16 +1,13 @@
 import logging
 
 from celery import shared_task
-from celery.utils.log import get_task_logger
 from django.conf import settings  # lint-amnesty, pylint: disable=unused-import
-
-from ecommerce.extensions.voucher.models import Voucher
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, ignore_result=True)
-def update_voucher_names(self, vouchers):
+@shared_task(bind=True, ignore_result=True) 
+def update_voucher_names(self, vouchers): # pylint: disable=unused-argument
     for voucher in vouchers:
         if f"{voucher.id} -" not in voucher.name:
             updated_name = f"{voucher.id} - {voucher.name}"
