@@ -41,7 +41,7 @@ class ManagementCommandTests(TestCase):
         mock_all.return_value = mock_vouchers
 
         # Call the Celery task
-        update_voucher_names(mock_vouchers)
+        update_voucher_names(mock_vouchers)  # pylint: disable=no-value-for-parameter
         # Assert that the names are updated as expected
         self.assertEqual(mock_vouchers[0].name, '1 - Name1')
         self.assertEqual(mock_vouchers[1].name, '2 - Name2')
