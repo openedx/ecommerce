@@ -1,7 +1,6 @@
 import logging
 
 from celery import shared_task
-from django.conf import settings  # lint-amnesty, pylint: disable=unused-import
 
 logger = logging.getLogger(__name__)
 
@@ -19,4 +18,4 @@ def update_voucher_names(self, vouchers):  # pylint: disable=unused-argument
                 voucher.name = updated_name
                 voucher.save()
             except Exception as exc:  # pylint: disable=broad-except
-                logger.exception("Error updating voucher name %d: %s", voucher.id, exc)
+                logger.exception("Error updating voucher name %d: %s", voucher.id, exc)  # pragma: no cover

@@ -45,6 +45,28 @@ class ManagementCommandTests(TestCase):
         for voucher in vouchers:
             assert voucher.name == f'{voucher.id} - {self.voucher_name}'
 
+    def test_update_voucher_names_long_name(self):
+        """
+        Verify task will truncate long voucher names to 128 chars
+        """
+
+        # Make voucher have a long name
+        voucher_with_long_name = Voucher.objects.first()
+        voucher_with_long_name.name = 'a' * 200
+        voucher_with_long_name.save()
+
+        call_command('update_voucher_names')
+
+        voucher_with_long_name.refresh_from_db()
+        # Note that I have to trim the name here in the test too
+        # because the ID of the voucher isn't guaranteed to be 1 char
+        # long, so need to dynamically generate what we'd expect the name
+        # to be
+        expected_name = f'{voucher_with_long_name.id} - {"a" * 200}'[:128]
+        assert voucher_with_long_name.name == expected_name
+        assert len(voucher_with_long_name.name) == 128
+
+
     def test_voucher_name_update_idempotent(self):
         """
         Verify running the management command multiple times ultimately results
