@@ -36,9 +36,11 @@ class ManagementCommandTests(TestCase):
         """
         call_command('update_voucher_names')
 
-        for voucher_id in [1, 2, 3]:
-            voucher = Voucher.objects.get(id=voucher_id)
-            assert voucher.name == f'{voucher_id} - {self.voucher_name}'
+        vouchers = Voucher.objects.all()
+        assert vouchers.count() == 3
+
+        for voucher in vouchers:
+            assert voucher.name == f'{voucher.id} - {self.voucher_name}'
 
     def test_voucher_name_update_idempotent(self):
         """
@@ -46,14 +48,15 @@ class ManagementCommandTests(TestCase):
         in the same voucher names.
         """
         # Before we run the command
-        for voucher_id in [1, 2, 3]:
-            voucher = Voucher.objects.get(id=voucher_id)
+        vouchers = Voucher.objects.all()
+        assert vouchers.count() == 3
+        for voucher in vouchers:
             assert voucher.name == self.voucher_name
 
         # And after each time we run the command
         for _ in range(2):
             call_command('update_voucher_names')
 
-            for voucher_id in [1, 2, 3]:
-                voucher = Voucher.objects.get(id=voucher_id)
-                assert voucher.name == f'{voucher_id} - {self.voucher_name}'
+            vouchers = Voucher.objects.all()
+            for voucher in vouchers:
+                assert voucher.name == f'{voucher.id} - {self.voucher_name}'
