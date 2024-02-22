@@ -66,7 +66,6 @@ class ManagementCommandTests(TestCase):
         assert voucher_with_long_name.name == expected_name
         assert len(voucher_with_long_name.name) == 128
 
-
     def test_voucher_name_update_idempotent(self):
         """
         Verify running the management command multiple times ultimately results
