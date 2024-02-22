@@ -6,7 +6,6 @@ from django.test import TestCase
 from django.utils import timezone
 
 from ecommerce.extensions.voucher.models import Voucher
-from ecommerce.extensions.voucher.tasks import update_voucher_names
 
 
 class ManagementCommandTests(TestCase):
