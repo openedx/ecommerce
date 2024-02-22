@@ -48,8 +48,8 @@ class ManagementCommandTests(TestCase):
         """
         # Before we run the command
         for voucher_id in [1, 2, 3]:
-                voucher = Voucher.objects.get(id=voucher_id)
-                assert voucher.name == self.voucher_name
+            voucher = Voucher.objects.get(id=voucher_id)
+            assert voucher.name == self.voucher_name
 
         # And after each time we run the command
         for _ in range(2):
