@@ -52,7 +52,7 @@ class ManagementCommandTests(TestCase):
 
         # Make voucher have a long name
         voucher_with_long_name = Voucher.objects.first()
-        voucher_with_long_name.name = 'a' * 200
+        voucher_with_long_name.name = 'a' * 128
         voucher_with_long_name.save()
 
         call_command('update_voucher_names')
@@ -62,7 +62,7 @@ class ManagementCommandTests(TestCase):
         # because the ID of the voucher isn't guaranteed to be 1 char
         # long, so need to dynamically generate what we'd expect the name
         # to be
-        expected_name = f'{voucher_with_long_name.id} - {"a" * 200}'[:128]
+        expected_name = f'{voucher_with_long_name.id} - {"a" * 128}'[:128]
         assert voucher_with_long_name.name == expected_name
         assert len(voucher_with_long_name.name) == 128
 
