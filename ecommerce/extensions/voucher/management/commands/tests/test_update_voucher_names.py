@@ -11,57 +11,50 @@ from ecommerce.extensions.voucher.tasks import update_voucher_names
 
 class ManagementCommandTests(TestCase):
     def setUp(self):
+        self.voucher_name = 'Test voucher'
         self.data = {
-            'name': 'Test voucher',
-            'code': 'TESTCODE',
+            'name': self.voucher_name,
             'start_datetime': timezone.now(),
             'end_datetime': timezone.now() + timedelta(days=7)
         }
-        self.voucher = Voucher.objects.create(**self.data)
+        for item in range(3):
+            code = 'TESTCODE' + str(item)
+            Voucher.objects.create(code=code, **self.data)
 
     @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names.delay')
     def test_update_voucher_names_command(self, mock_delay):
+        """
+        Verify a celery task is spun off when the management command is run.
+        """
+        call_command('update_voucher_names', batch_size=1)
 
-        call_command('update_voucher_names')
-        # Assert that the Celery task is scheduled
-        self.assertTrue(mock_delay.called)
+        assert mock_delay.called is True
+        assert mock_delay.call_count == 3
 
-    @mock.patch('ecommerce.extensions.voucher.models.Voucher.objects.all')
-    def test_update_voucher_names_task(self, mock_all):
-        # Mock Voucher objects
-        start_datetime = timezone.now()
-        end_datetime = timezone.now() + timedelta(days=7)
-
-        mock_vouchers = [
-            Voucher(id=1, name='Name1', code='SASAFR',
-                    start_datetime=start_datetime, end_datetime=start_datetime),
-            Voucher(id=2, name='Name2', code='EWRRFEC',
-                    start_datetime=start_datetime, end_datetime=end_datetime),
-        ]
-        mock_all.return_value = mock_vouchers
-
-        # Call the Celery task
-        update_voucher_names(mock_vouchers)  # pylint: disable=no-value-for-parameter
-        # Assert that the names are updated as expected
-        self.assertEqual(mock_vouchers[0].name, '1 - Name1')
-        self.assertEqual(mock_vouchers[1].name, '2 - Name2')
-
-    @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names.delay')
-    def test_voucher_name_update_once(self, mock_delay):
-        original_name = 'Original Name'
-        code = 'ABC123XSD'
-        start_datetime = timezone.now()
-        end_datetime = start_datetime + timedelta(days=7)
-        voucher = Voucher.objects.create(name=original_name,
-                                         code=code,
-                                         start_datetime=start_datetime,
-                                         end_datetime=end_datetime
-                                         )
-
-        call_command('update_voucher_names')
+    def test_update_voucher_names_task(self):
+        """
+        Verify task called in management command updates the voucher names correctly.
+        """
         call_command('update_voucher_names')
 
-        updated_voucher = Voucher.objects.get(id=voucher.id)
+        for voucher_id in [1, 2, 3]:
+            voucher = Voucher.objects.get(id=voucher_id)
+            assert voucher.name == f'{voucher_id} - {self.voucher_name}'
 
-        self.assertEqual(mock_delay.call_count, 2)
-        self.assertEqual(updated_voucher.name, f"{voucher.id} - {original_name}")
+    def test_voucher_name_update_idempotent(self):
+        """
+        Verify running the management command multiple times ultimately results
+        in the same voucher names.
+        """
+        # Before we run the command
+        for voucher_id in [1, 2, 3]:
+                voucher = Voucher.objects.get(id=voucher_id)
+                assert voucher.name == self.voucher_name
+
+        # And after each time we run the command
+        for _ in range(2):
+            call_command('update_voucher_names')
+
+            for voucher_id in [1, 2, 3]:
+                voucher = Voucher.objects.get(id=voucher_id)
+                assert voucher.name == f'{voucher_id} - {self.voucher_name}'
