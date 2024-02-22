@@ -70,7 +70,7 @@ class Dispatcher(Dispatcher):
             from_email = site.siteconfiguration.get_from_email()
 
         # Determine whether we are sending a HTML version too
-        if messages['html']:
+        if messages.get('html'):
             email = EmailMultiAlternatives(messages['subject'],
                                            messages['body'],
                                            from_email=from_email,
