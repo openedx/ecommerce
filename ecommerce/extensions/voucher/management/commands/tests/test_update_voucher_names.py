@@ -61,6 +61,29 @@ class ManagementCommandTests(TestCase):
 
         mock_delay.assert_not_called()
 
+    def test_update_voucher_names_offset(self):
+        """
+        Verify task processes correct # of records when offset is specified.
+        """
+        first_voucher = Voucher.objects.first()
+        last_voucher = Voucher.objects.last()
+        expected_first_voucher_name = first_voucher.name
+        expected_last_voucher_name = f'{last_voucher.id} - {last_voucher.name}'
+
+        # we expect vouchers 2 and 3 to be updated,
+        # but not voucher 1
+        call_command(
+            'update_voucher_names',
+            batch_size=1,
+            batch_offset=1,
+            run_async=False
+        )
+        first_voucher.refresh_from_db()
+        assert first_voucher.name == expected_first_voucher_name
+
+        last_voucher.refresh_from_db()
+        assert last_voucher.name == expected_last_voucher_name
+
     def test_update_voucher_names_long_name(self):
         """
         Verify task will truncate long voucher names to 128 chars

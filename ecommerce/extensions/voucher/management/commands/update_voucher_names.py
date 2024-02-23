@@ -38,14 +38,23 @@ class Command(BaseCommand):
             help='How long to sleep between batches.',
             type=int
         )
+        parser.add_argument(
+            '--batch-offset',
+            action='store',
+            dest='batch_offset',
+            default=0,
+            help='0-indexed offset to start processing at.',
+            type=int
+        )
 
     def handle(self, *args, **options):
         batch_size = options['batch_size']
         run_async = options['run_async']
         batch_sleep = options['batch_sleep']
+        batch_offset = options['batch_offset']
 
         total_vouchers = Voucher.objects.count()
-        processed_vouchers = 0
+        processed_vouchers = batch_offset
 
         logger.info("Total number of vouchers: %d", total_vouchers)
 
