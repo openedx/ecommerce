@@ -12,6 +12,7 @@ def update_voucher_names_task(self, vouchers):  # pylint: disable=unused-argumen
     """
     update_voucher_names(vouchers)
 
+
 def update_voucher_names(vouchers):
     """
     Update voucher names to be unique, and no more than 128 chars long.
