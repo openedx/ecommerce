@@ -28,7 +28,7 @@ class ManagementCommandTests(TestCase):
         """
         Verify a celery task is spun off when the management command is run.
         """
-        call_command('update_voucher_names', batch_size=1)
+        call_command('update_voucher_names', batch_size=1, run_async=True)
 
         assert mock_delay.called is True
         assert mock_delay.call_count == 3
@@ -37,13 +37,29 @@ class ManagementCommandTests(TestCase):
         """
         Verify task called in management command updates the voucher names correctly.
         """
-        call_command('update_voucher_names')
+        call_command('update_voucher_names', run_async=True)
 
         vouchers = Voucher.objects.all()
         assert vouchers.count() == 3
 
         for voucher in vouchers:
             assert voucher.name == f'{voucher.id} - {self.voucher_name}'
+
+    @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names.delay')
+    def test_update_voucher_names_synchronous(self, mock_delay):
+        """
+        Verify task is NOT called in management command, but rather, function is
+        directly called (and we expect it to still function)
+        """
+        call_command('update_voucher_names', run_async=False)
+
+        vouchers = Voucher.objects.all()
+        assert vouchers.count() == 3
+
+        for voucher in vouchers:
+            assert voucher.name == f'{voucher.id} - {self.voucher_name}'
+
+        mock_delay.assert_not_called()
 
     def test_update_voucher_names_long_name(self):
         """
@@ -55,7 +71,7 @@ class ManagementCommandTests(TestCase):
         voucher_with_long_name.name = 'a' * 128
         voucher_with_long_name.save()
 
-        call_command('update_voucher_names')
+        call_command('update_voucher_names', run_async=True)
 
         voucher_with_long_name.refresh_from_db()
         # Note that I have to trim the name here in the test too
@@ -79,7 +95,7 @@ class ManagementCommandTests(TestCase):
 
         # And after each time we run the command
         for _ in range(2):
-            call_command('update_voucher_names')
+            call_command('update_voucher_names', run_async=True)
 
             vouchers = Voucher.objects.all()
             for voucher in vouchers:
@@ -111,7 +127,7 @@ class ManagementCommandTests(TestCase):
         )
 
         with LogCapture(self.LOGGER_NAME) as lc:
-            call_command('update_voucher_names')
+            call_command('update_voucher_names', run_async=True)
             lc.check(*expected)
 
         mock_delay.assert_called_once()
