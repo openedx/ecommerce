@@ -23,7 +23,7 @@ class ManagementCommandTests(TestCase):
 
         self.LOGGER_NAME = 'ecommerce.extensions.voucher.management.commands.update_voucher_names'
 
-    @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names.delay')
+    @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names_task.delay')
     def test_update_voucher_names_command(self, mock_delay):
         """
         Verify a celery task is spun off when the management command is run.
@@ -45,7 +45,7 @@ class ManagementCommandTests(TestCase):
         for voucher in vouchers:
             assert voucher.name == f'{voucher.id} - {self.voucher_name}'
 
-    @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names.delay')
+    @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names_task.delay')
     def test_update_voucher_names_synchronous(self, mock_delay):
         """
         Verify task is NOT called in management command, but rather, function is
@@ -124,7 +124,7 @@ class ManagementCommandTests(TestCase):
             for voucher in vouchers:
                 assert voucher.name == f'{voucher.id} - {self.voucher_name}'
 
-    @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names.delay')
+    @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names_task.delay')
     def test_update_voucher_names_command_failure(self, mock_delay):
         """
         Verify a when celery task fails to spin off, we log an error and continue.

@@ -5,7 +5,7 @@ from time import sleep
 from django.core.management.base import BaseCommand
 
 from ecommerce.extensions.voucher.models import Voucher
-from ecommerce.extensions.voucher.tasks import update_voucher_names
+from ecommerce.extensions.voucher.tasks import update_voucher_names, update_voucher_names_task
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class Command(BaseCommand):
             try:
                 # Call the Celery task asynchronously for each batch
                 if run_async:
-                    update_voucher_names.delay(vouchers)
+                    update_voucher_names_task.delay(vouchers)
                 else:
                     update_voucher_names(vouchers)
             except Exception as exc:  # pylint: disable=broad-except
