@@ -6,7 +6,17 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, ignore_result=True)
-def update_voucher_names(self, vouchers):  # pylint: disable=unused-argument
+def update_voucher_names_task(self, vouchers):  # pylint: disable=unused-argument
+    """
+    Wrapper to allow update_voucher_names be run as a celery task.
+    """
+    update_voucher_names(vouchers)
+
+
+def update_voucher_names(vouchers):
+    """
+    Update voucher names to be unique, and no more than 128 chars long.
+    """
     for voucher in vouchers:
         if f"{voucher.id} -" not in voucher.name:
             updated_name = f"{voucher.id} - {voucher.name}"
