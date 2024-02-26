@@ -28,7 +28,7 @@ class Command(BaseCommand):
             dest='run_async',
             type=bool,
             default=False,
-            help='Bool if this task run on celery (default to False)'
+            help='Bool if this task is run on celery (default to False)'
         )
         parser.add_argument(
             '--batch-sleep',
