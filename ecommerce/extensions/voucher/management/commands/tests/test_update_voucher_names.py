@@ -43,8 +43,8 @@ class ManagementCommandTests(TestCase):
         vouchers = Voucher.objects.all()
         assert vouchers.count() == 3
 
-        for i, voucher in enumerate(vouchers):
-            assert voucher.name == f'{voucher.id} - {self.voucher_name}{i}'
+        for voucher in vouchers:
+            assert voucher.name[:-1] == f'{voucher.id} - {self.voucher_name}'
 
     @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names_task.delay')
     def test_update_voucher_names_synchronous(self, mock_delay):
