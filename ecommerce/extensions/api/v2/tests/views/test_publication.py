@@ -260,11 +260,11 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         if test_mobile_seats and verified_product:
             android_seat = course.seat_products.get(title='Android ' + seat_title)
             self.assertEqual(android_seat.expires, expires)
-            self.assertEqual(android_seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
+            self.assertEqual(android_seat.stockrecords.get(partner=self.partner).price, expected['price'])
 
             ios_seat = course.seat_products.get(title='Ios ' + seat_title)
             self.assertEqual(ios_seat.expires, expires)
-            self.assertEqual(ios_seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
+            self.assertEqual(ios_seat.stockrecords.get(partner=self.partner).price, expected['price'])
 
         if test_mobile_seats and verified_product:
             android_seat = course.seat_products.get(title='Android ' + seat_title)
