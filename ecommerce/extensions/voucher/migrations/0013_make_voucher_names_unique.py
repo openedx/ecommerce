@@ -17,14 +17,11 @@ def make_voucher_names_unique(apps, schema_editor):
         updates = []
 
         for obj in page.object_list:
-<<<<<<< HEAD
-            obj.name = '%d - %s' % (obj.id, obj.name)
-            if len(obj.name) > 128:
-                obj.name = obj.name[:128]
-=======
-            obj.name = '%d - %s' % (obj.id, obj.name[:128 - len(obj.id)])
->>>>>>> cfc34a88d ([Copy]Django Oscar Upgrade to version 3.1 [#4102] (#4125))
-            updates.append(obj)
+            if f"{obj.id} -" not in obj.name: 
+                obj.name = '%d - %s' % (obj.id, obj.name)
+                if len(obj.name) > 128:
+                    obj.name = obj.name[:128]
+                updates.append(obj)
 
         Voucher.objects.bulk_update(updates, ['name'])
 
