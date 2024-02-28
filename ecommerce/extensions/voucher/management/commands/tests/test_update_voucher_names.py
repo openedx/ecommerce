@@ -16,7 +16,7 @@ class ManagementCommandTests(TestCase):
             'start_datetime': timezone.now(),
             'end_datetime': timezone.now() + timedelta(days=7)
         }
-        
+
         for item in range(3):
             code = 'TESTCODE' + str(item)
             name = self.voucher_name + str(item)
