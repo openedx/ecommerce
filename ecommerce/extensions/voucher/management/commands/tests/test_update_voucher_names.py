@@ -13,13 +13,14 @@ class ManagementCommandTests(TestCase):
     def setUp(self):
         self.voucher_name = 'Test voucher'
         self.data = {
-            'name': self.voucher_name,
             'start_datetime': timezone.now(),
             'end_datetime': timezone.now() + timedelta(days=7)
         }
+        
         for item in range(3):
             code = 'TESTCODE' + str(item)
-            Voucher.objects.create(code=code, **self.data)
+            name = self.voucher_name + str(item)
+            Voucher.objects.create(name=name, code=code, **self.data)
 
         self.LOGGER_NAME = 'ecommerce.extensions.voucher.management.commands.update_voucher_names'
 
