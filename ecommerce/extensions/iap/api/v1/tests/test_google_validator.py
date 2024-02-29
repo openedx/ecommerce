@@ -1,5 +1,6 @@
 import mock
 from inapppy import errors
+from oscar.test.factories import BasketFactory
 from testfixtures import LogCapture
 
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
@@ -55,11 +56,13 @@ class GoogleValidatorTests(TestCase):
 
     def setUp(self):
         self.validator = GooglePlayValidator()
+        self.basket = BasketFactory()
+
 
     @mock.patch('ecommerce.extensions.iap.api.v1.google_validator.GooglePlayVerifier')
     def test_validate_successful(self, mock_google_verifier):
         mock_google_verifier.return_value = GooglePlayVerifierProxy()
-        response = self.validator.validate(self.VALID_RECEIPT, self.CONFIGURATION)
+        response = self.validator.validate(self.VALID_RECEIPT, self.CONFIGURATION, self.basket)
         self.assertEqual(response, self.VALIDATED_RESPONSE)
 
     @mock.patch('ecommerce.extensions.iap.api.v1.google_validator.GooglePlayVerifier')
@@ -67,7 +70,7 @@ class GoogleValidatorTests(TestCase):
         mock_google_verifier.return_value = GooglePlayVerifierProxy()
         logger_name = 'ecommerce.extensions.iap.api.v1.google_validator'
         with LogCapture(logger_name) as google_validator_log_capture:
-            response = self.validator.validate(self.INVALID_RECEIPT, self.CONFIGURATION)
+            response = self.validator.validate(self.INVALID_RECEIPT, self.CONFIGURATION, self.basket)
             google_validator_log_capture.check_present(
                 (
                     logger_name,
