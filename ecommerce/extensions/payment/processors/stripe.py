@@ -124,11 +124,16 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         order_number = basket.order_number
         amount = self._get_basket_amount(basket)
         currency = basket.currency
+        courses = self._get_basket_courses(basket)
+
         return {
             'amount': amount,
             'currency': currency,
             'description': order_number,
-            'metadata': {'order_number': order_number},
+            'metadata': {
+                'order_number': order_number,
+                'courses': courses,
+            },
         }
 
     def generate_basket_pi_idempotency_key(self, basket):
