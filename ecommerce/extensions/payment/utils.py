@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
-from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import parse_tracking_context
 
 logger = logging.getLogger(__name__)
@@ -101,7 +101,7 @@ def clean_field_value(value):
     return re.sub(r'[\^:"\']', '', value)
 
 
-def embargo_check(user, site, products, ip=None):
+def embargo_check(user, site, products, ip=None, headers={}):
     """ Checks if the user has access to purchase products by calling the LMS embargo API.
 
     Args:
@@ -118,13 +118,15 @@ def embargo_check(user, site, products, ip=None):
         _, _, ip = parse_tracking_context(user, usage='embargo')
 
     for product in products:
-        # We only are checking Seats
-        if product.get_product_class().name == SEAT_PRODUCT_CLASS_NAME:
+        product_class_name = product.get_product_class().name
+
+        # We are checking Seats & Course Entitlement
+        if product_class_name == SEAT_PRODUCT_CLASS_NAME or product_class_name == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
             courses.append(product.course.id)
 
     if courses:
         params = {
-            'user': user,
+            'user': user.username,
             'ip_address': ip,
             'course_ids': courses
         }
@@ -132,7 +134,11 @@ def embargo_check(user, site, products, ip=None):
         try:
             api_client = site.siteconfiguration.oauth_api_client
             api_url = urljoin(f"{site.siteconfiguration.embargo_api_url}/", "course_access/")
-            response = api_client.get(api_url, params=params).json()
+            response = api_client.get(
+                api_url,
+                params=params,
+                headers={**headers, 'accept': 'application/json'}
+            ).json()
             return response.get('access', True)
         except:  # pylint: disable=bare-except
             # We are going to allow purchase if the API is un-reachable.
