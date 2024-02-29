@@ -58,7 +58,6 @@ class GoogleValidatorTests(TestCase):
         self.validator = GooglePlayValidator()
         self.basket = BasketFactory()
 
-
     @mock.patch('ecommerce.extensions.iap.api.v1.google_validator.GooglePlayVerifier')
     def test_validate_successful(self, mock_google_verifier):
         mock_google_verifier.return_value = GooglePlayVerifierProxy()
