@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 class IOSValidator:
-    def validate(self, receipt, configuration, basket=None):
+    def validate(self, receipt, configuration, basket=None):  # pylint: disable=unused-argument
         """
         Accepts receipt, validates that the purchase has already been completed in
         Apple for the mentioned productId.

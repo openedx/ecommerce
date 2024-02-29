@@ -2,6 +2,8 @@ import logging
 
 from inapppy import GooglePlayVerifier, errors
 
+from ecommerce.extensions.iap.utils import get_consumable_android_sku
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,9 +14,8 @@ class GooglePlayValidator:
         Google for the mentioned productId.
         """
         purchase_token = receipt['purchaseToken']
-        # Mobile assumes one course purchase at a time
-        stockrecord_price = int(basket.total_excl_tax)
-        product_sku = 'mobile.android.usd{}'.format(stockrecord_price)
+        # Mobile assumes one course is purchased at a time
+        product_sku = get_consumable_android_sku(basket.total_excl_tax)
         verifier = GooglePlayVerifier(
             configuration.get('google_bundle_id'),
             configuration.get('google_service_account_key_file'),
@@ -24,7 +25,7 @@ class GooglePlayValidator:
         except errors.GoogleError:
             try:
                 # Fallback to the old approach and verify token with partner_sku
-                # This fallback is for temporary reason untill all android users move on to new version
+                # This fallback is temporary until all android products are switched to consumable products.
                 result = self.verify_result(verifier, purchase_token, receipt['productId'])
             except errors.GoogleError as exc:
                 logger.error('Purchase validation failed %s', exc)
