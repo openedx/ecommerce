@@ -80,5 +80,6 @@ def create_mobile_seat(sku_prefix, existing_web_seat):
 
     return mobile_stock_record
 
+
 def get_consumable_android_sku(price):
     return 'mobile.android.usd{}'.format(int(price))
