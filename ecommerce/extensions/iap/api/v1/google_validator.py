@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class GooglePlayValidator:
-    def validate(self, receipt, configuration, basket=None):
+    def validate(self, receipt, configuration, basket):
         """
         Accepts receipt, validates that the purchase has already been completed in
         Google for the mentioned productId.
@@ -23,6 +23,8 @@ class GooglePlayValidator:
         try:
             result = self.verify_result(verifier, purchase_token, product_sku)
         except errors.GoogleError:
+            logger.error('Purchase validation failed, Now moving to fallback approach for non consumable skus')
+
             try:
                 # Fallback to the old approach and verify token with partner_sku
                 # This fallback is temporary until all android products are switched to consumable products.

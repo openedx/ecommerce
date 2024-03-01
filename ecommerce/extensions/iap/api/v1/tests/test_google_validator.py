@@ -74,6 +74,11 @@ class GoogleValidatorTests(TestCase):
                 (
                     logger_name,
                     'ERROR',
+                    "Purchase validation failed, Now moving to fallback approach for non consumable skus"
+                ),
+                (
+                    logger_name,
+                    'ERROR',
                     "Purchase validation failed {}".format(
                         'GoogleError None None'
                     ),
@@ -81,3 +86,21 @@ class GoogleValidatorTests(TestCase):
             )
             self.assertIn('error', response)
             self.assertIn('message', response)
+
+    @mock.patch('ecommerce.extensions.iap.api.v1.google_validator.GooglePlayVerifier')
+    def test_validate_failure_for_consumable_sku(self, mock_google_verifier):
+        logger_name = 'ecommerce.extensions.iap.api.v1.google_validator'
+        with mock.patch.object(GooglePlayVerifierProxy, 'verify_with_result',
+                               side_effect=[errors.GoogleError(), GooglePlayVerifierResponse()]), \
+                LogCapture(logger_name) as google_validator_log_capture:
+            mock_google_verifier.return_value = GooglePlayVerifierProxy()
+
+            response = self.validator.validate(self.INVALID_RECEIPT, self.CONFIGURATION, self.basket)
+            google_validator_log_capture.check_present(
+                (
+                    logger_name,
+                    'ERROR',
+                    "Purchase validation failed, Now moving to fallback approach for non consumable skus"
+                ),
+            )
+            self.assertEqual(response, self.VALIDATED_RESPONSE)
