@@ -40,11 +40,11 @@ class ManagementCommandTests(TestCase):
         """
         call_command('update_voucher_names', run_async=True)
 
-        vouchers = Voucher.objects.all()
+        vouchers = Voucher.objects.all().order_by('id')
         assert vouchers.count() == 3
 
-        for voucher in vouchers:
-            assert voucher.name[:-1] == f'{voucher.id} - {self.voucher_name}'
+        for i, voucher in enumerate(vouchers):
+            assert voucher.name == f'{voucher.id} - {self.voucher_name}{i}'
 
     @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names_task.delay')
     def test_update_voucher_names_synchronous(self, mock_delay):
@@ -54,11 +54,11 @@ class ManagementCommandTests(TestCase):
         """
         call_command('update_voucher_names', run_async=False)
 
-        vouchers = Voucher.objects.all()
+        vouchers = Voucher.objects.all().order_by('id')
         assert vouchers.count() == 3
 
-        for voucher in vouchers:
-            assert voucher.name[:-1] == f'{voucher.id} - {self.voucher_name}'
+        for i, voucher in enumerate(vouchers):
+            assert voucher.name == f'{voucher.id} - {self.voucher_name}{i}'
 
         mock_delay.assert_not_called()
 
@@ -112,18 +112,18 @@ class ManagementCommandTests(TestCase):
         in the same voucher names.
         """
         # Before we run the command
-        vouchers = Voucher.objects.all()
+        vouchers = Voucher.objects.all().order_by('id')
         assert vouchers.count() == 3
-        for voucher in vouchers:
-            assert voucher.name[:-1] == self.voucher_name
+        for i, voucher in enumerate(vouchers):
+            assert voucher.name == f'{self.voucher_name}{i}'
 
         # And after each time we run the command
         for _ in range(2):
             call_command('update_voucher_names', run_async=True)
 
-            vouchers = Voucher.objects.all()
-            for voucher in vouchers:
-                assert voucher.name[:-1] == f'{voucher.id} - {self.voucher_name}'
+            vouchers = Voucher.objects.all().order_by('id')
+            for i, voucher in enumerate(vouchers):
+                assert voucher.name == f'{voucher.id} - {self.voucher_name}{i}'
 
     @mock.patch('ecommerce.extensions.voucher.tasks.update_voucher_names_task.delay')
     def test_update_voucher_names_command_failure(self, mock_delay):
