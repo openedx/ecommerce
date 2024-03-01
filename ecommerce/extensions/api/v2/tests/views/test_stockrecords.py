@@ -34,7 +34,7 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
         """ Verify a list of stock records is returned. """
         StockRecordFactory(partner__short_code='Tester')
         StockRecord.objects.create(partner=self.partner, product=self.product, partner_sku='dummy-sku',
-                                   price_currency='USD', price_excl_tax=200.00)
+                                   price_currency='USD', price=200.00)
 
         response = self.client.get(self.list_path)
         self.assertEqual(response.status_code, 200)
@@ -74,19 +74,19 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
         self.assertDictEqual(response.json(), self.serialize_stockrecord(self.stockrecord))
 
     def test_update(self):
-        """ Verify update endpoint allows to update 'price_currency' and 'price_excl_tax'. """
+        """ Verify update endpoint allows to update 'price_currency' and 'price'. """
         self.user.user_permissions.add(self.change_permission)
         self.user.save()
 
         data = {
             "price_currency": "PKR",
-            "price_excl_tax": "500.00"
+            "price": "500.00"
         }
         response = self.attempt_update(data)
         self.assertEqual(response.status_code, 200)
 
         stockrecord = StockRecord.objects.get(id=self.stockrecord.id)
-        self.assertEqual(str(stockrecord.price_excl_tax), data['price_excl_tax'])
+        self.assertEqual(str(stockrecord.price), data['price'])
         self.assertEqual(stockrecord.price_currency, data['price_currency'])
 
     def test_update_without_permission(self):
@@ -96,7 +96,7 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
 
         data = {
             "price_currency": "PKR",
-            "price_excl_tax": "500.00"
+            "price": "500.00"
         }
         response = self.attempt_update(data)
         self.assertEqual(response.status_code, 403)
@@ -107,13 +107,13 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
         self.user.save()
 
         data = {
-            "price_excl_tax": "500.00"
+            "price": "500.00"
         }
         response = self.attempt_update(data)
         self.assertEqual(response.status_code, 200)
 
     def test_allowed_fields_for_update(self):
-        """ Verify the endpoint only allows the price_excl_tax and price_currency fields to be updated. """
+        """ Verify the endpoint only allows the price and price_currency fields to be updated. """
         self.user.user_permissions.add(self.change_permission)
         self.user.save()
 
@@ -125,7 +125,7 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
         stockrecord = StockRecord.objects.get(id=self.stockrecord.id)
         self.assertEqual(self.serialize_stockrecord(self.stockrecord), self.serialize_stockrecord(stockrecord))
         self.assertDictEqual(response.json(), {
-            'message': 'Only the price_currency and price_excl_tax fields are allowed to be modified.'})
+            'message': 'Only the price_currency and price fields are allowed to be modified.'})
 
     def attempt_update(self, data):
         """ Helper method that attempts to update an existing StockRecord object.
@@ -167,7 +167,7 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
             "partner": self.partner.id,
             "partner_sku": "new-sku",
             "price_currency": "USD",
-            "price_excl_tax": 50.00
+            "price": 50.00
         }
 
         return self.client.post(self.list_path, json.dumps(data), JSON_CONTENT_TYPE)

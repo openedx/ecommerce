@@ -330,18 +330,18 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockRecord
-        fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price_excl_tax',)
+        fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price',)
 
 
 class PartialStockRecordSerializerForUpdate(StockRecordSerializer):
     """ Stock record objects serializer for PUT requests.
 
-    Allowed fields to update are 'price_currency' and 'price_excl_tax'.
+    Allowed fields to update are 'price_currency' and 'price'.
     """
 
     class Meta:
         model = StockRecord
-        fields = ('price_currency', 'price_excl_tax',)
+        fields = ('price_currency', 'price',)
 
 
 class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSerializer):
@@ -843,12 +843,12 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
                 mobile_stock_record = mobile_seat.stockrecords.first()
                 web_stock_record = web_seat.stockrecords.first()
-                if mobile_stock_record.price_excl_tax != web_stock_record.price_excl_tax:
-                    mobile_stock_record.price_excl_tax = web_stock_record.price_excl_tax
+                if mobile_stock_record.price != web_stock_record.price:
+                    mobile_stock_record.price = web_stock_record.price
                     mobile_stock_record.save()
 
                     if 'ios' in mobile_stock_record.partner_sku:
-                        self._update_app_store_product(mobile_seat, web_stock_record.price_excl_tax)
+                        self._update_app_store_product(mobile_seat, web_stock_record.price)
 
         except Exception as e:  # pylint: disable=broad-except
             logger.error(u'Failed to update mobile seats [%s]: [%s]', course.id, str(e))
