@@ -12,7 +12,9 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE
 from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.utils import (
+    basket_add_dynamic_payment_methods_enabled,
     basket_add_payment_intent_id_attribute,
+    basket_add_payment_intent_status,
     get_basket_courses_list,
     get_billing_address_from_payment_intent_data
 )
@@ -118,15 +120,22 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             **self._build_payment_intent_parameters(basket),
             # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
             secret_key_confirmation='required',
-            # don't create a new intent for the same basket
-            idempotency_key=self.generate_basket_pi_idempotency_key(basket),
             # Enable dynamic payment methods, w/o payment method configuration ID due to Custom Actions Beta:
             # 'allow_redirects' is default to 'always',
             # 'enabled' is not default to True with CAB, only for Deferred Intents.
             automatic_payment_methods={'enabled': True},
         )
         new_payment_intent_id = new_payment_intent['id']
+        logger.info(
+            'Canceled Payment Intent [%s] and created new Payment Intent [%s] for basket [%d]',
+            payment_intent_id,
+            new_payment_intent_id,
+            basket.id,
+        )
+        new_payment_intent_status = new_payment_intent['status']
         basket_add_payment_intent_id_attribute(basket, new_payment_intent_id)
+        basket_add_payment_intent_status(basket, new_payment_intent_status)
+        basket_add_dynamic_payment_methods_enabled(basket, new_payment_intent)
         return new_payment_intent
 
     def generate_basket_pi_idempotency_key(self, basket):
@@ -175,6 +184,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 )
 
                 basket_add_payment_intent_id_attribute(basket, transaction_id)
+                basket_add_payment_intent_status(basket, stripe_response['status'])
+                basket_add_dynamic_payment_methods_enabled(basket, stripe_response)
             # for when basket was already created, but with different amount
             except stripe.error.IdempotencyError:
                 # if this PI has been created before, we should be able to retrieve
@@ -242,7 +253,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 # Need to create a new one so the MFE can let the learner retry payment
                 new_payment_intent = self.create_new_payment_intent_for_basket(confirm_api_response['id'], basket)
                 logger.info(
-                    'Dynamic Payment Method received requires additional action for edX order %s, '
+                    'Dynamic Payment Method received, requires additional action for edX order %s, '
                     'created a new Payment Intent %s with status %s.',
                     confirm_api_response['metadata']['order_number'],
                     new_payment_intent['id'],
