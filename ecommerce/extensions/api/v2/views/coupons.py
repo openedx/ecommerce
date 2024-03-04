@@ -376,7 +376,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if data:
             if 'name' in data:
                 for voucher in vouchers:
-                    voucher.name = "%s - %d" % (data['name'], voucher.id + 1)
+                    voucher.name = "%d - %s" % (voucher.id + 1, data['name'])
                     if len(voucher.name) > 128:
                         voucher.name = voucher.name[:128]
 
