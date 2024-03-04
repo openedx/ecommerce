@@ -128,7 +128,7 @@ def create_coupon_product_and_stockrecord(title, category, partner, price):
     StockRecord.objects.update_or_create(
         defaults={
             'price_currency': settings.OSCAR_DEFAULT_CURRENCY,
-            'price_excl_tax': price
+            'price': price
         },
         partner=partner,
         partner_sku=sku,
