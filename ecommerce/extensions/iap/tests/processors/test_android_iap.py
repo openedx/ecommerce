@@ -9,7 +9,7 @@ import ddt
 import mock
 from django.test import RequestFactory
 from django.urls import reverse
-from oscar.apps.payment.exceptions import GatewayError
+from oscar.apps.payment.exceptions import GatewayError, PaymentError, UserCancelled
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
@@ -63,9 +63,14 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
             'currency_code': 'USD',
         }
         self.mock_validation_response = {
-            'resource': {
-                'orderId': 'orderId.android.test.purchased'
-            }
+            'raw_response': {
+                'purchaseTimeMillis': '170847478508', 'purchaseState': 1, 'consumptionState': 0,
+                'developerPayload': '', 'orderId': 'GPA.test.order.id', 'acknowledgementState': 0,
+                'kind': 'androidpublisher#productPurchase',
+                'obfuscatedExternalAccountId': 'testabc', 'regionCode': 'MX'
+            },
+            'is_canceled': False,
+            'is_expired': False
         }
 
     def _get_receipt_url(self):
@@ -215,3 +220,28 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         self.assertIsNotNone(payment_processor_response_extension)
         self.assertEqual(payment_processor_response_extension.meta_data.get('price'), str(price))
         self.assertEqual(payment_processor_response_extension.meta_data.get('currency_code'), currency_code)
+
+    @mock.patch.object(GooglePlayValidator, 'validate')
+    def test_handle_processor_response_payment_error(self, mock_google_validator):
+        """
+        Verify that appropriate PaymentError is raised in absence of orderId.
+        """
+        modified_validation_response = self.mock_validation_response
+        modified_validation_response['raw_response'].pop('orderId')
+        mock_google_validator.return_value = modified_validation_response
+        with self.assertRaises(PaymentError):
+            modified_return_data = self.RETURN_DATA
+            modified_return_data.pop('transactionId')
+
+            self.processor.handle_processor_response(modified_return_data, basket=self.basket)
+
+    @mock.patch.object(GooglePlayValidator, 'validate')
+    def test_handle_processor_response_with_cancelled_payment(self, mock_google_validator):
+        """
+        Verify that appropriate UserCancelled error is raised if payment is cancelled.
+        """
+        modified_validation_response = self.mock_validation_response
+        modified_validation_response['is_canceled'] = True
+        mock_google_validator.return_value = modified_validation_response
+        with self.assertRaises(UserCancelled):
+            self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)

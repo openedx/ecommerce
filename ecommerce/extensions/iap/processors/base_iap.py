@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 
 import waffle
 from django.urls import reverse
-from oscar.apps.payment.exceptions import GatewayError, PaymentError
+from oscar.apps.payment.exceptions import GatewayError, PaymentError, UserCancelled
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
@@ -125,6 +125,14 @@ class BaseIAP(BasePaymentProcessor):
         if self.NAME == 'ios-iap':
             if not original_transaction_id:
                 raise PaymentError(response)
+
+        # In case of Android transaction_id is required to identify payment
+        elif not transaction_id:
+            raise PaymentError(response)
+
+        # In case of Android make sure payment is not cancelled
+        elif validation_response.get('is_canceled'):
+            raise UserCancelled(response)
 
         if not waffle.switch_is_active(DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME):
             is_redundant_payment = self.is_payment_redundant(original_transaction_id, transaction_id)
