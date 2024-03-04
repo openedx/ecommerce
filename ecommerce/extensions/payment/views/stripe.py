@@ -237,6 +237,14 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
 
         # We'll only have a return value if the payment is a dynamic payment methods in progress
         if in_progress_payment:
+            logger.info(
+                'Dynamic Payment Method received for edX order %s with basket %d, '
+                'returning Payment Intent %s with status %s to the payment MFE',
+                in_progress_payment.order_number,
+                in_progress_payment.basket_id,
+                in_progress_payment.transaction_id,
+                in_progress_payment.status,
+            )
             return self.dynamic_payment_methods_response(in_progress_payment)
         try:
             billing_address = self.create_billing_address(
@@ -298,13 +306,12 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
         }, status=400)
 
     def dynamic_payment_methods_response(self, in_progress_payment):
-        """Tell the frontend the Payment Intent status and it will decide what to do."""
+        """Tell the frontend the Payment Intent ID and status and it will decide what to do."""
         if 'status' in in_progress_payment._fields:
             response_data = {
                 'status': in_progress_payment.status,
                 'confirmation_client_secret': in_progress_payment.confirmation_client_secret,
                 'payment_method': in_progress_payment.payment_method,
-                'total': in_progress_payment.total,
                 'transaction_id': in_progress_payment.transaction_id,
             }
         return JsonResponse(response_data, status=201)

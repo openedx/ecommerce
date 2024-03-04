@@ -19,9 +19,11 @@ from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.basket.constants import (
+    DYNAMIC_PAYMENT_METHODS_ENABLED,
     EMAIL_OPT_IN_ATTRIBUTE,
     ENABLE_STRIPE_PAYMENT_PROCESSOR,
     PAYMENT_INTENT_ID_ATTRIBUTE,
+    PAYMENT_INTENT_STATUS_ATTRIBUTE,
     PURCHASER_BEHALF_ATTRIBUTE,
     REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING
 )
@@ -392,6 +394,38 @@ def basket_add_organization_attribute(basket, request_data):
             attribute_type=purchaser_attribute,
             value_text=purchaser
         )
+
+
+@newrelic.agent.function_trace()
+def basket_add_payment_intent_status(basket, payment_intent_status):
+    payment_intent_status_attribute, __ = BasketAttributeType.objects.get_or_create(
+        name=PAYMENT_INTENT_STATUS_ATTRIBUTE)
+    # Do a get_or_create and update value_text after (instead of update_or_create)
+    # to prevent a particularly slow full table scan that uses a LIKE
+    basket_attribute, __ = BasketAttribute.objects.get_or_create(
+        attribute_type=payment_intent_status_attribute,
+        basket=basket,
+    )
+    basket_attribute.value_text = payment_intent_status
+    basket_attribute.save()
+
+
+@newrelic.agent.function_trace()
+def basket_add_dynamic_payment_methods_enabled(basket, payment_intent):
+    """
+    Adds a boolean value which is True if there is more than
+    'card' payment method type in the Stripe Payment Intent.
+    """
+    dynamic_payment_methods_enabled_attribute, __ = BasketAttributeType.objects.get_or_create(
+        name=DYNAMIC_PAYMENT_METHODS_ENABLED)
+    # Do a get_or_create and update value_text after (instead of update_or_create)
+    # to prevent a particularly slow full table scan that uses a LIKE
+    basket_attribute, __ = BasketAttribute.objects.get_or_create(
+        attribute_type=dynamic_payment_methods_enabled_attribute,
+        basket=basket,
+    )
+    basket_attribute.value_text = len(payment_intent['payment_method_types']) > 1
+    basket_attribute.save()
 
 
 @newrelic.agent.function_trace()
