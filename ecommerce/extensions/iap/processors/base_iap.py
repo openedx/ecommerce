@@ -83,7 +83,7 @@ class BaseIAP(BasePaymentProcessor):
             available_attempts = available_attempts + self.retry_attempts
 
         for attempt_count in range(1, available_attempts + 1):
-            validation_response = self.validator.validate(response, self.configuration)
+            validation_response = self.validator.validate(response, self.configuration, basket)
             validation_error = validation_response.get('error')
             if not validation_error:
                 break
