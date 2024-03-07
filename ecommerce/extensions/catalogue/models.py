@@ -62,7 +62,6 @@ class CreateSafeHistoricalRecords(HistoricalRecords):
 
 
 class Product(AbstractProduct):
-
     course = models.ForeignKey(
         'courses.Course', null=True, blank=True, related_name='products', on_delete=models.CASCADE
     )
