@@ -74,12 +74,11 @@ def create_or_update_course_entitlement(
     course_entitlement.structure = Product.CHILD
     course_entitlement.is_discountable = True
     course_entitlement.title = 'Course {}'.format(title)
-    course_entitlement.parent = parent_entitlement
     course_entitlement.attr.certificate_type = certificate_type
     course_entitlement.attr.UUID = UUID
     course_entitlement.attr.id_verification_required = id_verification_required
     course_entitlement.attr.credit_provider = credit_provider
-
+    course_entitlement.parent = parent_entitlement
     if variant_id:
         course_entitlement.attr.variant_id = variant_id
     if has_existing_course_entitlement:
@@ -95,7 +94,7 @@ def create_or_update_course_entitlement(
             'product': course_entitlement,
             'partner': partner,
             'partner_sku': generate_sku(course_entitlement, partner),
-            'price': price,
+            'price_excl_tax': price,
             'price_currency': settings.OSCAR_DEFAULT_CURRENCY,
         }
     )
