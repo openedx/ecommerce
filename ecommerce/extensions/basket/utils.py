@@ -589,7 +589,7 @@ def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
 
     for discount in discounts_after:
         logger.info(
-            '[REV-3876] Checking discount %s for voucher %s for user %s ',
+            '[REV-3876] Checking discount %s for voucher %s for user %s '
             'basket %d and order number %s, with course IDs %s',
             discount,
             voucher.code,
