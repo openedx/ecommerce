@@ -572,8 +572,43 @@ def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
 
     # Look for discounts from this new voucher
     found_discount = False
+
+    course_ids = []
+    if basket.lines.exists():
+        for line in basket.lines.all():
+            try:
+                course_id = line.product.course.id
+            except Exception:  # pylint: disable=broad-except
+                logger.exception(
+                    '[REV-3876] Failed to retrieve course_id data from basket [%s] order [%s], adding None',
+                    basket.id,
+                    basket.order_number
+                )
+                course_id = None
+            course_ids.append(course_id)
+
     for discount in discounts_after:
+        logger.info(
+            '[REV-3876] Checking discount %s for voucher %s for user %s ',
+            'basket %d and order number %s, with course IDs %s',
+            discount,
+            voucher.code,
+            request.user.username,
+            basket.id,
+            basket.order_number,
+            course_ids,
+        )
         if discount['voucher'] and discount['voucher'] == voucher:
+            logger.info(
+                '[REV-3876] Found discount %s for voucher %s for user %s, '
+                'basket %d and order number %s, with course IDs %s',
+                discount,
+                voucher.code,
+                request.user.username,
+                basket.id,
+                basket.order_number,
+                course_ids,
+            )
             found_discount = True
             break
 
