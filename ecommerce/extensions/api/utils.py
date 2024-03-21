@@ -21,7 +21,7 @@ def send_mail_to_mobile_team_for_change_in_course(course, seats, failure_msg=Fal
         result = seat_template.format(
             course.name,
             stock_record.partner_sku,
-            stock_record.price_excl_tax,
+            stock_record.price,
         )
         return result
 
