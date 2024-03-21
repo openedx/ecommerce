@@ -68,7 +68,7 @@ def create_basket(owner=None, site=None, empty=False, price='10.00', product_cla
             product = create_product(product_class=product_class_instance)
         else:
             product = create_product()
-        create_stockrecord(product, num_in_stock=2, price_excl_tax=D(price))
+        create_stockrecord(product, num_in_stock=2, price=D(price))
         basket.add_product(product)
     return basket
 
@@ -306,7 +306,7 @@ class EnterpriseOfferFactory(ConditionalOfferFactory):
     emails_for_usage_alert = 'example_1@example.com, example_2@example.com'
 
 
-class OfferAssignmentFactory(factory.DjangoModelFactory):
+class OfferAssignmentFactory(factory.django.DjangoModelFactory):
     offer = factory.SubFactory(EnterpriseOfferFactory)
     code = factory.Sequence(lambda n: 'VOUCHERCODE{number}'.format(number=n))
     user_email = factory.Sequence(lambda n: 'example_%s@example.com' % n)
@@ -322,7 +322,7 @@ class DynamicPercentageDiscountBenefitFactory(BenefitFactory):
     proxy_class = class_path(DynamicPercentageDiscountBenefit)
 
 
-class CodeAssignmentNudgeEmailTemplatesFactory(factory.DjangoModelFactory):
+class CodeAssignmentNudgeEmailTemplatesFactory(factory.django.DjangoModelFactory):
     email_greeting = factory.Faker('sentence')
     email_closing = factory.Faker('sentence')
     email_subject = factory.Faker('sentence')
@@ -333,7 +333,7 @@ class CodeAssignmentNudgeEmailTemplatesFactory(factory.DjangoModelFactory):
         model = CodeAssignmentNudgeEmailTemplates
 
 
-class CodeAssignmentNudgeEmailsFactory(factory.DjangoModelFactory):
+class CodeAssignmentNudgeEmailsFactory(factory.django.DjangoModelFactory):
     email_template = factory.SubFactory(CodeAssignmentNudgeEmailTemplatesFactory)
     user_email = factory.Sequence(lambda n: 'learner_%s@example.com' % n)
     email_date = datetime.now()
@@ -343,7 +343,7 @@ class CodeAssignmentNudgeEmailsFactory(factory.DjangoModelFactory):
         model = CodeAssignmentNudgeEmails
 
 
-class SDNFallbackMetadataFactory(factory.DjangoModelFactory):
+class SDNFallbackMetadataFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SDNFallbackMetadata
 
@@ -352,7 +352,7 @@ class SDNFallbackMetadataFactory(factory.DjangoModelFactory):
     download_timestamp = datetime.now() - timedelta(days=10)
 
 
-class SDNFallbackDataFactory(factory.DjangoModelFactory):
+class SDNFallbackDataFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SDNFallbackData
 

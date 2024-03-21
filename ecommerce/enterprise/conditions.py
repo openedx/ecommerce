@@ -80,7 +80,7 @@ def is_offer_max_discount_available(basket, offer):
 
 def _get_basket_discount_value(basket, offer):
     """Calculate the discount value based on benefit type and value"""
-    sum_basket_lines = basket.all_lines().aggregate(total=Sum('stockrecord__price_excl_tax'))['total'] or Decimal(0.0)
+    sum_basket_lines = basket.all_lines().aggregate(total=Sum('stockrecord__price'))['total'] or Decimal(0.0)
     # calculate discount value that will be covered by the offer
     benefit_type = get_benefit_type(offer.benefit)
     benefit_value = offer.benefit.value

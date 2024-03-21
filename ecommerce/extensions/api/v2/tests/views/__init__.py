@@ -87,5 +87,5 @@ class ProductSerializerMixin:
             'product': stockrecord.product.id,
             'partner_sku': stockrecord.partner_sku,
             'price_currency': stockrecord.price_currency,
-            'price_excl_tax': str(stockrecord.price_excl_tax),
+            'price': str(stockrecord.price),
         }

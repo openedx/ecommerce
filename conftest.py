@@ -132,7 +132,6 @@ def django_db_setup(django_db_setup, django_db_blocker, django_db_use_migrations
         Option.objects.get_or_create(
             name='Course Entitlement',
             code='course_entitlement',
-            type=Option.OPTIONAL,
         )
 
         coupon, _ = ProductClass.objects.get_or_create(

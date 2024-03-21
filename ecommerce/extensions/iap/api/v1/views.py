@@ -439,7 +439,7 @@ class MobileSkusCreationView(APIView):
             configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][IOSIAP.NAME.lower()]
             ios_product = list((filter(lambda sku: 'ios' in sku.partner_sku, mobile_products)))[0]
             course_data = {
-                'price': ios_product.price_excl_tax,
+                'price': ios_product.price,
                 'name': course.name,
                 'key': course_run_key
             }

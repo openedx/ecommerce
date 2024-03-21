@@ -7,7 +7,7 @@ from ecommerce.referrals.models import Referral
 from ecommerce.tests.factories import SiteFactory
 
 
-class ReferralFactory(factory.DjangoModelFactory):
+class ReferralFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Referral
 

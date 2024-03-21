@@ -84,7 +84,7 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
     def assert_stock_record_valid(self, stock_record, seat, price):
         """ Verify the given StockRecord is configured correctly. """
         self.assertEqual(stock_record.partner, self.partner)
-        self.assertEqual(stock_record.price_excl_tax, price)
+        self.assertEqual(stock_record.price, price)
         self.assertEqual(stock_record.price_currency, 'USD')
         self.assertEqual(stock_record.partner_sku, generate_sku(seat, self.partner))
 
