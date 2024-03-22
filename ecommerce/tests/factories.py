@@ -11,7 +11,7 @@ from oscar.test.factories import StockRecordFactory as OscarStockRecordFactory
 from ecommerce.core.models import SiteConfiguration
 
 
-class PartnerFactory(factory.django.DjangoModelFactory):
+class PartnerFactory(factory.DjangoModelFactory):
     class Meta:
         model = get_model('partner', 'Partner')
         django_get_or_create = ('name',)
@@ -20,7 +20,7 @@ class PartnerFactory(factory.django.DjangoModelFactory):
     short_code = FuzzyText(length=8)
 
 
-class SiteFactory(factory.django.DjangoModelFactory):
+class SiteFactory(factory.DjangoModelFactory):
     class Meta:
         model = Site
 
@@ -28,7 +28,7 @@ class SiteFactory(factory.django.DjangoModelFactory):
     name = FuzzyText()
 
 
-class SiteConfigurationFactory(factory.django.DjangoModelFactory):
+class SiteConfigurationFactory(factory.DjangoModelFactory):
     class Meta:
         model = SiteConfiguration
 
@@ -48,7 +48,7 @@ class StockRecordFactory(OscarStockRecordFactory):
     price_currency = 'USD'
 
 
-class UserFactory(factory.django.DjangoModelFactory):
+class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = get_model('core', 'User')
 
