@@ -23,12 +23,12 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
         audit_seat = seats[1]
         self.assertFalse(hasattr(audit_seat.attr, 'certificate_type'))
         self.assertFalse(audit_seat.attr.id_verification_required)
-        self.assertEqual(audit_seat.stockrecords.get(partner=self.partner).price_excl_tax, 0)
+        self.assertEqual(audit_seat.stockrecords.get(partner=self.partner).price, 0)
 
         verified_seat = seats[0]
         self.assertEqual(verified_seat.attr.certificate_type, 'verified')
         self.assertTrue(verified_seat.attr.id_verification_required)
-        self.assertEqual(verified_seat.stockrecords.get(partner=self.partner).price_excl_tax, price)
+        self.assertEqual(verified_seat.stockrecords.get(partner=self.partner).price, price)
 
     @responses.activate
     def test_handle(self):

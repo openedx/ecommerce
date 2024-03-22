@@ -1,16 +1,16 @@
 {% load i18n %}
 
 <div class="table-header">
-  <h3><i class="icon-search icon-large"></i>{% trans "Search" as tmsg %}{{ tmsg | force_escape }}</h3>
+  <h3><i class="fas fa-search"></i> {% trans "Search" %}</h3>
 </div>
-<div class="well">
+<div class="card card-body bg-light">
   <form action="" method="get" class="form-inline" id="search_form">
     {% for field in form %}
       {% if field.id_for_label in exposed_field_ids %}
         {% if field.is_hidden %}
           {{ field }}
         {% else %}
-          <span class="control-group {% if field.errors %}error{% endif %}">
+          <div class="form-group mr-2" {% if field.errors %}error{% endif %}">
                             {{ field.label_tag }}
                             {{ field }}
             {% for error in field.errors %}
@@ -18,34 +18,33 @@
                 <li>{{ error }}</li>
               </ul>
             {% endfor %}
-                        </span>
+            </div>
         {% endif %}
       {% endif %}
     {% endfor %}
     <input type="submit" value="{% trans "Search" as tmsg %}{{ tmsg | force_escape }}" class="btn btn-primary"/>
     <a data-toggle="modal" href="#SearchModal">{% trans "Advanced Search" as tmsg %}{{ tmsg | force_escape }}</a>
   </form>
+</div>
 
-  <div class="modal fade" id="SearchModal">
+<div class="modal fade" data-show="true" id="SearchModal" role="dialog">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h3>{% trans "Advanced Search" as tmsg %}{{ tmsg | force_escape }}</h3>
-        </div>
-        <form action="" method="get" class="form-horizontal">
-          <div class="modal-body">
-            <div class="container-fluid">
-              {% csrf_token %}
-              {% include "oscar/partials/form_fields.html" with form=form %}
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>{% trans "Advanced Search" %}</h3>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
-          </div>
-          <div class="modal-footer">
-            <a href="#" class="btn btn-default" data-dismiss="modal">{% trans "Close" as tmsg %}{{ tmsg | force_escape }}</a>
-            <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Searching...' as tmsg %}{{ tmsg | force_escape }}">{% trans "Search" as tmsg %}{{ tmsg | force_escape }}</button>
-          </div>
-        </form>
-      </div>
+            <form method="get" class="form-stacked">
+                <div class="modal-body">
+                    <div class="container">
+                    {% include "oscar/dashboard/partials/form_fields.html" with form=form style=style %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" class="btn btn-secondary" data-dismiss="modal">{% trans "Close" %}</a>
+                    <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Searching...' %}">{% trans "Search" %}</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>

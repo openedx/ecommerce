@@ -24,7 +24,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def setUp(self):
         super(ProgramCourseRunSeatsConditionTests, self).setUp()
         self.condition = factories.ProgramCourseRunSeatsConditionFactory()
-        self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
+        self.test_product = ProductFactory(stockrecords__price=10, categories=[])
         self.site.siteconfiguration.enable_partial_program = True
 
     def test_name(self):
@@ -168,7 +168,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         """ Ensure the basket returns False if the basket total is zero. """
         offer = factories.ProgramOfferFactory(partner=self.partner, condition=self.condition)
         basket = BasketFactory(site=self.site, owner=UserFactory())
-        test_product = factories.ProductFactory(stockrecords__price_excl_tax=0,
+        test_product = factories.ProductFactory(stockrecords__price=0,
                                                 stockrecords__partner__short_code='test')
         basket.add_product(test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))

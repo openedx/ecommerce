@@ -111,7 +111,7 @@ class DynamicConditionTests(TestCase):
         {'discount_applicable': False, 'discount_percent': 15},
         None,)
     def test_is_satisfied_true(self, discount_jwt, jwt_decode_handler, request):   # pylint: disable=unused-argument
-        product = ProductFactory(product_class=self.seat_product_class, stockrecords__price_excl_tax=10, categories=[])
+        product = ProductFactory(product_class=self.seat_product_class, stockrecords__price=10, categories=[])
         self.basket.add_product(product)
 
         request.return_value = Mock(method='GET', GET={'discount_jwt': discount_jwt})
@@ -126,7 +126,7 @@ class DynamicConditionTests(TestCase):
         """
         This discount should not apply if are buying more than one of the same course.
         """
-        product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
+        product = ProductFactory(stockrecords__price=10, categories=[])
         self.basket.add_product(product, quantity=2)
         self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))
 
@@ -136,6 +136,6 @@ class DynamicConditionTests(TestCase):
         """
         This discount should not apply if are not purchasing a seat product.
         """
-        product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
+        product = ProductFactory(stockrecords__price=10, categories=[])
         self.basket.add_product(product)
         self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))

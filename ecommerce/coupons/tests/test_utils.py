@@ -54,7 +54,7 @@ class CouponUtilsTests(TestCase, CouponMixin, DiscoveryMockMixin):
         """
         Verify is_voucher_applied return correct value.
         """
-        product = ProductFactory(stockrecords__price_excl_tax=100)
+        product = ProductFactory(stockrecords__price=100)
         voucher, product = prepare_voucher(
             _range=RangeFactory(products=[product]),
             benefit_value=10
