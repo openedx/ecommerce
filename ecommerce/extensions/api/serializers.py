@@ -956,6 +956,7 @@ class VoucherSerializer(serializers.ModelSerializer):
     is_available_to_user = serializers.SerializerMethodField()
     benefit = serializers.SerializerMethodField()
     redeem_url = serializers.SerializerMethodField()
+    end_datetime = serializers.DateTimeField(format=ISO_8601_FORMAT)
 
     def get_is_available_to_user(self, obj):
         request = self.context.get('request')
