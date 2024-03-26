@@ -177,7 +177,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 transaction_id = stripe_response['id']
 
                 logger.info(
-                    "Capture-context: succesfully created a Stripe Payment Intent [%s] for basket [%s] and order [%s]",
+                    "Capture-context: succesfully created a Stripe Payment Intent [%s] "
+                    "for basket [%s] and order [%s]",
                     transaction_id,
                     basket.id,
                     basket.order_number
@@ -186,6 +187,14 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 basket_add_payment_intent_id_attribute(basket, transaction_id)
                 basket_add_payment_intent_status(basket, stripe_response['status'])
                 basket_add_dynamic_payment_methods_enabled(basket, stripe_response)
+
+                # Check if payment intent is in unexpected state, ie. 'requires_action'
+                # If the user closes the DPM BNPL window, they are redirected back to payment MFE,
+                # and Stripe will change the status of the intent back to 'requires_payment_method'.
+                # This is here as an added protection against potential edge cases.
+                if stripe_response['status'] == 'requires_action':
+                    stripe_response = self.create_new_payment_intent_for_basket(basket, transaction_id)
+
             # for when basket was already created, but with different amount
             except stripe.error.IdempotencyError:
                 # if this PI has been created before, we should be able to retrieve
@@ -248,25 +257,14 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # If the payment has another status other than 'succeeded', we want to return to the MFE something it can handle
         if dynamic_payment_methods_enabled:
             if confirm_api_response['status'] == 'requires_action':
-                # The Payment Intent in this status will result in 'payment_intent_unexpected_state', since it cannot
-                # be confirmed again unless in 'requires_confirmation' or 'requires_payment_intent' status.
-                # Need to create a new one so the MFE can let the learner retry payment
-                new_payment_intent = self.create_new_payment_intent_for_basket(confirm_api_response['id'], basket)
-                logger.info(
-                    'Dynamic Payment Method received, requires additional action for edX order %s, '
-                    'created a new Payment Intent %s with status %s.',
-                    confirm_api_response['metadata']['order_number'],
-                    new_payment_intent['id'],
-                    new_payment_intent['status'],
-                )
                 return InProgressProcessorResponse(
                     basket_id=basket.id,
                     order_number=basket.order_number,
-                    status=new_payment_intent['status'],
-                    confirmation_client_secret=new_payment_intent['client_secret'],
-                    transaction_id=new_payment_intent['id'],
-                    payment_method=new_payment_intent['payment_method'],
-                    total=new_payment_intent['amount'],
+                    status=confirm_api_response['status'],
+                    confirmation_client_secret=confirm_api_response['client_secret'],
+                    transaction_id=confirm_api_response['id'],
+                    payment_method=confirm_api_response['payment_method'],
+                    total=confirm_api_response['amount'],
                 )
 
         # proceed only if payment went through
