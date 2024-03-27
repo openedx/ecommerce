@@ -418,7 +418,7 @@
       "source": null,
       "statement_descriptor": null,
       "statement_descriptor_suffix": null,
-      "status": "requires_payment_method",
+      "status": "requires_action",
       "transfer_data": null,
       "transfer_group": null
     },
@@ -478,7 +478,7 @@
       "transfer_group": null
     },
     "cancel_resp": {
-      "id": "pi_3LsftNIadiFyUl1x2TWxaADZ",
+      "id": "pi_3OqcQ5H4caH7G0X11y8NKNa4",
       "object": "payment_intent",
       "amount": 14900,
       "amount_capturable": 0,
@@ -502,9 +502,9 @@
         ],
         "has_more": false,
         "total_count": 0,
-        "url": "/v1/charges?payment_intent=pi_3LsftNIadiFyUl1x2TWxaADZ"
+        "url": "/v1/charges?payment_intent=pi_3OqcQ5H4caH7G0X11y8NKNa4"
       },
-      "client_secret": "pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh",
+      "client_secret": "pi_3OqcQ5H4caH7G0X11y8NKNa4_secret_kbBQP5DZGLccIESMInIq5GECO",
       "confirmation_method": "automatic",
       "created": 1709561818,
       "currency": "usd",

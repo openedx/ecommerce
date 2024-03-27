@@ -16,6 +16,7 @@ from ecommerce.core.constants import (
 )
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
@@ -105,19 +106,11 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                             mock_modify.side_effect = modify_side_effect
                         else:
                             mock_modify.side_effect = [fixture_data['modify_resp']]
-                        # If Payment Intent gets into 'requires_action' status without confirmation from the BNPL,
-                        # we create a new Payment Intent for retry payment in the MFE
-                        with mock.patch('stripe.PaymentIntent.cancel') as mock_cancel:
-                            if in_progress_payment is not None:
-                                mock_cancel.side_effect = [fixture_data['cancel_resp']]
-                            with mock.patch('stripe.PaymentIntent.create') as mock_create:
-                                if in_progress_payment is not None:
-                                    mock_create.side_effect = [fixture_data['create_resp_in_progress']]
-                                # make your call
-                                return self.client.post(
-                                    url,
-                                    data=data
-                                )
+                        # make your call
+                        return self.client.post(
+                            url,
+                            data=data
+                        )
 
     def assert_successful_order_response(self, response, order_number):
         assert response.status_code == 201
@@ -385,6 +378,49 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             # The metadata must be less than 500 characters
             assert len(mock_create.call_args.kwargs['metadata']['courses']) < 500
 
+    @file_data('fixtures/test_stripe_test_payment_flow.json')
+    def test_capture_context_in_progress_payment(
+            self,
+            confirm_resp,  # pylint: disable=unused-argument
+            confirm_resp_in_progress,  # pylint: disable=unused-argument
+            create_resp,
+            create_resp_in_progress,
+            modify_resp,  # pylint: disable=unused-argument
+            cancel_resp,
+            refund_resp,  # pylint: disable=unused-argument
+            retrieve_addr_resp):  # pylint: disable=unused-argument
+        """
+        Verify that hitting capture-context with a Payment Intent that already exists but it's
+        in 'requires_action' state, that a new Payment Intent is created and associated to the basket.
+        """
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            mock_create.return_value = create_resp_in_progress
+            # If Payment Intent gets into 'requires_action' status without confirmation from the BNPL,
+            # we create a new Payment Intent for retry payment in the MFE
+            with mock.patch('stripe.PaymentIntent.cancel') as mock_cancel:
+                mock_cancel.return_value = cancel_resp
+                with mock.patch('stripe.PaymentIntent.create') as mock_create_new:
+                    mock_create_new.return_value = create_resp
+                    response = self.client.get(self.capture_context_url)
+
+                    # Basket should have the new Payment Intent ID
+                    mock_create_new.assert_called_once()
+                    payment_intent_id = BasketAttribute.objects.get(
+                        basket=basket,
+                        attribute_type__name=PAYMENT_INTENT_ID_ATTRIBUTE
+                    ).value_text
+                    assert payment_intent_id == mock_create_new.return_value['id']
+
+                    # Response should have the same order_number and new client secret
+                    assert response.json() == {
+                        'capture_context': {
+                            'key_id': mock_create_new.return_value['client_secret'],
+                            'order_id': basket.order_number,
+                        }
+                    }
+
     def test_payment_error_no_basket(self):
         """
         Verify view redirects to error page if no basket exists for payment_intent_id.
@@ -449,7 +485,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
     def test_payment_handle_payment_intent_in_progress(self):
         """
         Verify the POST endpoint handles a Payment Intent that is not succeeded yet,
-        with a 'requires_action' status without confirmation from the BNPL payment.
+        with a 'requires_action' for a BNPL payment, which will be handled in the MFE.
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
@@ -464,13 +500,9 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         )
 
         assert response.status_code == 201
-        # A new Payment Intent was created for retry payment
-        assert response.json() == {
-            'status': 'requires_payment_method',
-            'transaction_id': 'pi_3OqcQ5H4caH7G0X11y8NKNa4',
-            'confirmation_client_secret': 'pi_3OqcQ5H4caH7G0X11y8NKNa4_secret_kbBQP5DZGLccIESMInIq5GECO',
-            'payment_method': None,
-        }
+        # Should return 'requires_action' to the MFE with the same Payment Intent
+        assert response.json()['status'] == 'requires_action'
+        assert response.json()['transaction_id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
 
     def test_handle_payment_fails_with_carderror(self):
         """
