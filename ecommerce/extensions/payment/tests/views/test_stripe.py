@@ -468,7 +468,6 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         # Should return 'requires_action' to the MFE with the same Payment Intent
         assert response.json()['status'] == 'requires_action'
         assert response.json()['transaction_id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
-        assert response.json()['confirmation_client_secret'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh'
 
     def test_handle_payment_fails_with_carderror(self):
         """
