@@ -105,19 +105,11 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                             mock_modify.side_effect = modify_side_effect
                         else:
                             mock_modify.side_effect = [fixture_data['modify_resp']]
-                        # If Payment Intent gets into 'requires_action' status without confirmation from the BNPL,
-                        # we create a new Payment Intent for retry payment in the MFE
-                        with mock.patch('stripe.PaymentIntent.cancel') as mock_cancel:
-                            if in_progress_payment is not None:
-                                mock_cancel.side_effect = [fixture_data['cancel_resp']]
-                            with mock.patch('stripe.PaymentIntent.create') as mock_create:
-                                if in_progress_payment is not None:
-                                    mock_create.side_effect = [fixture_data['create_resp_in_progress']]
-                                # make your call
-                                return self.client.post(
-                                    url,
-                                    data=data
-                                )
+                        # make your call
+                        return self.client.post(
+                            url,
+                            data=data
+                        )
 
     def assert_successful_order_response(self, response, order_number):
         assert response.status_code == 201
@@ -174,7 +166,8 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             modify_resp,
             cancel_resp,  # pylint: disable=unused-argument
             refund_resp,  # pylint: disable=unused-argument
-            retrieve_addr_resp):
+            retrieve_addr_resp,
+            in_progress_payment=None):
         """
         Verify that the stripe payment flow, hitting capture-context and
         stripe-checkout urls, results in a basket associated with the correct
@@ -193,7 +186,15 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         # need to call capture-context endpoint before we call do GET to the stripe checkout view
         # so that the PaymentProcessorResponse is already created
         with mock.patch('stripe.PaymentIntent.create') as mock_create:
-            mock_create.return_value = create_resp
+            if in_progress_payment is not None:
+                mock_create.return_value = create_resp_in_progress
+                # If Payment Intent gets into 'requires_action' status without confirmation from the BNPL,
+                # we create a new Payment Intent for retry payment in the MFE
+                with mock.patch('stripe.PaymentIntent.cancel') as mock_cancel:
+                    if in_progress_payment is not None:
+                        mock_cancel.side_effect = cancel_resp
+            else:
+                mock_create.return_value = create_resp
             self.client.get(self.capture_context_url)
             mock_create.assert_called_once()
             assert mock_create.call_args.kwargs['idempotency_key'] == idempotency_key
@@ -449,7 +450,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
     def test_payment_handle_payment_intent_in_progress(self):
         """
         Verify the POST endpoint handles a Payment Intent that is not succeeded yet,
-        with a 'requires_action' status without confirmation from the BNPL payment.
+        with a 'requires_action' for a BNPL payment, which will be handled in the MFE.
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
 
@@ -464,13 +465,10 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         )
 
         assert response.status_code == 201
-        # A new Payment Intent was created for retry payment
-        assert response.json() == {
-            'status': 'requires_payment_method',
-            'transaction_id': 'pi_3OqcQ5H4caH7G0X11y8NKNa4',
-            'confirmation_client_secret': 'pi_3OqcQ5H4caH7G0X11y8NKNa4_secret_kbBQP5DZGLccIESMInIq5GECO',
-            'payment_method': None,
-        }
+        # Should return 'requires_action' to the MFE with the same Payment Intent
+        assert response.json()['status'] == 'requires_action'
+        assert response.json()['transaction_id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+        assert response.json()['confirmation_client_secret'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh'
 
     def test_handle_payment_fails_with_carderror(self):
         """
