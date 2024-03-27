@@ -36,7 +36,13 @@ from ecommerce.extensions.analytics.utils import translate_basket_line_for_segme
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, ENABLE_STRIPE_PAYMENT_PROCESSOR
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
-from ecommerce.extensions.basket.utils import _set_basket_bundle_status, apply_voucher_on_basket_and_check_discount
+from ecommerce.extensions.basket.utils import (
+    _set_basket_bundle_status,
+    apply_voucher_on_basket_and_check_discount,
+    basket_add_dynamic_payment_methods_enabled,
+    basket_add_payment_intent_id_attribute,
+    basket_add_payment_intent_status
+)
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -325,6 +331,14 @@ class BasketLogicTestMixin:
         basket.add_product(product, 1)
         return basket
 
+    def create_basket_and_add_product_stripe(self, product, payment_intent_status, payment_intent_id, payment_intent):
+        basket = self.create_empty_basket()
+        basket.add_product(product, 1)
+        basket_add_dynamic_payment_methods_enabled(basket, payment_intent)
+        basket_add_payment_intent_id_attribute(basket, payment_intent_id)
+        basket_add_payment_intent_status(basket, payment_intent_status)
+        return basket
+
     def create_seat(self, course, seat_price=100, cert_type='verified'):
         return course.create_or_update_seat(cert_type, True, seat_price)
 
@@ -404,6 +418,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             self,
             basket,
             enable_stripe_payment_processor=False,
+            is_dynamic_payment_methods_enabled=None,
             url=None,
             response=None,
             status_code=200,
@@ -421,6 +436,8 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             subject=None,
             messages=None,
             summary_discounts=None,
+            payment_intent_id=None,
+            payment_intent_status=None,
             **kwargs
     ):
         if response is None:
@@ -458,6 +475,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             'basket_id': basket.id,
             'currency': currency,
             'enable_stripe_payment_processor': enable_stripe_payment_processor,
+            'is_dynamic_payment_methods_enabled': is_dynamic_payment_methods_enabled,
             'offers': offers,
             'coupons': coupons,
             'messages': messages if messages else [],
@@ -466,6 +484,8 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             'summary_discounts': summary_discounts,
             'summary_price': summary_price,
             'order_total': order_total,
+            'payment_intent_id': payment_intent_id,
+            'payment_intent_status': payment_intent_status,
             'products': [
                 {
                     'product_type': product_type,
@@ -711,6 +731,32 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
                 response=response,
                 enable_stripe_payment_processor=enable_stripe_payment_processor,
             )
+
+    def test_cart_with_stripe_data(self):
+        """
+        For Dynamic Payment Methods, the basket will contain Payment Intent information.
+        Verify that the basket contains Payment Intent ID, Payment Intent status, and if DPM is enabled.
+        """
+        payment_intent_status = 'requires_payment_method'
+        payment_intent_id = 'pi_3OqcQ5H4caH7G0X11y8NKNa4'
+        payment_intent = {
+            'payment_method_types': [
+                'card',
+                'klarna',
+            ]
+        }
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product_stripe(
+            seat, payment_intent_status, payment_intent_id, payment_intent
+        )
+        response = self.client.get(self.path)
+        self.assert_expected_response(
+            basket,
+            response=response,
+            is_dynamic_payment_methods_enabled=len(payment_intent['payment_method_types']) > 1,
+            payment_intent_status=payment_intent_status,
+            payment_intent_id=payment_intent_id
+        )
 
     @responses.activate
     def test_enterprise_free_basket_redirect(self):

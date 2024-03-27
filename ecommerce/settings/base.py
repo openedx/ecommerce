@@ -865,7 +865,7 @@ API_ROOT = None
 ECOMMERCE_MICROFRONTEND_URL = os.environ.get('ECOMMERCE_MICROFRONTEND_URL')
 
 # Needed to link to the payment micro-frontend
-PAYMENT_MICROFRONTEND_URL = None
+PAYMENT_MICROFRONTEND_URL = os.environ.get('PAYMENT_MICROFRONTEND_URL')
 
 # For Enterprise purchases to send purchase information to HubSpot for marketing leads
 HUBSPOT_FORMS_API_URI = "SET-ME-PLEASE"
