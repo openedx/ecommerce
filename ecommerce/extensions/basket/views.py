@@ -50,8 +50,7 @@ from ecommerce.extensions.basket import message_utils
 from ecommerce.extensions.basket.constants import (
     DYNAMIC_PAYMENT_METHODS_ENABLED,
     ENABLE_STRIPE_PAYMENT_PROCESSOR,
-    PAYMENT_INTENT_ID_ATTRIBUTE,
-    PAYMENT_INTENT_STATUS_ATTRIBUTE
+    PAYMENT_INTENT_ID_ATTRIBUTE
 )
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
 from ecommerce.extensions.basket.utils import (
@@ -683,7 +682,6 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         self._add_coupons(response, context)
         self._add_enable_stripe_payment_processor(response)
         self._add_payment_intent_id(response, self.request.basket)
-        self._add_payment_intent_status(response, self.request.basket)
         self._add_is_dynamic_payment_methods(response, self.request.basket)
         return response
 
@@ -757,17 +755,6 @@ class PaymentApiLogicMixin(BasketLogicMixin):
             response['payment_intent_id'] = payment_intent_attr.value_text.strip()
         except (BasketAttribute.DoesNotExist, BasketAttributeType.DoesNotExist):
             response['payment_intent_id'] = None
-
-    def _add_payment_intent_status(self, response, basket):
-        try:
-            payment_intent_status_attribute = BasketAttributeType.objects.get(name=PAYMENT_INTENT_STATUS_ATTRIBUTE)
-            payment_intent_attr = BasketAttribute.objects.get(
-                basket=basket,
-                attribute_type=payment_intent_status_attribute
-            )
-            response['payment_intent_status'] = payment_intent_attr.value_text.strip()
-        except (BasketAttribute.DoesNotExist, BasketAttributeType.DoesNotExist):
-            response['payment_intent_status'] = None
 
     def _add_is_dynamic_payment_methods(self, response, basket):
         try:

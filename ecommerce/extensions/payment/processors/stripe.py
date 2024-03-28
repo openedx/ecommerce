@@ -14,7 +14,6 @@ from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.utils import (
     basket_add_dynamic_payment_methods_enabled,
     basket_add_payment_intent_id_attribute,
-    basket_add_payment_intent_status,
     get_basket_courses_list,
     get_billing_address_from_payment_intent_data
 )
@@ -113,7 +112,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         This is used as a reset of the payment to allow payment retries when the intent gets into unexpected states.
         """
         # Cancel existing Payment Intent
-        stripe.PaymentIntent.cancel(payment_intent_id)
+        cancelled_payment_intent = stripe.PaymentIntent.cancel(payment_intent_id)
 
         # Create a new Payment Intent and add to Basket
         new_payment_intent = stripe.PaymentIntent.create(
@@ -128,13 +127,11 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         new_payment_intent_id = new_payment_intent['id']
         logger.info(
             'Canceled Payment Intent [%s] and created new Payment Intent [%s] for basket [%d]',
-            payment_intent_id,
+            cancelled_payment_intent['id'],
             new_payment_intent_id,
             basket.id,
         )
-        new_payment_intent_status = new_payment_intent['status']
         basket_add_payment_intent_id_attribute(basket, new_payment_intent_id)
-        basket_add_payment_intent_status(basket, new_payment_intent_status)
         basket_add_dynamic_payment_methods_enabled(basket, new_payment_intent)
         return new_payment_intent
 
@@ -185,7 +182,6 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 )
 
                 basket_add_payment_intent_id_attribute(basket, transaction_id)
-                basket_add_payment_intent_status(basket, stripe_response['status'])
                 basket_add_dynamic_payment_methods_enabled(basket, stripe_response)
 
                 # Check if payment intent is in unexpected state, ie. 'requires_action'
