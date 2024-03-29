@@ -17,6 +17,7 @@ from ecommerce.core.constants import (
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE
+from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
@@ -163,11 +164,11 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             confirm_resp,
             confirm_resp_in_progress,  # pylint: disable=unused-argument
             create_resp,
-            create_resp_in_progress,  # pylint: disable=unused-argument
             modify_resp,
             cancel_resp,  # pylint: disable=unused-argument
             refund_resp,  # pylint: disable=unused-argument
-            retrieve_addr_resp):
+            retrieve_addr_resp,
+            retrieve_resp_in_progress):  # pylint: disable=unused-argument
         """
         Verify that the stripe payment flow, hitting capture-context and
         stripe-checkout urls, results in a basket associated with the correct
@@ -384,39 +385,42 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             confirm_resp,  # pylint: disable=unused-argument
             confirm_resp_in_progress,  # pylint: disable=unused-argument
             create_resp,
-            create_resp_in_progress,
             modify_resp,  # pylint: disable=unused-argument
             cancel_resp,
             refund_resp,  # pylint: disable=unused-argument
-            retrieve_addr_resp):  # pylint: disable=unused-argument
+            retrieve_addr_resp,  # pylint: disable=unused-argument
+            retrieve_resp_in_progress):
         """
         Verify that hitting capture-context with a Payment Intent that already exists but it's
         in 'requires_action' state, that a new Payment Intent is created and associated to the basket.
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        payment_intent_id = retrieve_resp_in_progress['id']
+        basket_add_payment_intent_id_attribute(basket, payment_intent_id)
 
-        with mock.patch('stripe.PaymentIntent.create') as mock_create:
-            mock_create.return_value = create_resp_in_progress
+        with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
+            mock_retrieve.return_value = retrieve_resp_in_progress
             # If Payment Intent gets into 'requires_action' status without confirmation from the BNPL,
             # we create a new Payment Intent for retry payment in the MFE
             with mock.patch('stripe.PaymentIntent.cancel') as mock_cancel:
                 mock_cancel.return_value = cancel_resp
-                with mock.patch('stripe.PaymentIntent.create') as mock_create_new:
-                    mock_create_new.return_value = create_resp
+                with mock.patch('stripe.PaymentIntent.create') as mock_create:
+                    mock_create.return_value = create_resp
                     response = self.client.get(self.capture_context_url)
 
                     # Basket should have the new Payment Intent ID
-                    mock_create_new.assert_called_once()
+                    mock_create.assert_called_once()
+                    mock_cancel.assert_called_once()
                     payment_intent_id = BasketAttribute.objects.get(
                         basket=basket,
                         attribute_type__name=PAYMENT_INTENT_ID_ATTRIBUTE
                     ).value_text
-                    assert payment_intent_id == mock_create_new.return_value['id']
+                    assert payment_intent_id == mock_create.return_value['id']
 
                     # Response should have the same order_number and new client secret
                     assert response.json() == {
                         'capture_context': {
-                            'key_id': mock_create_new.return_value['client_secret'],
+                            'key_id': mock_create.return_value['client_secret'],
                             'order_id': basket.order_number,
                         }
                     }
