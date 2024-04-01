@@ -11,9 +11,10 @@ class GooglePlayValidator:
     def validate(self, receipt, configuration, basket):
         """
         Accepts receipt, validates that the purchase has already been completed in
-        Google for the mentioned productId.
+        Google for the mentioned product_id.
         """
-        purchase_token = receipt['purchaseToken']
+        # purchaseToken will be removed in coming releases in favour of purchase_token
+        purchase_token = receipt.get('purchase_token', receipt.get('purchaseToken'))
         # Mobile assumes one course is purchased at a time
         product_sku = get_consumable_android_sku(basket.total_excl_tax)
         verifier = GooglePlayVerifier(
@@ -28,7 +29,8 @@ class GooglePlayValidator:
             try:
                 # Fallback to the old approach and verify token with partner_sku
                 # This fallback is temporary until all android products are switched to consumable products.
-                result = self.verify_result(verifier, purchase_token, receipt['productId'])
+                sku = basket.all_lines().first().stockrecord.partner_sku
+                result = self.verify_result(verifier, purchase_token, sku)
             except errors.GoogleError as exc:
                 logger.error('Purchase validation failed %s', exc)
                 result = {

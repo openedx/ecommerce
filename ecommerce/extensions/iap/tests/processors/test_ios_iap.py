@@ -56,10 +56,8 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
             u"Failed to execute IOSInAppPurchase payment on attempt [{attempt_count}]. "
             u"IOSInAppPurchase's response was recorded in entry [{entry_id}]."
         )
+        self.product_sku = self.product.stockrecords.first().partner_sku
         self.RETURN_DATA = {
-            'transactionId': 'test_id',
-            'originalTransactionId': 'original_test_id',
-            'productId': 'test_product_id',
             'purchaseToken': 'inapp:test.edx.edx:ios.test.purchased',
             'price': 40.25,
             'currency_code': 'USD',
@@ -74,7 +72,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                         'original_transaction_id': 'very_old_purchase_id',
                         'product_id': 'org.edx.mobile.test_product1',
                         'purchase_date_ms': '1676562309000',
-                        'transaction_id': 'vaery_old_purchase_id'
+                        'transaction_id': 'very_old_purchase_id'
                     },
                     {
                         'in_app_ownership_type': 'PURCHASED',
@@ -86,7 +84,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                     {
                         'in_app_ownership_type': 'PURCHASED',
                         'original_transaction_id': 'original_test_id',
-                        'product_id': 'test_product_id',
+                        'product_id': self.product_sku,
                         'purchase_date_ms': '1676562978000',
                         'transaction_id': 'test_id'
                     }
@@ -94,6 +92,8 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                 'receipt_creation_date_ms': '1676562978000',
             }
         }
+        self.transaction_id = self.mock_validation_response['receipt']['in_app'][2]['transaction_id']
+        self.original_transaction_id = self.mock_validation_response['receipt']['in_app'][2]['original_transaction_id']
 
     def _get_receipt_url(self):
         """
@@ -180,7 +180,6 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         mock_ios_validator.return_value = modified_validation_response
         with self.assertRaises(PaymentError):
             modified_return_data = self.RETURN_DATA
-            modified_return_data.pop('originalTransactionId')
 
             self.processor.handle_processor_response(modified_return_data, basket=self.basket)
 
@@ -204,11 +203,10 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         Verify that the processor creates the appropriate PaymentEvent and Source objects.
         """
         mock_ios_validator.return_value = self.mock_validation_response
-
         handled_response = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
         self.assertEqual(handled_response.currency, self.basket.currency)
         self.assertEqual(handled_response.total, self.basket.total_incl_tax)
-        self.assertEqual(handled_response.transaction_id, self.RETURN_DATA['transactionId'])
+        self.assertEqual(handled_response.transaction_id, self.transaction_id)
         self.assertIsNone(handled_response.card_type)
 
     def test_issue_credit(self):
@@ -233,10 +231,9 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         Verify that the PaymentProcessor object is created as expected.
         """
         mock_ios_validator.return_value = self.mock_validation_response
-        transaction_id = self.RETURN_DATA.get('transactionId')
 
         self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
-        payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id)
+        payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=self.transaction_id)
         self.assertTrue(payment_processor_response.exists())
         self.assertEqual(payment_processor_response.first().processor_name, self.processor_name)
         self.assertEqual(payment_processor_response.first().response, self.mock_validation_response)
@@ -247,13 +244,12 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         Verify that the PaymentProcessorExtension object is created as expected.
         """
         mock_ios_validator.return_value = self.mock_validation_response
-        transaction_id = self.RETURN_DATA.get('transactionId')
-        original_transaction_id = self.RETURN_DATA.get('originalTransactionId')
+        original_transaction_id = self.original_transaction_id
         price = str(self.RETURN_DATA.get('price'))
         currency_code = self.RETURN_DATA.get('currency_code')
 
         self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
-        payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id)
+        payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=self.transaction_id)
         payment_processor_response_extension = payment_processor_response.first().extension
         self.assertIsNotNone(payment_processor_response_extension)
         self.assertEqual(payment_processor_response_extension.original_transaction_id, original_transaction_id)

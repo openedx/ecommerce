@@ -6,6 +6,7 @@ from ecommerce.extensions.iap.api.v1.utils import (
     AppStoreRequestException,
     apply_price_of_inapp_purchase,
     create_inapp_purchase,
+    create_ios_product,
     get_auth_headers,
     localize_inapp_purchase,
     products_in_basket_already_purchased,
@@ -13,6 +14,7 @@ from ecommerce.extensions.iap.api.v1.utils import (
     submit_in_app_purchase_for_review,
     upload_screenshot_of_inapp_purchase
 )
+from ecommerce.extensions.iap.utils import create_child_products_for_mobile
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.testcases import TestCase
@@ -57,6 +59,36 @@ class TestCreateIosProducts(TestCase):
     def setUp(self):
         super(TestCreateIosProducts, self).setUp()
         self.configuration = settings.PAYMENT_PROCESSOR_CONFIG['edx']['ios-iap']
+        self.course = CourseFactory(partner=self.partner)
+        self.product = self.course.create_or_update_seat('verified', True, 50)
+        _, self.ios_seat = create_child_products_for_mobile(self.product.parent)
+
+    @mock.patch('ecommerce.extensions.iap.api.v1.utils.create_inapp_purchase', return_value='12345')
+    @mock.patch('ecommerce.extensions.iap.api.v1.utils.localize_inapp_purchase')
+    @mock.patch('ecommerce.extensions.iap.api.v1.utils.apply_price_of_inapp_purchase')
+    @mock.patch('ecommerce.extensions.iap.api.v1.utils.upload_screenshot_of_inapp_purchase')
+    @mock.patch('ecommerce.extensions.iap.api.v1.utils.set_territories_of_in_app_purchase')
+    @mock.patch('ecommerce.extensions.iap.api.v1.utils.submit_in_app_purchase_for_review', return_value=None)
+    def test_create_ios_product(self, _, __, ___, ____, _____, ______, _______):
+        course = {
+            'key': 'test',
+            'name': 'test',
+            'price': '123'
+        }
+        error_msg = create_ios_product(course, self.ios_seat, self.configuration)
+        self.assertEqual(error_msg, None)
+
+    # @mock.patch('ecommerce.extensions.iap.api.v1.utils.create_inapp_purchase')
+    def test_create_ios_product_with_failure(self, _):
+        course = {
+            'key': 'test',
+            'name': 'test',
+            'price': '123'
+        }
+        error_msg = create_ios_product(course, self.ios_seat, self.configuration)
+        expected_msg = "[Couldn't create inapp purchase id]  for course [{}] with sku [{}]".format(
+            course['key'], self.ios_seat.partner_sku)
+        self.assertEqual(error_msg, expected_msg)
 
     def test_get_auth_headers(self, _):
         """

@@ -266,6 +266,19 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
 class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
     """ MobileCoursePurchaseExecutionView view tests. """
     path = reverse('iap:iap-execute')
+    android_validator_response = {
+        "raw_response": {
+            "purchaseTimeMillis": '1719640434830',
+            'purchaseState': 1,
+            'orderId': 'GPA.3372-6782-3456-123',
+            'purchaseType': 0,
+            'acknowledgementState': 0,
+            'kind': 'androidpublisher#productPurchase',
+            'regionCode': 'PK'
+        },
+        "is_canceled": False,
+        "is_expired": False,
+    }
 
     def setUp(self):
         super(MobileCoursePurchaseExecutionViewTests, self).setUp()
@@ -284,8 +297,6 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         self.logger_name = 'ecommerce.extensions.iap.api.v1.views'
 
         self.post_data = {
-            'transactionId': 'transactionId.android.test.purchased',
-            'productId': 'android.test.purchased',
             'purchaseToken': 'inapp:org.edx.mobile:android.test.purchased',
             'payment_processor': 'android-iap',
             'basket_id': self.basket.id
@@ -379,11 +390,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                 mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
                 LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger_one, \
                 LogCapture(self.logger_name) as logger_two:
-            fake_google_validation.return_value = {
-                'resource': {
-                    'orderId': 'orderId.android.test.purchased'
-                }
-            }
+            fake_google_validation.return_value = self.android_validator_response
             self._assert_response({'error': ERROR_DURING_ORDER_CREATION})
             self.assertTrue(fake_google_validation.called)
             self.assertTrue(fake_handle_order_placement.called)
@@ -411,11 +418,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
                                side_effect=UnableToPlaceOrder) as fake_handle_order_placement, \
                 mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
                 LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as logger:
-            fake_google_validation.return_value = {
-                'resource': {
-                    'orderId': 'orderId.android.test.purchased'
-                }
-            }
+            fake_google_validation.return_value = self.android_validator_response
             self._assert_response({'error': 'An error occurred during order creation.'})
             self.assertTrue(fake_handle_order_placement.called)
             logger.check(
@@ -506,11 +509,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         """
         with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation, \
                 LogCapture(self.logger_name) as logger:
-            fake_google_validation.return_value = {
-                'resource': {
-                    'orderId': 'orderId.android.test.purchased'
-                }
-            }
+            fake_google_validation.return_value = self.android_validator_response
             response = self.client.post(self.path, data=self.post_data)
             order = Order.objects.get(number=self.basket.order_number)
             self.assertEqual(response.json(), {'order_data': MobileOrderSerializer(order).data})
@@ -584,11 +583,7 @@ class MobileCoursePurchaseExecutionViewTests(PaymentEventsMixin, TestCase):
         error_message = ERROR_DURING_POST_ORDER_OP.encode('UTF-8')
         expected_response_content = b'{"error": "%s"}' % error_message
         with mock.patch.object(GooglePlayValidator, 'validate') as fake_google_validation:
-            fake_google_validation.return_value = {
-                'resource': {
-                    'orderId': 'orderId.android.test.purchased'
-                }
-            }
+            fake_google_validation.return_value = self.android_validator_response
             response = self.client.post(self.path, data=self.post_data)
             self.assertTrue(mock_handle_post_order.called)
             self.assertEqual(response.status_code, expected_response_status_code)

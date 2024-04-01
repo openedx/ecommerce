@@ -3,7 +3,9 @@ from inapppy import errors
 from oscar.test.factories import BasketFactory
 from testfixtures import LogCapture
 
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
+from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 VALID_PURCHASE_TOKEN = "test.purchase.token"
@@ -37,12 +39,10 @@ class GoogleValidatorTests(TestCase):
 
     PRODUCT_SKU = "test.product.sku"
     VALID_RECEIPT = {
-        "purchaseToken": VALID_PURCHASE_TOKEN,
-        "productId": PRODUCT_SKU
+        "purchase_token": VALID_PURCHASE_TOKEN,
     }
     INVALID_RECEIPT = {
         "purchaseToken": INVALID_PURCHASE_TOKEN,
-        "productId": PRODUCT_SKU
     }
     CONFIGURATION = {
         "google_bundle_id": "test.google.bundle.id",
@@ -57,6 +57,9 @@ class GoogleValidatorTests(TestCase):
     def setUp(self):
         self.validator = GooglePlayValidator()
         self.basket = BasketFactory()
+        self.course = CourseFactory()
+        product = self.course.create_or_update_seat('verified', False, 50)
+        self.basket = create_basket(price='50.0', product_class=product.product_class)
 
     @mock.patch('ecommerce.extensions.iap.api.v1.google_validator.GooglePlayVerifier')
     def test_validate_successful(self, mock_google_verifier):
