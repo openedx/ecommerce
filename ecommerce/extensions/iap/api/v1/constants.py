@@ -13,6 +13,7 @@ ERROR_ORDER_NOT_FOUND_FOR_REFUND = "Could not find any order to refund for [%s] 
 ERROR_REFUND_NOT_COMPLETED = "Could not complete refund for user [%s] in course [%s] by processor [%s]"
 ERROR_TRANSACTION_NOT_FOUND_FOR_REFUND = "Could not find any transaction to refund for [%s] by processor [%s]"
 ERROR_DURING_POST_ORDER_OP = "An error occurred during post order operations."
+EXPIRED_ANDROID_PURCHASE_ERROR = 'Android payment is expired for [%s] in basket [%d]'
 FOUND_MULTIPLE_PRODUCTS_ERROR = "Found unexpected number of products for course [%s]"
 GOOGLE_PUBLISHER_API_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
 IOS_PRODUCT_REVIEW_NOTE = ('This in-app purchase will unlock all the content of the course {course_name}\n\n'

@@ -16,7 +16,10 @@ from testfixtures import LogCapture
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
+from ecommerce.extensions.iap.api.v1.constants import (
+    DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME,
+    EXPIRED_ANDROID_PURCHASE_ERROR
+)
 from ecommerce.extensions.iap.api.v1.google_validator import GooglePlayValidator
 from ecommerce.extensions.iap.processors.android_iap import AndroidIAP
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
@@ -56,9 +59,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
             u"AndroidInAppPurchase's response was recorded in entry [{entry_id}]."
         )
         self.RETURN_DATA = {
-            'transactionId': 'transactionId.android.test.purchased',
-            'productId': 'android.test.purchased',
-            'purchaseToken': 'inapp:org.edx.mobile:android.test.purchased',
+            'purchase_token': 'inapp:org.edx.mobile:android.test.purchased',
             'price': 40.25,
             'currency_code': 'USD',
         }
@@ -110,7 +111,8 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         mock_google_validator.return_value = {
             'error': 'Invalid receipt'
         }
-        product_id = self.RETURN_DATA.get('productId')
+
+        product_id = self.basket.all_lines().first().stockrecord.partner_sku
 
         logger_name = 'ecommerce.extensions.iap.processors.android_iap'
         with LogCapture(logger_name) as android_iap_logger:
@@ -170,7 +172,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         handled_response = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
         self.assertEqual(handled_response.currency, self.basket.currency)
         self.assertEqual(handled_response.total, self.basket.total_incl_tax)
-        self.assertEqual(handled_response.transaction_id, self.RETURN_DATA['transactionId'])
+        self.assertEqual(handled_response.transaction_id, self.mock_validation_response['raw_response']['orderId'])
         self.assertIsNone(handled_response.card_type)
 
     def test_issue_credit(self):
@@ -195,7 +197,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         Verify that the PaymentProcessor object is created as expected.
         """
         mock_google_validator.return_value = self.mock_validation_response
-        transaction_id = self.RETURN_DATA.get('transactionId')
+        transaction_id = self.mock_validation_response['raw_response']['orderId']
 
         self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
         payment_processor_response = PaymentProcessorResponse.objects.filter(transaction_id=transaction_id)
@@ -209,7 +211,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         Verify that the PaymentProcessorExtension object is created as expected.
         """
         mock_google_validator.return_value = self.mock_validation_response
-        transaction_id = self.RETURN_DATA.get('transactionId')
+        transaction_id = self.mock_validation_response['raw_response']['orderId']
         price = str(self.RETURN_DATA.get('price'))
         currency_code = self.RETURN_DATA.get('currency_code')
 
@@ -230,10 +232,7 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         modified_validation_response['raw_response'].pop('orderId')
         mock_google_validator.return_value = modified_validation_response
         with self.assertRaises(PaymentError):
-            modified_return_data = self.RETURN_DATA
-            modified_return_data.pop('transactionId')
-
-            self.processor.handle_processor_response(modified_return_data, basket=self.basket)
+            self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
 
     @mock.patch.object(GooglePlayValidator, 'validate')
     def test_handle_processor_response_with_cancelled_payment(self, mock_google_validator):
@@ -245,3 +244,25 @@ class AndroidIAPTests(PaymentProcessorTestCaseMixin, TestCase):
         mock_google_validator.return_value = modified_validation_response
         with self.assertRaises(UserCancelled):
             self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+
+    @mock.patch.object(GooglePlayValidator, 'validate')
+    def test_handle_processor_response_with_expired_payment(self, mock_google_validator):
+        """
+        Verify that appropriate UserCancelled error is raised if payment is cancelled.
+        """
+
+        modified_validation_response = self.mock_validation_response
+        modified_validation_response['is_expired'] = True
+        mock_google_validator.return_value = modified_validation_response
+        logger_name = 'ecommerce.extensions.iap.processors.android_iap'
+        with self.assertRaises(PaymentError):
+            with LogCapture(logger_name) as android_iap_logger:
+                self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+                android_iap_logger.check_present(
+                    (
+                        logger_name,
+                        'ERROR',
+                        EXPIRED_ANDROID_PURCHASE_ERROR, self.mock_validation_response['raw_response']['orderId'],
+                        self.basket.id
+                    ),
+                )

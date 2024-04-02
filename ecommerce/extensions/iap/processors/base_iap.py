@@ -6,7 +6,10 @@ from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError, PaymentError, UserCancelled
 
 from ecommerce.core.url_utils import get_ecommerce_url
-from ecommerce.extensions.iap.api.v1.constants import DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME
+from ecommerce.extensions.iap.api.v1.constants import (
+    DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME,
+    EXPIRED_ANDROID_PURCHASE_ERROR
+)
 from ecommerce.extensions.iap.models import IAPProcessorConfiguration, PaymentProcessorResponseExtension
 from ecommerce.extensions.payment.exceptions import RedundantPaymentNotificationError
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
@@ -77,7 +80,7 @@ class BaseIAP(BasePaymentProcessor):
             HandledProcessorResponse
         """
         available_attempts = 1
-        product_id = response.get('productId')
+        sku = basket.all_lines().first().stockrecord.partner_sku
 
         if waffle.switch_is_active('IAP_RETRY_ATTEMPTS'):
             available_attempts = available_attempts + self.retry_attempts
@@ -94,7 +97,7 @@ class BaseIAP(BasePaymentProcessor):
                 "Failed to execute [%s] payment for [%s] on attempt [%d]. "
                 "[%s]'s response was recorded in entry [%d].",
                 self.NAME,
-                product_id,
+                sku,
                 attempt_count,
                 self.NAME,
                 entry.id,
@@ -106,19 +109,18 @@ class BaseIAP(BasePaymentProcessor):
                     "Failed to execute [%s] payment for [%s]. "
                     "[%s] response was recorded in entry [%d].",
                     self.NAME,
-                    product_id,
+                    sku,
                     self.NAME,
                     entry.id
                 )
                 raise GatewayError(validation_response)
 
         if self.NAME == 'ios-iap':
-            validation_response = self.parse_ios_response(validation_response, product_id)
+            validation_response = self.parse_ios_response(validation_response, sku)
 
-        transaction_id = response.get('transactionId', self._get_transaction_id_from_receipt(validation_response))
+        transaction_id = self._get_transaction_id_from_receipt(validation_response)
         # original_transaction_id is primary identifier for a purchase on iOS
-        original_transaction_id = response.get('originalTransactionId', self._get_attribute_from_receipt(
-            validation_response, 'original_transaction_id'))
+        original_transaction_id = self._get_attribute_from_receipt(validation_response, 'original_transaction_id')
         currency_code = str(response.get('currency_code', ''))
         price = str(response.get('price', ''))
 
@@ -128,11 +130,18 @@ class BaseIAP(BasePaymentProcessor):
 
         # In case of Android transaction_id is required to identify payment
         elif not transaction_id:
+            logger.error('Unable to find transaction id for basket [%d]', basket.id)
             raise PaymentError(response)
 
         # In case of Android make sure payment is not cancelled
         elif validation_response.get('is_canceled'):
+            logger.error('Android payment is cancelled for [%s] in basket [%d]', transaction_id, basket.id)
             raise UserCancelled(response)
+
+        # In case of Android make sure payment is not expired
+        elif validation_response.get('is_expired'):
+            logger.error(EXPIRED_ANDROID_PURCHASE_ERROR, transaction_id, basket.id)
+            raise PaymentError(response)
 
         if not waffle.switch_is_active(DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME):
             is_redundant_payment = self.is_payment_redundant(original_transaction_id, transaction_id)
@@ -147,7 +156,7 @@ class BaseIAP(BasePaymentProcessor):
             currency_code=currency_code,
             price=price
         )
-        logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, product_id, basket.id)
+        logger.info("Successfully executed [%s] payment [%s] for basket [%d].", self.NAME, sku, basket.id)
 
         currency = basket.currency
         total = basket.total_incl_tax

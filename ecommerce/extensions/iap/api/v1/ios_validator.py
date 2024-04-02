@@ -9,7 +9,7 @@ class IOSValidator:
     def validate(self, receipt, configuration, basket=None):  # pylint: disable=unused-argument
         """
         Accepts receipt, validates that the purchase has already been completed in
-        Apple for the mentioned productId.
+        Apple for the mentioned product_id.
         """
         bundle_id = configuration.get('ios_bundle_id')
         # auto_retry_wrong_env_request = True automatically queries sandbox endpoint if
@@ -18,7 +18,7 @@ class IOSValidator:
 
         try:
             validation_result = validator.validate(
-                receipt['purchaseToken'],
+                receipt.get('purchase_token', receipt.get('purchaseToken')),
                 exclude_old_transactions=False  # if True, include only the latest renewal transaction
             )
         except InAppPyValidationError as ex:
