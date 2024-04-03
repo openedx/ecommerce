@@ -12,6 +12,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from stripe.error import SignatureVerificationError
 
+from ecommerce.extensions.payment.processors.webhooks import StripeWebhooksPayment
+
 logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.PAYMENT_PROCESSOR_CONFIG['edx']['stripe']['secret_key']
@@ -53,14 +55,25 @@ class StripeWebhooksView(APIView):
 
         # Handle the event
         payment_intent = event.data.object
+        dynamic_payment_methods_options = ['klarna', 'affirm', 'afterpay_clearpay']
         if event.type == 'payment_intent.succeeded':
-            logger.info(
-                '[Stripe webhooks] event payment_intent.succeeded with amount %d and payment intent ID [%s].',
-                payment_intent.amount,
-                payment_intent.id,
-            )
-            # TODO: define and call a method to handle the successful payment intent.
-            # handle_payment_intent_succeeded(payment_intent)
+            dynamic_payment_methods_type = payment_intent.payment_method_details.type
+            if dynamic_payment_methods_type in dynamic_payment_methods_options:
+                # This is a payment intent for a BNPL payment
+                logger.info(
+                    '[Stripe webhooks] Dynamic Payment Methods event payment_intent.succeeded '
+                    'with amount %d and payment intent ID [%s].',
+                    payment_intent.amount,
+                    payment_intent.id,
+                )
+                webhooks_payment = StripeWebhooksPayment(site=None)
+                webhooks_payment.handle_webhooks_payment(request, payment_intent, dynamic_payment_methods_type)
+            else:
+                logger.info(
+                    '[Stripe webhooks] event payment_intent.succeeded with amount %d and payment intent ID [%s].',
+                    payment_intent.amount,
+                    payment_intent.id,
+                )
         elif event.type == 'payment_intent.payment_failed':
             logger.info(
                 '[Stripe webhooks] event payment_intent.payment_failed with amount %d and payment intent ID [%s].',
