@@ -325,6 +325,16 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         payment_method = ReceiptResponseView().get_payment_method(order)
         self.assertEqual(payment_method, '{} {}'.format(source.card_type, source.label))
 
+    def test_get_payment_method_stripe_dynamic_payment_methods_purchase(self):
+        """
+        Dynamic Payment Method type (source label) should be displayed as the Payment method
+        when Stripe DPM was used to purchase a product.
+        """
+        order = self.create_order()
+        source = factories.SourceFactory(order=order, card_type=None, label='Stripe affirm')
+        payment_method = ReceiptResponseView().get_payment_method(order)
+        self.assertEqual(payment_method, source.label)
+
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @responses.activate
     def test_get_receipt_for_existing_order(self, mock_learner_data):

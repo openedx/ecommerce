@@ -243,7 +243,7 @@ class ReceiptResponseView(ThankYouView):
                     type=source.get_card_type_display(),
                     number=source.label
                 )
-            return source.source_type.name
+            return source.label if source.label else source.source_type.name
         return None
 
     def order_contains_credit_seat(self, order):
