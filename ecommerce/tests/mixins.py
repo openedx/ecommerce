@@ -137,6 +137,7 @@ class JwtMixin:
         # create a mock user, and not the actual user, because we want to confirm that
         #   the user is created during JWT authentication
         user = Mock()
+        user.id = 1
         user.username = username
         user.email = email
         user.is_staff = is_staff
@@ -174,7 +175,7 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             parent=self.base_product,
             title='Cardboard Cutout',
             stockrecords__partner_sku=self.FREE_SKU,
-            stockrecords__price_excl_tax=Decimal('0.00'),
+            stockrecords__price=Decimal('0.00'),
         )
         self.set_jwt_cookie(SYSTEM_ENTERPRISE_OPERATOR_ROLE, ALL_ACCESS_CONTEXT)
 

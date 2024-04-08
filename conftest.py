@@ -6,16 +6,15 @@ from oscar.core.utils import slugify
 from ecommerce.core.constants import (
     COUPON_PRODUCT_CLASS_NAME,
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+    DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ENTERPRISE_COUPON_ADMIN_ROLE,
+    ORDER_MANAGER_ROLE,
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.catalogue.utils import create_subcategories
 from ecommerce.extensions.checkout.signals import BUNDLE
-from ecommerce.core.constants import ORDER_MANAGER_ROLE
-from ecommerce.core.constants import DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME
-from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE
-
 
 COUPON_CATEGORY_NAME = 'Coupons'
 
@@ -124,7 +123,6 @@ def django_db_setup(django_db_setup, django_db_blocker, django_db_use_migrations
         Option.objects.get_or_create(
             name='Course Entitlement',
             code='course_entitlement',
-            type=Option.OPTIONAL,
         )
 
         coupon, _ = ProductClass.objects.get_or_create(

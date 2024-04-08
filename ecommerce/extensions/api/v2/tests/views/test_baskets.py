@@ -79,7 +79,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             parent=self.base_product,
             title='LP 560-4',
             stockrecords__partner_sku=self.PAID_SKU,
-            stockrecords__price_excl_tax=Decimal('180000.00'),
+            stockrecords__price=Decimal('180000.00'),
             stockrecords__partner__short_code='oscr',
         )
         factories.ProductFactory(
@@ -87,7 +87,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             parent=self.base_product,
             title=u'Papier-mâché',
             stockrecords__partner_sku=self.ALTERNATE_FREE_SKU,
-            stockrecords__price_excl_tax=Decimal('0.00'),
+            stockrecords__price=Decimal('0.00'),
             stockrecords__partner__short_code='otto',
         )
         factories.ProductFactory(
@@ -95,7 +95,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             parent=self.base_product,
             title='LP 570-4 Superleggera',
             stockrecords__partner_sku=self.ALTERNATE_PAID_SKU,
-            stockrecords__price_excl_tax=Decimal('240000.00'),
+            stockrecords__price=Decimal('240000.00'),
             stockrecords__partner__short_code='dummy',
         )
         # Ensure that the basket attribute type exists for these tests
@@ -403,7 +403,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories=[])
         self.path = reverse('api:v2:baskets:calculate')
         self.range = factories.RangeFactory(includes_all_products=True)
-        self.product_total = sum(product.stockrecords.first().price_excl_tax for product in self.products)
+        self.product_total = sum(product.stockrecords.first().price for product in self.products)
         self.user = self._login_as_user(is_staff=True)
         self.url = self._generate_sku_url(self.products, username=self.user.username)
 
@@ -597,7 +597,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         products, url = self.setup_other_user_basket_calculate()
 
         expected = {
-            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price
                                                  for product in products),
             'total_incl_tax': Decimal('0.00'),
             'currency': 'USD'
@@ -623,7 +623,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         products, url = self.setup_other_user_basket_calculate()
 
         expected = {
-            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price
                                                  for product in products),
             'total_incl_tax': Decimal('0.00'),
             'currency': 'USD'
@@ -691,7 +691,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         products, url = self._setup_anonymous_basket_calculate()
 
         expected = {
-            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price
                                                  for product in products),
             'total_incl_tax': Decimal('0.00'),
             'currency': 'USD'
@@ -867,7 +867,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         url = self._generate_sku_url(products, username='invalidusername')
 
         expected = {
-            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price
                                                  for product in products[1:]),
             'total_incl_tax': Decimal('300.00'),
             'currency': 'USD'
@@ -932,7 +932,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
             products.append(
                 factories.ProductFactory(
                     stockrecords__partner=self.partner,
-                    stockrecords__price_excl_tax=Decimal('10.00'),
+                    stockrecords__price=Decimal('10.00'),
                     stockrecords__partner_sku=sku,
                 ))
         return products, program_uuid

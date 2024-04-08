@@ -6,6 +6,7 @@ DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME = "disable_redundant_payment_
 ERROR_ALREADY_PURCHASED = "You have already purchased these products"
 ERROR_BASKET_NOT_FOUND = "Basket [{}] not found."
 ERROR_BASKET_ID_NOT_PROVIDED = "Basket id is not provided"
+ERROR_DURING_IOS_REFUND_EXECUTION = "Could not execute IOS refund."
 ERROR_DURING_ORDER_CREATION = "An error occurred during order creation."
 ERROR_DURING_PAYMENT_HANDLING = "An error occurred during payment handling."
 ERROR_ORDER_NOT_FOUND_FOR_REFUND = "Could not find any order to refund for [%s] by processor [%s]"

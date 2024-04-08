@@ -4,11 +4,13 @@ import json
 import logging
 from urllib.parse import urljoin
 
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SEAT_TYPES
+from ecommerce.courses.constants import CertificateType
 from ecommerce.courses.utils import mode_for_product
 
 logger = logging.getLogger(__name__)
@@ -36,13 +38,27 @@ class LMSPublisher:
             if enrollment_code:
                 bulk_sku = enrollment_code.stockrecords.first().partner_sku
 
+        android_sku = None
+        ios_sku = None
+        if getattr(seat.attr, 'certificate_type', '') == CertificateType.VERIFIED:
+            android_stock_record = StockRecord.objects.filter(
+                product__parent=seat.parent, partner_sku__contains='mobile.android').first()
+            ios_stock_record = StockRecord.objects.filter(
+                product__parent=seat.parent, partner_sku__contains='mobile.ios').first()
+            if android_stock_record:
+                android_sku = android_stock_record.partner_sku
+            if ios_stock_record:
+                ios_sku = ios_stock_record.partner_sku
+
         return {
             'name': mode_for_product(seat),
             'currency': stock_record.price_currency,
-            'price': int(stock_record.price_excl_tax),
+            'price': int(stock_record.price),
             'sku': stock_record.partner_sku,
             'bulk_sku': bulk_sku,
             'expires': self.get_seat_expiration(seat),
+            'android_sku': android_sku,
+            'ios_sku': ios_sku,
         }
 
     def publish(self, course):
@@ -63,7 +79,11 @@ class LMSPublisher:
 
         name = course.name
         verification_deadline = self.get_course_verification_deadline(course)
-        modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
+
+        # Do not fetch mobile seats to create Course modes. Mobile skus are
+        # added to the verified course mode in serialize_seat_for_commerce_api()
+        seat_products = course.seat_products.filter(~Q(stockrecords__partner_sku__contains="mobile"))
+        modes = [self.serialize_seat_for_commerce_api(seat) for seat in seat_products]
 
         has_credit = 'credit' in [mode['name'] for mode in modes]
         if has_credit:

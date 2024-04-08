@@ -90,7 +90,7 @@ class TestDownloadSndFallbackCommand(TestCase):
 
 class TestDownloadSndFallbackCommandExceptions(TestCase):
     LOGGER_NAME = 'ecommerce.core.management.commands.populate_sdn_fallback_data_and_metadata'
-    URL = 'http://api.trade.gov/static/consolidated_screening_list/consolidated.csv'
+    URL = 'https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv'
     ERROR_MESSAGE = 'some foo error'
 
     @responses.activate

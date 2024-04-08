@@ -49,7 +49,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.user = UserFactory()
         self.condition = factories.EnterpriseCustomerConditionFactory()
 
-        self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
+        self.test_product = ProductFactory(stockrecords__price=10, categories=[])
         self.course_run_1 = CourseFactory(partner=self.partner)
         self.course_run_1.create_or_update_seat('verified', True, Decimal(100))
 
@@ -227,7 +227,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = BasketFactory(site=self.site, owner=self.user)
         test_product = factories.ProductFactory(
-            stockrecords__price_excl_tax=0,
+            stockrecords__price=0,
             stockrecords__partner__short_code='test'
         )
         basket.add_product(test_product)
