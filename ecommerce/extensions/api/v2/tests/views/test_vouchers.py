@@ -68,6 +68,30 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
             coupon_vouchers.vouchers.add(voucher)
         return vouchers
 
+    def test_generate_correct_end_datetime(self):
+        """
+        Test that the 'end_datetime' parameter is generated in the correct format.
+
+        The 'end_datetime' parameter should be generated as a string in the
+        format '%Y-%m-%dT%H:%M:%SZ', representing the end date and time.
+        The created voucher's 'end_datetime' has the milliseconds part if to
+        retrieve it directly from the DB.
+        """
+        self.create_vouchers()
+        response = self.client.get(self.path)
+        response_data = response.json()
+        result = response_data['results'][0]
+        end_datetime = result['end_datetime']
+        is_valid_format = False
+
+        try:
+            datetime.datetime.strptime(end_datetime, '%Y-%m-%dT%H:%M:%SZ')
+            is_valid_format = True
+        except ValueError:
+            pass
+
+        self.assertTrue(is_valid_format)
+
     def test_list(self):
         """ Verify the endpoint lists all vouchers. """
         vouchers = self.create_vouchers(count=3)
