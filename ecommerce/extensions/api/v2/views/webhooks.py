@@ -54,41 +54,44 @@ class StripeWebhooksView(APIView):
         # to another function, and return response asap if we're listening to many events.
 
         # Handle the event
-        payment_intent = event.data.object
+        payment_intent = event['data']['object']
         dynamic_payment_methods_options = ['klarna', 'affirm', 'afterpay_clearpay']
-        if event.type == 'payment_intent.succeeded':
-            dynamic_payment_methods_type = payment_intent.payment_method_details.type
-            if dynamic_payment_methods_type in dynamic_payment_methods_options:
+        if event['type'] == 'payment_intent.succeeded':
+            payment_method_type = (
+                payment_intent['charges']['data'][0]['payment_method_details']['type']
+                if payment_intent['charges']['data'] else None
+            )
+            if payment_method_type in dynamic_payment_methods_options:
                 # This is a payment intent for a BNPL payment
                 logger.info(
                     '[Stripe webhooks] Dynamic Payment Methods event payment_intent.succeeded '
                     'with amount %d and payment intent ID [%s].',
-                    payment_intent.amount,
-                    payment_intent.id,
+                    payment_intent['amount'],
+                    payment_intent['id'],
                 )
                 webhooks_payment = StripeWebhooksPayment(site=None)
-                webhooks_payment.handle_webhooks_payment(request, payment_intent, dynamic_payment_methods_type)
+                webhooks_payment.handle_webhooks_payment(request, payment_intent, payment_method_type)
             else:
                 logger.info(
                     '[Stripe webhooks] event payment_intent.succeeded with amount %d and payment intent ID [%s].',
-                    payment_intent.amount,
-                    payment_intent.id,
+                    payment_intent['amount'],
+                    payment_intent['id'],
                 )
-        elif event.type == 'payment_intent.payment_failed':
+        elif event['type'] == 'payment_intent.payment_failed':
             logger.info(
                 '[Stripe webhooks] event payment_intent.payment_failed with amount %d and payment intent ID [%s].',
-                payment_intent.amount,
-                payment_intent.id,
+                payment_intent['amount'],
+                payment_intent['id'],
             )
             # TODO: define and call a method to handle failed payment intent.
-        elif event.type == 'payment_intent.requires_action':
+        elif event['type'] == 'payment_intent.requires_action':
             logger.info(
                 '[Stripe webhooks] event payment_intent.requires_action with amount %d and payment intent ID [%s].',
-                payment_intent.amount,
-                payment_intent.id,
+                payment_intent['amount'],
+                payment_intent['id'],
             )
             # TODO: define and call a method to handle requires_action for 3DS.
         else:
-            logger.warning('[Stripe webhooks] unhandled event with type [%s].', event.type)
+            logger.warning('[Stripe webhooks] unhandled event with type [%s].', event['type'])
 
         return Response(status=status.HTTP_200_OK)
