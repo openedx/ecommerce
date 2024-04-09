@@ -4,9 +4,9 @@ import logging
 
 import mock
 from django.test import RequestFactory
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 
-from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE
+from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute
 from ecommerce.extensions.payment.processors.webhooks import StripeWebhooksPayment
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.factories import UserFactory
@@ -14,10 +14,9 @@ from ecommerce.tests.testcases import TestCase
 
 log = logging.getLogger(__name__)
 
-BasketAttribute = get_model('basket', 'BasketAttribute')
-BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
+OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
 class StripeWebhooksPaymentTests(PaymentProcessorTestCaseMixin, TestCase):
@@ -32,24 +31,24 @@ class StripeWebhooksPaymentTests(PaymentProcessorTestCaseMixin, TestCase):
         Country.objects.create(iso_3166_1_a2='US', name='US')
         self.request = RequestFactory()
         self.request.site = self.site
-        self.request.user = UserFactory()
-        self.payment_intent = {
+        self.user = UserFactory()
+        self.request.user = self.user
+
+    def _get_order_number_from_basket(self, basket):
+        return OrderNumberGenerator().order_number(basket)
+
+    def _build_payment_intent_data(self, basket, payment_intent_status=None):
+        return {
             "id": "pi_3OzUOMH4caH7G0X114tkIL0X",
             "object": "payment_intent",
             "status": "succeeded",
             "amount": 14900,
-            "amount_capturable": 0,
-            "amount_received": 14900,
-            "capture_method": "automatic",
             "charges": {
                 "object": "list",
                 "data": [{
                     "id": "py_3OzUOMH4caH7G0X11OOKbfIk",
                     "object": "charge",
                     "amount": 14900,
-                    "amount_captured": 14900,
-                    "amount_refunded": 0,
-                    "balance_transaction": "txn_3OzUOMH4caH7G0X11flKf5U4",
                     "billing_details": {
                         "address": {
                             "city": "Beverly Hills",
@@ -64,40 +63,26 @@ class StripeWebhooksPaymentTests(PaymentProcessorTestCaseMixin, TestCase):
                     },
                     "created": 1711676524,
                     "currency": "usd",
-                    "description": "EDX-100001",
+                    "description": self._get_order_number_from_basket(basket),
                     "metadata": {
-                        "order_number": "EDX-100001"
+                        "order_number": self._get_order_number_from_basket(basket)
                     },
                     "payment_intent": "pi_3OzUOMH4caH7G0X114tkIL0X",
                     "payment_method": "pm_1OzURzH4caH7G0X19vH5rGBT",
                     "payment_method_details": {
-                        "afterpay_clearpay": {
+                        "affirm": {
                             "order_id": "JCkYW6Afa0hELU0p1Urf",
                         },
-                        "type": "afterpay_clearpay"
+                        "type": "affirm"
                     },
-                    "shipping": {
-                        "address": {
-                            "city": "Beverly Hills",
-                            "country": "US",
-                            "line1": "Amsterdam Ave",
-                            "line2": "Apt 214",
-                            "postal_code": "10024",
-                            "state": "NY"
-                        },
-                        "name": "Test Person-us",
-                    },
-                    "status": "succeeded",
+                    "status": payment_intent_status,
                 }],
-                "total_count": 2,
-                "url": "/v1/charges?payment_intent=pi_3OzUOMH4caH7G0X114tkIL0X"
             },
             "client_secret": "pi_3OzUOMH4caH7G0X114tkIL0X_secret_SYz2fcAkT2hIWhpdRTqUwRFHF",
             "confirmation_method": "automatic",
             "created": 1711676282,
             "currency": "usd",
-            "description": "EDX-100001",
-            "latest_charge": "py_3OzUOMH4caH7G0X11OOKbfIk",
+            "description": self._get_order_number_from_basket(basket),
             "payment_method": "pm_1OzURzH4caH7G0X19vH5rGBT",
             "payment_method_configuration_details": {
                 "id": "pmc_1LspDWH4caH7G0X1LXrN8QMJ",
@@ -106,20 +91,12 @@ class StripeWebhooksPaymentTests(PaymentProcessorTestCaseMixin, TestCase):
                 "affirm": {
                     "preferred_locale": "en"
                 },
-                "afterpay_clearpay": {
-                    "preferred_locale": "en"
-                },
                 "card": {
                     "request_three_d_secure": "automatic"
                 },
-                "klarna": {
-                    "preferred_locale": "en"
-                }
             },
             "payment_method_types": [
                 "card",
-                "afterpay_clearpay",
-                "klarna",
                 "affirm"
             ],
             "secret_key_confirmation": "required",
@@ -161,44 +138,39 @@ class StripeWebhooksPaymentTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         self.skipTest('Webhooks payments processor does not yet support issuing credit.')
 
-    def test_handle_webhooks_payment(self):
+    @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order')
+    @mock.patch('stripe.PaymentIntent.retrieve')
+    @mock.patch('ecommerce.extensions.payment.processors.webhooks.track_segment_event')
+    def test_handle_webhooks_payment(self, mock_track, mock_retrieve, mock_handle_post_order):
         """
         Verify a payment received via Stripe webhooks is processed, an order is created and fulfilled.
         """
+        succeeded_payment_intent = self._build_payment_intent_data(self.basket, payment_intent_status='succeeded')
+
         # Need to associate the Payment Intent to the Basket
-        basket_attribute_type, _ = BasketAttributeType.objects.get_or_create(name=PAYMENT_INTENT_ID_ATTRIBUTE)
-        basket_attribute_type.save()
-        BasketAttribute.objects.get_or_create(
-            basket=self.basket,
-            attribute_type=basket_attribute_type,
-            value_text=self.payment_intent['id'],
+        basket_add_payment_intent_id_attribute(self.basket, succeeded_payment_intent['id'])
+
+        mock_retrieve.return_value = {
+            'id': succeeded_payment_intent['id'],
+            'client_secret': succeeded_payment_intent['client_secret'],
+            'payment_method': {
+                'id': succeeded_payment_intent['payment_method'],
+                'object': 'payment_method',
+                'billing_details': succeeded_payment_intent['charges']['data'][0]['billing_details'],
+                'type': succeeded_payment_intent['charges']['data'][0]['payment_method_details']['type']
+            },
+        }
+        self.processor_class(self.site).handle_webhooks_payment(
+            self.request, succeeded_payment_intent, 'afterpay_clearpay'
         )
-        with mock.patch('ecommerce.extensions.payment.processors.webhooks.track_segment_event') as mock_track:
-            with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
-                with mock.patch(
-                    'ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order'
-                ) as mock_handle_post_order:
-                    mock_retrieve.return_value = {
-                        'id': self.payment_intent['id'],
-                        'client_secret': self.payment_intent['client_secret'],
-                        'payment_method': {
-                            'id': self.payment_intent['payment_method'],
-                            'object': 'payment_method',
-                            'billing_details': self.payment_intent['charges']['data'][0]['billing_details'],
-                            'type': self.payment_intent['charges']['data'][0]['payment_method_details']['type']
-                        },
-                    }
-                    self.processor_class(self.site).handle_webhooks_payment(
-                        self.request, self.payment_intent, 'afterpay_clearpay'
-                    )
-                    properties = {
-                        'basket_id': self.basket.id,
-                        'processor_name': 'stripe',
-                        'stripe_enabled': True,
-                        'total': self.basket.total_incl_tax,
-                        'success': True,
-                    }
-                    mock_track.assert_called_once_with(
-                        self.basket.site, self.basket.owner, 'Payment Processor Response', properties
-                    )
-                    mock_handle_post_order.assert_called_once()
+        properties = {
+            'basket_id': self.basket.id,
+            'processor_name': 'stripe',
+            'stripe_enabled': True,
+            'total': self.basket.total_incl_tax,
+            'success': True,
+        }
+        mock_track.assert_called_once_with(
+            self.basket.site, self.basket.owner, 'Payment Processor Response', properties
+        )
+        mock_handle_post_order.assert_called_once()

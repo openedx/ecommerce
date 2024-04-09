@@ -26,6 +26,16 @@ class StripeWebhooksPayment(EdxOrderPlacementMixin, BasePaymentProcessor):
 
     NAME = 'stripe'
 
+    def __init__(self, site):
+        """
+        Constructs a new instance of the Stripe webhooks processor.
+
+        Raises:
+            KeyError: If no settings configured for this payment processor.
+        """
+        super(StripeWebhooksPayment, self).__init__(site)
+        self.site = site
+
     @property
     def payment_processor(self):
         return Stripe(self.site)
@@ -71,7 +81,8 @@ class StripeWebhooksPayment(EdxOrderPlacementMixin, BasePaymentProcessor):
             basket.strategy = strategy.Default()
         except Basket.DoesNotExist:
             logger.exception(
-                '[Dynamic Payment Methods] Basket %d does not exist for order %s and Payment Intent %s',
+                '[Dynamic Payment Methods] Basket with ID %d does not exist.'
+                'This was attempted for for order %s and Payment Intent %s',
                 basket_id, order_number, payment_intent_id
             )
         else:
@@ -87,7 +98,7 @@ class StripeWebhooksPayment(EdxOrderPlacementMixin, BasePaymentProcessor):
             try:
                 self.record_processor_response(payment_intent, transaction_id=payment_intent_id, basket=basket)
                 logger.info(
-                    '[Dynamic Payment Methods] Successfully confirmed Stripe payment intent [%s] '
+                    '[Dynamic Payment Methods] Successfully recorded Stripe payment intent [%s] '
                     'for basket [%d] and order number [%s].',
                     payment_intent_id,
                     basket.id,
@@ -99,7 +110,7 @@ class StripeWebhooksPayment(EdxOrderPlacementMixin, BasePaymentProcessor):
             else:
                 # Card number is required for Source object, it cannot be null (payment_source.label)
                 # Dynamic payment methods payment intents do not contain card information, adding DPM type instead.
-                label = 'Stripe {}'.format(payment_method_type)
+                label = 'stripe {}'.format(payment_method_type)
                 handled_processor_response = HandledProcessorResponse(
                     transaction_id=payment_intent_id,
                     total=total,
