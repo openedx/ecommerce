@@ -61,7 +61,7 @@ class RefundBasketTransactionsTests(TestCase):
 class FulfillFrozenBasketsTests(TestCase):
     """ Test Fulfill Frozen Basket class"""
 
-    def _dummy_basket_data(self, payment_procesor=None):
+    def _dummy_basket_data(self, payment_processor=None):
         """ Creates dummy basket data for testing."""
         basket = create_basket(site=self.site)
         basket.status = 'Frozen'
@@ -72,9 +72,9 @@ class FulfillFrozenBasketsTests(TestCase):
                 'type': 'affirm'
             }
         }
-        if payment_procesor:
+        if payment_processor:
             PaymentProcessorResponse.objects.create(
-                basket=basket, transaction_id='pi_123dummy', processor_name=payment_procesor, response=response)
+                basket=basket, transaction_id='pi_123dummy', processor_name=payment_processor, response=response)
         else:
             PaymentProcessorResponse.objects.create(
                 basket=basket, transaction_id='PAY-123', processor_name='paypal', response={'state': 'approved'})
@@ -138,7 +138,7 @@ class FulfillFrozenBasketsTests(TestCase):
 
     def test_success_with_stripe_dynamic_payment_methods(self):
         """ Test basket with Stripe DPM payment basket."""
-        basket = self._dummy_basket_data(payment_procesor='stripe')
+        basket = self._dummy_basket_data(payment_processor='stripe')
         assert FulfillFrozenBaskets().fulfill_basket(basket.id, self.site)
 
         order = Order.objects.get(number=basket.order_number)
