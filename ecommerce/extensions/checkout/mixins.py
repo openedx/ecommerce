@@ -124,11 +124,12 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
 
     def emit_checkout_step_events(self, basket, handled_processor_response, payment_processor):
         """ Emit events necessary to track the user in the checkout funnel. """
-
+        payment_method_type = (handled_processor_response.card_type if handled_processor_response.card_type
+                               else handled_processor_response.card_number)
         properties = {
             'checkout_id': basket.order_number,
             'step': 1,
-            'payment_method': '{} | {}'.format(handled_processor_response.card_type, payment_processor.NAME)
+            'payment_method': '{} | {}'.format(payment_method_type, payment_processor.NAME)
         }
         track_segment_event(basket.site, basket.owner, 'Checkout Step Completed', properties)
 
