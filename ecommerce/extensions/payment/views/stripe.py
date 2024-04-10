@@ -307,11 +307,10 @@ class StripeCheckoutView(EdxOrderPlacementMixin, APIView):
 
     def dynamic_payment_methods_response(self, in_progress_payment):
         """Tell the frontend the Payment Intent ID and status and it will decide what to do."""
-        if 'status' in in_progress_payment._fields:
-            response_data = {
-                'status': in_progress_payment.status,
-                'confirmation_client_secret': in_progress_payment.confirmation_client_secret,
-                'payment_method': in_progress_payment.payment_method,
-                'transaction_id': in_progress_payment.transaction_id,
-            }
+        response_data = {
+            'status': in_progress_payment.status,
+            'confirmation_client_secret': in_progress_payment.confirmation_client_secret,
+            'payment_method': in_progress_payment.payment_method,
+            'transaction_id': in_progress_payment.transaction_id,
+        }
         return JsonResponse(response_data, status=201)

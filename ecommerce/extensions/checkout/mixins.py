@@ -127,7 +127,6 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
                     processor_response.transaction_id,
                     processor_response.status,
                 )
-                # TODO: do we track this event if in progress?
                 return processor_response
             # We only record successful payments in the database.
             self.record_payment(basket, processor_response)

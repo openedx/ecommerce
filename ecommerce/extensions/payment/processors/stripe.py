@@ -106,7 +106,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             },
         }
 
-    def create_new_payment_intent_for_basket(self, basket, payment_intent_id):
+    def cancel_and_create_new_payment_intent_for_basket(self, basket, payment_intent_id):
         """
         Create a new Stripe payment intent to associate with the current basket.
         This is used as a reset of the payment to allow payment retries when the intent gets into unexpected states.
@@ -114,7 +114,9 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # Cancel existing Payment Intent
         cancelled_payment_intent = stripe.PaymentIntent.cancel(payment_intent_id)
 
-        # Create a new Payment Intent and add to Basket
+        # Create a new Payment Intent and add to the basket.
+        # Pls note: idempotency_key is not used because we found that Stripe will "resuscitate" the
+        # Payment Intent and an intent with the same ID would be created - this will fail later on confirm.
         new_payment_intent = stripe.PaymentIntent.create(
             **self._build_payment_intent_parameters(basket),
             # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
@@ -171,19 +173,27 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 ).value_text
             except BasketAttribute.DoesNotExist:
                 payment_intent_id = None
+
+            # If the basket has a Payment Intent, get the status
             if payment_intent_id:
                 stripe_response = stripe.PaymentIntent.retrieve(id=payment_intent_id)
                 status = stripe_response['status']
                 if status != 'requires_payment_method' or status != 'requires_confirmation':
-                    # Payment Intent is not in a comfirmable status, must create a new one
-                    stripe_response = self.create_new_payment_intent_for_basket(basket, payment_intent_id)
+                    # Payment Intent is in a non-confirmable status, must create a new one
+                    stripe_response = self.cancel_and_create_new_payment_intent_for_basket(basket, payment_intent_id)
+                # If a Payment Intent exists in a confirmable status, it will skip the below else statement,
+                # aka not create another intent with the idempotency key this time around.
+
+            # The basket does not have a Payment Intent, create one
             else:
                 try:
                     stripe_response = stripe.PaymentIntent.create(
                         **self._build_payment_intent_parameters(basket),
                         # This means this payment intent can only be confirmed with secret key (as in, from ecommerce)
                         secret_key_confirmation='required',
-                        # don't create a new intent for the same basket
+                        # Use idempotency to not create a new intent for the same basket, as
+                        # this endpoint is called every time the checkout page is loaded, otherwise
+                        # it would create a new payment intent every time
                         idempotency_key=self.generate_basket_pi_idempotency_key(basket),
                         # Enable dynamic payment methods, w/o payment method configuration ID due to Custom Actions Beta
                         # 'allow_redirects' is default to 'always'
