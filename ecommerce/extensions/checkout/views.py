@@ -160,12 +160,25 @@ class ReceiptResponseView(ThankYouView):
         return super(ReceiptResponseView, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        is_dynamic_payment_methods = request.GET.get('dpm_enabled', None)
+        order_number = request.GET.get('order_number', None)
         try:
+            log.info(
+                'Receipt endpoint reached for order [%s], is_dynamic_payment_methods_enabled is %s',
+                order_number,
+                is_dynamic_payment_methods,
+            )
             response = super(ReceiptResponseView, self).get(request, *args, **kwargs)
         except Http404:
             self.template_name = 'edx/checkout/receipt_not_found.html'
+            log.exception(
+                '[Dynamic Payment Methods] Order [%s] has been received and is still being processed,'
+                'rendering receipt not found.',
+                order_number
+            )
             context = {
-                'order_history_url': request.site.siteconfiguration.build_lms_url('account/settings'),
+                'is_dynamic_payment_methods': is_dynamic_payment_methods,
+                'order_history_url': settings.ECOMMERCE_MICROFRONTEND_URL + '/orders/',
             }
             return self.render_to_response(context=context, status=404)
         enterprise_customer_user = self.get_metadata_for_enterprise_user(request)
