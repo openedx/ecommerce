@@ -140,7 +140,7 @@ class StripeWebhooksViewTests(TestCase):
                 self.assertEqual(response.status_code, 400)
                 self.assertTrue(mock_logger.called)
 
-    @mock.patch('ecommerce.extensions.payment.processors.webhooks.StripeWebhooksPayment.handle_webhooks_payment')
+    @mock.patch('ecommerce.extensions.payment.processors.webhooks.StripeWebhooksProcessor.handle_webhooks_payment')
     @mock.patch('stripe.Webhook.construct_event')
     @ddt.data(
         ('payment_intent.succeeded', 299, 'pi_123dummy', False),

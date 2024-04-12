@@ -7,7 +7,7 @@ from django.test import RequestFactory
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute
-from ecommerce.extensions.payment.processors.webhooks import StripeWebhooksPayment
+from ecommerce.extensions.payment.processors.webhooks import StripeWebhooksProcessor
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
@@ -19,13 +19,13 @@ Country = get_model('address', 'Country')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-class StripeWebhooksPaymentTests(PaymentProcessorTestCaseMixin, TestCase):
-    """ Tests StripeWebhooksPayment """
-    processor_class = StripeWebhooksPayment
+class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
+    """ Tests StripeWebhooksProcessor """
+    processor_class = StripeWebhooksProcessor
     processor_name = 'stripe'
 
     def setUp(self):
-        super(StripeWebhooksPaymentTests, self).setUp()
+        super(StripeWebhooksProcessorTests, self).setUp()
         self.site_configuration.client_side_payment_processor = 'stripe'
         self.site_configuration.save()
         Country.objects.create(iso_3166_1_a2='US', name='US')
@@ -106,7 +106,7 @@ class StripeWebhooksPaymentTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         Tests configuration.
         """
-        self.skipTest('StripeWebhooksPayment processor does not currently require configuration.')
+        self.skipTest('StripeWebhooksProcessor processor does not currently require configuration.')
 
     def test_name(self):
         """
@@ -118,13 +118,13 @@ class StripeWebhooksPaymentTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         Tests handle_processor_response.
         """
-        self.skipTest('StripeWebhooksPayment processor does not currently implement handle_processor_response.')
+        self.skipTest('StripeWebhooksProcessor processor does not currently implement handle_processor_response.')
 
     def test_get_transaction_parameters(self):
         """
         Tests transaction parameters.
         """
-        self.skipTest('StripeWebhooksPayment processor does not currently implement get_transaction_parameters.')
+        self.skipTest('StripeWebhooksProcessor processor does not currently implement get_transaction_parameters.')
 
     def test_issue_credit(self):
         """

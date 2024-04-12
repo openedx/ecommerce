@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from stripe.error import SignatureVerificationError
 
-from ecommerce.extensions.payment.processors.webhooks import StripeWebhooksPayment
+from ecommerce.extensions.payment.processors.webhooks import StripeWebhooksProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class StripeWebhooksView(APIView):
                     payment_intent['amount'],
                     payment_intent['id'],
                 )
-                webhooks_payment = StripeWebhooksPayment(site=None)
+                webhooks_payment = StripeWebhooksProcessor(site=None)
                 webhooks_payment.handle_webhooks_payment(request, payment_intent, payment_method_type)
             else:
                 logger.info(

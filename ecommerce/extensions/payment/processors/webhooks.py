@@ -19,7 +19,7 @@ Basket = get_model('basket', 'Basket')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-class StripeWebhooksPayment(EdxOrderPlacementMixin, BasePaymentProcessor):
+class StripeWebhooksProcessor(EdxOrderPlacementMixin, BasePaymentProcessor):
     """
     Handle a payment success received through Stripe webhooks.
     """
@@ -33,7 +33,7 @@ class StripeWebhooksPayment(EdxOrderPlacementMixin, BasePaymentProcessor):
         Raises:
             KeyError: If no settings configured for this payment processor.
         """
-        super(StripeWebhooksPayment, self).__init__(site)
+        super(StripeWebhooksProcessor, self).__init__(site)
         self.site = site
 
     @property
