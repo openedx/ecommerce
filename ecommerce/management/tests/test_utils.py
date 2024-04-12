@@ -147,7 +147,7 @@ class FulfillFrozenBasketsTests(TestCase):
         total = basket.total_incl_tax_excl_discounts
         Source.objects.get(
             source_type__name=Stripe.NAME, currency=order.currency, amount_allocated=total, amount_debited=total,
-            label='Stripe affirm', card_type=None)
+            label='affirm', card_type=None)
         PaymentEvent.objects.get(event_type__name=PaymentEventTypeName.PAID, amount=total,
                                  processor_name=Stripe.NAME)
 

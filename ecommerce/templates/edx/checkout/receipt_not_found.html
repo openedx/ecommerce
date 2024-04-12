@@ -21,7 +21,7 @@
           </h3>
           <div class="copy">
             {% if is_dynamic_payment_methods %}
-            <p>{% trans "Your payment has been received and a receipt is being processed. Please re-load this page." as tmsg %}{{ tmsg | force_escape }}</p>
+            <p>{% trans "Your payment has been received and a receipt is being processed. Please reload this page." as tmsg %}{{ tmsg | force_escape }}</p>
             <br/>
             {% else %}
             <p>{% trans "The specified order could not be located. Please ensure that the URL is correct, and try again." as tmsg %}{{ tmsg | force_escape }}</p>

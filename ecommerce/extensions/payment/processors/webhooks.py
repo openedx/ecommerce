@@ -110,12 +110,11 @@ class StripeWebhooksProcessor(EdxOrderPlacementMixin, BasePaymentProcessor):
             else:
                 # Card number is required for Source object, it cannot be null (payment_source.label)
                 # Dynamic payment methods payment intents do not contain card information, adding DPM type instead.
-                label = 'stripe {}'.format(payment_method_type)
                 handled_processor_response = HandledProcessorResponse(
                     transaction_id=payment_intent_id,
                     total=total,
                     currency=currency,
-                    card_number=label,
+                    card_number=payment_method_type,
                     card_type=None
                 )
                 self.record_payment(basket, handled_processor_response)

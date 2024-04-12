@@ -332,7 +332,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         when Stripe DPM was used to purchase a product.
         """
         order = self.create_order()
-        source = factories.SourceFactory(order=order, card_type=None, label='Stripe affirm')
+        source = factories.SourceFactory(order=order, card_type=None, label='affirm')
         payment_method = ReceiptResponseView().get_payment_method(order)
         self.assertEqual(payment_method, source.label)
 
