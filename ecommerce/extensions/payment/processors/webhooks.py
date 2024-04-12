@@ -141,6 +141,13 @@ class StripeWebhooksProcessor(EdxOrderPlacementMixin, BasePaymentProcessor):
             try:
                 order = self.create_order(request, basket, billing_address)
                 self.handle_post_order(order)
+                logger.info(
+                    '[Dynamic Payment Methods] Successfully completed processing Stripe payment intent [%s] '
+                    'for basket [%d] and order number [%s].',
+                    payment_intent_id,
+                    basket.id,
+                    basket.order_number,
+                )
             except Exception:  # pylint: disable=broad-except
                 logger.exception(
                     '[Dynamic Payment Methods] Error processing order for transaction [%s], '
