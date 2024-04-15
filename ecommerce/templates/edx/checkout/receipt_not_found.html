@@ -20,16 +20,18 @@
             {{ error_summary }}
           </h3>
           <div class="copy">
+            {% if is_dynamic_payment_methods %}
+            <p>{% trans "Your payment has been received and a receipt is being processed. Please reload this page." as tmsg %}{{ tmsg | force_escape }}</p>
+            <br/>
+            {% else %}
             <p>{% trans "The specified order could not be located. Please ensure that the URL is correct, and try again." as tmsg %}{{ tmsg | force_escape }}</p>
             <br/>
+            {% endif %}
           </div>
           <div class="msg">
             <p>
-              {% captureas link_start %}
-                <a href="{{ order_history_url }}">
-              {% endcaptureas %}
               {% blocktrans asvar tmsg %}
-                You may also view your previous orders on the {link_start}{order_history_url}{link_middle}{link_end}Account Settings{link_end}
+                You may also view your orders on the {link_start}{order_history_url}{link_middle}Order History{link_end}
                 page.
               {% endblocktrans %}
               {% interpolate_html tmsg link_start='<a href="'|safe link_middle='">'|safe link_end='</a>'|safe order_history_url=order_history_url|safe %}

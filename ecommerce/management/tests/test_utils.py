@@ -13,6 +13,7 @@ from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
+from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.test.factories import create_basket, prepare_voucher
 from ecommerce.management.utils import FulfillFrozenBaskets, refund_basket_transactions
 from ecommerce.tests.factories import UserFactory
@@ -60,13 +61,23 @@ class RefundBasketTransactionsTests(TestCase):
 class FulfillFrozenBasketsTests(TestCase):
     """ Test Fulfill Frozen Basket class"""
 
-    def _dummy_basket_data(self):
+    def _dummy_basket_data(self, payment_processor=None):
         """ Creates dummy basket data for testing."""
         basket = create_basket(site=self.site)
         basket.status = 'Frozen'
         basket.save()
-        PaymentProcessorResponse.objects.create(basket=basket, transaction_id='PAY-123', processor_name='paypal',
-                                                response={'state': 'approved'})
+        response = {
+            'state': 'approved',
+            'payment_method': {
+                'type': 'affirm'
+            }
+        }
+        if payment_processor:
+            PaymentProcessorResponse.objects.create(
+                basket=basket, transaction_id='pi_123dummy', processor_name=payment_processor, response=response)
+        else:
+            PaymentProcessorResponse.objects.create(
+                basket=basket, transaction_id='PAY-123', processor_name='paypal', response={'state': 'approved'})
         return basket
 
     @staticmethod
@@ -124,6 +135,21 @@ class FulfillFrozenBasketsTests(TestCase):
             label='Paypal Account', card_type=None)
         PaymentEvent.objects.get(event_type__name=PaymentEventTypeName.PAID, amount=total,
                                  processor_name=Paypal.NAME)
+
+    def test_success_with_stripe_dynamic_payment_methods(self):
+        """ Test basket with Stripe DPM payment basket."""
+        basket = self._dummy_basket_data(payment_processor='stripe')
+        assert FulfillFrozenBaskets().fulfill_basket(basket.id, self.site)
+
+        order = Order.objects.get(number=basket.order_number)
+        assert order.status == 'Complete'
+
+        total = basket.total_incl_tax_excl_discounts
+        Source.objects.get(
+            source_type__name=Stripe.NAME, currency=order.currency, amount_allocated=total, amount_debited=total,
+            label='affirm', card_type=None)
+        PaymentEvent.objects.get(event_type__name=PaymentEventTypeName.PAID, amount=total,
+                                 processor_name=Stripe.NAME)
 
     def test_multiple_transactions(self):
         """ Test utility against multiple payment processor responses."""

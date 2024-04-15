@@ -294,10 +294,11 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     def test_get_receipt_for_nonexisting_order(self, mock_learner_data):
         """ The view should return 404 status if the Order is not found. """
-        mock_learner_data.return_value = self.non_enterprise_learner_data
-        order_number = 'ABC123'
-        response = self._get_receipt_response(order_number)
-        self.assertEqual(response.status_code, 404)
+        with self.settings(ECOMMERCE_MICROFRONTEND_URL='https://ecommerce-mfe-url.com'):
+            mock_learner_data.return_value = self.non_enterprise_learner_data
+            order_number = 'ABC123'
+            response = self._get_receipt_response(order_number)
+            self.assertEqual(response.status_code, 404)
 
     def test_get_payment_method_no_source(self):
         """ Payment method should be None when an Order has no Payment source. """
@@ -324,6 +325,16 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         source = factories.SourceFactory(order=order, card_type='Dummy Card', label='Test')
         payment_method = ReceiptResponseView().get_payment_method(order)
         self.assertEqual(payment_method, '{} {}'.format(source.card_type, source.label))
+
+    def test_get_payment_method_stripe_dynamic_payment_methods_purchase(self):
+        """
+        Dynamic Payment Method type (source label) should be displayed as the Payment method
+        when Stripe DPM was used to purchase a product.
+        """
+        order = self.create_order()
+        source = factories.SourceFactory(order=order, card_type=None, label='affirm')
+        payment_method = ReceiptResponseView().get_payment_method(order)
+        self.assertEqual(payment_method, source.label)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @responses.activate
@@ -393,14 +404,15 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     @responses.activate
     def test_get_receipt_for_existing_order_user_not_owner(self, mock_learner_data):
         """ Users that don't own the Order shouldn't be able to see the Receipt. """
-        mock_learner_data.return_value = self.non_enterprise_learner_data
-        other_user = self.create_user()
-        order = self._create_order_for_receipt()
-        response = self._visit_receipt_page_with_another_user(order, other_user)
-        context_data = {'order_history_url': self.site.siteconfiguration.build_lms_url('account/settings')}
+        with self.settings(ECOMMERCE_MICROFRONTEND_URL='https://ecommerce-mfe-url.com'):
+            mock_learner_data.return_value = self.non_enterprise_learner_data
+            other_user = self.create_user()
+            order = self._create_order_for_receipt()
+            response = self._visit_receipt_page_with_another_user(order, other_user)
+            context_data = {'order_history_url': settings.ECOMMERCE_MICROFRONTEND_URL + '/orders/'}
 
-        self.assertEqual(response.status_code, 404)
-        self.assertDictContainsSubset(context_data, response.context_data)
+            self.assertEqual(response.status_code, 404)
+            self.assertDictContainsSubset(context_data, response.context_data)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @responses.activate

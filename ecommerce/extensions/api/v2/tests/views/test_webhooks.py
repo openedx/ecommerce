@@ -37,40 +37,71 @@ class StripeWebhooksViewTests(TestCase):
         self.mock_header = {
             'HTTP_STRIPE_SIGNATURE': 't=1674755157,v1=a5e6655d0f41076ca300150ed98b125ab0203f8672ced6f7cc9c8856517727e8',
         }
-        self.mock_stripe_event = mock.Mock()
 
-    def _build_request_data(self, **kwargs):
+    def _build_event_data(self, **kwargs):
         event_type = kwargs.get('event_type', None)
         amount = kwargs.get('amount', None)
         payment_intent_id = kwargs.get('payment_intent_id', None)
+        is_dynamic_payment_methods = kwargs.get('is_dynamic_payment_methods', None)
+
+        payment_method_details = {
+            'card': {
+                'brand': 'visa',
+                'country': 'US',
+                'exp_month': 4,
+                'exp_year': 2025,
+                'funding': 'credit',
+                'last4': '4242',
+            },
+            'type': 'card'
+        }
+
+        payment_method_details_dpm = {
+            'affirm': {
+                'order_id': 'JCkYW6Afa0hELU0p1Urf',
+            },
+            'type': 'affirm'
+        }
+
+        charge_data = {
+            "id": "ch_3P4QCyH4caH7G0X10RkSR7Px",
+            "object": "charge",
+            "amount": amount,
+            "payment_intent": payment_intent_id,
+            "payment_method": "pm_1P4QCvH4caH7G0X1xMAs7Gld",
+            "payment_method_details": (
+                payment_method_details_dpm if is_dynamic_payment_methods
+                else payment_method_details
+            ),
+        }
+
         return {
-            'id': 'evt_123dummy',
-            'object': 'event',
-            'api_version': '2022-08-01',
-            'created': 1673630016,
-            'data': {
-                'object': {
-                    'object': 'payment_intent',
-                    'id': payment_intent_id,
-                    'amount': amount,
-                    'amount_received': amount,
-                    'confirmation_method': 'automatic',
-                    'currency': 'usd',
-                    'description': 'EDX-10001',
-                    'metadata': {
-                        'order_number': 'EDX-10001'
+            "id": "evt_3P4Q10H4caH7G0X10U4oCAXb",
+            "object": "event",
+            "api_version": "2022-08-01",
+            "created": 1712851098,
+            "data": {
+                "object": {
+                    "id": payment_intent_id,
+                    "object": "payment_intent",
+                    "amount": amount,
+                    "charges": {
+                        "object": "list",
+                        "data": [
+                            charge_data if event_type == 'payment_intent.succeeded' else None
+                        ],
                     },
-                    'payment_method': 'pm_123dummy',
-                    'secret_key_confirmation': 'required',
-                    'status': 'succeeded',
-                },
+                    "created": 1712851098,
+                    "currency": "usd",
+                    "description": "EDX-100001",
+                    "metadata": {
+                        "order_number": "EDX-100001"
+                    },
+                    "payment_method": "pm_123dummy",
+                    "status": "requires_payment_method",
+                }
             },
-            'pending_webhooks': 3,
-            'request': {
-                'id': 'req_123dummy',
-                'idempotency_key': '123dummy'
-            },
-            'type': event_type,
+            "type": event_type
         }
 
     @ddt.data('get', 'put', 'patch', 'head')
@@ -104,24 +135,39 @@ class StripeWebhooksViewTests(TestCase):
                     'error on signature verification', self.mock_header['HTTP_STRIPE_SIGNATURE']
                 )
                 response = self.client.post(
-                    self.url, self._build_request_data(), content_type=JSON_CONTENT_TYPE, **self.mock_header
+                    self.url, self._build_event_data(), content_type=JSON_CONTENT_TYPE, **self.mock_header
                 )
                 self.assertEqual(response.status_code, 400)
                 self.assertTrue(mock_logger.called)
 
+    @mock.patch('ecommerce.extensions.payment.processors.webhooks.StripeWebhooksProcessor.handle_webhooks_payment')
     @mock.patch('stripe.Webhook.construct_event')
     @ddt.data(
-        ('payment_intent.succeeded', 299, 'pi_123dummy'),
-        ('payment_intent.requires_action', 399, 'pi_456dummy'),
-        ('payment_intent.payment_failed', 499, 'pi_789dummy'),
+        ('payment_intent.succeeded', 299, 'pi_123dummy', False),
+        ('payment_intent.requires_action', 399, 'pi_456dummy', False),
+        ('payment_intent.payment_failed', 499, 'pi_789dummy', False),
+        ('payment_intent.succeeded', 199, 'pi_123dpm', True),
     )
     @ddt.unpack
-    def test_handled_webhook_event(self, event_type, amount, payment_intent_id, mock_construct_event):
+    def test_handled_webhook_event(
+        self,
+        event_type,
+        amount,
+        payment_intent_id,
+        is_dynamic_payment_methods,
+        mock_construct_event,
+        mock_webhooks_processor
+    ):
         """
         Verify the expected logs for the known handled event types are logged
         with the correct event type and other attributes.
         """
-        post_data = self._build_request_data(event_type=event_type, amount=amount, payment_intent_id=payment_intent_id)
+        event_data = self._build_event_data(
+            event_type=event_type,
+            amount=amount,
+            payment_intent_id=payment_intent_id,
+            is_dynamic_payment_methods=is_dynamic_payment_methods
+        )
         expected_logs = [
             (
                 log_name,
@@ -130,15 +176,25 @@ class StripeWebhooksViewTests(TestCase):
                 .format(event_type, amount, payment_intent_id),
             ),
         ]
+        expected_logs_dpm = [
+            (
+                log_name,
+                'INFO',
+                '[Stripe webhooks] Dynamic Payment Methods event {} with amount {} and payment intent ID [{}].'
+                .format(event_type, amount, payment_intent_id),
+            ),
+        ]
         with self.settings(**self.mock_settings):
-            self.mock_stripe_event.type = event_type
-            self.mock_stripe_event.data.object.amount = amount
-            self.mock_stripe_event.data.object.id = payment_intent_id
-            mock_construct_event.return_value = self.mock_stripe_event
+            mock_construct_event.return_value = event_data
             with LogCapture(log_name) as log_capture:
-                response = self.client.post(self.url, post_data, content_type=JSON_CONTENT_TYPE, **self.mock_header)
+                response = self.client.post(self.url, event_data, content_type=JSON_CONTENT_TYPE, **self.mock_header)
                 self.assertEqual(response.status_code, 200)
-                log_capture.check_present(*expected_logs)
+                if is_dynamic_payment_methods:
+                    mock_webhooks_processor.assert_called()
+                    log_capture.check_present(*expected_logs_dpm)
+                else:
+                    mock_webhooks_processor.assert_not_called()
+                    log_capture.check_present(*expected_logs)
 
     @mock.patch('stripe.Webhook.construct_event')
     def test_unhandled_webhook_event(self, mock_construct_event):
@@ -146,18 +202,17 @@ class StripeWebhooksViewTests(TestCase):
         Verify the expected logs for the unhandled event types are logged with the correct event type.
         """
         event_type = 'account_updated'
-        post_data = self._build_request_data(event_type=event_type)
+        event_data = self._build_event_data(event_type=event_type)
         expected_logs = [
             (
                 log_name,
                 'WARNING',
-                '[Stripe webhooks] unhandled event with type [{}].'.format(post_data['type']),
+                '[Stripe webhooks] unhandled event with type [{}].'.format(event_data['type']),
             ),
         ]
         with self.settings(**self.mock_settings):
-            self.mock_stripe_event.type = event_type
-            mock_construct_event.return_value = self.mock_stripe_event
+            mock_construct_event.return_value = event_data
             with LogCapture(log_name) as log_capture:
-                response = self.client.post(self.url, post_data, content_type=JSON_CONTENT_TYPE, **self.mock_header)
+                response = self.client.post(self.url, event_data, content_type=JSON_CONTENT_TYPE, **self.mock_header)
                 self.assertEqual(response.status_code, 200)
                 log_capture.check_present(*expected_logs)

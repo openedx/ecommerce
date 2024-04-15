@@ -129,9 +129,14 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             card_number = 'Paypal Account'
             card_type = None
         elif payment_notification.transaction_id.startswith('pi_'):
-            card_number = payment_notification.response['payment_method']['card']['last4']
-            stripe_card_type = payment_notification.response['payment_method']['card']['brand']
-            card_type = STRIPE_CARD_TYPE_MAP[stripe_card_type]
+            payment_type = payment_notification.response['payment_method']['type']
+            if payment_type == 'card':
+                card_number = payment_notification.response['payment_method']['card']['last4']
+                stripe_card_type = payment_notification.response['payment_method']['card']['brand']
+                card_type = STRIPE_CARD_TYPE_MAP[stripe_card_type]
+            else:
+                card_number = payment_type
+                card_type = None
         else:
             card_number = payment_notification.response['req_card_number']
             cybersource_card_type = payment_notification.response['req_card_type']
