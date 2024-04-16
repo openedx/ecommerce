@@ -161,7 +161,7 @@ class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
             },
         }
         self.processor_class(self.site).handle_webhooks_payment(
-            self.request, succeeded_payment_intent, 'afterpay_clearpay'
+            self.request, succeeded_payment_intent, 'affirm'
         )
         properties = {
             'basket_id': self.basket.id,
@@ -169,6 +169,7 @@ class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
             'stripe_enabled': True,
             'total': self.basket.total_incl_tax,
             'success': True,
+            'payment_method': succeeded_payment_intent['charges']['data'][0]['payment_method_details']['type'],
         }
         mock_track.assert_called_once_with(
             self.basket.site, self.basket.owner, 'Payment Processor Response', properties
