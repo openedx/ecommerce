@@ -72,6 +72,9 @@ class StripeWebhooksProcessor(EdxOrderPlacementMixin, BasePaymentProcessor):
         Upon receipt of the payment_intent.succeeded event from Stripe, create an order, create a billing address,
         fulfill order, and save payment processor data.
         """
+        # Adding the request site needed for getting the partner.short_code from siteconfiguration
+        self.site = request.site
+
         # Get basket associated to the Payment Intent
         payment_intent_id = payment_intent['id']
         order_number = payment_intent['description']
@@ -98,7 +101,7 @@ class StripeWebhooksProcessor(EdxOrderPlacementMixin, BasePaymentProcessor):
             try:
                 self.record_processor_response(payment_intent, transaction_id=payment_intent_id, basket=basket)
                 logger.info(
-                    '[Dynamic Payment Methods] Successfully recorded Stripe payment intent [%s] '
+                    '[Dynamic Payment Methods] Successfully recorded Stripe response for payment intent [%s] '
                     'for basket [%d] and order number [%s].',
                     payment_intent_id,
                     basket.id,
@@ -120,7 +123,7 @@ class StripeWebhooksProcessor(EdxOrderPlacementMixin, BasePaymentProcessor):
                 self.record_payment(basket, handled_processor_response)
                 properties.update({'total': handled_processor_response.total, 'success': True, })
             finally:
-                # TODO: Differentiate event from regular payments?
+                properties.update({'payment_method': payment_method_type})
                 track_segment_event(basket.site, basket.owner, 'Payment Processor Response', properties)
 
             # Create Billing Address
