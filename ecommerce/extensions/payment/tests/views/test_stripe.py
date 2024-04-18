@@ -380,6 +380,38 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             assert len(mock_create.call_args.kwargs['metadata']['courses']) < 500
 
     @file_data('fixtures/test_stripe_test_payment_flow.json')
+    def test_capture_context_confirmable_status(
+            self,
+            confirm_resp,  # pylint: disable=unused-argument
+            confirm_resp_in_progress,  # pylint: disable=unused-argument
+            create_resp,  # pylint: disable=unused-argument
+            modify_resp,  # pylint: disable=unused-argument
+            cancel_resp,  # pylint: disable=unused-argument
+            refund_resp,  # pylint: disable=unused-argument
+            retrieve_addr_resp,
+            retrieve_resp_in_progress):  # pylint: disable=unused-argument
+        """
+        Verify that hitting capture-context with a Payment Intent that already exists and it's in a status that
+        can be confirmed, that a new Payment Intent is not created for this basket.
+        """
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        payment_intent_id = retrieve_addr_resp['id']
+        basket_add_payment_intent_id_attribute(basket, payment_intent_id)
+
+        with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
+            mock_retrieve.return_value = retrieve_addr_resp
+            # If Payment Intent already exists for this basket, and it's in a usable status that
+            # can later be confirmed, make sure we do not cancel and create a new Payment Intent.
+            with mock.patch('stripe.PaymentIntent.cancel') as mock_cancel:
+                self.client.get(self.capture_context_url)
+                mock_cancel.assert_not_called()
+                payment_intent_id = BasketAttribute.objects.get(
+                    basket=basket,
+                    attribute_type__name=PAYMENT_INTENT_ID_ATTRIBUTE
+                ).value_text
+                assert payment_intent_id == mock_retrieve.return_value['id']
+
+    @file_data('fixtures/test_stripe_test_payment_flow.json')
     def test_capture_context_in_progress_payment(
             self,
             confirm_resp,  # pylint: disable=unused-argument
