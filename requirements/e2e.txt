@@ -4,11 +4,11 @@
 #
 #    make upgrade
 #
-asgiref==3.7.2
+asgiref==3.8.1
     # via
     #   -c requirements/base.txt
     #   django
-certifi==2023.11.17
+certifi==2024.2.2
     # via
     #   -c requirements/base.txt
     #   requests
@@ -24,7 +24,7 @@ click==8.1.7
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-django==3.2.23
+django==3.2.25
     # via
     #   -c requirements/base.txt
     #   -c requirements/common_constraints.txt
@@ -39,40 +39,42 @@ django-waffle==4.1.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-edx-django-utils==5.9.0
+edx-django-utils==5.12.0
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-edx-rest-api-client==5.6.1
+edx-rest-api-client==5.7.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/e2e.in
-exceptiongroup==1.2.0
+exceptiongroup==1.2.1
     # via pytest
-future==0.18.3
+future==1.0.0
     # via pyjwkest
 idna==2.7
     # via
     #   -c requirements/base.txt
     #   -c requirements/constraints.txt
     #   requests
-importlib-metadata==7.0.1
-    # via pytest-randomly
+importlib-metadata==7.1.0
+    # via
+    #   -c requirements/base.txt
+    #   pytest-randomly
 iniconfig==2.0.0
     # via pytest
 jinja2==3.1.3
     # via
     #   -c requirements/base.txt
     #   pytest-html
-markupsafe==2.1.3
+markupsafe==2.1.5
     # via
     #   -c requirements/base.txt
     #   jinja2
-newrelic==9.5.0
+newrelic==9.9.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-packaging==23.2
+packaging==24.0
     # via
     #   -c requirements/base.txt
     #   pytest
@@ -84,11 +86,11 @@ pluggy==0.13.1
     # via
     #   -c requirements/constraints.txt
     #   pytest
-psutil==5.9.7
+psutil==5.9.8
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
-pycparser==2.21
+pycparser==2.22
     # via
     #   -c requirements/base.txt
     #   cffi
@@ -116,11 +118,11 @@ pytest==7.4.4
     #   pytest-selenium
     #   pytest-timeout
     #   pytest-variables
-pytest-base-url==2.0.0
+pytest-base-url==2.1.0
     # via pytest-selenium
 pytest-html==4.1.1
     # via pytest-selenium
-pytest-metadata==3.0.0
+pytest-metadata==3.1.1
     # via pytest-html
 pytest-randomly==3.15.0
     # via -r requirements/e2e.in
@@ -128,15 +130,15 @@ pytest-selenium==2.0.1
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/e2e.in
-pytest-timeout==2.2.0
+pytest-timeout==2.3.1
     # via -r requirements/e2e.in
 pytest-variables==2.0.0
     # via
     #   -c requirements/constraints.txt
     #   pytest-selenium
-python-dotenv==1.0.0
+python-dotenv==1.0.1
     # via -r requirements/e2e.in
-pytz==2023.3.post1
+pytz==2024.1
     # via
     #   -c requirements/base.txt
     #   django
@@ -162,11 +164,11 @@ slumber==0.7.1
     # via
     #   -c requirements/base.txt
     #   edx-rest-api-client
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via
     #   -c requirements/base.txt
     #   django
-stevedore==5.1.0
+stevedore==5.2.0
     # via
     #   -c requirements/base.txt
     #   edx-django-utils
@@ -174,7 +176,7 @@ tenacity==6.3.1
     # via pytest-selenium
 tomli==2.0.1
     # via pytest
-typing-extensions==4.9.0
+typing-extensions==4.11.0
     # via
     #   -c requirements/base.txt
     #   asgiref
@@ -184,7 +186,7 @@ urllib3==1.26.18
     #   -c requirements/constraints.txt
     #   requests
     #   selenium
-zipp==3.17.0
+zipp==3.18.1
     # via
     #   -c requirements/base.txt
     #   importlib-metadata

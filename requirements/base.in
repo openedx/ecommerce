@@ -40,7 +40,8 @@ httplib2==0.20.2
 inapppy==2.5.2
 jsonfield
 jsonfield2
-libsass==0.9.2
+libsass
+lxml[html_clean]
 markdown==3.4.3
 mysqlclient<1.5
 newrelic
