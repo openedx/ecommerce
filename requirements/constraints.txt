@@ -32,7 +32,6 @@ idna==2.7
 
 # TODO : Pinning this until we are sure there aren't any breaking changes, then we'll upgrade.
 celery<6.0.0
-libsass==0.23.0
 
 # social-auth-app-django 5.3.0 currently introduces a hanging migration for large table sizes
 # Pinning for now to reduce entropy
