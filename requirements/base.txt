@@ -34,8 +34,9 @@ babel==2.14.0
     # via django-oscar
 backoff==1.10.0
     # via analytics-python
-backports-zoneinfo[tzdata]==0.2.1
+backports-zoneinfo[tzdata]==0.2.1 ; python_version < "3.9"
     # via
+    #   -c requirements/constraints.txt
     #   celery
     #   djangorestframework
     #   kombu

@@ -51,3 +51,7 @@ pylint==2.12.2
 mccabe<0.7
 # pylint==2.12.2 requires wrapt<1.14
 wrapt<1.14
+
+# backports-zoneinfo comes by-default in newer versions of python
+# it gives error while building wheel with python>=3.9
+backports.zoneinfo ; python_version < "3.9"
