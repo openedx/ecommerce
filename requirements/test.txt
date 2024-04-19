@@ -513,7 +513,6 @@ lazy-object-proxy==1.10.0
     # via astroid
 libsass==0.23.0
     # via
-    #   -c requirements/constraints.txt
     #   -r requirements/base.txt
     #   django-libsass
 linecache2==1.0.0
