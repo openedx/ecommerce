@@ -160,12 +160,19 @@ router.register(
     order_views.ManualCourseEnrollmentOrderViewSet,
     basename='manual-course-enrollment-order'
 )
-router.register(r'partners', partner_views.PartnerViewSet) \
-    .register(r'catalogs', catalog_views.CatalogViewSet,
-              basename='partner-catalogs', parents_query_lookups=['partner_id'])
-router.register(r'partners', partner_views.PartnerViewSet) \
-    .register(r'products', product_views.ProductViewSet,
-              basename='partner-product', parents_query_lookups=['stockrecords__partner_id'])
+partner_router = router.register(r'partners', partner_views.PartnerViewSet, basename='partner')
+partner_router.register(
+    r'catalogs',
+    catalog_views.CatalogViewSet,
+    basename='partner-catalogs',
+    parents_query_lookups=['partner_id'],
+)
+partner_router.register(
+    r'products',
+    product_views.ProductViewSet,
+    basename='partner-product',
+    parents_query_lookups=['stockrecords__partner_id'],
+)
 router.register(r'products', product_views.ProductViewSet, basename='product')
 router.register(r'vouchers', voucher_views.VoucherViewSet, basename='vouchers')
 router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, basename='stockrecords')
