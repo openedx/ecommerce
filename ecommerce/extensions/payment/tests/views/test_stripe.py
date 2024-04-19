@@ -410,6 +410,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                     attribute_type__name=PAYMENT_INTENT_ID_ATTRIBUTE
                 ).value_text
                 assert payment_intent_id == mock_retrieve.return_value['id']
+                assert retrieve_addr_resp['status'] == 'requires_confirmation'
 
     @file_data('fixtures/test_stripe_test_payment_flow.json')
     def test_capture_context_in_progress_payment(
