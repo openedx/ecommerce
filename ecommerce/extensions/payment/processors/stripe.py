@@ -178,7 +178,16 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             if payment_intent_id:
                 stripe_response = stripe.PaymentIntent.retrieve(id=payment_intent_id)
                 status = stripe_response['status']
-                if status != 'requires_payment_method' or status != 'requires_confirmation':
+                logger.info(
+                    'Stripe capture-context called for basket [%d] and order number [%s] with '
+                    'existing Payment Intent [%s] with status [%s]',
+                    basket.id,
+                    basket.order_number,
+                    payment_intent_id,
+                    status,
+                )
+                confirmable_statuses = ['requires_payment_method', 'requires_confirmation']
+                if status not in confirmable_statuses:
                     # Payment Intent is in a non-confirmable status, must create a new one
                     stripe_response = self.cancel_and_create_new_payment_intent_for_basket(basket, payment_intent_id)
                 # If a Payment Intent exists in a confirmable status, it will skip the below else statement,
