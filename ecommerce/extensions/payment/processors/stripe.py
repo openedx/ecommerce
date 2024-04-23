@@ -108,11 +108,26 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
     def cancel_and_create_new_payment_intent_for_basket(self, basket, payment_intent_id):
         """
-        Create a new Stripe payment intent to associate with the current basket.
+        Cancel and create a new Stripe payment intent to associate with the current basket.
         This is used as a reset of the payment to allow payment retries when the intent gets into unexpected states.
         """
-        # Cancel existing Payment Intent
-        cancelled_payment_intent = stripe.PaymentIntent.cancel(payment_intent_id)
+        try:
+            # Cancel existing Payment Intent
+            stripe.PaymentIntent.cancel(payment_intent_id)
+            logger.info(
+                'Sucessfully cancelled Payment Intent [%s] for basket [%d] and order number [%s]',
+                payment_intent_id,
+                basket.id,
+                basket.order_number,
+            )
+        except stripe.error.InvalidRequestError:
+            logger.info(
+                'InvalidRequestError: Payment Intent [%s] for basket [%d] and order number [%s] '
+                'could not be canceled.',
+                payment_intent_id,
+                basket.id,
+                basket.order_number,
+            )
 
         # Create a new Payment Intent and add to the basket.
         # Pls note: idempotency_key is not used because we found that Stripe will "resuscitate" the
@@ -128,10 +143,10 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         )
         new_payment_intent_id = new_payment_intent['id']
         logger.info(
-            'Canceled Payment Intent [%s] and created new Payment Intent [%s] for basket [%d]',
-            cancelled_payment_intent['id'],
+            'Sucessfully created new Payment Intent [%s] for basket [%d] and order number [%s]',
             new_payment_intent_id,
             basket.id,
+            basket.order_number,
         )
         basket_add_payment_intent_id_attribute(basket, new_payment_intent_id)
         basket_add_dynamic_payment_methods_enabled(basket, new_payment_intent)
@@ -188,8 +203,11 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                 )
                 confirmable_statuses = ['requires_payment_method', 'requires_confirmation']
                 if status not in confirmable_statuses:
-                    # Payment Intent is in a non-confirmable status, must create a new one
+                    # Payment Intent is in a non-confirmable status, must create a new one.
+                    # This includes canceled status, since if one is create with idempotency key for an existing
+                    # payment with canceled status, it will not create a new Payment Intent.
                     stripe_response = self.cancel_and_create_new_payment_intent_for_basket(basket, payment_intent_id)
+
                 # If a Payment Intent exists in a confirmable status, it will skip the below else statement,
                 # aka not create another intent with the idempotency key this time around.
 
