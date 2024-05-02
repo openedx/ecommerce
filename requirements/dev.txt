@@ -87,9 +87,9 @@ billiard==4.2.0
     #   celery
 bleach==6.1.0
     # via -r requirements/test.txt
-boto3==1.34.87
+boto3==1.34.96
     # via -r requirements/test.txt
-botocore==1.34.87
+botocore==1.34.96
     # via
     #   -r requirements/test.txt
     #   boto3
@@ -155,7 +155,7 @@ coreschema==0.0.4
     # via
     #   -r requirements/test.txt
     #   coreapi
-coverage[toml]==7.4.4
+coverage[toml]==7.5.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -264,7 +264,7 @@ django-extra-views==0.14.0
     #   django-oscar
 django-filter==23.5
     # via -r requirements/test.txt
-django-haystack==3.2.1
+django-haystack==3.3b2
     # via
     #   -r requirements/test.txt
     #   django-oscar
@@ -319,6 +319,10 @@ djangorestframework-csv==3.0.2
     # via -r requirements/test.txt
 djangorestframework-datatables==0.7.1
     # via -r requirements/test.txt
+dnspython==2.6.1
+    # via
+    #   -r requirements/test.txt
+    #   pymongo
 docutils==0.19
     # via
     #   -r requirements/docs.txt
@@ -334,7 +338,7 @@ drf-yasg==1.21.7
     # via -r requirements/test.txt
 edx-auth-backends==4.3.0
     # via -r requirements/test.txt
-edx-braze-client==0.2.3
+edx-braze-client==0.2.5
     # via
     #   -r requirements/test.txt
     #   edx-ecommerce-worker
@@ -342,7 +346,7 @@ edx-django-release-util==1.4.0
     # via -r requirements/test.txt
 edx-django-sites-extensions==4.2.0
     # via -r requirements/test.txt
-edx-django-utils==5.12.0
+edx-django-utils==5.13.0
     # via
     #   -r requirements/test.txt
     #   django-config-models
@@ -355,13 +359,13 @@ edx-drf-extensions==10.3.0
     #   edx-rbac
 edx-ecommerce-worker==3.3.4
     # via -r requirements/test.txt
-edx-i18n-tools==1.5.0
+edx-i18n-tools==1.6.0
     # via -r requirements/test.txt
-edx-opaque-keys==2.5.1
+edx-opaque-keys==2.9.0
     # via
     #   -r requirements/test.txt
     #   edx-drf-extensions
-edx-rbac==1.8.0
+edx-rbac==1.9.0
     # via -r requirements/test.txt
 edx-rest-api-client==5.7.0
     # via
@@ -383,11 +387,11 @@ factory-boy==3.2.1
     # via
     #   -r requirements/test.txt
     #   django-oscar
-faker==24.11.0
+faker==25.0.0
     # via
     #   -r requirements/test.txt
     #   factory-boy
-filelock==3.13.4
+filelock==3.14.0
     # via
     #   -r requirements/test.txt
     #   tox
@@ -395,7 +399,7 @@ fixtures==4.1.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-freezegun==1.4.0
+freezegun==1.5.0
     # via -r requirements/test.txt
 frozenlist==1.4.1
     # via
@@ -412,11 +416,7 @@ future==1.0.0
     #   pyjwkest
 getsmarter-api-clients==0.6.1
     # via -r requirements/test.txt
-gitdb==4.0.11
-    # via gitpython
-gitpython==3.1.43
-    # via transifex-client
-google-api-core==2.18.0
+google-api-core==2.19.0
     # via
     #   -r requirements/test.txt
     #   google-api-python-client
@@ -514,7 +514,7 @@ jsonfield==3.1.0
     # via -r requirements/test.txt
 jsonfield2==4.0.0.post0
     # via -r requirements/test.txt
-jsonschema==4.21.1
+jsonschema==4.22.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
@@ -607,6 +607,7 @@ packaging==24.0
     # via
     #   -r requirements/docs.txt
     #   -r requirements/test.txt
+    #   django-haystack
     #   drf-yasg
     #   pydata-sphinx-theme
     #   pytest
@@ -642,7 +643,7 @@ pkgutil-resolve-name==1.3.10
     # via
     #   -r requirements/test.txt
     #   jsonschema
-platformdirs==4.2.0
+platformdirs==4.2.1
     # via
     #   -r requirements/test.txt
     #   pylint
@@ -746,7 +747,7 @@ pyjwt[crypto]==2.8.0
     #   social-auth-core
 pylint==2.12.2
     # via -r requirements/test.txt
-pymongo==3.13.0
+pymongo==4.4.0
     # via
     #   -r requirements/test.txt
     #   edx-opaque-keys
@@ -825,8 +826,6 @@ python-mimeparse==1.6.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-python-slugify==4.0.1
-    # via transifex-client
 python-subunit==1.4.4
     # via
     #   -r requirements/test.txt
@@ -866,11 +865,11 @@ rcssmin==1.1.1
     # via
     #   -r requirements/test.txt
     #   django-compressor
-redis==5.0.3
+redis==5.0.4
     # via
     #   -r requirements/test.txt
     #   edx-ecommerce-worker
-referencing==0.34.0
+referencing==0.35.1
     # via
     #   -r requirements/test.txt
     #   jsonschema
@@ -899,7 +898,6 @@ requests==2.31.0
     #   social-auth-core
     #   sphinx
     #   stripe
-    #   transifex-client
     #   zeep
 requests-file==2.0.0
     # via
@@ -977,8 +975,6 @@ slumber==0.7.1
     # via
     #   -r requirements/test.txt
     #   edx-rest-api-client
-smmap==5.0.1
-    # via gitdb
 snowballstemmer==2.2.0
     # via
     #   -r requirements/docs.txt
@@ -987,7 +983,7 @@ social-auth-app-django==5.2.0
     # via
     #   -r requirements/test.txt
     #   edx-auth-backends
-social-auth-core==4.5.3
+social-auth-core==4.5.4
     # via
     #   -r requirements/test.txt
     #   edx-auth-backends
@@ -1040,21 +1036,19 @@ stevedore==5.2.0
     #   -r requirements/test.txt
     #   edx-django-utils
     #   edx-opaque-keys
-stripe==9.3.0
+stripe==9.4.0
     # via -r requirements/test.txt
 tenacity==6.3.1
     # via
     #   -r requirements/test.txt
     #   pytest-selenium
-testfixtures==8.1.0
+testfixtures==8.2.0
     # via -r requirements/test.txt
 testtools==2.7.1
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
     #   python-subunit
-text-unidecode==1.3
-    # via python-slugify
 toml==0.10.2
     # via
     #   -r requirements/test.txt
@@ -1075,7 +1069,7 @@ traceback2==1.4.0
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-transifex-client==0.14.4
+transifex-client==0.12.5
     # via -r requirements/dev.in
 typing==3.7.4.3
     # via
@@ -1088,7 +1082,6 @@ typing-extensions==4.11.0
     #   asgiref
     #   astroid
     #   edx-opaque-keys
-    #   faker
     #   kombu
     #   pydata-sphinx-theme
     #   pylint
@@ -1158,7 +1151,7 @@ x509==0.1
     # via
     #   -r requirements/test.txt
     #   cybersource-rest-client-python
-xss-utils==0.5.0
+xss-utils==0.6.0
     # via -r requirements/test.txt
 yarl==1.9.4
     # via
