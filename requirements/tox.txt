@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-filelock==3.13.4
+filelock==3.14.0
     # via tox
 packaging==24.0
     # via tox

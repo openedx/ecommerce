@@ -4,7 +4,8 @@
 django-debug-toolbar
 
 # i18n
-transifex-client
+# newer version of transifex-client doesn't work with python3.12.2
+transifex-client==0.12.5
 
 # Visual Studio Code Debugger
 ptvsd
