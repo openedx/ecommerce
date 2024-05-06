@@ -213,7 +213,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                             data={
                                 'payment_intent_id': create_resp['id'],
                                 'skus': basket.lines.first().stockrecord.partner_sku,
-                                'dynamic_payment_methods_enabled': False,
+                                'dynamic_payment_methods_enabled': 'false',
                             },
                         )
                 assert mock_retrieve.call_count == 1
@@ -474,7 +474,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             data={
                 'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                 'skus': '',
-                'dynamic_payment_methods_enabled': False,
+                'dynamic_payment_methods_enabled': 'false',
             },
         )
         assert response.status_code == 302
@@ -492,7 +492,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': 'totally_the_wrong_sku',
-                    'dynamic_payment_methods_enabled': False,
+                    'dynamic_payment_methods_enabled': 'false',
                 },
             )
             assert response.json() == {'sku_error': True}
@@ -519,7 +519,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': basket.lines.first().stockrecord.partner_sku,
-                    'dynamic_payment_methods_enabled': False,
+                    'dynamic_payment_methods_enabled': 'false',
                 },
             )
             assert response.status_code == 400
@@ -537,7 +537,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             {
                 'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                 'skus': basket.lines.first().stockrecord.partner_sku,
-                'dynamic_payment_methods_enabled': True,
+                'dynamic_payment_methods_enabled': 'true',
             },
             in_progress_payment=True,
         )
@@ -558,7 +558,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             {
                 'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                 'skus': basket.lines.first().stockrecord.partner_sku,
-                'dynamic_payment_methods_enabled': False,
+                'dynamic_payment_methods_enabled': 'false',
             },
             confirm_side_effect=stripe.error.CardError('Oops!', {}, 'card_declined'),
         )
@@ -579,7 +579,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': basket.lines.first().stockrecord.partner_sku,
-                    'dynamic_payment_methods_enabled': False,
+                    'dynamic_payment_methods_enabled': 'false',
                 },
             )
             assert response.status_code == 400
