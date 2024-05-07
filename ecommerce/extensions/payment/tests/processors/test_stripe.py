@@ -1,5 +1,6 @@
 
 
+import json
 import logging
 
 import mock
@@ -17,93 +18,61 @@ log = logging.getLogger(__name__)
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 
+STRIPE_TEST_FIXTURE_PATH = 'ecommerce/extensions/payment/tests/views/fixtures/test_stripe_test_payment_flow.json'
+
 
 class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
     processor_class = Stripe
     processor_name = 'stripe'
 
+    def _get_response_data(self, response_type):
+        with open(STRIPE_TEST_FIXTURE_PATH, 'r') as fixtures:  # pylint: disable=unspecified-encoding
+            return json.load(fixtures)['happy_path'][response_type]
+
     def test_get_transaction_parameters(self):
         transaction_params = self.processor.get_transaction_parameters(self.basket)
         assert 'payment_page_url' in transaction_params.keys()
 
-    # TODO: update or remove these tests
     def test_handle_processor_response(self):
-        assert True
-        # payment_intent_1 = stripe.PaymentIntent.construct_from({
-        #     'id': 'pi_testtesttest',
-        #     'source': {
-        #         'brand': 'visa',
-        #         'last4': '4242',
-        #     },
-        # }, 'fake-key')
+        with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
+            mock_modify.return_value = self._get_response_data('modify_resp')
+            with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
+                confirm_response_data = self._get_response_data('confirm_resp')
+                mock_confirm.return_value = confirm_response_data
+                response = {
+                    'payment_intent_id': confirm_response_data['id'],
+                    'skus': self.basket.lines.first().stockrecord.partner_sku,
+                    'dynamic_payment_methods_enabled': 'false'
+                }
+                actual = self.processor.handle_processor_response(response, self.basket)
 
-        # payment_intent_2 = stripe.PaymentIntent.construct_from({
-        #     'id': 'pi_testtesttest',
-        #     'source': {
-        #         'brand': 'visa',
-        #         'last4': '4242',
-        #     },
-        #     'status': 'succeeded',
-        #     "charges": {
-        #         "object": "list",
-        #         "data": [
-        #             {
-        #                 "id": "ch_testtesttest",
-        #                 "object": "charge",
-        #                 "status": "succeeded",
-        #                 "payment_method_details": {
-        #                     "card": {
-        #                         "brand": "visa",
-        #                         "country": "US",
-        #                         "exp_month": 5,
-        #                         "exp_year": 2020,
-        #                         "fingerprint": "Xt5EWLLDS7FJjR1c",
-        #                         "funding": "credit",
-        #                         "last4": "4242",
-        #                         "network": "visa",
-        #                     },
-        #                     "type": "card"
-        #                 },
-        #             }
-        #         ]
-        #     }
-        # }, 'fake-key')
+                assert actual.transaction_id == confirm_response_data['id']
+                assert actual.total == self.basket.total_incl_tax
+                assert actual.currency == self.basket.currency
 
-        # with mock.patch('stripe.PaymentIntent.modify') as payment_intent_modify_mock:
-        #     with mock.patch('stripe.PaymentIntent.confirm') as payment_intent_confirm_mock:
-        #         payment_intent_modify_mock.return_value = payment_intent_1
-        #         payment_intent_confirm_mock.return_value = payment_intent_2
-        #         actual = self.processor.handle_processor_response(payment_intent_1, self.basket)
+                self.assert_processor_response_recorded(
+                    self.processor_name,
+                    confirm_response_data['id'],
+                    confirm_response_data,
+                    basket=self.basket
+                )
 
-        # assert actual.transaction_id == payment_intent_1.id
-        # assert actual.total == self.basket.total_incl_tax
-        # assert actual.currency == self.basket.currency
-
-        # self.assert_processor_response_recorded(
-        #     self.processor_name,
-        #     payment_intent_2.id,
-        #     payment_intent_2,
-        #     basket=self.basket
-        # )
-
-    # def test_handle_processor_response_error(self):
-    #     payment_intent_1 = stripe.PaymentIntent.construct_from({
-    #         'id': 'pi_testtesttest',
-    #         'source': {
-    #             'brand': 'visa',
-    #             'last4': '4242',
-    #         },
-    #     }, 'fake-key')
-    #     with mock.patch('stripe.PaymentIntent.modify') as charge_mock:
-    #         charge_mock.side_effect = stripe.error.CardError(
-    #             'fake-msg', 'fake-param', 'fake-code', http_body='fake-body', http_status=500
-    #         )
-    #         self.assertRaises(
-    #             TransactionDeclined,
-    #             self.processor.handle_processor_response,
-    #             payment_intent_1,
-    #             self.basket
-    #         )
+    def test_handle_processor_response_error(self):
+        with self.assertLogs(level='ERROR') as logger:
+            with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
+                mock_modify.return_value = self._get_response_data('modify_resp')
+                with mock.patch('stripe.PaymentIntent.confirm') as mock_confirm:
+                    mock_confirm.side_effect = stripe.error.CardError(
+                        'fake-msg', 'fake-param', 'fake-code', http_body='fake-body', http_status=500
+                    )
+                    confirm_response_data = self._get_response_data('confirm_resp')
+                    self.assertRaises(
+                        stripe.error.CardError,
+                        self.processor.handle_processor_response,
+                        confirm_response_data,
+                        self.basket
+                    )
+                    self.assertIn('Card Error for basket [{}]'.format(self.basket.id), logger.output[0])
 
     def test_issue_credit(self):
         charge_reference_number = '9436'
