@@ -276,7 +276,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # pretty sure we should simply return/error if basket is None, as not
         # sure what it would mean if there
         payment_intent_id = response.get('payment_intent_id', None)
-        dynamic_payment_methods_enabled = response.get('dynamic_payment_methods_enabled', None) == 'true'
+        dynamic_payment_methods_enabled = response.get('dynamic_payment_methods_enabled', None)
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
 
         # rewrite order amount so it's updated for coupon & quantity and unchanged by the user
