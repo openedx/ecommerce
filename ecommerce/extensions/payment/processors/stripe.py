@@ -207,7 +207,12 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                     # This includes canceled status, since if one is create with idempotency key for an existing
                     # payment with canceled status, it will not create a new Payment Intent.
                     stripe_response = self.cancel_and_create_new_payment_intent_for_basket(basket, payment_intent_id)
-
+                else:
+                    # Update the Payment Intent with the latest item in the cart
+                    stripe.PaymentIntent.modify(
+                        payment_intent_id,
+                        **self._build_payment_intent_parameters(basket),
+                    )
                 # If a Payment Intent exists in a confirmable status, it will skip the below else statement,
                 # aka not create another intent with the idempotency key this time around.
 
