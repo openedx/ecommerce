@@ -552,11 +552,12 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             expected_log = (
                 'INFO:ecommerce.extensions.payment.processors.stripe:'
                 'Confirmed Stripe payment intent [{}] for basket [{}] and order number [{}], '
-                'with dynamic_payment_methods_enabled [{}].'.format(
+                'with dynamic_payment_methods_enabled [{}] and status [{}].'.format(
                     payment_intent_id,
                     basket.id,
                     basket.order_number,
-                    dynamic_payment_methods_enabled
+                    dynamic_payment_methods_enabled,
+                    response.json()['status']
                 )
             )
             actual_log = log.output[6]

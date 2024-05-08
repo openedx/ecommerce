@@ -303,11 +303,12 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         logger.info(
             'Confirmed Stripe payment intent [%s] for basket [%d] and order number [%s], '
-            'with dynamic_payment_methods_enabled [%s].',
+            'with dynamic_payment_methods_enabled [%s] and status [%s].',
             payment_intent_id,
             basket.id,
             basket.order_number,
-            dynamic_payment_methods_enabled
+            dynamic_payment_methods_enabled,
+            confirm_api_response['status']
         )
 
         # If the payment has another status other than 'succeeded', we want to return to the MFE something it can handle
