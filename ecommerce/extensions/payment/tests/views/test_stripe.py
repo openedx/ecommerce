@@ -531,21 +531,36 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         with a 'requires_action' for a BNPL payment, which will be handled in the MFE.
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        payment_intent_id = 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+        dynamic_payment_methods_enabled = 'true'
 
-        response = self.payment_flow_with_mocked_stripe_calls(
-            self.stripe_checkout_url,
-            {
-                'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
-                'skus': basket.lines.first().stockrecord.partner_sku,
-                'dynamic_payment_methods_enabled': 'true',
-            },
-            in_progress_payment=True,
-        )
+        with self.assertLogs(level='INFO') as log:
+            response = self.payment_flow_with_mocked_stripe_calls(
+                self.stripe_checkout_url,
+                {
+                    'payment_intent_id': payment_intent_id,
+                    'skus': basket.lines.first().stockrecord.partner_sku,
+                    'dynamic_payment_methods_enabled': dynamic_payment_methods_enabled,
+                },
+                in_progress_payment=True,
+            )
 
-        assert response.status_code == 201
-        # Should return 'requires_action' to the MFE with the same Payment Intent
-        assert response.json()['status'] == 'requires_action'
-        assert response.json()['transaction_id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+            assert response.status_code == 201
+            # Should return 'requires_action' to the MFE with the same Payment Intent
+            assert response.json()['status'] == 'requires_action'
+            assert response.json()['transaction_id'] == payment_intent_id
+            expected_log = (
+                'INFO:ecommerce.extensions.payment.processors.stripe:'
+                'Confirmed Stripe payment intent [{}] for basket [{}] and order number [{}], '
+                'with dynamic_payment_methods_enabled [{}].'.format(
+                    payment_intent_id,
+                    basket.id,
+                    basket.order_number,
+                    dynamic_payment_methods_enabled
+                )
+            )
+            actual_log = log.output[6]
+            assert actual_log == expected_log
 
     def test_handle_payment_fails_with_carderror(self):
         """
