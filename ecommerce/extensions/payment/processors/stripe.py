@@ -276,7 +276,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         # pretty sure we should simply return/error if basket is None, as not
         # sure what it would mean if there
         payment_intent_id = response.get('payment_intent_id', None)
-        dynamic_payment_methods_enabled = response.get('dynamic_payment_methods_enabled', None) == 'true'
+        dynamic_payment_methods_enabled = response.get('dynamic_payment_methods_enabled', None)
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
 
         # rewrite order amount so it's updated for coupon & quantity and unchanged by the user
@@ -301,25 +301,34 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             logger.exception('Card Error for basket [%d]: %s}', basket.id, err)
             raise
 
+        logger.info(
+            'Confirmed Stripe payment intent [%s] for basket [%d] and order number [%s], '
+            'with dynamic_payment_methods_enabled [%s] and status [%s].',
+            payment_intent_id,
+            basket.id,
+            basket.order_number,
+            dynamic_payment_methods_enabled,
+            confirm_api_response['status']
+        )
+
         # If the payment has another status other than 'succeeded', we want to return to the MFE something it can handle
-        if dynamic_payment_methods_enabled:
-            if confirm_api_response['status'] == 'requires_action':
-                return InProgressProcessorResponse(
-                    basket_id=basket.id,
-                    order_number=basket.order_number,
-                    status=confirm_api_response['status'],
-                    confirmation_client_secret=confirm_api_response['client_secret'],
-                    transaction_id=confirm_api_response['id'],
-                    payment_method=confirm_api_response['payment_method'],
-                    total=confirm_api_response['amount'],
-                )
+        if confirm_api_response['status'] == 'requires_action':
+            return InProgressProcessorResponse(
+                basket_id=basket.id,
+                order_number=basket.order_number,
+                status=confirm_api_response['status'],
+                confirmation_client_secret=confirm_api_response['client_secret'],
+                transaction_id=confirm_api_response['id'],
+                payment_method=confirm_api_response['payment_method'],
+                total=confirm_api_response['amount'],
+            )
 
         # proceed only if payment went through
         assert confirm_api_response['status'] == "succeeded"
         self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
 
         logger.info(
-            'Successfully confirmed Stripe payment intent [%s] for basket [%d] and order number [%s].',
+            'Confirmed Stripe payment intent with succeeded status [%s] for basket [%d] and order number [%s].',
             payment_intent_id,
             basket.id,
             basket.order_number,
