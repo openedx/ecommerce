@@ -17,7 +17,7 @@ from ecommerce.core.constants import (
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE
-from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute
+from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute, get_basket_courses_list
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
@@ -244,7 +244,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             basket=basket
         )
 
-    def test_capture_context_basket_price_change(self):
+    def test_capture_context_basket_change(self):
         """
         Verify that existing payment intent is retrieved,
         and that we do not error with an IdempotencyError in this case: capture
@@ -288,6 +288,50 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 self.client.get(self.capture_context_url)
                 mock_retrieve.assert_called_once()
                 assert mock_retrieve.call_args.kwargs['id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+
+    def test_capture_context_basket_price_change(self):
+        """
+        Verify that when capture-context is hit, if the basket has a pre-existing Payment Intent,
+        we keep the Payment Intent updated in case the contents of the basket has changed, especially the amount.
+        """
+        # Create a basket with an existing Payment Intent
+        payment_intent_id = 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        basket_add_payment_intent_id_attribute(basket, payment_intent_id)
+
+        # Hit the capture-context endpoint where the basket already has a Payment Intent
+        # and should make a modify call to Stripe.
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
+                mock_retrieve.return_value = {
+                    'id': payment_intent_id,
+                    'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+                    'status': 'requires_payment_method'
+                }
+                with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
+                    mock_modify.return_value = {
+                        'id': payment_intent_id,
+                        'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+                        'status': 'requires_payment_method',
+                        'amount': basket.total_incl_tax
+                    }
+                    courses = get_basket_courses_list(basket)
+                    courses_metadata = str(courses)[:499] if courses else None
+                    payment_intent_parameters = {
+                        'amount': str((basket.total_incl_tax * 100).to_integral_value()),
+                        'currency': basket.currency,
+                        'description': basket.order_number,
+                        'metadata': {
+                            'order_number': basket.order_number,
+                            'courses': courses_metadata,
+                        },
+                    }
+
+                    self.client.get(self.capture_context_url)
+                    mock_create.assert_not_called()
+                    mock_retrieve.assert_called_once()
+                    mock_modify.assert_called_once_with(payment_intent_id, **payment_intent_parameters)
+                    assert mock_retrieve.call_args.kwargs['id'] == payment_intent_id
 
     def test_capture_context_empty_basket(self):
         basket = create_basket(owner=self.user, site=self.site)
