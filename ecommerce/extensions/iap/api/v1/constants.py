@@ -1,6 +1,7 @@
 """ Constants for iap extension apis v1 """
 
 COURSE_ADDED_TO_BASKET = "Course added to the basket successfully"
+COURSE_ADDED_AND_CHECKED_OUT_BASKET = "Course added to the basket and basket checked out successfully"
 COURSE_ALREADY_PAID_ON_DEVICE = "The course upgrade has already been paid for by the user."
 DISABLE_REDUNDANT_PAYMENT_CHECK_MOBILE_SWITCH_NAME = "disable_redundant_payment_check_for_mobile"
 ERROR_ALREADY_PURCHASED = "You have already purchased these products"

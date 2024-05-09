@@ -38,6 +38,7 @@ from ecommerce.extensions.basket.utils import (
 from ecommerce.extensions.basket.views import BasketLogicMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.iap.api.v1.constants import (
+    COURSE_ADDED_AND_CHECKED_OUT_BASKET,
     COURSE_ADDED_TO_BASKET,
     COURSE_ALREADY_PAID_ON_DEVICE,
     ERROR_ALREADY_PURCHASED,
@@ -163,6 +164,53 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
             raise BadRequestException(_(NO_PRODUCT_AVAILABLE))
 
         return available_products
+
+
+class BasketCheckoutView(MobileBasketAddItemsView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
+        track_segment_event(request.site, request.user, SEGMENT_MOBILE_BASKET_ADD, {'emitted_at': time.time()})
+
+        try:
+            skus = self._get_skus(request)
+            products = self._get_products(request, skus)
+
+            logger.info(LOGGER_STARTING_PAYMENT_FLOW, request.user.username, skus)
+
+            available_products = self._get_available_products(request, products)
+
+            try:
+                basket = prepare_basket(request, available_products)
+            except AlreadyPlacedOrderException:
+                logger.exception(LOGGER_BASKET_ALREADY_PURCHASED, request.user.username, skus)
+                return JsonResponse({'error': _(ERROR_ALREADY_PURCHASED)}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            set_email_preference_on_basket(request, basket)
+
+            logger.info(LOGGER_BASKET_CREATED, request.user.username, skus)
+            request.data._mutable = True  # pylint: disable=W0212
+            request.data['basket_id'] = basket.id
+            response = CheckoutView.as_view()(request._request)  # pylint: disable=W0212
+            if response.status_code != 200:
+                logger.exception(LOGGER_CHECKOUT_ERROR, response.content.decode(), response.status_code)
+                return JsonResponse({'error': response.content.decode()}, status=response.status_code)
+
+            return JsonResponse({'success': _(COURSE_ADDED_AND_CHECKED_OUT_BASKET), 'basket_id': basket.id},
+                                status=status.HTTP_200_OK)
+
+        except BadRequestException as exc:
+            logger.exception(LOGGER_BASKET_CREATION_FAILED, request.user.username, str(exc))
+            return JsonResponse({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def _get_skus(self, request):
+        skus = [escape(sku) for sku in request.data.getlist('sku')]
+        if not skus:
+            raise BadRequestException(_('No SKUs provided.'))
+
+        return skus
 
 
 class MobileCheckoutView(APIView):
