@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 Applicator = get_class('offer.applicator', 'Applicator')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
+Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
@@ -145,10 +146,16 @@ class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         self.skipTest('Webhooks payments processor does not yet support issuing credit.')
 
+    @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.create_order')
     @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order')
     @mock.patch('stripe.PaymentIntent.retrieve')
     @mock.patch('ecommerce.extensions.payment.processors.webhooks.track_segment_event')
-    def test_handle_webhooks_payment(self, mock_track, mock_retrieve, mock_handle_post_order):
+    def test_handle_webhooks_payment(
+            self,
+            mock_track,
+            mock_retrieve,
+            mock_handle_post_order,
+            mock_create_order):
         """
         Verify a payment received via Stripe webhooks is processed, an order is created and fulfilled.
         """
@@ -181,13 +188,13 @@ class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
         mock_track.assert_called_once_with(
             self.basket.site, self.basket.owner, 'Payment Processor Response', properties
         )
+        mock_create_order.assert_called_once()
         mock_handle_post_order.assert_called_once()
 
-    @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.create_order')
     @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order')
     @mock.patch('stripe.PaymentIntent.retrieve')
     @mock.patch('ecommerce.extensions.payment.processors.webhooks.track_segment_event')
-    def test_handle_webhooks_payment_with_voucher(self, mock_track, mock_retrieve, mock_handle_post_order, mock_create_order):
+    def test_handle_webhooks_payment_with_voucher(self, mock_track, mock_retrieve, mock_handle_post_order):
         """
         Verify a payment received via Stripe webhooks is processed, an order is created and fulfilled with a coupon.
         """
@@ -231,6 +238,7 @@ class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
         mock_track.assert_called_once_with(
             basket.site, basket.owner, 'Payment Processor Response', properties
         )
-        mock_create_order.assert_called_once()
         mock_handle_post_order.assert_called_once()
-        assert basket.total_incl_tax != basket.total_excl_tax_excl_discounts
+        order = Order.objects.get(number=basket.order_number)
+        assert order.total_incl_tax == basket.total_incl_tax
+        assert basket.total_incl_tax != basket.total_incl_tax_excl_discounts
