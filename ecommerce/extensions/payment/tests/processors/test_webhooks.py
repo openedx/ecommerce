@@ -5,17 +5,22 @@ import logging
 import mock
 from django.test import RequestFactory
 from oscar.core.loading import get_class, get_model
+from oscar.test.factories import RangeFactory
 
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute
 from ecommerce.extensions.payment.processors.webhooks import StripeWebhooksProcessor
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
+from ecommerce.extensions.test.factories import create_basket, prepare_voucher
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 log = logging.getLogger(__name__)
 
+Applicator = get_class('offer.applicator', 'Applicator')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
+Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
@@ -38,17 +43,20 @@ class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
         return OrderNumberGenerator().order_number(basket)
 
     def _build_payment_intent_data(self, basket, payment_intent_status=None):
+        # Apply coupon to basket so that the mocked return from Stripe has the discounted amount
+        Applicator().apply(basket, self.request.user, self.request)
+
         return {
             "id": "pi_3OzUOMH4caH7G0X114tkIL0X",
             "object": "payment_intent",
             "status": "succeeded",
-            "amount": 14900,
+            "amount": basket.total_incl_tax,
             "charges": {
                 "object": "list",
                 "data": [{
                     "id": "py_3OzUOMH4caH7G0X11OOKbfIk",
                     "object": "charge",
-                    "amount": 14900,
+                    "amount": basket.total_incl_tax,
                     "billing_details": {
                         "address": {
                             "city": "Beverly Hills",
@@ -138,10 +146,16 @@ class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         self.skipTest('Webhooks payments processor does not yet support issuing credit.')
 
+    @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.create_order')
     @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order')
     @mock.patch('stripe.PaymentIntent.retrieve')
     @mock.patch('ecommerce.extensions.payment.processors.webhooks.track_segment_event')
-    def test_handle_webhooks_payment(self, mock_track, mock_retrieve, mock_handle_post_order):
+    def test_handle_webhooks_payment(
+            self,
+            mock_track,
+            mock_retrieve,
+            mock_handle_post_order,
+            mock_create_order):
         """
         Verify a payment received via Stripe webhooks is processed, an order is created and fulfilled.
         """
@@ -174,4 +188,57 @@ class StripeWebhooksProcessorTests(PaymentProcessorTestCaseMixin, TestCase):
         mock_track.assert_called_once_with(
             self.basket.site, self.basket.owner, 'Payment Processor Response', properties
         )
+        mock_create_order.assert_called_once()
         mock_handle_post_order.assert_called_once()
+
+    @mock.patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.handle_post_order')
+    @mock.patch('stripe.PaymentIntent.retrieve')
+    @mock.patch('ecommerce.extensions.payment.processors.webhooks.track_segment_event')
+    def test_handle_webhooks_payment_with_voucher(self, mock_track, mock_retrieve, mock_handle_post_order):
+        """
+        Verify a payment received via Stripe webhooks is processed, an order is created and fulfilled with a coupon.
+        """
+        # Create a basket, add a voucher without applying
+        basket = create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        voucher, product = prepare_voucher(
+            _range=RangeFactory(includes_all_products=True),
+            benefit_value=10,
+            code='test101'
+        )
+        basket.vouchers.add(voucher)
+        basket.add_product(product)
+
+        succeeded_payment_intent = self._build_payment_intent_data(basket, payment_intent_status='succeeded')
+
+        # Need to associate the Payment Intent to the Basket
+        basket_add_payment_intent_id_attribute(basket, succeeded_payment_intent['id'])
+
+        mock_retrieve.return_value = {
+            'id': succeeded_payment_intent['id'],
+            'client_secret': succeeded_payment_intent['client_secret'],
+            'payment_method': {
+                'id': succeeded_payment_intent['payment_method'],
+                'object': 'payment_method',
+                'billing_details': succeeded_payment_intent['charges']['data'][0]['billing_details'],
+                'type': succeeded_payment_intent['charges']['data'][0]['payment_method_details']['type']
+            },
+            'amount': succeeded_payment_intent['amount']
+        }
+        self.processor_class(self.site).handle_webhooks_payment(
+            self.request, succeeded_payment_intent, 'affirm'
+        )
+        properties = {
+            'basket_id': basket.id,
+            'processor_name': 'stripe',
+            'stripe_enabled': True,
+            'total': basket.total_incl_tax,
+            'success': True,
+            'payment_method': succeeded_payment_intent['charges']['data'][0]['payment_method_details']['type'],
+        }
+        mock_track.assert_called_once_with(
+            basket.site, basket.owner, 'Payment Processor Response', properties
+        )
+        mock_handle_post_order.assert_called_once()
+        order = Order.objects.get(number=basket.order_number)
+        assert order.total_incl_tax == basket.total_incl_tax
+        assert basket.total_incl_tax != basket.total_incl_tax_excl_discounts
