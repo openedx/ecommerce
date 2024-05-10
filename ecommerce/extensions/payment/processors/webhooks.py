@@ -15,6 +15,7 @@ from ecommerce.extensions.payment.processors.stripe import Stripe
 
 logger = logging.getLogger(__name__)
 
+Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
@@ -82,6 +83,11 @@ class StripeWebhooksProcessor(EdxOrderPlacementMixin, BasePaymentProcessor):
         try:
             basket = Basket.objects.get(id=basket_id)
             basket.strategy = strategy.Default()
+
+            # Even though at this stage the basket has been submitted, because we never save the voucher
+            # application in other parts of the code where the voucher is applied to the basket,
+            # we need to apply it to the basket here.
+            Applicator().apply(basket, request.user, request)
         except Basket.DoesNotExist:
             logger.exception(
                 '[Dynamic Payment Methods] Basket with ID %d does not exist.'
