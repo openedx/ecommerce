@@ -2,9 +2,9 @@ from django.conf.urls import url
 
 from ecommerce.extensions.iap.api.v1.views import (
     AndroidRefundView,
-    MobileBasketCheckoutView,
     IOSRefundView,
     MobileBasketAddItemsView,
+    MobileBasketCheckoutView,
     MobileCheckoutView,
     MobileCoursePurchaseExecutionView,
     MobileSkusCreationView
