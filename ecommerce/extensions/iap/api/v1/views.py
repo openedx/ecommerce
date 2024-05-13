@@ -166,7 +166,7 @@ class MobileBasketAddItemsView(BasketLogicMixin, APIView):
         return available_products
 
 
-class BasketCheckoutView(MobileBasketAddItemsView):
+class MobileBasketCheckoutView(MobileBasketAddItemsView):
 
     permission_classes = (IsAuthenticated,)
 
