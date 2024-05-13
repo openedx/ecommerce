@@ -17,7 +17,7 @@ from ecommerce.core.constants import (
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.basket.constants import PAYMENT_INTENT_ID_ATTRIBUTE
-from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute
+from ecommerce.extensions.basket.utils import basket_add_payment_intent_id_attribute, get_basket_courses_list
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
@@ -172,7 +172,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         """
         Verify that the stripe payment flow, hitting capture-context and
         stripe-checkout urls, results in a basket associated with the correct
-        stripe payment_intent_id.
+        stripe payment_intent_id, and a processor response is recorded.
 
         Args:
             confirm_resp: Response for confirm call on payment purchase
@@ -211,9 +211,9 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                         self.client.post(
                             self.stripe_checkout_url,
                             data={
-                                'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
+                                'payment_intent_id': create_resp['id'],
                                 'skus': basket.lines.first().stockrecord.partner_sku,
-                                'dynamic_payment_methods_enabled': False,
+                                'dynamic_payment_methods_enabled': 'false',
                             },
                         )
                 assert mock_retrieve.call_count == 1
@@ -235,10 +235,16 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         pprs = PaymentProcessorResponse.objects.filter(
             transaction_id="pi_3LsftNIadiFyUl1x2TWxaADZ"
         )
-        # created when andle_processor_response is successful
+        # created when handle_processor_response is successful
         assert pprs.count() == 1
+        self.assert_processor_response_recorded(
+            Stripe.NAME,
+            confirm_resp['id'],
+            confirm_resp,
+            basket=basket
+        )
 
-    def test_capture_context_basket_price_change(self):
+    def test_capture_context_basket_change(self):
         """
         Verify that existing payment intent is retrieved,
         and that we do not error with an IdempotencyError in this case: capture
@@ -282,6 +288,50 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 self.client.get(self.capture_context_url)
                 mock_retrieve.assert_called_once()
                 assert mock_retrieve.call_args.kwargs['id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+
+    def test_capture_context_basket_price_change(self):
+        """
+        Verify that when capture-context is hit, if the basket has a pre-existing Payment Intent,
+        we keep the Payment Intent updated in case the contents of the basket has changed, especially the amount.
+        """
+        # Create a basket with an existing Payment Intent
+        payment_intent_id = 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+        basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        basket_add_payment_intent_id_attribute(basket, payment_intent_id)
+
+        # Hit the capture-context endpoint where the basket already has a Payment Intent
+        # and should make a modify call to Stripe.
+        with mock.patch('stripe.PaymentIntent.create') as mock_create:
+            with mock.patch('stripe.PaymentIntent.retrieve') as mock_retrieve:
+                mock_retrieve.return_value = {
+                    'id': payment_intent_id,
+                    'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+                    'status': 'requires_payment_method'
+                }
+                with mock.patch('stripe.PaymentIntent.modify') as mock_modify:
+                    mock_modify.return_value = {
+                        'id': payment_intent_id,
+                        'client_secret': 'pi_3LsftNIadiFyUl1x2TWxaADZ_secret_VxRx7Y1skyp0jKtq7Gdu80Xnh',
+                        'status': 'requires_payment_method',
+                        'amount': basket.total_incl_tax
+                    }
+                    courses = get_basket_courses_list(basket)
+                    courses_metadata = str(courses)[:499] if courses else None
+                    payment_intent_parameters = {
+                        'amount': str((basket.total_incl_tax * 100).to_integral_value()),
+                        'currency': basket.currency,
+                        'description': basket.order_number,
+                        'metadata': {
+                            'order_number': basket.order_number,
+                            'courses': courses_metadata,
+                        },
+                    }
+
+                    self.client.get(self.capture_context_url)
+                    mock_create.assert_not_called()
+                    mock_retrieve.assert_called_once()
+                    mock_modify.assert_called_once_with(payment_intent_id, **payment_intent_parameters)
+                    assert mock_retrieve.call_args.kwargs['id'] == payment_intent_id
 
     def test_capture_context_empty_basket(self):
         basket = create_basket(owner=self.user, site=self.site)
@@ -468,7 +518,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             data={
                 'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                 'skus': '',
-                'dynamic_payment_methods_enabled': False,
+                'dynamic_payment_methods_enabled': 'false',
             },
         )
         assert response.status_code == 302
@@ -486,7 +536,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': 'totally_the_wrong_sku',
-                    'dynamic_payment_methods_enabled': False,
+                    'dynamic_payment_methods_enabled': 'false',
                 },
             )
             assert response.json() == {'sku_error': True}
@@ -513,7 +563,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': basket.lines.first().stockrecord.partner_sku,
-                    'dynamic_payment_methods_enabled': False,
+                    'dynamic_payment_methods_enabled': 'false',
                 },
             )
             assert response.status_code == 400
@@ -525,21 +575,37 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
         with a 'requires_action' for a BNPL payment, which will be handled in the MFE.
         """
         basket = self.create_basket(product_class=SEAT_PRODUCT_CLASS_NAME)
+        payment_intent_id = 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+        dynamic_payment_methods_enabled = 'true'
 
-        response = self.payment_flow_with_mocked_stripe_calls(
-            self.stripe_checkout_url,
-            {
-                'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
-                'skus': basket.lines.first().stockrecord.partner_sku,
-                'dynamic_payment_methods_enabled': True,
-            },
-            in_progress_payment=True,
-        )
+        with self.assertLogs(level='INFO') as log:
+            response = self.payment_flow_with_mocked_stripe_calls(
+                self.stripe_checkout_url,
+                {
+                    'payment_intent_id': payment_intent_id,
+                    'skus': basket.lines.first().stockrecord.partner_sku,
+                    'dynamic_payment_methods_enabled': dynamic_payment_methods_enabled,
+                },
+                in_progress_payment=True,
+            )
 
-        assert response.status_code == 201
-        # Should return 'requires_action' to the MFE with the same Payment Intent
-        assert response.json()['status'] == 'requires_action'
-        assert response.json()['transaction_id'] == 'pi_3LsftNIadiFyUl1x2TWxaADZ'
+            assert response.status_code == 201
+            # Should return 'requires_action' to the MFE with the same Payment Intent
+            assert response.json()['status'] == 'requires_action'
+            assert response.json()['transaction_id'] == payment_intent_id
+            expected_log = (
+                'INFO:ecommerce.extensions.payment.processors.stripe:'
+                'Confirmed Stripe payment intent [{}] for basket [{}] and order number [{}], '
+                'with dynamic_payment_methods_enabled [{}] and status [{}].'.format(
+                    payment_intent_id,
+                    basket.id,
+                    basket.order_number,
+                    dynamic_payment_methods_enabled,
+                    response.json()['status']
+                )
+            )
+            actual_log = log.output[6]
+            assert actual_log == expected_log
 
     def test_handle_payment_fails_with_carderror(self):
         """
@@ -552,7 +618,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
             {
                 'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                 'skus': basket.lines.first().stockrecord.partner_sku,
-                'dynamic_payment_methods_enabled': False,
+                'dynamic_payment_methods_enabled': 'false',
             },
             confirm_side_effect=stripe.error.CardError('Oops!', {}, 'card_declined'),
         )
@@ -573,7 +639,7 @@ class StripeCheckoutViewTests(PaymentEventsMixin, TestCase):
                 {
                     'payment_intent_id': 'pi_3LsftNIadiFyUl1x2TWxaADZ',
                     'skus': basket.lines.first().stockrecord.partner_sku,
-                    'dynamic_payment_methods_enabled': False,
+                    'dynamic_payment_methods_enabled': 'false',
                 },
             )
             assert response.status_code == 400

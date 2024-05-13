@@ -207,7 +207,12 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
                     # This includes canceled status, since if one is create with idempotency key for an existing
                     # payment with canceled status, it will not create a new Payment Intent.
                     stripe_response = self.cancel_and_create_new_payment_intent_for_basket(basket, payment_intent_id)
-
+                else:
+                    # Update the Payment Intent with the latest item in the cart
+                    stripe.PaymentIntent.modify(
+                        payment_intent_id,
+                        **self._build_payment_intent_parameters(basket),
+                    )
                 # If a Payment Intent exists in a confirmable status, it will skip the below else statement,
                 # aka not create another intent with the idempotency key this time around.
 
@@ -275,8 +280,8 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def handle_processor_response(self, response, basket=None):
         # pretty sure we should simply return/error if basket is None, as not
         # sure what it would mean if there
-        payment_intent_id = response['payment_intent_id']
-        dynamic_payment_methods_enabled = response['dynamic_payment_methods_enabled']
+        payment_intent_id = response.get('payment_intent_id', None)
+        dynamic_payment_methods_enabled = response.get('dynamic_payment_methods_enabled', None)
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
 
         # rewrite order amount so it's updated for coupon & quantity and unchanged by the user
@@ -301,25 +306,34 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             logger.exception('Card Error for basket [%d]: %s}', basket.id, err)
             raise
 
+        logger.info(
+            'Confirmed Stripe payment intent [%s] for basket [%d] and order number [%s], '
+            'with dynamic_payment_methods_enabled [%s] and status [%s].',
+            payment_intent_id,
+            basket.id,
+            basket.order_number,
+            dynamic_payment_methods_enabled,
+            confirm_api_response['status']
+        )
+
         # If the payment has another status other than 'succeeded', we want to return to the MFE something it can handle
-        if dynamic_payment_methods_enabled:
-            if confirm_api_response['status'] == 'requires_action':
-                return InProgressProcessorResponse(
-                    basket_id=basket.id,
-                    order_number=basket.order_number,
-                    status=confirm_api_response['status'],
-                    confirmation_client_secret=confirm_api_response['client_secret'],
-                    transaction_id=confirm_api_response['id'],
-                    payment_method=confirm_api_response['payment_method'],
-                    total=confirm_api_response['amount'],
-                )
+        if confirm_api_response['status'] == 'requires_action':
+            return InProgressProcessorResponse(
+                basket_id=basket.id,
+                order_number=basket.order_number,
+                status=confirm_api_response['status'],
+                confirmation_client_secret=confirm_api_response['client_secret'],
+                transaction_id=confirm_api_response['id'],
+                payment_method=confirm_api_response['payment_method'],
+                total=confirm_api_response['amount'],
+            )
 
         # proceed only if payment went through
         assert confirm_api_response['status'] == "succeeded"
         self.record_processor_response(confirm_api_response, transaction_id=payment_intent_id, basket=basket)
 
         logger.info(
-            'Successfully confirmed Stripe payment intent [%s] for basket [%d] and order number [%s].',
+            'Confirmed Stripe payment intent with succeeded status [%s] for basket [%d] and order number [%s].',
             payment_intent_id,
             basket.id,
             basket.order_number,
