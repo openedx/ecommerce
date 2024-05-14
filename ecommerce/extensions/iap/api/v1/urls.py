@@ -4,12 +4,14 @@ from ecommerce.extensions.iap.api.v1.views import (
     AndroidRefundView,
     IOSRefundView,
     MobileBasketAddItemsView,
+    MobileBasketCheckoutView,
     MobileCheckoutView,
     MobileCoursePurchaseExecutionView,
     MobileSkusCreationView
 )
 
 urlpatterns = [
+    url(r'^basket-checkout/$', MobileBasketCheckoutView.as_view(), name='mobile-basket-checkout'),
     url(r'^basket/add/$', MobileBasketAddItemsView.as_view(), name='mobile-basket-add'),
     url(r'^checkout/$', MobileCheckoutView.as_view(), name='iap-checkout'),
     url(r'^execute/$', MobileCoursePurchaseExecutionView.as_view(), name='iap-execute'),

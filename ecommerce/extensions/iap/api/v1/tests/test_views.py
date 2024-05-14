@@ -96,6 +96,7 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
     """ MobileBasketAddItemsView view tests. """
     path = reverse('iap:mobile-basket-add')
     logger_name = 'ecommerce.extensions.iap.api.v1.views'
+    basket_status = Basket.OPEN
 
     def setUp(self):
         super(MobileBasketAddItemsViewTests, self).setUp()
@@ -115,6 +116,12 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
             url += '&{}={}'.format(name, value)
         return self.client.get(url)
 
+    def get_basket_from_response(self, response):
+        request = response.wsgi_request
+        basket_id = response.json()['basket_id']
+        basket = request.user.baskets.get(id=basket_id)
+        return basket
+
     def test_add_multiple_products_to_basket(self):
         """ Verify the basket accepts multiple products. """
         with LogCapture(self.logger_name) as logger:
@@ -125,16 +132,15 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
             logger.check((self.logger_name, 'INFO', LOGGER_STARTING_PAYMENT_FLOW % (self.user.username, skus)),
                          (self.logger_name, 'INFO', LOGGER_BASKET_CREATED % (self.user.username, skus)))
 
-        request = response.wsgi_request
-        basket = Basket.get_basket(request.user, request.site)
-        self.assertEqual(basket.status, Basket.OPEN)
+        basket = self.get_basket_from_response(response)
+        self.assertEqual(basket.status, self.basket_status)
         self.assertEqual(basket.lines.count(), len(products))
 
     def test_add_multiple_products_no_skus_provided(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
         with LogCapture(self.logger_name) as logger:
             error = 'No SKUs provided.'
-            response = self.client.get(self.path)
+            response = self._get_response([])
             self.assertEqual(response.status_code, 400)
             self.assertEqual(response.json()['error'], error)
             logger.check((self.logger_name, 'ERROR', LOGGER_BASKET_CREATION_FAILED % (self.user.username, error)))
@@ -144,7 +150,7 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
         Verify that adding multiple products to the basket results in an error if
         the products do not exist.
         """
-        response = self.client.get(self.path, data=[('sku', 1), ('sku', 2)])
+        response = self._get_response([1, 2])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], PRODUCTS_DO_NOT_EXIST.format(skus='1, 2'))
 
@@ -199,8 +205,7 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
         products.append(OrderLine.objects.get(order=order).product)
         response = self._get_response([product.stockrecords.first().partner_sku for product in products])
-        request = response.wsgi_request
-        basket = Basket.get_basket(request.user, request.site)
+        basket = self.get_basket_from_response(response)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(basket.lines.count(), len(products) - 1)
 
@@ -227,9 +232,8 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
         response = self._get_response([product.stockrecords.first().partner_sku for product in products])
         self.assertEqual(response.status_code, 200)
 
-        request = response.wsgi_request
-        basket = Basket.get_basket(request.user, request.site)
-        self.assertEqual(basket.status, Basket.OPEN)
+        basket = self.get_basket_from_response(response)
+        self.assertEqual(basket.status, self.basket_status)
 
     @ddt.data(
         ('false', 'False'),
@@ -241,8 +245,7 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
         Verify the email_opt_in query string is saved into a BasketAttribute.
         """
         response = self._get_response(self.stock_record.partner_sku, email_opt_in=opt_in)
-        request = response.wsgi_request
-        basket = Basket.get_basket(request.user, request.site)
+        basket = self.get_basket_from_response(response)
         basket_attribute = BasketAttribute.objects.get(
             basket=basket,
             attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
@@ -254,8 +257,7 @@ class MobileBasketAddItemsViewTests(DiscoveryMockMixin, LmsApiMockMixin, BasketM
         Verify that email_opt_in defaults to false if not specified.
         """
         response = self._get_response(self.stock_record.partner_sku)
-        request = response.wsgi_request
-        basket = Basket.get_basket(request.user, request.site)
+        basket = self.get_basket_from_response(response)
         basket_attribute = BasketAttribute.objects.get(
             basket=basket,
             attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
@@ -678,6 +680,52 @@ class TestMobileCheckoutView(TestCase):
         response_data = response.json()
         self.assertIn(reverse('iap:iap-execute'), response_data['payment_page_url'])
         self.assertEqual(response_data['payment_processor'], self.processor_name)
+
+
+class BasketCheckoutViewTests(MobileBasketAddItemsViewTests):
+    path = reverse('iap:mobile-basket-checkout')
+    logger_name = 'ecommerce.extensions.iap.api.v1.views'
+    basket_status = Basket.FROZEN
+    processor_name = 'android-iap'
+
+    def _get_response(self, product_skus, **url_params):
+        formatted_url_params = ''
+        for name, value in url_params.items():
+            formatted_url_params += '&{}={}'.format(name, value)
+
+        url = self.path
+        if formatted_url_params:
+            url = '{root}?{qs}'.format(root=self.path, qs=formatted_url_params[1:])
+
+        data = {'sku': product_skus, 'payment_processor': 'android-iap'}
+        return self.client.post(url, data=data)
+
+    def test_authentication_required(self):
+        """ Verify the endpoint requires authentication. """
+        self.client.logout()
+        response = self.client.post(self.path, data={})
+        self.assertEqual(response.status_code, 401)
+
+    @override_settings(
+        PAYMENT_PROCESSORS=['ecommerce.extensions.iap.processors.android_iap.AndroidIAP']
+    )
+    def test_view_response(self):
+        """ Verify the endpoint returns a successful response when the user is able to checkout. """
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + self.processor_name, True)
+        response = self._get_response(product_skus=[self.stock_record.partner_sku])
+        self.assertEqual(response.status_code, 200)
+
+        basket = self.get_basket_from_response(response)
+        self.assertEqual(basket.status, Basket.FROZEN)
+        response_data = response.json()
+        self.assertEqual(response_data['basket_id'], basket.id)
+
+    def test_invalid_processor_response(self):
+        """ Verify the endpoint returns a successful response when the user is able to checkout. """
+        data = {'sku': self.stock_record.partner_sku, 'payment_processor': 'invalid-iap'}
+        response = self.client.post(self.path, data=data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'error': 'Payment processor [invalid-iap] not found.'})
 
 
 class BaseRefundTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
