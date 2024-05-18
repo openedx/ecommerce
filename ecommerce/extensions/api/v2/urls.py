@@ -20,6 +20,7 @@ from ecommerce.extensions.api.v2.views import providers as provider_views
 from ecommerce.extensions.api.v2.views import publication as publication_views
 from ecommerce.extensions.api.v2.views import refunds as refund_views
 from ecommerce.extensions.api.v2.views import retirement as retirement_views
+from ecommerce.extensions.api.v2.views import sdn as sdn_views
 from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
 from ecommerce.extensions.api.v2.views import user_management as user_management_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
@@ -109,6 +110,10 @@ USER_MANAGEMENT_URLS = [
     url(r'^replace_usernames/$', user_management_views.UsernameReplacementView.as_view(), name='username_replacement'),
 ]
 
+SDN_URLS = [
+    url(r'^$', sdn_views.SDNView.as_view(), name='sdn')
+]
+
 urlpatterns = [
     url(r'^baskets/', include((BASKET_URLS, 'baskets'))),
     url(r'^checkout/', include((CHECKOUT_URLS, 'checkout'))),
@@ -122,6 +127,7 @@ urlpatterns = [
     url(r'^user_management/', include((USER_MANAGEMENT_URLS, 'user_management'))),
     url(r'^assignment-email/', include((ASSIGNMENT_EMAIL_URLS, 'assignment-email'))),
     url(r'^webhooks/', include((WEBHOOKS_URLS, 'webhooks'))),
+    url(r'^sdn/', include((SDN_URLS, 'sdn'))),
 ]
 
 router = SimpleRouter()
