@@ -78,7 +78,7 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                         'in_app_ownership_type': 'PURCHASED',
                         'original_transaction_id': 'old_purchase_id',
                         'product_id': 'org.edx.mobile.test_product3',
-                        'purchase_date_ms': '1676562544000',
+                        'purchase_date_ms': '1676562978000',
                         'transaction_id': 'old_purchase_id'
                     },
                     {
@@ -86,10 +86,12 @@ class IOSIAPTests(PaymentProcessorTestCaseMixin, TestCase):
                         'original_transaction_id': 'original_test_id',
                         'product_id': self.product_sku,
                         'purchase_date_ms': '1676562978000',
+                        'original_purchase_date_ms': '1676562978005',
                         'transaction_id': 'test_id'
                     }
                 ],
                 'receipt_creation_date_ms': '1676562978000',
+                'original_purchase_date_ms': '1676562978005'
             }
         }
         self.transaction_id = self.mock_validation_response['receipt']['in_app'][2]['transaction_id']

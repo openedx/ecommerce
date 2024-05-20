@@ -19,7 +19,7 @@ class IOSValidator:
         try:
             validation_result = validator.validate(
                 receipt.get('purchase_token', receipt.get('purchaseToken')),
-                exclude_old_transactions=False  # if True, include only the latest renewal transaction
+                exclude_old_transactions=True  # if True, include only the latest renewal transaction
             )
         except InAppPyValidationError as ex:
             # handle validation error
