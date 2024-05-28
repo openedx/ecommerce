@@ -3,11 +3,13 @@
 -r e2e.txt                  # required for quality
 -r tox.txt
 
+astroid==3.2.2
 coverage
 ddt
 diff-cover
 django-webtest
 edx-i18n-tools              # required for quality
+edx-lint
 factory-boy
 freezegun
 isort
