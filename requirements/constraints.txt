@@ -15,13 +15,13 @@
 cybersource-rest-client-python==0.0.21
 
 # Django 3.2 support is added in version 2.2 so pinning it to 2.2
-django-oscar==3.2
+django-oscar==3.2.4
 
 # Pinned because transifex-client==0.13.6 pins it
 urllib3>=1.24.2,<2.0.0
 
 # Was causing some tox issues locally.
-virtualenv==16.7.9
+virtualenv==20.26.2
 
 # greater versions failing with extract-translations step.
 tox==3.14.6
@@ -41,17 +41,19 @@ social-auth-app-django==5.2.0
 #   (see pytest-selenium/issues/294)
 # - pytest-variables v3 uses pytest.stash instead of _variables. This
 #   conflicts with how pytest-selenium uses variables prior to v3.
-selenium<4.0.0
-pytest-selenium<3.0.0
-pytest-variables<3.0.0
+selenium<=4
+pytest-selenium==3.0.0
+pytest-variables==1.9.0
+needle==0.5.0
+requests==2.32.2
 
-# pylint>2.12.2 requires a lot of quality fixes. Can be resolved later on.
-pylint==2.12.2
-# pylint==2.12.2 requires mccabe<0.7.0
-mccabe<0.7
-# pylint==2.12.2 requires wrapt<1.14
-wrapt<1.14
+pylint==3.2.2
+edx-lint==5.3.6
+astroid==3.2.2
 
 # backports-zoneinfo comes by-default in newer versions of python
 # it gives error while building wheel with python>=3.9
 backports.zoneinfo ; python_version < "3.9"
+
+# python3.8 does not support newer version
+accessible-pygments==0.0.4
