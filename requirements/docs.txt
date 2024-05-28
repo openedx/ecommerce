@@ -5,10 +5,12 @@
 #    make upgrade
 #
 accessible-pygments==0.0.4
-    # via pydata-sphinx-theme
+    # via
+    #   -c requirements/constraints.txt
+    #   pydata-sphinx-theme
 alabaster==0.7.13
     # via sphinx
-babel==2.14.0
+babel==2.15.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -30,7 +32,7 @@ imagesize==1.4.1
     # via sphinx
 importlib-metadata==7.1.0
     # via sphinx
-jinja2==3.1.3
+jinja2==3.1.4
     # via sphinx
 markupsafe==2.1.5
     # via jinja2
@@ -40,15 +42,17 @@ packaging==24.0
     #   sphinx
 pydata-sphinx-theme==0.14.4
     # via sphinx-book-theme
-pygments==2.17.2
+pygments==2.18.0
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
     #   sphinx
 pytz==2024.1
     # via babel
-requests==2.31.0
-    # via sphinx
+requests==2.32.2
+    # via
+    #   -c requirements/constraints.txt
+    #   sphinx
 snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.5
@@ -78,5 +82,5 @@ urllib3==1.26.18
     # via
     #   -c requirements/constraints.txt
     #   requests
-zipp==3.18.1
+zipp==3.18.2
     # via importlib-metadata
