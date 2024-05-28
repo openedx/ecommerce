@@ -1,7 +1,8 @@
 NODE_BIN=./node_modules/.bin
 DIFF_COVER_BASE_BRANCH=master
-PYTHON_ENV=py38
+PYTHON_ENV_VAR=$(if $(PYTHON_ENV),$(PYTHON_ENV),py312)
 DJANGO_ENV_VAR=$(if $(DJANGO_ENV),$(DJANGO_ENV),django32)
+PYTHON_VERSION_VAR=$(if $(PYTHON_VERSION),$(PYTHON_VERSION),3.12)
 
 help:
 	@echo ''
@@ -45,17 +46,17 @@ requirements: requirements.js
 	pip3 install -r requirements/dev.txt --exists-action w
 
 requirements.tox:
-	pip3 install -U pip==20.0.2
+	pip3 install -U pip
 	pip3 install -r requirements/tox.txt --exists-action w
 
 production-requirements: requirements.js
 	pip3 install -r requirements.txt --exists-action w
 
 migrate: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-migrate
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-migrate
 
 serve: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-serve
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-serve
 
 clean:
 	find . -name '*.pyc' -delete
@@ -65,18 +66,18 @@ clean_static:
 	rm -rf assets/* ecommerce/static/build/*
 
 run_check_isort: requirements.tox
-	tox -e $(PYTHON_ENV)-check_isort
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-check_isort
 
 run_isort: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-run_isort
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-run_isort
 
 run_pycodestyle: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-pycodestyle
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-pycodestyle
 
 run_pep8: run_pycodestyle
 
 run_pylint: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-pylint
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-pylint
 
 quality: run_check_isort run_pycodestyle run_pylint
 
@@ -86,42 +87,42 @@ validate_js:
 	$(NODE_BIN)/gulp lint
 
 validate_python: clean requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-tests
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-tests
 
 acceptance: clean requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-acceptance
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-acceptance
 
 fast_validate_python: clean requirements.tox
-	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-tests
+	DISABLE_ACCEPTANCE_TESTS=True python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-tests
 
 validate: validate_python validate_js quality
 
 theme_static: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-theme_static
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-theme_static
 
 static: requirements.js theme_static requirements.tox
 	$(NODE_BIN)/r.js -o build.js
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-static
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-static
 
 html_coverage: requirements.tox
-	tox -e $(PYTHON_ENV)-coverage_html
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-coverage_html
 
 diff_coverage: validate fast_diff_coverage
 
 fast_diff_coverage: requirements.tox
-	tox -e $(PYTHON_ENV)-fast_diff_coverage
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-fast_diff_coverage
 
 e2e: requirements.tox
-	tox -e $(PYTHON_ENV)-e2e
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-e2e
 
 extract_translations: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-extract_translations
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-extract_translations
 
 dummy_translations: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-dummy_translations
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-dummy_translations
 
 compile_translations: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-compile_translations
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-compile_translations
 
 fake_translations: extract_translations dummy_translations compile_translations
 
@@ -134,18 +135,18 @@ update_translations: pull_translations fake_translations
 
 # extract_translations should be called before this command can detect changes
 detect_changed_source_translations: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-detect_changed_translations
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-detect_changed_translations
 
 # @FIXME: skip detect_changed_source_translations until git diff works again (REV-2737)
 check_translations_up_to_date: fake_translations # detect_changed_source_translations
 
 # Validate translations
 validate_translations: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-validate_translations
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-validate_translations
 
 # Scan the Django models in all installed apps in this project for restricted field names
 check_keywords: requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-check_keywords
+	python$(PYTHON_VERSION_VAR) -m tox -e $(PYTHON_ENV_VAR)-${DJANGO_ENV_VAR}-check_keywords
 
 COMMON_CONSTRAINTS_TXT=requirements/common_constraints.txt
 .PHONY: $(COMMON_CONSTRAINTS_TXT)
@@ -172,6 +173,12 @@ upgrade: $(COMMON_CONSTRAINTS_TXT)
 
 docs:
 	tox -e docs
+
+quality-and-jobs: requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords
+
+test-python: requirements.js clean_static static validate_python
+
+acceptance-python: requirements.js clean_static static acceptance
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \
