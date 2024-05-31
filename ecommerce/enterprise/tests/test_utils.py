@@ -1,5 +1,6 @@
 
 
+import sys
 import uuid
 
 import ddt
@@ -122,7 +123,10 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
             self.learner.username
         )
 
-        self.assertDictContainsSubset(expected_return, response)
+        if sys.version_info > (3, 9):
+            self.assertLessEqual(expected_return.items(), response.items())
+        else:
+            self.assertDictContainsSubset(expected_return, response)
 
     @responses.activate
     def test_ecu_needs_consent(self):

@@ -79,9 +79,9 @@ billiard==4.2.0
     #   celery
 bleach==6.1.0
     # via -r requirements/base.txt
-boto3==1.34.111
+boto3==1.34.115
     # via -r requirements/base.txt
-botocore==1.34.111
+botocore==1.34.115
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -161,7 +161,7 @@ coreschema==0.0.4
     # via
     #   -r requirements/base.txt
     #   coreapi
-coverage[toml]==7.5.1
+coverage[toml]==7.5.3
     # via
     #   -r requirements/base.txt
     #   -r requirements/test.in
@@ -290,7 +290,7 @@ django-model-utils==4.5.1
     # via
     #   -r requirements/base.txt
     #   edx-rbac
-django-oscar==3.2.4
+django-oscar==3.2
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.txt
@@ -407,7 +407,7 @@ factory-boy==3.2.1
     #   -r requirements/base.txt
     #   -r requirements/test.in
     #   django-oscar
-faker==25.2.0
+faker==25.3.0
     # via
     #   -r requirements/base.txt
     #   factory-boy
@@ -601,7 +601,7 @@ needle==0.5.0
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.txt
-newrelic==9.9.1
+newrelic==9.10.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -681,7 +681,7 @@ polib==1.2.0
     # via edx-i18n-tools
 premailer==2.9.2
     # via -r requirements/base.txt
-prompt-toolkit==3.0.43
+prompt-toolkit==3.0.45
     # via
     #   -r requirements/base.txt
     #   click-repl
@@ -1054,7 +1054,7 @@ stevedore==5.2.0
     #   code-annotations
     #   edx-django-utils
     #   edx-opaque-keys
-stripe==9.7.0
+stripe==9.8.0
     # via -r requirements/base.txt
 tenacity==6.3.1
     # via
@@ -1101,7 +1101,7 @@ typing==3.7.4.3
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-typing-extensions==4.11.0
+typing-extensions==4.12.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
@@ -1175,13 +1175,13 @@ yarl==1.9.4
     #   aiohttp
 zeep==4.2.1
     # via -r requirements/base.txt
-zipp==3.18.2
+zipp==3.19.0
     # via
     #   -r requirements/base.txt
     #   -r requirements/e2e.txt
     #   importlib-metadata
     #   importlib-resources
-zope-interface==6.4.post1
+zope-interface==6.4.post2
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
