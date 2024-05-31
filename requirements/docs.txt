@@ -76,11 +76,11 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-typing-extensions==4.11.0
+typing-extensions==4.12.0
     # via pydata-sphinx-theme
 urllib3==1.26.18
     # via
     #   -c requirements/constraints.txt
     #   requests
-zipp==3.18.2
+zipp==3.19.0
     # via importlib-metadata
