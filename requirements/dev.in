@@ -2,7 +2,6 @@
 -r docs.txt
 
 django-debug-toolbar
-needle
 # i18n
 # newer version of transifex-client doesn't work with python3.12.2
 transifex-client==0.12.5
@@ -12,5 +11,3 @@ ptvsd
 
 # For devserver code reloading
 pywatchman
-astroid==3.2.2
-edx-lint

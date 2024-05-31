@@ -131,6 +131,9 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         if sys.version_info > (3, 9):
+            # assertDictContainsSubset is depreciated in python version>3.9
+            # context.response return ContextList object, belwo statements will convert it to dict
+            # assertLessEqual method is used instead of depreciated assertDictContainsSubset method
             context = {}
             for i, ctx in enumerate(response.context):
                 if isinstance(ctx, dict):
