@@ -151,7 +151,6 @@ requests==2.32.2
     #   slumber
 selenium==3.141.0
     # via
-    #   -c requirements/base.txt
     #   -c requirements/constraints.txt
     #   -r requirements/e2e.in
     #   pytest-selenium
