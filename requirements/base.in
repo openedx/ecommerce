@@ -31,7 +31,6 @@ edx-django-utils
 edx-drf-extensions>=8.13.0  # 8.13 fixes forgiven JWTs for ecommerce
 edx-django-sites-extensions
 edx-ecommerce-worker
-edx-lint
 edx-opaque-keys
 edx-rbac
 edx-rest-api-client
@@ -47,7 +46,6 @@ markdown==3.4.3
 mysqlclient
 newrelic
 ndg-httpsclient
-needle
 openedx-atlas
 path.py==7.2
 paypalrestsdk

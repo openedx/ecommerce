@@ -44,11 +44,11 @@ social-auth-app-django==5.2.0
 selenium<=4
 pytest-selenium==3.0.0
 pytest-variables==1.9.0
-needle==0.5.0
 requests==2.32.2
 
 pylint==3.2.2
 edx-lint==5.3.6
+# other versions of astroid has conflicts with pylint
 astroid==3.2.2
 
 # backports-zoneinfo comes by-default in newer versions of python

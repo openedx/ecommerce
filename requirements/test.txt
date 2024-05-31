@@ -33,8 +33,6 @@ asn1crypto==1.5.1
 astroid==3.2.2
     # via
     #   -c requirements/constraints.txt
-    #   -r requirements/base.txt
-    #   -r requirements/test.in
     #   pylint
     #   pylint-celery
 async-timeout==4.0.3
@@ -79,9 +77,9 @@ billiard==4.2.0
     #   celery
 bleach==6.1.0
     # via -r requirements/base.txt
-boto3==1.34.115
+boto3==1.34.116
     # via -r requirements/base.txt
-botocore==1.34.115
+botocore==1.34.116
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -136,9 +134,7 @@ click-didyoumean==0.3.1
     #   -r requirements/base.txt
     #   celery
 click-log==0.4.0
-    # via
-    #   -r requirements/base.txt
-    #   edx-lint
+    # via edx-lint
 click-plugins==1.1.1
     # via
     #   -r requirements/base.txt
@@ -148,9 +144,7 @@ click-repl==0.3.0
     #   -r requirements/base.txt
     #   celery
 code-annotations==1.8.0
-    # via
-    #   -r requirements/base.txt
-    #   edx-lint
+    # via edx-lint
 configparser==7.0.0
     # via
     #   -r requirements/base.txt
@@ -208,9 +202,7 @@ defusedxml==0.8.0rc2
 diff-cover==9.0.0
     # via -r requirements/test.in
 dill==0.3.8
-    # via
-    #   -r requirements/base.txt
-    #   pylint
+    # via pylint
 distlib==0.3.8
     # via
     #   -r requirements/tox.txt
@@ -381,7 +373,6 @@ edx-i18n-tools==1.6.0
 edx-lint==5.3.6
     # via
     #   -c requirements/constraints.txt
-    #   -r requirements/base.txt
     #   -r requirements/test.in
 edx-opaque-keys==2.9.0
     # via
@@ -508,7 +499,6 @@ isodate==0.6.1
     #   zeep
 isort==5.13.2
     # via
-    #   -r requirements/base.txt
     #   -r requirements/test.in
     #   pylint
 itypes==1.2.0
@@ -574,9 +564,7 @@ markupsafe==2.1.5
     #   -r requirements/base.txt
     #   jinja2
 mccabe==0.7.0
-    # via
-    #   -r requirements/base.txt
-    #   pylint
+    # via pylint
 mock==5.1.0
     # via -r requirements/test.in
 monotonic==1.6
@@ -597,10 +585,6 @@ naked==0.1.32
     #   cybersource-rest-client-python
 ndg-httpsclient==0.5.1
     # via -r requirements/base.txt
-needle==0.5.0
-    # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/base.txt
 newrelic==9.10.0
     # via
     #   -r requirements/base.txt
@@ -610,7 +594,6 @@ nose==1.3.7
     # via
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
-    #   needle
 oauth2client==4.1.3
     # via
     #   -r requirements/base.txt
@@ -657,7 +640,6 @@ pillow==10.3.0
     # via
     #   -r requirements/base.txt
     #   django-oscar
-    #   needle
 pkgutil-resolve-name==1.3.10
     # via
     #   -r requirements/base.txt
@@ -766,23 +748,17 @@ pyjwt[crypto]==2.8.0
 pylint==3.2.2
     # via
     #   -c requirements/constraints.txt
-    #   -r requirements/base.txt
     #   -r requirements/test.in
     #   edx-lint
     #   pylint-celery
     #   pylint-django
     #   pylint-plugin-utils
 pylint-celery==0.3
-    # via
-    #   -r requirements/base.txt
-    #   edx-lint
+    # via edx-lint
 pylint-django==2.5.5
-    # via
-    #   -r requirements/base.txt
-    #   edx-lint
+    # via edx-lint
 pylint-plugin-utils==0.8.2
     # via
-    #   -r requirements/base.txt
     #   pylint-celery
     #   pylint-django
 pymongo==4.4.0
@@ -870,9 +846,7 @@ python-mimeparse==1.6.0
     #   -r requirements/base.txt
     #   cybersource-rest-client-python
 python-slugify==8.0.4
-    # via
-    #   -r requirements/base.txt
-    #   code-annotations
+    # via code-annotations
 python-subunit==1.4.4
     # via
     #   -r requirements/base.txt
@@ -985,10 +959,8 @@ s3transfer==0.10.1
 selenium==3.141.0
     # via
     #   -c requirements/constraints.txt
-    #   -r requirements/base.txt
     #   -r requirements/e2e.txt
     #   -r requirements/test.in
-    #   needle
     #   pytest-selenium
 semantic-version==2.10.0
     # via
@@ -1054,7 +1026,7 @@ stevedore==5.2.0
     #   code-annotations
     #   edx-django-utils
     #   edx-opaque-keys
-stripe==9.8.0
+stripe==9.9.0
     # via -r requirements/base.txt
 tenacity==6.3.1
     # via
@@ -1068,9 +1040,7 @@ testtools==2.7.1
     #   cybersource-rest-client-python
     #   python-subunit
 text-unidecode==1.3
-    # via
-    #   -r requirements/base.txt
-    #   python-slugify
+    # via python-slugify
 toml==0.10.2
     # via
     #   -r requirements/e2e.txt
@@ -1079,13 +1049,10 @@ toml==0.10.2
     #   tox
 tomli==2.0.1
     # via
-    #   -r requirements/base.txt
     #   coverage
     #   pylint
 tomlkit==0.12.5
-    # via
-    #   -r requirements/base.txt
-    #   pylint
+    # via pylint
 tox==3.14.6
     # via
     #   -c requirements/constraints.txt
