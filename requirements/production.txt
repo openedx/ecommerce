@@ -53,11 +53,11 @@ billiard==4.2.0
     # via celery
 bleach==6.1.0
     # via -r requirements/base.in
-boto3==1.34.111
+boto3==1.34.115
     # via
     #   -r requirements/base.in
     #   django-ses
-botocore==1.34.111
+botocore==1.34.115
     # via
     #   boto3
     #   s3transfer
@@ -107,7 +107,7 @@ coreapi==2.3.3
     # via -r requirements/base.in
 coreschema==0.0.4
     # via coreapi
-coverage==7.5.1
+coverage==7.5.3
     # via cybersource-rest-client-python
 crispy-bootstrap3==2024.1
     # via -r requirements/base.in
@@ -202,7 +202,7 @@ django-libsass==0.9
     # via -r requirements/base.in
 django-model-utils==4.5.1
     # via edx-rbac
-django-oscar==3.2.4
+django-oscar==3.2
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
@@ -293,7 +293,7 @@ extras==1.0.0
     # via cybersource-rest-client-python
 factory-boy==3.2.1
     # via django-oscar
-faker==25.2.0
+faker==25.3.0
     # via factory-boy
 fixtures==4.1.0
     # via cybersource-rest-client-python
@@ -415,7 +415,7 @@ needle==0.5.0
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
     #   -r requirements/production.in
-newrelic==9.9.1
+newrelic==9.10.0
     # via
     #   -r requirements/base.in
     #   -r requirements/production.in
@@ -464,7 +464,7 @@ platformdirs==4.2.2
     #   zeep
 premailer==2.9.2
     # via -r requirements/base.in
-prompt-toolkit==3.0.43
+prompt-toolkit==3.0.45
     # via click-repl
 proto-plus==1.23.0
     # via google-api-core
@@ -686,7 +686,7 @@ stevedore==5.2.0
     #   code-annotations
     #   edx-django-utils
     #   edx-opaque-keys
-stripe==9.7.0
+stripe==9.8.0
     # via -r requirements/base.in
 testtools==2.7.1
     # via
@@ -702,7 +702,7 @@ traceback2==1.4.0
     # via cybersource-rest-client-python
 typing==3.7.4.3
     # via cybersource-rest-client-python
-typing-extensions==4.11.0
+typing-extensions==4.12.0
     # via
     #   asgiref
     #   astroid
@@ -747,11 +747,11 @@ yarl==1.9.4
     # via aiohttp
 zeep==4.2.1
     # via -r requirements/base.in
-zipp==3.18.2
+zipp==3.19.0
     # via
     #   importlib-metadata
     #   importlib-resources
-zope-interface==6.4.post1
+zope-interface==6.4.post2
     # via
     #   cybersource-rest-client-python
     #   datetime
