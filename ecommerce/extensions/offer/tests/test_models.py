@@ -640,7 +640,7 @@ class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 
         basket.add_product(entitlement_product)
         basket.add_product(seat)
-        applicable_lines = [(line.product.stockrecords.first().price_excl_tax, line) for line in basket.all_lines()]
+        applicable_lines = [(line.product.stockrecords.first().price, line) for line in basket.all_lines()]
         basket.add_product(no_certificate_product)
 
         self.mock_access_token_response()

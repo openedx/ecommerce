@@ -92,5 +92,6 @@ ignore_dirs:
     - i18n
     - assets
     - node_modules
+    - tests
     - static/bower_components
     - static/build
