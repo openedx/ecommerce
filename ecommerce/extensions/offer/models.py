@@ -198,7 +198,7 @@ class Benefit(AbstractBenefit):
                 offer.id,
                 applicable_lines
             )
-            return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
+            return [(line.product.stockrecords.first().price, line) for line in applicable_lines]
         return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
 

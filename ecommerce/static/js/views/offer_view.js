@@ -127,7 +127,7 @@ define([
                 if (course.get('seat_type') === 'credit' && !course.multiple_credit_providers) {
                     price = parseFloat(course.get('credit_provider_price')).toFixed(2);
                 } else {
-                    price = parseFloat(course.get('stockrecords').price_excl_tax).toFixed(2);
+                    price = parseFloat(course.get('stockrecords').price).toFixed(2);
                 }
 
                 if (benefit.type === 'Percentage') {
@@ -140,7 +140,7 @@ define([
                 }
 
                 // eslint-disable-next-line no-param-reassign
-                course.get('stockrecords').price_excl_tax = price;
+                course.get('stockrecords').price = price;
                 course.set({new_price: newPrice.toFixed(2)});
             },
 

@@ -72,7 +72,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
             product=mobile_seat,
             partner_sku="mobile.{}.{}".format(sku_prefix.lower(), web_stock_record.partner_sku.lower()),
             price_currency=web_stock_record.price_currency,
-            price_excl_tax=web_stock_record.price_excl_tax,
+            price=web_stock_record.price,
         )
         return mobile_seat
 
@@ -164,7 +164,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         expected = {
             'name': 'verified',
             'currency': 'USD',
-            'price': int(stock_record.price_excl_tax),
+            'price': int(stock_record.price),
             'sku': stock_record.partner_sku,
             'bulk_sku': None,
             'expires': None,
@@ -195,7 +195,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         expected = {
             'name': 'verified',
             'currency': 'USD',
-            'price': int(stock_record.price_excl_tax),
+            'price': int(stock_record.price),
             'sku': stock_record.partner_sku,
             'bulk_sku': None,
             'expires': None,
@@ -229,7 +229,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         expected = {
             'name': expected_mode,
             'currency': 'USD',
-            'price': int(stock_record.price_excl_tax),
+            'price': int(stock_record.price),
             'sku': stock_record.partner_sku,
             'bulk_sku': None,
             'expires': None,
@@ -247,7 +247,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         expected = {
             'name': 'verified',
             'currency': 'USD',
-            'price': int(stock_record.price_excl_tax),
+            'price': int(stock_record.price),
             'sku': stock_record.partner_sku,
             'bulk_sku': ec_stock_record.partner_sku,
             'expires': None,
