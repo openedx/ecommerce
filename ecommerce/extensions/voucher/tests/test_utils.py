@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import sys
 import uuid
 
 import ddt
@@ -524,10 +523,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
 
         __, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
         self.assert_report_first_row(rows[0], query_coupon, first_voucher)
-        if sys.version_info > (3, 9):
-            self.assertLessEqual({'Redeemed For Course ID': 'Unknown'}.items(), rows[2].items())
-        else:
-            self.assertDictContainsSubset({'Redeemed For Course ID': 'Unknown'}, rows[2])
+        self.assertLessEqual({'Redeemed For Course ID': 'Unknown'}.items(), rows[2].items())
 
     def test_report_for_inactive_coupons(self):
         """ Verify the coupon report show correct status for inactive coupons. """

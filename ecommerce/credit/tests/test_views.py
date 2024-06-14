@@ -2,7 +2,6 @@
 Tests for the checkout page.
 """
 
-import sys
 from datetime import timedelta
 
 import ddt
@@ -130,21 +129,19 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        if sys.version_info > (3, 9):
-            # assertDictContainsSubset is depreciated in python version>3.9
-            # context.response return ContextList object, belwo statements will convert it to dict
-            # assertLessEqual method is used instead of depreciated assertDictContainsSubset method
-            context = {}
-            for i, ctx in enumerate(response.context):
-                if isinstance(ctx, dict):
-                    context.update(ctx)
-                elif hasattr(ctx, '__iter__') and not isinstance(ctx, str):
-                    for item in ctx:
-                        if isinstance(item, dict):
-                            context.update(item)
-            self.assertLessEqual({'course': self.course}.items(), context.items())
-        else:
-            self.assertDictContainsSubset({'course': self.course}, response.context)
+
+        # assertDictContainsSubset is deprecated in Python version > 3.9
+        # response.context returns a ContextList object; the below statements will convert it to a dict
+        # assertLessEqual method is used instead of the deprecated assertDictContainsSubset method
+        context = {}
+        for i, ctx in enumerate(response.context):
+            if isinstance(ctx, dict):
+                context.update(ctx)
+            elif hasattr(ctx, '__iter__') and not isinstance(ctx, str):
+                for item in ctx:
+                    if isinstance(item, dict):
+                        context.update(item)
+        self.assertLessEqual({'course': self.course}.items(), context.items())
 
         self.assertContains(
             response,
