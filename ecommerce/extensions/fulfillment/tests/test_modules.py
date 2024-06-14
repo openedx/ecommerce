@@ -3,7 +3,6 @@
 
 import datetime
 import json
-import sys
 import uuid
 from decimal import Decimal
 from urllib.parse import urlencode
@@ -213,10 +212,7 @@ class EnrollmentFulfillmentModuleTests(
             'X-Forwarded-For': self.user.tracking_context['lms_ip'],
         }
 
-        if sys.version_info > (3, 9):
-            self.assertLessEqual(expected_headers.items(), actual_headers.items())
-        else:
-            self.assertDictContainsSubset(expected_headers, actual_headers)
+        self.assertLessEqual(expected_headers.items(), actual_headers.items())
         self.assertEqual(expected_body, actual_body)
 
     @responses.activate
