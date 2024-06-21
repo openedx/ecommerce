@@ -1,0 +1,2 @@
+# If there are any Python packages you want to keep in your virtualenv beyond
+# those listed in the official requirements files, list them here.
