@@ -498,8 +498,9 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
         paypal_redirect = request.GET.get('paypal_redirect')
 
         if paypal_redirect:
-            concat_char = "&" if "?" in redirect_url else "?"
-            redirect_url += f"{concat_char}paypal_redirect=1"
+            redirect_url += '&' if '?' in redirect_url else '?'
+            redirect_url += 'paypal_redirect=1'
+
         redirect_url = add_stripe_flag_to_url(redirect_url, request)
 
         return HttpResponseRedirect(redirect_url, status=303)
