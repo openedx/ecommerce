@@ -49,6 +49,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         echo "This is a test to see if this works on 2u main branch"
+        pip install pip==21.2.1 --upgrade
         pip install -r requirements/pip_tools.txt
         pip install -r requirements/production.txt
         pip uninstall -y mysqlclient
