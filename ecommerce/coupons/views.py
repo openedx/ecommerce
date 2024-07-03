@@ -147,7 +147,6 @@ class CouponOfferView(TemplateView):
         """Get method for coupon redemption page."""
         return super(CouponOfferView, self).get(request, *args, **kwargs)
 
-
 class CouponRedeemView(EdxOrderPlacementMixin, APIView):
     permission_classes = (LoginRedirectIfUnauthenticated,)
 
@@ -303,7 +302,13 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         # and should not display the payment form before making that determination.
         # TODO: It would be cleaner if the user could be redirected to their final destination up front.
         redirect_url = get_payment_microfrontend_or_basket_url(self.request) + "?coupon_redeem_redirect=1"
+
+        # Check for the paypal=true parameter from the ecommerece checkout and add it to the redirect URL if present
+        if request.GET.get('paypal') == 'true':
+            redirect_url += "&paypal=true"
+
         redirect_url = add_stripe_flag_to_url(redirect_url, self.request)
+
         return HttpResponseRedirect(redirect_url)
 
 
