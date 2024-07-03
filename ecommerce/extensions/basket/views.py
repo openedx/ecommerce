@@ -493,11 +493,13 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         redirect_url = add_invalid_code_message_to_url(redirect_url, invalid_code)
 
-        # Check for the paypal_redirect=1 parameter from the ecommerece checkout and add it to the redirect URL if present
+        # Check for the paypal_redirect=1 parameter from the ecommerece checkout and add it to the
+        # redirect URL if present
         paypal_redirect = request.GET.get('paypal_redirect')
 
         if paypal_redirect:
-            redirect_url += "?paypal_redirect=1"
+            concat_char = "&" if "?" in redirect_url else "?"
+            redirect_url += f"{concat_char}paypal_redirect=1"
         redirect_url = add_stripe_flag_to_url(redirect_url, request)
 
         return HttpResponseRedirect(redirect_url, status=303)
