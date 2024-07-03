@@ -147,6 +147,7 @@ class CouponOfferView(TemplateView):
         """Get method for coupon redemption page."""
         return super(CouponOfferView, self).get(request, *args, **kwargs)
 
+
 class CouponRedeemView(EdxOrderPlacementMixin, APIView):
     permission_classes = (LoginRedirectIfUnauthenticated,)
 
