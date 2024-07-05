@@ -303,7 +303,16 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         # and should not display the payment form before making that determination.
         # TODO: It would be cleaner if the user could be redirected to their final destination up front.
         redirect_url = get_payment_microfrontend_or_basket_url(self.request) + "?coupon_redeem_redirect=1"
+
+        # Check for the paypal_redirect=1 parameter from the ecommerce checkout and add it to the
+        # redirect URL if present
+        paypal_redirect = request.GET.get('paypal_redirect')
+
+        if paypal_redirect:
+            redirect_url += "&paypal_redirect=1"
+
         redirect_url = add_stripe_flag_to_url(redirect_url, self.request)
+
         return HttpResponseRedirect(redirect_url)
 
 
