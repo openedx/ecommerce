@@ -435,10 +435,16 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     def test_invalid_voucher_code(self):
         """ Verify an error is returned when voucher does not exist. """
         code = FuzzyText().fuzz().upper()
+        expected_message = 'No voucher found with code {code}'.format(code=code)
         url = format_url(base=self.redeem_url, params={'code': code, 'sku': self.stock_record.partner_sku})
-        response = self.client.get(url)
-        msg = 'No voucher found with code {code}'.format(code=code)
-        self.assertEqual(response.context['error'], msg)
+        response = self.client.get(url, follow=True)
+        
+        messages = []
+        messages += response.context['messages']
+        
+        self.assertEqual(messages[0].tags, 'error')
+        self.assertEqual(messages[0].message, expected_message)
+        self.assert_redemption_page_redirects(self.get_coupon_redeem_success_expected_redirect_url())
 
     def test_no_product(self):
         """ Verify an error is returned when a stock record for the provided SKU doesn't exist. """

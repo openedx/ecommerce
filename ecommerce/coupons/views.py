@@ -173,7 +173,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
             voucher = Voucher.objects.get(code=code)
         except Voucher.DoesNotExist:
             msg = 'No voucher found with code {code}'.format(code=code)
-            messages.warning(self.request, _(msg))
+            messages.error(self.request, _(msg))
             redirect_url = get_payment_microfrontend_or_basket_url(self.request) + "?coupon_redeem_redirect=1"
             redirect_url = add_stripe_flag_to_url(redirect_url, self.request)
             return HttpResponseRedirect(redirect_url)
