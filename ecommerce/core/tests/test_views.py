@@ -26,11 +26,11 @@ class HealthTests(TestCase):
         """Test that the endpoint reports when all services are healthy."""
         self._assert_health(status.HTTP_200_OK, Status.OK, Status.OK)
 
-    @mock.patch('newrelic.agent')
-    def test_health_check_is_ignored_by_new_relic(self, mock_newrelic_agent):
-        """Test that the health endpoint is ignored by NewRelic"""
+    @mock.patch('ecommerce.core.views.ignore_transaction')
+    def test_health_check_is_ignored(self, mock_ignore_transaction):
+        """Test that the health endpoint is ignored in performance monitoring"""
         self._assert_health(status.HTTP_200_OK, Status.OK, Status.OK)
-        self.assertTrue(mock_newrelic_agent.ignore_transaction.called)
+        self.assertTrue(mock_ignore_transaction.called)
 
     @mock.patch('django.contrib.sites.middleware.get_current_site', mock.Mock(return_value=None))
     @mock.patch('django.db.backends.base.base.BaseDatabaseWrapper.cursor', mock.Mock(side_effect=DatabaseError))
