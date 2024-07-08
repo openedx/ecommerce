@@ -1,6 +1,5 @@
 
 
-import newrelic.agent
 from edx_django_utils import monitoring as monitoring_utils
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
 from oscar.core.loading import get_model
@@ -81,6 +80,6 @@ class BasketMiddleware(OscarBasketMiddleware):
 
         return basket
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('apply_offers_to_basket')
     def apply_offers_to_basket(self, request, basket):
         apply_offers_on_basket(request, basket)
