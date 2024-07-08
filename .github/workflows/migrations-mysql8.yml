@@ -48,6 +48,7 @@ jobs:
         mysql -V
     - name: Install Python dependencies
       run: |
+        pip install pip==21.2.1 --upgrade  # set pip version to be compatible with deprecated pip version syntax
         pip install -r requirements/pip_tools.txt
         pip install -r requirements/production.txt
         pip uninstall -y mysqlclient

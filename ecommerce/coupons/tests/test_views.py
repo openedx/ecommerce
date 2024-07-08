@@ -342,7 +342,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         super().tearDown()
         responses.reset()
 
-    def redeem_url_with_params(self, code=COUPON_CODE, consent_token=None):
+    def redeem_url_with_params(self, code=COUPON_CODE, consent_token=None, other_qs_params=None):
         """ Constructs the coupon redemption URL with the proper string query parameters. """
         params = {
             'code': code,
@@ -350,6 +350,8 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         }
         if consent_token is not None:
             params['consent_token'] = consent_token
+        if other_qs_params is not None:
+            params.update(other_qs_params)
         return format_url(base=self.redeem_url, params=params)
 
     def create_coupon_and_get_code(
@@ -387,9 +389,12 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.assertEqual(Voucher.objects.filter(code=coupon_code).count(), 1)
         return coupon_code, coupon
 
-    def redeem_coupon(self, code=COUPON_CODE, consent_token=None):
+    def redeem_coupon(self, code=COUPON_CODE, consent_token=None, other_qs_params=None):
         self.request.user = self.user
-        return self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
+        return self.client.get(self.redeem_url_with_params(
+            code=code,
+            consent_token=consent_token,
+            other_qs_params=other_qs_params))
 
     def assert_redirects_to_receipt_page(self, code=COUPON_CODE, consent_token=None):
         response = self.redeem_coupon(code=code, consent_token=consent_token)
@@ -406,9 +411,10 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         self.assertRedirects(response, expected_url, status_code=302, fetch_redirect_response=False)
 
-    def assert_redemption_page_redirects(self, expected_url, target=200, code=COUPON_CODE, consent_token=None):
+    def assert_redemption_page_redirects(self, expected_url, target=200, code=COUPON_CODE,
+                                         consent_token=None, other_qs_params=None):
         """ Verify redirect from redeem page to expected page. """
-        response = self.redeem_coupon(code=code, consent_token=consent_token)
+        response = self.redeem_coupon(code=code, consent_token=consent_token, other_qs_params=other_qs_params)
         self.assertRedirects(
             response, expected_url, status_code=302, target_status_code=target, fetch_redirect_response=False
         )
@@ -500,6 +506,19 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
         self.assert_redemption_page_redirects(self.get_coupon_redeem_success_expected_redirect_url())
+
+    @responses.activate
+    def test_basket_redirect_discount_code_with_paypal(self):
+        """ Verify the view redirects to the basket view when a discount code is provided with a paypal qs param. """
+        self.mock_course_api_response(course=self.course)
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        self.assert_redemption_page_redirects(
+            self.get_coupon_redeem_success_expected_redirect_url() + '&paypal_redirect=1',
+            other_qs_params={'paypal_redirect': '1'}
+        )
 
     @override_flag(REDIRECT_WITH_WAFFLE_TESTING_QUERYSTRING, active=True)
     @responses.activate

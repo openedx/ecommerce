@@ -119,6 +119,16 @@ class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixi
         expected_url = self.get_full_url(reverse('basket:summary')) + '?utm_source=test'
         self.assertEqual(response.url, expected_url)
 
+    def test_basket_with_paypal_param(self):
+        """ Verify the basket includes paypal param after redirect. """
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        response = self._get_response(
+            [product.stockrecords.first().partner_sku for product in products],
+            paypal_redirect='1',
+        )
+        expected_url = self.get_full_url(reverse('basket:summary')) + '?paypal_redirect=1'
+        self.assertEqual(response.url, expected_url)
+
     @responses.activate
     def test_redirect_to_basket_summary(self):
         """
