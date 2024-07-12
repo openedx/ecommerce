@@ -170,15 +170,25 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
             return render(request, template_name, {'error': _('SKU not provided.')})
 
         try:
-            voucher = Voucher.objects.get(code=code)
-        except Voucher.DoesNotExist:
-            msg = 'No voucher found with code {code}'.format(code=code)
-            return render(request, template_name, {'error': _(msg)})
-
-        try:
             product = StockRecord.objects.get(partner_sku=sku).product
         except StockRecord.DoesNotExist:
             return render(request, template_name, {'error': _('The product does not exist.')})
+
+        try:
+            voucher = Voucher.objects.get(code=code)
+        except Voucher.DoesNotExist:
+            try:
+                basket = prepare_basket(request, [product])
+            except AlreadyPlacedOrderException:
+                msg = _('You have already purchased {course} seat.').format(course=product.course.name)
+                return render(request, template_name, {'error': msg})
+
+            msg = 'No voucher found with code {code}'.format(code=code)
+            messages.error(self.request, _(msg))
+
+            redirect_url = get_payment_microfrontend_or_basket_url(self.request) + "?coupon_redeem_redirect=1"
+            redirect_url = add_stripe_flag_to_url(redirect_url, self.request)
+            return HttpResponseRedirect(redirect_url)
 
         valid_voucher, msg, hide_error_message = voucher_is_valid(voucher, [product], request)
         if not valid_voucher:
