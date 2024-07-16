@@ -9,13 +9,13 @@ from datetime import datetime
 from decimal import Decimal
 
 import dateutil.parser
-import newrelic.agent
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
+from edx_django_utils import monitoring as monitoring_utils
 from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.signals import voucher_removal
@@ -98,7 +98,7 @@ class BasketLogicMixin:
     Business logic for determining basket contents and checkout/payment options.
     """
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('process_basket_lines')
     def process_basket_lines(self, lines):
         """
         Processes the basket lines and extracts information for the view's context.
@@ -244,7 +244,7 @@ class BasketLogicMixin:
                     response=HttpResponseRedirect(redirect_url)
                 )
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_get_course_data')
     def _get_course_data(self, product):
         """
         Return course data.
@@ -294,7 +294,7 @@ class BasketLogicMixin:
 
         return course_data, course
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_get_order_details_message')
     def _get_order_details_message(self, product):
         if product.is_course_entitlement_product:
             return _(
@@ -347,7 +347,7 @@ class BasketLogicMixin:
         else:
             return None
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_set_single_enrollment_code_warning_if_needed')
     def _set_single_enrollment_code_warning_if_needed(self, product, course):
         assert product.is_enrollment_code_product
 
@@ -377,7 +377,7 @@ class BasketLogicMixin:
             )
             message_utils.add_message_data(message_code, 'course_about_url', course_about_url)
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_get_benefit_value')
     def _get_benefit_value(self, line):
         if line.has_discount:
             applied_offer_values = list(self.request.basket.applied_offers().values())
@@ -386,7 +386,7 @@ class BasketLogicMixin:
                 return format_benefit_value(benefit)
         return None
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_get_certificate_type')
     def _get_certificate_type(self, product):
         if product.is_seat_product or product.is_course_entitlement_product:
             return product.attr.certificate_type
@@ -394,14 +394,14 @@ class BasketLogicMixin:
             return product.attr.seat_type
         return None
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_get_certificate_type_display_value')
     def _get_certificate_type_display_value(self, product):
         certificate_type = self._get_certificate_type(product)
         if certificate_type:
             return get_certificate_type_display_value(certificate_type)
         return None
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_deserialize_date')
     def _deserialize_date(self, date_string):
         try:
             return dateutil.parser.parse(date_string)
@@ -507,12 +507,12 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
 
 
 class BasketSummaryView(BasketLogicMixin, BasketView):
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('get_context_data')
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         return self._add_to_context_data(context)
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('get')
     def get(self, request, *args, **kwargs):
         basket = request.basket
 
@@ -540,7 +540,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             redirect_response = HttpResponseRedirect(microfrontend_url)
             raise RedirectException(response=redirect_response)
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_add_to_context_data')
     def _add_to_context_data(self, context):
         formset = context.get('formset', [])
         lines = context.get('line_list', [])
@@ -577,7 +577,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         })
         return context
 
-    @newrelic.agent.function_trace()
+    @monitoring_utils.function_trace('_get_payment_processors_data')
     def _get_payment_processors_data(self, payment_processors):
         """Retrieve information about payment processors for the client side checkout basket.
 

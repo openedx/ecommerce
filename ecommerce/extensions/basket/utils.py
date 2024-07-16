@@ -5,13 +5,13 @@ import json
 import logging
 from urllib.parse import unquote, urlencode
 
-import newrelic.agent
 import pytz
 import waffle
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
+from edx_django_utils import monitoring as monitoring_utils
 from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
 
@@ -100,7 +100,7 @@ def _use_payment_microfrontend(request):
     )
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('add_utm_params_to_url')
 def add_utm_params_to_url(url, params):
     # utm_params is [(u'utm_content', u'course-v1:IDBx IDB20.1x 1T2017'),...
     utm_params = [item for item in params if 'utm_' in item[0]]
@@ -113,7 +113,7 @@ def add_utm_params_to_url(url, params):
     return url
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('add_invalid_code_message_to_url')
 def add_invalid_code_message_to_url(url, code):
     if code:
         message = 'error_message=Code {code} is invalid.'.format(code=str(code))
@@ -121,7 +121,7 @@ def add_invalid_code_message_to_url(url, code):
     return url
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('prepare_basket')
 def prepare_basket(request, products, voucher=None):
     """
     Create or get the basket, add products, apply a voucher, and record referral data.
@@ -223,7 +223,7 @@ def prepare_basket(request, products, voucher=None):
     return basket
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('get_basket_switch_data')
 def get_basket_switch_data(product):
     """
     Given a seat or enrollment product, find the SKU of the related product of
@@ -251,7 +251,7 @@ def get_basket_switch_data(product):
     return switch_link_text, partner_sku
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('_find_seat_enrollment_toggle_sku')
 def _find_seat_enrollment_toggle_sku(product, target_structure):
     """
     Given a seat or enrollment code product, find the SKU of the related product of
@@ -290,7 +290,7 @@ def _find_seat_enrollment_toggle_sku(product, target_structure):
     return None
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('attribute_cookie_data')
 def attribute_cookie_data(basket, request):
     try:
         with transaction.atomic():
@@ -314,7 +314,7 @@ def attribute_cookie_data(basket, request):
         logger.exception('Error while attributing cookies to basket.')
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('_referral_from_basket_site')
 def _referral_from_basket_site(basket, site):
     try:
         # There should be only 1 referral instance for one basket.
@@ -325,7 +325,7 @@ def _referral_from_basket_site(basket, site):
     return referral
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('_record_affiliate_basket_attribution')
 def _record_affiliate_basket_attribution(referral, request):
     """
       Attribute this user's basket to the referring affiliate, if applicable.
@@ -339,7 +339,7 @@ def _record_affiliate_basket_attribution(referral, request):
     referral.affiliate_id = affiliate_id
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('_record_utm_basket_attribution')
 def _record_utm_basket_attribution(referral, request):
     """
       Attribute this user's basket to UTM data, if applicable.
@@ -363,7 +363,7 @@ def _record_utm_basket_attribution(referral, request):
     referral.utm_created_at = created_at_datetime
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('basket_add_organization_attribute')
 def basket_add_organization_attribute(basket, request_data):
     """
     Adds the organization, and purchased_on_behalf attribute on basket, if organization value is provided
@@ -395,7 +395,7 @@ def basket_add_organization_attribute(basket, request_data):
         )
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('basket_add_dynamic_payment_methods_enabled')
 def basket_add_dynamic_payment_methods_enabled(basket, payment_intent):
     """
     Adds a boolean value which is True if there is more than
@@ -413,7 +413,7 @@ def basket_add_dynamic_payment_methods_enabled(basket, payment_intent):
     basket_attribute.save()
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('basket_add_payment_intent_id_attribute')
 def basket_add_payment_intent_id_attribute(basket, payment_intent_id):
     """
     Adds the Stripe payment_intent_id attribute on basket.
@@ -435,7 +435,7 @@ def basket_add_payment_intent_id_attribute(basket, payment_intent_id):
     basket_attribute.save()
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('basket_add_enterprise_catalog_attribute')
 def basket_add_enterprise_catalog_attribute(basket, request_data):
     """
     Add enterprise catalog UUID attribute on basket, if the catalog UUID value
@@ -465,7 +465,7 @@ def basket_add_enterprise_catalog_attribute(basket, request_data):
         BasketAttribute.objects.filter(basket=basket, attribute_type=enterprise_catalog_attribute).delete()
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('_set_basket_bundle_status')
 def _set_basket_bundle_status(bundle, basket):
     """
     Sets the basket's bundle status
@@ -494,7 +494,7 @@ def _set_basket_bundle_status(bundle, basket):
         BasketAttribute.objects.filter(basket=basket, attribute_type__name=BUNDLE).delete()
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('validate_voucher')
 def validate_voucher(voucher, user, basket, request_site):
     """
     Validates if a voucher code can be used for user and basket.
@@ -566,7 +566,7 @@ def apply_offers_on_basket(request, basket):
         Applicator().apply(basket, request.user, request)
 
 
-@newrelic.agent.function_trace()
+@monitoring_utils.function_trace('apply_voucher_on_basket_and_check_discount')
 def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
     """
     Applies voucher on a product.
