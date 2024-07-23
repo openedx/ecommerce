@@ -23,12 +23,10 @@ class OfferMetaDataView(CoreOfferMetaDataView):
         session_data[self._key()] = json_data
         self.request.session.save()
 
-    def _fetch_form_kwargs(self, step_name=None):
+    def _fetch_form_kwargs(self):
 
-        if not step_name:
-            step_name = self.step_name
         session_data = self.request.session.setdefault(self.wizard_name, {})
-        json_data = session_data.get(self._key(step_name), None)
+        json_data = session_data.get(self._key(self.step_name), None)
         if json_data:
             form_kwargs = json.loads(json_data)
             form_kwargs['data']['site'] = Site.objects.get(pk=form_kwargs['data']['site_id'])

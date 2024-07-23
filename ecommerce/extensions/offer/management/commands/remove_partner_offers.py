@@ -8,7 +8,7 @@ import logging
 from django.core.management import BaseCommand
 from django.db.models import signals
 from django.template.defaultfilters import pluralize
-from oscar.apps.offer.signals import delete_unused_related_conditions_and_benefits
+from oscar.apps.offer.receivers import delete_unused_related_conditions_and_benefits
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.order.management.commands.prompt import query_yes_no

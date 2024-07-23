@@ -36,7 +36,7 @@ class RefundBasketTransactionsTests(TestCase):
     def test_success(self):
         product_price = 100
         percentage_discount = 10
-        product = ProductFactory(stockrecords__price_excl_tax=product_price)
+        product = ProductFactory(stockrecords__price=product_price)
         voucher, product = prepare_voucher(_range=RangeFactory(products=[product]), benefit_value=percentage_discount)
         self.request.user = UserFactory()
         basket = prepare_basket(self.request, [product], voucher)
@@ -93,7 +93,7 @@ class FulfillFrozenBasketsTests(TestCase):
         """ Test basket with cybersource payment basket."""
         product_price = 100
         percentage_discount = 10
-        product = ProductFactory(stockrecords__price_excl_tax=product_price)
+        product = ProductFactory(stockrecords__price=product_price)
         voucher, product = prepare_voucher(_range=RangeFactory(products=[product]), benefit_value=percentage_discount)
         self.request.user = UserFactory()
         basket = prepare_basket(self.request, [product], voucher)
@@ -236,7 +236,7 @@ class FulfillFrozenBasketsTests(TestCase):
     def test_with_expired_voucher(self):
         """ Test creates order when called with basket with expired voucher"""
         basket = create_basket()
-        product = ProductFactory(stockrecords__price_excl_tax=100, stockrecords__partner=self.partner,
+        product = ProductFactory(stockrecords__price=100, stockrecords__partner=self.partner,
                                  stockrecords__price_currency='USD')
         voucher, product = prepare_voucher(code='TEST101', _range=RangeFactory(products=[product]))
         self.request.user = UserFactory()

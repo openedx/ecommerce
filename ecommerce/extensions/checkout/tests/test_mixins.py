@@ -367,7 +367,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
     def test_place_free_order(self, __):
         """ Verify an order is placed and the basket is submitted. """
         basket = create_basket(empty=True)
-        basket.add_product(ProductFactory(stockrecords__price_excl_tax=0))
+        basket.add_product(ProductFactory(stockrecords__price=0))
         order = EdxOrderPlacementMixin().place_free_order(basket)
 
         self.assertIsNotNone(order)
@@ -376,7 +376,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
     def test_non_free_basket_order(self, __):
         """ Verify an error is raised for non-free basket. """
         basket = create_basket(empty=True)
-        basket.add_product(ProductFactory(stockrecords__price_excl_tax=10))
+        basket.add_product(ProductFactory(stockrecords__price=10))
 
         with self.assertRaises(BasketNotFreeError):
             EdxOrderPlacementMixin().place_free_order(basket)

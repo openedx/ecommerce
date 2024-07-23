@@ -28,6 +28,7 @@ class OfferWizardTests(TestCase):
         metadata = {
             'name': 'Test Offer',
             'description': 'Blah!',
+            'offer_type': 'Site',
             'site': site.id,
         }
         metadata_url = reverse('dashboard:offer-metadata')
