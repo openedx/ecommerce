@@ -18,6 +18,10 @@ class SyncMobileSeatsTests(BaseIAPManagementCommandTests):
         self.course_with_audit_seat = self.create_course_and_seats(create_mobile_seats=False, create_web_seat=False)
         self.course_with_unsync_seats = self.create_course_and_seats(create_mobile_seats=True, create_web_seat=True)
         self.course_with_unsync_seats2 = self.create_course_and_seats(create_mobile_seats=True, create_web_seat=True)
+        self.course_with_mobile_seats = self.create_course_and_seats(create_mobile_seats=True, create_web_seat=True)
+        web_seat = self.get_web_seat_for_course(self.course_with_mobile_seats)
+        web_seat.delete()
+
         mobile_seats = self.get_mobile_seats_for_course(self.course_with_unsync_seats)
         mobile_seats = list(mobile_seats) + list(self.get_mobile_seats_for_course(self.course_with_unsync_seats2))
 

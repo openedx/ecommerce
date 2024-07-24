@@ -43,6 +43,10 @@ class Command(BaseCommand):
                 attribute_values__value_text=CertificateType.VERIFIED,
             ).exclude(stockrecords__partner_sku__icontains="mobile").first()
 
+            if not web_seat:
+                logger.info('While syncing could not find web seat for {}'.format(product.title) )
+                continue
+
             for mobile_seat in mobile_seats:
                 info = 'Syncing {} with {}'.format(mobile_seat.title, web_seat.title)
                 logger.info(info)
