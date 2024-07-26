@@ -178,8 +178,7 @@ class BaseIAP(BasePaymentProcessor):
         """
         purchases = response['receipt'].get('in_app', [])
         for purchase in purchases:
-            if purchase['product_id'] == product_id and \
-                    response['receipt']['original_purchase_date_ms'] == purchase['original_purchase_date_ms']:
+            if purchase['product_id'] == product_id:
 
                 response['receipt']['in_app'] = [purchase]
                 break
