@@ -148,7 +148,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         course = CourseFactory(id=course_id, name='Test Course', partner=self.partner)
         product = factories.ProductFactory(
             categories=[],
-            stockrecords__price_excl_tax=price,
+            stockrecords__price=price,
             stockrecords__price_currency=currency
         )
         basket = factories.BasketFactory(owner=self.user, site=self.site)
@@ -797,14 +797,14 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
 
         time_at_initial_price = datetime.now(pytz.utc).isoformat()
 
-        stock_record.price_excl_tax = price_1
+        stock_record.price = price_1
         stock_record.save()
-        stock_record.price_excl_tax = price_2
+        stock_record.price = price_2
         stock_record.save()
 
         time_at_price_2 = datetime.now(pytz.utc).isoformat()
 
-        stock_record.price_excl_tax = final_price
+        stock_record.price = final_price
         stock_record.save()
 
         time_at_final_price = datetime.now(pytz.utc).isoformat()

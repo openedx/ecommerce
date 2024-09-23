@@ -381,7 +381,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         for line in order.lines.all():
             old_stock = line.stockrecord.history.filter(history_date__lt=date_placed).order_by('-history_date').first()
             stock_record = old_stock or line.stockrecord
-            price = stock_record.price_excl_tax or Decimal('0')
+            price = stock_record.price or Decimal('0')
             quantity = line.quantity
             line.line_price_before_discounts_incl_tax = price * quantity
             line.line_price_before_discounts_excl_tax = price * quantity
